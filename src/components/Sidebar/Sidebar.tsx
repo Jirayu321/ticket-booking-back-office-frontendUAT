@@ -10,7 +10,7 @@ const Sidebar: React.FC = () => {
       </div>
       <div className="menu">
         <ul>
-          <h2 className="title">เมนูหลัก</h2>
+          <h2 className="sidebarTitle">เมนูหลัก</h2>
           <li className="menu-item active">
             <span className="icon">🔄</span>
             ภาพรวม
@@ -35,7 +35,7 @@ const Sidebar: React.FC = () => {
             <span className="icon">📍</span>
             แสกนบัตร
           </li>
-          <h2 className="title" >จัดการร้าน</h2>
+          <h2 className="sidebarTitle" >จัดการร้าน</h2>
           <li className="menu-item">
             <span className="icon">🔄</span>
             ผังร้าน
@@ -52,7 +52,7 @@ const Sidebar: React.FC = () => {
             <span className="icon">📄</span>
             ตั้งค่าบริษัท
           </li>
-          <h2 className="title">ทั่วไป</h2>
+          <h2 className="sidebarTitle">ทั่วไป</h2>
           <li className="menu-item">
             <span className="icon">🏢</span>
             Profile

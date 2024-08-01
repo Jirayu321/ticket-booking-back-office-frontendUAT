@@ -62,7 +62,7 @@
 
 
 
-.title {
+.sidebarTitle {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.5);
   margin-left: 18px;
@@ -95,8 +95,8 @@
 
 
 .logoutIcon {
-  width: 24px; /* Adjust size as needed */
-  height: 24px; /* Adjust size as needed */
+  width: 20px; /* Adjust size as needed */
+  height: 20px; /* Adjust size as needed */
   background-image: url('/logout.svg'); /* Ensure the path is correct */
   background-size: contain;
   background-repeat: no-repeat;
