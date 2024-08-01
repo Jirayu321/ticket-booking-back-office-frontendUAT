@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import GenerateBoxes from "./components/generate-boxes"; // Import the new component
 import "./zone-price-form.css";
 import deleteOffIcon from '../../../public/delete-off.svg';
 import deleteOnIcon from '../../../public/delete-on.svg';
@@ -10,10 +11,30 @@ const ZonePriceForm = ({ zones, handleSave }) => {
   const [prices, setPrices] = useState([
     { id: 1, startDate: "16/06/2024", startTime: "10:00 PM", endDate: "16/06/2024", endTime: "10:00 PM", price: "2500.00" },
   ]);
-  const [tableInputMethod, setTableInputMethod] = useState("");
+  const [tableInputMethod, setTableInputMethod] = useState("1");
+  const [seatNumber, setSeatNumber] = useState(() => {
+    const savedSeatNumber = localStorage.getItem('seatNumber');
+    return savedSeatNumber ? Number(savedSeatNumber) : 0;
+  });
+  const [selectedZoneName, setSelectedZoneName] = useState(() => {
+    return localStorage.getItem('selectedZoneName') || '';
+  });
 
-  const handleExpandZone = (zoneId: number) => {
+  useEffect(() => {
+    console.log("Selected Zone Name:", selectedZoneName);
+  }, [selectedZoneName]);
+
+  const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZone(expandedZone === zoneId ? null : zoneId);
+    setSelectedZoneName(zoneName);
+    localStorage.setItem('selectedZoneName', zoneName);
+    console.log("Selected Zone:", zoneName);
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(event.target.value);
+    setSeatNumber(value);
+    localStorage.setItem('seatNumber', value.toString());
   };
 
   const handlePriceChange = (id: number, field: string, value: string) => {
@@ -113,7 +134,7 @@ const ZonePriceForm = ({ zones, handleSave }) => {
           min="0"
           value={params.value}
           onChange={(e) => handlePriceChange(params.row.id, "price", e.target.value)}
-          style={{ width: "90%", color  : "black" ,backgroundColor: "white" }}
+          style={{ width: "90%", color: "black", backgroundColor: "white" }}
         />
       ),
     },
@@ -144,10 +165,10 @@ const ZonePriceForm = ({ zones, handleSave }) => {
       <div style={{ paddingTop: "30px" }} className="form-section">
         <div className="zone-select-container">
           <label>เลือก ZONE GROUP</label>
-          <select className="zone-select">
+          <select className="zone-select" onChange={(e) => handleExpandZone(parseInt(e.target.value), e.target.options[e.target.selectedIndex].text)}>
             <option value="">ผังร้านคุณเอก</option>
             {zones.map((zone) => (
-              <option key={zone.id} value={zone.name}>
+              <option key={zone.id} value={zone.id}>
                 {zone.name}
               </option>
             ))}
@@ -156,7 +177,7 @@ const ZonePriceForm = ({ zones, handleSave }) => {
       </div>
       {zones.map((zone) => (
         <div key={zone.id} className="zone-section">
-          <div className="zone-header" onClick={() => handleExpandZone(zone.id)}>
+          <div className="zone-header" onClick={() => handleExpandZone(zone.id, zone.name)}>
             <span>
               {zone.id}. {zone.name}
             </span>
@@ -190,13 +211,15 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                       />
                     </div>
                     <div className="ticket-amount-row">
-                      <label>จำนวนที่นั่ง/ตั๋ว</label>
-                      <input
+                        <label>จำนวนที่นั่ง/ตั๋ว</label>
+                        <input
                         type="number"
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
                         style={{ backgroundColor: "white", color: "black" }}
-                      />
+                        value={seatNumber}
+                        onChange={handleInputChange}
+                        />
                     </div>
                   </div>
                 </div>
@@ -222,12 +245,13 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                   onChange={(e) => setTableInputMethod(e.target.value)}
                   className="table-input-method-select"
                 >
-                  <option value="1">คีย์เลขโต๊ะได้เอง</option>
-                  <option value="2">รันจาก XX ถึง XX - (1-40)</option>
-                  <option value="3">นำหน้าด้วย Plan name ต่อด้วย รันจาก XX ถึง XX - (โต๊ะโซนสีเขียว 1- โต๊ะโซนสีเขียว 40)</option>
-                  <option value="4">ใส่อักษรนำหน้า ต่อด้วย รันจาก XX ถึง XX ([?] 1- [?] 40)</option>
-                  <option value="5">ไม่ระบุเลขโต๊ะ</option>
+                  <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
+                  <option value="2">2.รันจาก 1 ถึง {seatNumber}</option>
+                  <option value="3">3.นำหน้าด้วย {selectedZoneName} ต่อด้วย รันจาก 1 ถึง {seatNumber} - ({selectedZoneName} 1- {selectedZoneName} {seatNumber})</option>
+                  <option value="4">4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง {seatNumber} ([?] 1- [?] {seatNumber})</option>
+                  <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
                 </select>
+                <GenerateBoxes method={tableInputMethod} seatNumber={seatNumber} zoneName={selectedZoneName} />
               </div>
             </div>
           </Collapse>
