@@ -3,21 +3,23 @@
   position: absolute;
   top: 0;
   left: 157px;
-  width: 1512px;
-  height: 1201px;
+  width: 1763px;
+  height: 1505px;
   padding-left: 0; 
   background-color: #fff;
+  overflow-y: scroll; /* Add overflow-y property to enable vertical scrolling */
 }
 
 .header {
   background-color: #FFD700;
   padding: 15px;
+  height: 10px;
 }
 
 .header h1 {
-  margin: 0;
+  margin-top: -4px;
   color: #1A1A1A;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .sub-header {
@@ -31,7 +33,7 @@
 
 .sub-header .title {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   color: white;
 }
 
@@ -114,7 +116,23 @@ input:checked + .slider:before {
 }
 
 .form-section {
-  margin-bottom: 20px;
+  margin-bottom: 13px;
+  color: #1A1A1A;
+  margin-left: 15px;
+}
+
+.form-section-inline {
+  display: flex;
+  align-items: center;
+}
+
+.form-section-inline label {
+  margin-right: 10px;
+}
+
+.form-section-inline input[type="date"],
+.form-section-inline input[type="time"] {
+  margin-right: 20px;
 }
 
 label {
@@ -127,20 +145,96 @@ input[type="text"],
 input[type="date"],
 input[type="time"],
 select {
-  width: 50%;
+  width: 314px; /* Adjusted the width */
+  height: 25px; /* Adjusted the height */
   padding: 8px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background-color: white; /* Set background color to white */
+  color: black; /* Set text color to black */
 }
 
-.image-upload input[type="file"] {
-  width: auto;
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* Invert colors for dark mode */
 }
 
-.image-upload img {
-  max-width: 100px;
+input[type="text"] {
+  width: 95%; /* Set the width to 100% for text inputs */
+}
+
+.second-input {
+  display: block; /* Ensure it is displayed as a block element */
+}
+
+.large-select {
+  width: 400px; /* Adjust the width as needed */
+  height: 40px; /* Adjust the height as needed */
+  padding: 10px; /* Adjust the padding as needed */
+  font-size: 16px; /* Adjust the font size as needed */
+}
+
+/* Image upload styling */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+}
+
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-upload-title {
+  margin-bottom: 5px;
+}
+
+.image-upload-box {
+  width: 350px;
+  height: 150px;
+  border: 1px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: rgb(255, 255, 255,0.2);
+}
+
+.image-upload-box input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-upload-box img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.upload-link-container {
   margin-top: 10px;
+  text-align: center;
+}
+
+.image-upload-label {
+  cursor: pointer;
+}
+
+.image-upload-link {
+  text-decoration: underline;
+  color: grey;
+  cursor: pointer;
+}
+
+.image-upload-input {
+  display: none;
 }
 
 button {
@@ -160,58 +254,33 @@ button:hover {
 /* Navigation Menu */
 .nav-menu {
   display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-  background-color: #f1f1f1;
-  padding: 10px 0;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: -30px;
 }
 
-.nav-menu button {
-  background-color: transparent;
-  border: none;
+.left-box, .right-box {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.left-box {
+  flex: 2; /* Increase the flex value to make the box bigger */
+}
+
+.right-box {
+  flex: 2; /* Increase the flex value to make the box bigger */
+}
+
+button {
+  padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-  transition: color 0.3s;
 }
 
-.nav-menu button:hover {
-  color: #2196F3;
-}
-
-.nav-menu .active {
-  font-weight: bold;
-  color: #2196F3;
-}
-
-/* Zone Section */
-.zone-section {
+button.active {
+  background-color: white;
+  color: black;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
-.zone-header {
-  display: flex;
-  justify-content: space-between;
-  background-color: #FFD700;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-/* Responsive design */
-@media (max-width: 600px) {
-  .create-new-event {
-    padding: 10px;
-    width: 100%;
-    height: auto;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  form {
-    flex-direction: column;
-  }
 }

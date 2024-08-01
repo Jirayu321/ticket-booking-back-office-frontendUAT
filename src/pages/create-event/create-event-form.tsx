@@ -1,46 +1,81 @@
-import { useState, useEffect, ChangeEvent } from 'react';
-import './create-event-form.css';
+import { useState, useEffect, ChangeEvent } from "react";
+import "./create-event-form.css";
+import ZonePriceForm from "./zone-price-form";
 
 const CreateEventForm = () => {
-  const [title, setTitle] = useState(localStorage.getItem('title') || '');
-  const [description, setDescription] = useState(localStorage.getItem('description') || '');
-  const [date, setDate] = useState(localStorage.getItem('date') || '');
-  const [time, setTime] = useState(localStorage.getItem('time') || '');
-  const [status, setStatus] = useState(localStorage.getItem('status') || 'รอจัดงาน');
+  const [title, setTitle] = useState(localStorage.getItem("title") || "");
+  const [title2, setTitle2] = useState(localStorage.getItem("title2") || "");
+  const [description, setDescription] = useState(
+    localStorage.getItem("description") || ""
+  );
+  const [date, setDate] = useState(localStorage.getItem("date") || "");
+  const [time, setTime] = useState(localStorage.getItem("time") || "");
+  const [status, setStatus] = useState(
+    localStorage.getItem("status") || "รอจัดงาน"
+  );
   const [publish, setPublish] = useState(false);
-  const [images, setImages] = useState<Array<string | null>>([null, null, null, null]);
-  const [activeTab, setActiveTab] = useState('รายละเอียด');
+  const [images, setImages] = useState<Array<string | null>>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [zones, setZones] = useState([
-    { id: 1, name: 'โซนใบไม้เขียว', description: 'LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.' },
-    { id: 2, name: 'โซนใบไม้ส้ม', description: 'LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.' },
+    {
+      id: 1,
+      name: "โซนสีม่วง",
+      description:
+        "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.",
+    },
+    {
+      id: 2,
+      name: "โซนสีเขียว",
+      description:
+        "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.",
+    },
   ]);
 
   useEffect(() => {
-    const savedImages = JSON.parse(localStorage.getItem('images') || '[]');
+    const savedImages = JSON.parse(localStorage.getItem("images") || "[]");
     setImages(savedImages);
   }, []);
 
-  const handleInputChange = (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
-    setter(e.target.value);
-  };
+  const handleInputChange =
+    (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
+      setter(e.target.value);
+    };
 
-  const handleImageUpload = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const newImages = [...images];
-      newImages[index] = URL.createObjectURL(file);
-      setImages(newImages);
-      localStorage.setItem('images', JSON.stringify(newImages));
-    }
-  };
+  const handleImageUpload =
+    (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Image = reader.result as string;
+          const newImages = [...images];
+          newImages[index] = base64Image;
+          setImages(newImages);
+          localStorage.setItem("images", JSON.stringify(newImages));
+        };
+        reader.readAsDataURL(file);
+      }
+    };
 
   const handleSave = () => {
-    localStorage.setItem('title', title);
-    localStorage.setItem('description', description);
-    localStorage.setItem('date', date);
-    localStorage.setItem('time', time);
-    localStorage.setItem('status', status);
-    alert('Data saved locally');
+    localStorage.setItem("title", title);
+    localStorage.setItem("title2", title2);
+    localStorage.setItem("description", description);
+    localStorage.setItem("date", date);
+    localStorage.setItem("time", time);
+    localStorage.setItem("status", status);
+    localStorage.setItem("images", JSON.stringify(images));
+    alert("Data saved locally");
+  };
+
+  const handleNext = () => {
+    handleSave();
+    setActiveTab("โซน & ราคา");
   };
 
   return (
@@ -63,77 +98,119 @@ const CreateEventForm = () => {
           <span className="toggle-text">ไม่เผยแพร่</span>
         </div>
         <button className="btn-cancel">ยกเลิก</button>
-        <button className="btn-save" onClick={handleSave}>บันทึก</button>
+        <button className="btn-save" onClick={handleSave}>
+          บันทึก
+        </button>
       </div>
       <div className="nav-menu">
-        <button 
-          className={activeTab === 'รายละเอียด' ? 'active' : ''} 
-          onClick={() => setActiveTab('รายละเอียด')}
-        >
-          รายละเอียด
-        </button>
-        <button 
-          className={activeTab === 'โซน & ราคา' ? 'active' : ''} 
-          onClick={() => setActiveTab('โซน & ราคา')}
-        >
-          โซน & ราคา
-        </button>
+        <div className="left-box">
+          <button
+            className={activeTab === "รายละเอียด" ? "active" : ""}
+            onClick={() => setActiveTab("รายละเอียด")}
+          >
+            รายละเอียด
+          </button>
+        </div>
+        <div className="right-box">
+          <button
+            className={activeTab === "โซน & ราคา" ? "active" : ""}
+            onClick={() => setActiveTab("โซน & ราคา")}
+          >
+            โซน & ราคา
+          </button>
+        </div>
       </div>
-      {activeTab === 'รายละเอียด' && (
+      {activeTab === "รายละเอียด" && (
         <form>
+          <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
           <div className="form-section">
             <label>ชื่องาน*</label>
-            <input type="text" value={title} onChange={handleInputChange(setTitle)} />
+            <input
+              type="text"
+              value={title}
+              onChange={handleInputChange(setTitle)}
+              placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
+            />
+            <input
+              type="text"
+              value={title2}
+              onChange={handleInputChange(setTitle2)}
+              className="second-input"
+              placeholder="บรรทัดที่ 2 (เช่น at deedclub)"
+            />
           </div>
           <div className="form-section">
-            <label>คำอธิบาย</label>
-            <input type="text" value={description} onChange={handleInputChange(setDescription)} />
+            <label>ข้อมูลงาน (ถ้ามี)</label>
+            <input
+              type="text"
+              value={description}
+              onChange={handleInputChange(setDescription)}
+            />
           </div>
-          <div className="form-section">
+          <div className="form-section form-section-inline">
             <label>วันจัดงาน*</label>
-            <input type="date" value={date} onChange={handleInputChange(setDate)} />
+            <input
+              type="date"
+              value={date}
+              onChange={handleInputChange(setDate)}
+            />
             <label>เวลาจัดงาน</label>
-            <input type="time" value={time} onChange={handleInputChange(setTime)} />
+            <input
+              type="time"
+              value={time}
+              onChange={handleInputChange(setTime)}
+            />
           </div>
           <div className="form-section">
             <label>สถานะ*</label>
-            <select value={status} onChange={handleInputChange(setStatus)}>
+            <select
+              className="large-select"
+              value={status}
+              onChange={handleInputChange(setStatus)}
+            >
               <option value="รอจัดงาน">รอจัดงาน</option>
               <option value="จัดงานสำเร็จ">จัดงานสำเร็จ</option>
             </select>
           </div>
           <div className="form-section">
             <label>ภาพประกอบ</label>
-            {images.map((image, index) => (
-              <div key={index} className="image-upload">
-                <input type="file" onChange={handleImageUpload(index)} />
-                {image && <img src={image} alt={`Upload ${index}`} />}
-              </div>
-            ))}
+            <div className="image-grid">
+              {[
+                "ภาพปก*",
+                "ภาพประกอบ 1 (ไม่บังคับ)",
+                "ภาพประกอบ 2 (ไม่บังคับ)",
+                "ภาพประกอบ 3 (ไม่บังคับ)",
+              ].map((title, index) => (
+                <div key={index} className="image-upload-container">
+                  <span className="image-upload-title">{title}</span>
+                  <div className="image-upload-box">
+                    {images[index] && (
+                      <img src={images[index]} alt={`Upload ${index}`} />
+                    )}
+                  </div>
+                  <div className="upload-link-container">
+                    <label className="image-upload-label">
+                      <span className="image-upload-link">+ อัปโหลด</span>
+                      <input
+                        type="file"
+                        onChange={handleImageUpload(index)}
+                        className="image-upload-input"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="form-section">
-            <button type="button" onClick={handleSave}>บันทึก</button>
+          <div className="next-form-section">
+            <button type="button" onClick={handleNext}>
+              ต่อไป
+            </button>
           </div>
         </form>
       )}
-      {activeTab === 'โซน & ราคา' && (
-        <div>
-          <div className="form-section">
-            <label>เลือก ZONE GROUP</label>
-            <input type="text" placeholder="ค้นหาบนคุณเอก" />
-          </div>
-          {zones.map(zone => (
-            <div key={zone.id} className="zone-section">
-              <div className="zone-header">
-                <span>{zone.id}. {zone.name}</span>
-                <span>{zone.description}</span>
-              </div>
-            </div>
-          ))}
-          <div className="form-section">
-            <button type="button" onClick={handleSave}>บันทึก</button>
-          </div>
-        </div>
+      {activeTab === "โซน & ราคา" && (
+        <ZonePriceForm zones={zones} handleSave={handleSave} />
       )}
     </div>
   );
