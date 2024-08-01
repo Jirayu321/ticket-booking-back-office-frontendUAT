@@ -1,67 +1,104 @@
 .sidebar {
-    width: 250px;
-    height: 100vh;
-    background-color: #1A1A1A;
-    color: #FFFFFF;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-  }
-  
-  .sidebar-header {
-    margin-bottom: 20px;
-  }
-  
-  .logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: #FFD700;
-  }
-  
-  .menu {
-    flex-grow: 1;
-  }
-  
-  .menu ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .menu-item {
-    width: 100%;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .menu-item:hover, .menu-item.active {
-    background-color: #FFD700;
-    color: #1A1A1A;
-  }
-  
-  .icon {
-    margin-right: 10px;
-  }
-  
-  .logout {
-    margin-top: auto;
-    padding: 20px 0;
-  }
-  
-  .logout button {
-    background: none;
-    border: 1px solid #FFFFFF;
-    color: #FFFFFF;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .logout button:hover {
-    background-color: #FFFFFF;
-    color: #1A1A1A;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 160px;
+  height: 100vh; /* Full height */
+  background-color: #1A1A1A;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #FFD700;
+}
+
+.menu {
+  flex-grow: 1;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-item {
+  width: 90%;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background-color: #FFD700;
+  width: 81%;
+  color: #1A1A1A;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.logout {
+  margin-top: auto;
+  padding: 20px 0;
+  font-size: 12px;
+}
+
+
+
+
+
+.title {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-left: 18px;
+}
+
+.ticketIcon {
+  width: 24px; /* Adjust size as needed */
+  height: 24px; /* Adjust size as needed */
+  background-image: url('/ticket 1.svg'); /* Ensure the path is correct */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 10px; /* Adjust spacing as needed */
+  margin-left: -20px; /* Adjust spacing as needed */
+}
+
+.logout button {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 128px;
+  height: 33px;
+  margin-top: -50px;
+  border-radius: 0 0px 0 0; /* Top-right corner with 20px radius */
+  border-color:rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+
+
+.logoutIcon {
+  width: 24px; /* Adjust size as needed */
+  height: 24px; /* Adjust size as needed */
+  background-image: url('/logout.svg'); /* Ensure the path is correct */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-left: 10px; /* Adjust spacing as needed */
+}
