@@ -34,7 +34,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneN
           <input
             key={i}
             type="text"
-            placeholder={`${i + 1}`}
+            placeholder='โปรดระบุ'
             className="table-input-box"
           />
         );

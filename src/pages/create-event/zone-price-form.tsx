@@ -167,11 +167,9 @@ const ZonePriceForm = ({ zones, handleSave }) => {
           <label>เลือก ZONE GROUP</label>
           <select className="zone-select" onChange={(e) => handleExpandZone(parseInt(e.target.value), e.target.options[e.target.selectedIndex].text)}>
             <option value="">ผังร้านคุณเอก</option>
-            {zones.map((zone) => (
-              <option key={zone.id} value={zone.id}>
-                {zone.name}
-              </option>
-            ))}
+            <option value="">ผังร้านคุณโท</option>
+            <option value="">ผังร้านคุณตรี</option>
+          
           </select>
         </div>
       </div>

@@ -4,16 +4,17 @@
   top: 0;
   left: 157px;
   width: 1763px;
-  height: 1505px;
+  height: 100%; /* Set height to 100% or a specific value */
   padding-left: 0; 
   background-color: #fff;
-  overflow-y: scroll; /* Add overflow-y property to enable vertical scrolling */
+  overflow-y: scroll; /* Enable vertical scrolling */
 }
 
 .header {
   background-color: #FFD700;
   padding: 15px;
   height: 10px;
+  display: flex;
 }
 
 .header h1 {
@@ -31,10 +32,17 @@
   color: #FFD700;
 }
 
-.sub-header .title {
+.sub-header {
   margin: 0;
   font-size: 22px;
   color: white;
+}
+
+.title{
+  margin: 0;
+  font-size: 22px;
+  color: white;
+  margin-left: -650px;
 }
 
 .toggle-container {
@@ -49,6 +57,10 @@
   width: 60px;
   height: 34px;
   margin-right: 10px;
+}
+.toggle-text {
+  font-size: 20px;
+  color: white;
 }
 
 .toggle-container input {
@@ -100,6 +112,10 @@ input:checked + .slider:before {
 
 .btn-cancel {
   background-color: #ccc;
+  margin-left: 30px;
+  border-radius: 0px;
+  color: black;
+  font-weight: bold;
 }
 
 .btn-cancel:hover {
@@ -109,6 +125,10 @@ input:checked + .slider:before {
 .btn-save {
   background-color: #4CAF50;
   color: white;
+  margin-right: 20px;
+  border-radius: 0px;
+  color: 0B8600;
+  font-weight: bold;
 }
 
 .btn-save:hover {
@@ -255,32 +275,55 @@ button:hover {
 .nav-menu {
   display: flex;
   justify-content: space-between;
+  background-color: white;
+  margin: 0 auto;
   padding: 10px;
-  margin-bottom: -30px;
+  color: black;
+  height: 45px; /* Set the desired height */
 }
 
 .left-box, .right-box {
+  height: 35px; /* Increased height */
   flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  /* cursor: pointer; */
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 0px; /* Add rounded corners */
+  border: 1px solid #CFB70B; /* Add border line */
+  margin: 0 10px; /* Separate the boxes from each other */
 }
 
-.left-box {
-  flex: 2; /* Increase the flex value to make the box bigger */
+.left-box.active, .right-box.active {
+  background-color: rgb(207, 183, 11,0.1);
+  color: black;
 }
 
-.right-box {
-  flex: 2; /* Increase the flex value to make the box bigger */
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
+/* .left-box:hover, .right-box:hover {
+  background-color:rgb(207, 183, 11,0.1);
+  color: black;
+} */
 
 button.active {
   background-color: white;
   color: black;
   border: 1px solid #ccc;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-right: -360px;
+}
+
+.back-button img {
+  width: 58px; /* Adjust size as needed */
+  height: 58px; /* Adjust size as needed */
+  padding-left: 30px;
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
+import BackIcon from "../../../public/back.svg";
+import CarbonEvent from "../../../public/carbon-event.svg";
 
 const CreateEventForm = () => {
   const [title, setTitle] = useState(localStorage.getItem("title") || "");
@@ -24,7 +26,7 @@ const CreateEventForm = () => {
   const [zones, setZones] = useState([
     {
       id: 1,
-      name: "โซนสีม่วง",
+      name: "โซนสีแดง",
       description:
         "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.",
     },
@@ -78,12 +80,25 @@ const CreateEventForm = () => {
     setActiveTab("โซน & ราคา");
   };
 
+  const handleBackClick = () => {
+    if (activeTab === "โซน & ราคา") {
+      setActiveTab("รายละเอียด");
+    }
+    console.log("Back button clicked");
+  };
+
+  
+
   return (
     <div className="create-new-event">
       <div className="header">
+        <img src={CarbonEvent} alt="Carbon Event" style={{ width: '40px', height: '25px',marginTop:"-5px"}} />
         <h1>งานทั้งหมด</h1>
       </div>
       <div className="sub-header">
+        <button className="back-button">
+          <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
+        </button>
         <h2 className="title">สร้างงานใหม่</h2>
         <div className="toggle-container">
           <label>
@@ -96,28 +111,22 @@ const CreateEventForm = () => {
             <span className="slider" />
           </label>
           <span className="toggle-text">ไม่เผยแพร่</span>
+          <button className="btn-cancel">ยกเลิก</button>
+          <button className="btn-save" onClick={handleSave}>
+            บันทึก
+          </button>
         </div>
-        <button className="btn-cancel">ยกเลิก</button>
-        <button className="btn-save" onClick={handleSave}>
-          บันทึก
-        </button>
       </div>
       <div className="nav-menu">
-        <div className="left-box">
-          <button
-            className={activeTab === "รายละเอียด" ? "active" : ""}
-            onClick={() => setActiveTab("รายละเอียด")}
-          >
-            รายละเอียด
-          </button>
+        <div
+          className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}
+        >
+          รายละเอียด
         </div>
-        <div className="right-box">
-          <button
-            className={activeTab === "โซน & ราคา" ? "active" : ""}
-            onClick={() => setActiveTab("โซน & ราคา")}
-          >
-            โซน & ราคา
-          </button>
+        <div
+          className={`right-box ${activeTab === "โซน & ราคา" ? "active" : ""}`}
+        >
+          โซน & ราคา
         </div>
       </div>
       {activeTab === "รายละเอียด" && (
@@ -175,12 +184,7 @@ const CreateEventForm = () => {
           <div className="form-section">
             <label>ภาพประกอบ</label>
             <div className="image-grid">
-              {[
-                "ภาพปก*",
-                "ภาพประกอบ 1 (ไม่บังคับ)",
-                "ภาพประกอบ 2 (ไม่บังคับ)",
-                "ภาพประกอบ 3 (ไม่บังคับ)",
-              ].map((title, index) => (
+              {[ "ภาพปก*", "ภาพประกอบ 1 (ไม่บังคับ)", "ภาพประกอบ 2 (ไม่บังคับ)", "ภาพประกอบ 3 (ไม่บังคับ)", ].map((title, index) => (
                 <div key={index} className="image-upload-container">
                   <span className="image-upload-title">{title}</span>
                   <div className="image-upload-box">
