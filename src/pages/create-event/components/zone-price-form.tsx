@@ -5,36 +5,52 @@ import GenerateBoxes from "./generate-boxes"; // Import the new component
 import "./zone-price-form.css";
 import deleteOffIcon from '/delete-off.svg';
 import deleteOnIcon from '/delete-on.svg';
+import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast";
 
 const ZonePriceForm = ({ zones, handleSave }) => {
   const [expandedZone, setExpandedZone] = useState<number | null>(null);
-  const [prices, setPrices] = useState([
-    { id: 1, startDate: "16/06/2024", startTime: "10:00 PM", endDate: "16/06/2024", endTime: "10:00 PM", price: "2500.00" },
-  ]);
+  const [prices, setPrices] = useState([]);
   const [tableInputMethod, setTableInputMethod] = useState("1");
-  const [seatNumber, setSeatNumber] = useState(() => {
-    const savedSeatNumber = localStorage.getItem('seatNumber');
-    return savedSeatNumber ? Number(savedSeatNumber) : 0;
-  });
-  const [selectedZoneName, setSelectedZoneName] = useState(() => {
-    return localStorage.getItem('selectedZoneName') || '';
-  });
+  const [seatNumber, setSeatNumber] = useState(0);
+  const [selectedZoneName, setSelectedZoneName] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Selected Zone Name:", selectedZoneName);
-  }, [selectedZoneName]);
+    if (expandedZone !== null) {
+      const savedSeatNumber = localStorage.getItem(`seatNumber_${expandedZone}`);
+      const savedPrices = localStorage.getItem(`prices_${expandedZone}`);
+      const savedZoneName = localStorage.getItem(`zoneName_${expandedZone}`);
+
+      if (savedSeatNumber) {
+        setSeatNumber(Number(savedSeatNumber));
+      }
+
+      if (savedPrices) {
+        setPrices(JSON.parse(savedPrices));
+      } else {
+        setPrices([{ id: 1, startDate: "16/06/2024", startTime: "10:00 PM", endDate: "16/06/2024", endTime: "10:00 PM", price: "2500.00" }]);
+      }
+
+      if (savedZoneName) {
+        setSelectedZoneName(savedZoneName);
+      }
+    }
+  }, [expandedZone]);
 
   const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZone(expandedZone === zoneId ? null : zoneId);
     setSelectedZoneName(zoneName);
-    localStorage.setItem('selectedZoneName', zoneName);
+    localStorage.setItem(`zoneName_${zoneId}`, zoneName);
     console.log("Selected Zone:", zoneName);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setSeatNumber(value);
-    localStorage.setItem('seatNumber', value.toString());
+    if (expandedZone !== null) {
+      localStorage.setItem(`seatNumber_${expandedZone}`, value.toString());
+    }
   };
 
   const handlePriceChange = (id: number, field: string, value: string) => {
@@ -42,6 +58,9 @@ const ZonePriceForm = ({ zones, handleSave }) => {
       price.id === id ? { ...price, [field]: value } : price
     );
     setPrices(newPrices);
+    if (expandedZone !== null) {
+      localStorage.setItem(`prices_${expandedZone}`, JSON.stringify(newPrices));
+    }
   };
 
   const addPrice = () => {
@@ -52,7 +71,16 @@ const ZonePriceForm = ({ zones, handleSave }) => {
   };
 
   const removePrice = (id: number) => {
-    setPrices(prices.filter((price) => price.id !== id));
+    const newPrices = prices.filter((price) => price.id !== id);
+    setPrices(newPrices);
+    if (expandedZone !== null) {
+      localStorage.setItem(`prices_${expandedZone}`, JSON.stringify(newPrices));
+    }
+  };
+
+  const handleSave2 = () => {
+    toast.success("Data uploaded successfully");
+    navigate('/all-events');
   };
 
   const columns: GridColDef[] = [
@@ -169,7 +197,6 @@ const ZonePriceForm = ({ zones, handleSave }) => {
             <option value="">ผังร้านคุณเอก</option>
             <option value="">ผังร้านคุณโท</option>
             <option value="">ผังร้านคุณตรี</option>
-          
           </select>
         </div>
       </div>
@@ -209,15 +236,15 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                       />
                     </div>
                     <div className="ticket-amount-row">
-                        <label>จำนวนที่นั่ง/ตั๋ว</label>
-                        <input
+                      <label>จำนวนที่นั่ง/ตั๋ว</label>
+                      <input
                         type="number"
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
                         style={{ backgroundColor: "white", color: "black" }}
                         value={seatNumber}
                         onChange={handleInputChange}
-                        />
+                      />
                     </div>
                   </div>
                 </div>
@@ -255,8 +282,8 @@ const ZonePriceForm = ({ zones, handleSave }) => {
           </Collapse>
         </div>
       ))}
-      <div className="save-form-section" >
-        <button className="buttonSave" onClick={handleSave}>
+      <div className="save-form-section">
+        <button className="buttonSave" onClick={handleSave2}>
           บันทึก
         </button>
       </div>

@@ -4,6 +4,7 @@ import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
 import toast from "react-hot-toast";
 import Header from "../../common/header"; // Import the new Header component
+import {  useNavigate } from 'react-router-dom';
 
 const CreateEventForm = () => {
   const [title, setTitle] = useState(localStorage.getItem("title") || "");
@@ -24,6 +25,7 @@ const CreateEventForm = () => {
     null,
   ]);
   const [activeTab, setActiveTab] = useState("รายละเอียด");
+  const [isDetailCompleted, setIsDetailCompleted] = useState(false);
   const [zones, setZones] = useState([
     {
       id: 1,
@@ -81,18 +83,23 @@ const CreateEventForm = () => {
     localStorage.setItem("status", status);
     localStorage.setItem("images", JSON.stringify(images));
     toast.success("Data uploaded successfully");
+    navigate('/all-events');
   };
 
   const handleNext = () => {
-    handleSave();
     setActiveTab("โซน & ราคา");
+    setIsDetailCompleted(true);
   };
-
+  const navigate = useNavigate();
   const handleBackClick = () => {
     if (activeTab === "โซน & ราคา") {
       setActiveTab("รายละเอียด");
     }
     console.log("Back button clicked");
+    if (activeTab === "รายละเอียด") {
+      navigate('/all-events');
+      
+    }
   };
 
   return (
@@ -121,14 +128,16 @@ const CreateEventForm = () => {
         </div>
       </div>
       <div className="nav-menu">
-        <div
-          className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}
-        >
+        <div className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}>
+        <img
+          src={isDetailCompleted ? "/check-on.svg" : "/check-off.svg"}
+          alt="Check Icon"
+          className="icon"
+        />
           รายละเอียด
         </div>
-        <div
-          className={`right-box ${activeTab === "โซน & ราคา" ? "active" : ""}`}
-        >
+        <div className={`right-box ${activeTab === "โซน & ราคา" ? "active" : ""}`}>
+        <img src="/check-off.svg" alt="Check Off Icon" className="icon" />
           โซน & ราคา
         </div>
       </div>
@@ -238,7 +247,7 @@ const CreateEventForm = () => {
         </form>
       )}
       {activeTab === "โซน & ราคา" && (
-        <ZonePriceForm zones={zones} handleSave={handleSave} />
+        <ZonePriceForm zones={zones} handleSave={handleNext} />
       )}
     </div>
   );
