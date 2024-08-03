@@ -1,17 +1,21 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-
+import { Toaster } from 'react-hot-toast'
 import './App.css'
 import AllEvent from './pages/all-event/all-event'
-import Main from './pages/main/main'
+import Overview from './pages/overview/overview'
 import CreateNewEvent from './pages/create-event/create-event'
 
 function App() {
   return (
     <Router>
+      <Toaster
+  position="top-right"
+  reverseOrder={false}
+/>
       <Routes>
-        <Route path="/" element={<Main/>} />
-        <Route path="/dashboard" element={<Main/>} />
-        <Route path="/all-event" element={<AllEvent />} />
+        {/* <Route path="/" element={<Main/>} /> */}
+        <Route path="/overview" element={<Overview/>} />
+        <Route path="/all-events" element={<AllEvent />} />
         <Route path="/create-event" element={<CreateNewEvent />} />
       </Routes>
     </Router>

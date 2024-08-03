@@ -239,8 +239,8 @@ input[type="text"] {
 }
 
 .upload-link-container {
-  margin-top: 10px;
-  text-align: center;
+  display: flex;
+  align-items: center;
 }
 
 .image-upload-label {
@@ -249,20 +249,46 @@ input[type="text"] {
 
 .image-upload-link {
   text-decoration: underline;
-  color: grey;
+  color: black;
   cursor: pointer;
+
 }
 
 .image-upload-input {
   display: none;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #946037;
-  color: white;
+.image-remove-button {
+  cursor: pointer;
+  color: grey;
+  text-decoration: underline;
+  background: none;
   border: none;
+  padding: 0;
+  margin-left: 230px;
+}
+
+.next-form-section {
+  margin-top: 20px;
+  padding: 20px;
+  padding-right: 60px;
+  
+  background-color: #f2f2f2;
   border-radius: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.buttonNext {
+  width: 8%;
+  height: 100%;
+  padding: 10px 20px;
+  background-color: #0B8600;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 0px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -292,7 +318,6 @@ button:hover {
   padding: 10px;
   /* cursor: pointer; */
   font-size: 24px;
-  font-weight: bold;
   border-radius: 0px; /* Add rounded corners */
   border: 1px solid #CFB70B; /* Add border line */
   margin: 0 10px; /* Separate the boxes from each other */
@@ -301,6 +326,7 @@ button:hover {
 .left-box.active, .right-box.active {
   background-color: rgb(207, 183, 11,0.1);
   color: black;
+  font-weight: bold;
 }
 
 /* .left-box:hover, .right-box:hover {
@@ -315,15 +341,30 @@ button.active {
 }
 
 .back-button {
+  width: 58px; /* Adjust size as needed */
+  height: 58px;
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
-  margin-right: -360px;
+  /* Remove margin-right to avoid shifting position */
+  margin-right: -400px;
+  display: flex; /* Use flexbox to center the image */
+  justify-content: center;
+  align-items: center;
 }
 
 .back-button img {
   width: 58px; /* Adjust size as needed */
   height: 58px; /* Adjust size as needed */
-  padding-left: 30px;
+  /* Remove padding-left to avoid shifting position */
+  padding-left: 0;
+}
+
+.custom-hr {
+  border: none;
+  border-top: 1px dashed rgb(0, 0, 0,0.25); /* Dashed line */
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 98%;
 }

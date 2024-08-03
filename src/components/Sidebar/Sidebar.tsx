@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
@@ -12,58 +13,84 @@ const Sidebar: React.FC = () => {
         <ul>
           <h2 className="sidebarTitle">เมนูหลัก</h2>
           <li className="menu-item active">
-            <span className="icon">🔄</span>
-            ภาพรวม
+            <Link to="/overview">
+              <span className="icon">🔄</span>
+              ภาพรวม
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">🛒</span>
-            งานทั้งหมด
+            <Link to="/all-events">
+              <span className="icon">🛒</span>
+              งานทั้งหมด
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">📦</span>
-            คำสั่งซื้อทั้งหมด
+            <Link to="/all-orders">
+              <span className="icon">📦</span>
+              คำสั่งซื้อทั้งหมด
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">💳</span>
-            บัตรทั้งหมด
+            <Link to="/all-tickets">
+              <span className="icon">💳</span>
+              บัตรทั้งหมด
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">🎫</span>
-            ที่นั่งทั้งหมด
+            <Link to="/all-seats">
+              <span className="icon">🎫</span>
+              ที่นั่งทั้งหมด
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">📍</span>
-            แสกนบัตร
+            <Link to="/scan-tickets">
+              <span className="icon">📍</span>
+              แสกนบัตร
+            </Link>
           </li>
-          <h2 className="sidebarTitle" >จัดการร้าน</h2>
+          <h2 className="sidebarTitle">จัดการร้าน</h2>
           <li className="menu-item">
-            <span className="icon">🔄</span>
-            ผังร้าน
-          </li>
-          <li className="menu-item">
-            <span className="icon">🏪</span>
-            โซน
-          </li>
-          <li className="menu-item">
-            <span className="icon">📍</span>
-            ประเภทบัตร
+            <Link to="/store-layout">
+              <span className="icon">🔄</span>
+              ผังร้าน
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">📄</span>
-            ตั้งค่าบริษัท
+            <Link to="/zones">
+              <span className="icon">🏪</span>
+              โซน
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/ticket-types">
+              <span className="icon">📍</span>
+              ประเภทบัตร
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/company-settings">
+              <span className="icon">📄</span>
+              ตั้งค่าบริษัท
+            </Link>
           </li>
           <h2 className="sidebarTitle">ทั่วไป</h2>
           <li className="menu-item">
-            <span className="icon">🏢</span>
-            Profile
+            <Link to="/profile">
+              <span className="icon">🏢</span>
+              Profile
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">👤</span>
-            Role setting
+            <Link to="/role-settings">
+              <span className="icon">👤</span>
+              Role setting
+            </Link>
           </li>
           <li className="menu-item">
-            <span className="icon">⚙️</span>
-            Setting
+            <Link to="/settings">
+              <span className="icon">⚙️</span>
+              Setting
+            </Link>
           </li>
         </ul>
       </div>

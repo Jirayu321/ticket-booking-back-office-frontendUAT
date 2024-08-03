@@ -1,36 +1,36 @@
 .header-container {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* Adjust gap as needed */
-    color: #000;
-  }
-  
-  .start-number-container,
-  .prefix-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 10px;
-  }
-  
-  .boxes-container {
-    margin-top: 20px; /* Adjust margin as needed */
-  }
-  
-  .table-input-box-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px !important; /* Reduced gap */
-  }
-  
-  .table-input-box {
-    width: 285px !important; /* Reduced width */
-    height: 50px !important; /* Reduced height */
-    padding: 3px !important; /* Reduced padding */
-    border: 1px solid #ccc !important;
-    border-radius: 4px !important;
-    background-color: white !important;
-    text-align: center !important;
-    color: black !important;
-    font-size: 24px !important; /* Reduced font size */
-  }
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Adjust gap as needed */
+  color: #000;
+}
+
+.start-number-container,
+.prefix-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.boxes-container {
+  margin-top: 20px; /* Adjust margin as needed */
+}
+
+.table-input-box-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px !important; /* Reduced gap */
+}
+
+.table-input-box {
+  width: 285px !important; /* Reduced width */
+  height: 50px !important; /* Reduced height */
+  padding: 3px !important; /* Reduced padding */
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  text-align: center !important;
+  color: black !important;
+  font-size: 24px !important; /* Reduced font size */
+}

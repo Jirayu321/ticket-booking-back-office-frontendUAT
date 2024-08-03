@@ -1,7 +1,7 @@
 /* Container to make the page scrollable */
 .zone-price-form-container {
     max-height: 100vh;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     padding: 20px;
   }
   
@@ -191,3 +191,27 @@
     font-size: 16px;
   }
   
+  .save-form-section {
+    margin-top: 20px;
+    padding: 20px;
+    padding-right: 60px;
+    
+    background-color: #f2f2f2;
+    border-radius: 4px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .buttonSave {
+    width: 8%;
+    height: 100%;
+    padding: 10px 20px;
+    background-color: #0B8600;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 0px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }

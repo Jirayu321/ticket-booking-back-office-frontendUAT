@@ -1,0 +1,208 @@
+.all-events-content {
+    position: absolute;
+    top: 0;
+    left: 157px;
+    width: 1763px;
+    height: 100%; /* Set height to 100% or a specific value */
+    padding-left: 0;
+    background-color: #fff;
+    overflow-y: scroll; /* Enable vertical scrolling */
+  }
+  
+  .header {
+    background-color: #FFD700;
+    padding: 15px;
+    height: 10px;
+    display: flex;
+  }
+  
+  .header h1 {
+    margin-top: -4px;
+    color: #1A1A1A;
+    font-size: 18px;
+  }
+  
+  .filters {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align items to the start of the container */
+    margin-top: 20px;
+}
+
+.date-picker-container {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+  padding-left: 20px;
+}
+
+.date-picker {
+  width: 200px !important;
+  margin-right: 20px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: yellow;
+}
+
+.create-event-button {
+  background-color: #0B8600;
+  color: white;
+  margin-top: -10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 0px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 1040px;
+}
+
+.create-event-button:hover {
+  background-color: #0B8600;
+  color: white;
+}
+
+.filter-options {
+  padding-left: 30px;
+  display: flex;
+  gap: 25px;
+  margin-top: 10px; /* Add margin to separate from date pickers */
+}
+
+.filter-item {
+  display: flex;
+  align-items: center; /* Center items horizontally */
+  background-color: rgba(207, 183, 11, 0.1);
+  color: black;
+  padding: 15px; /* Increase padding */
+  border-radius: 4px;
+  border-color: #CFB70B;
+  border-width: 1px;
+  border-style: solid;
+  cursor: pointer;
+  font-size: 18px; /* Increase font size */
+  width: 400px; /* Set fixed width */
+  height: 100px; /* Set fixed height */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.filter-icon {
+  width: 80px; /* Set the width of the icon */
+  height: 80px; /* Set the height of the icon */
+  margin-right: 8px; /* Add some space between the icon and the text container */
+}
+
+.filter-text-container {
+  display: flex;
+  flex-direction: column; /* Stack text and number vertically */
+  align-items: center; /* Center text and number horizontally */
+  padding-left: 80px;
+}
+
+.filter-text {
+  color: black;
+  font-size: 18px; /* Increase font size */
+  margin-bottom: 5px; /* Add some space between the text and the number */
+}
+
+.filter-number {
+  color: black;
+  font-size: 28px; /* Increase font size */
+  font-weight: bold;
+}
+
+.event-list {
+  margin-top: 20px;
+}
+  
+  .event-list-header, .event-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .event-list-header {
+    background-color: black;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .event-list-item {
+    background-color: white;
+    color: #000;
+  }
+  
+  .column {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .publish {
+    color: white;
+    background-color: #0B8600;
+    font-weight: bold;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .unpublish {
+    color: black;
+    background-color: rgb(17, 19, 26,0.12);
+    font-weight: bold;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .pending {
+    color: blue;
+  }
+  
+  .active {
+    color: green;
+  }
+  
+  .closed {
+    color: red;
+  }
+  
+  .details-button {
+    background-color: #ffd700;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 60px;
+  }
+  
+  .pagination button {
+    background-color: #EEECEC;
+    color: black;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    margin: 0 2px;
+    cursor: pointer;
+  }
+  
+  .pagination button.active {
+    background-color: #EEECEC;
+    font-weight: bold;
+    border-radius: 2px;
+    border-color: #CFB70B;
+  }
+
+  .pagination button:hover { 
+    background-color: #CCC; 
+  }
+
+
+  

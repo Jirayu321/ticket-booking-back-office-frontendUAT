@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import GenerateBoxes from "./components/generate-boxes"; // Import the new component
+import GenerateBoxes from "./generate-boxes"; // Import the new component
 import "./zone-price-form.css";
-import deleteOffIcon from '../../../public/delete-off.svg';
-import deleteOnIcon from '../../../public/delete-on.svg';
+import deleteOffIcon from '/delete-off.svg';
+import deleteOnIcon from '/delete-on.svg';
 
 const ZonePriceForm = ({ zones, handleSave }) => {
   const [expandedZone, setExpandedZone] = useState<number | null>(null);
@@ -255,8 +255,8 @@ const ZonePriceForm = ({ zones, handleSave }) => {
           </Collapse>
         </div>
       ))}
-      <div className="form-section" style={{ height: "500px" }}>
-        <button type="button" onClick={handleSave}>
+      <div className="save-form-section" >
+        <button className="buttonSave" onClick={handleSave}>
           บันทึก
         </button>
       </div>

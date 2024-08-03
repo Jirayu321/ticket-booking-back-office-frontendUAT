@@ -1,8 +1,9 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
-import BackIcon from "../../../public/back.svg";
-import CarbonEvent from "../../../public/carbon-event.svg";
+import BackIcon from "/back.svg";
+import toast from "react-hot-toast";
+import Header from "../../common/header"; // Import the new Header component
 
 const CreateEventForm = () => {
   const [title, setTitle] = useState(localStorage.getItem("title") || "");
@@ -64,6 +65,13 @@ const CreateEventForm = () => {
       }
     };
 
+  const handleImageRemove = (index: number) => () => {
+    const newImages = [...images];
+    newImages[index] = null;
+    setImages(newImages);
+    localStorage.setItem("images", JSON.stringify(newImages));
+  };
+
   const handleSave = () => {
     localStorage.setItem("title", title);
     localStorage.setItem("title2", title2);
@@ -72,7 +80,7 @@ const CreateEventForm = () => {
     localStorage.setItem("time", time);
     localStorage.setItem("status", status);
     localStorage.setItem("images", JSON.stringify(images));
-    alert("Data saved locally");
+    toast.success("Data uploaded successfully");
   };
 
   const handleNext = () => {
@@ -87,14 +95,9 @@ const CreateEventForm = () => {
     console.log("Back button clicked");
   };
 
-  
-
   return (
     <div className="create-new-event">
-      <div className="header">
-        <img src={CarbonEvent} alt="Carbon Event" style={{ width: '40px', height: '25px',marginTop:"-5px"}} />
-        <h1>งานทั้งหมด</h1>
-      </div>
+      <Header title="งานทั้งหมด" /> {/* Use the new Header component */}
       <div className="sub-header">
         <button className="back-button">
           <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
@@ -156,6 +159,7 @@ const CreateEventForm = () => {
               onChange={handleInputChange(setDescription)}
             />
           </div>
+          <hr className="custom-hr" />
           <div className="form-section form-section-inline">
             <label>วันจัดงาน*</label>
             <input
@@ -181,6 +185,7 @@ const CreateEventForm = () => {
               <option value="จัดงานสำเร็จ">จัดงานสำเร็จ</option>
             </select>
           </div>
+          <hr className="custom-hr" />
           <div className="form-section">
             <label>ภาพประกอบ</label>
             <div className="image-grid">
@@ -193,22 +198,41 @@ const CreateEventForm = () => {
                     )}
                   </div>
                   <div className="upload-link-container">
-                    <label className="image-upload-label">
-                      <span className="image-upload-link">+ อัปโหลด</span>
-                      <input
-                        type="file"
-                        onChange={handleImageUpload(index)}
-                        className="image-upload-input"
-                      />
-                    </label>
+                    {images[index] ? (
+                      <>
+                        <label className="image-upload-label">
+                          <span className="image-upload-link">เปลี่ยนภาพ</span>
+                          <input
+                            type="file"
+                            onChange={handleImageUpload(index)}
+                            className="image-upload-input"
+                          />
+                        </label>
+                        <span
+                          className="image-remove-button"
+                          onClick={handleImageRemove(index)}
+                        >
+                          ลบ
+                        </span>
+                      </>
+                    ) : (
+                      <label className="image-upload-label">
+                        <span className="image-upload-link">+ อัปโหลด</span>
+                        <input
+                          type="file"
+                          onChange={handleImageUpload(index)}
+                          className="image-upload-input"
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
           <div className="next-form-section">
-            <button type="button" onClick={handleNext}>
-              ต่อไป
+            <button className="buttonNext" onClick={handleNext}>
+              ถัดไป
             </button>
           </div>
         </form>

@@ -12,6 +12,10 @@
   padding: 20px 0;
 }
 
+.sidebar * {
+  color: #FFFFFF !important; /* Ensure all text inside sidebar is white */
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -58,10 +62,6 @@
   font-size: 12px;
 }
 
-
-
-
-
 .sidebarTitle {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.5);
@@ -88,11 +88,9 @@
   height: 33px;
   margin-top: -50px;
   border-radius: 0 0px 0 0; /* Top-right corner with 20px radius */
-  border-color:rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
-
-
 
 .logoutIcon {
   width: 20px; /* Adjust size as needed */
