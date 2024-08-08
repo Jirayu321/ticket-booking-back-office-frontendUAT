@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import Header from '../common/header'; // Assuming you have a reusable Header component
+import React, { useEffect, useState } from 'react';
+import Header from '../common/header';
 import './all-event-content.css';
+import { fetchEvents, Event } from '../../services/apiService';
 
 const AllEventContent: React.FC = () => {
-  const [events] = useState([
-    { id: 1, code: 'P24060001', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'รอจัดงาน', publishStatus: 'ไม่เผยแพร่' },
-    { id: 2, code: 'P24060002', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'เริ่มงานแล้ว', publishStatus: 'เผยแพร่' },
-    { id: 3, code: 'P24060003', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ปิดงาน', publishStatus: 'เผยแพร่' },
-    { id: 4, code: 'P24060004', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ยกเลิก', publishStatus: 'ไม่เผยแพร่' },
-    { id: 5, code: 'P24060005', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'รอจัดงาน', publishStatus: 'เผยแพร่' },
-    { id: 6, code: 'P24060006', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'เริ่มงานแล้ว', publishStatus: 'เผยแพร่' },
-    { id: 7, code: 'P24060007', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ปิดงาน', publishStatus: 'ไม่เผยแพร่' },
-    { id: 8, code: 'P24060008', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ยกเลิก', publishStatus: 'เผยแพร่' },
-    { id: 9, code: 'P24060009', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'รอจัดงาน', publishStatus: 'ไม่เผยแพร่' },
-    { id: 10, code: 'P24060010', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'เริ่มงานแล้ว', publishStatus: 'เผยแพร่' },
-    { id: 11, code: 'P24060011', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ปิดงาน', publishStatus: 'ไม่เผยแพร่' },
-    { id: 12, code: 'P24060012', name: 'ILLSLICK LIVE CONCERT AT DEED...', startDate: '31/05/2567', endDate: '31/06/2567', publishDate: '31/05/2567', status: 'ยกเลิก', publishStatus: 'เผยแพร่' },
-  ]);
-
+  const [events, setEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const getEvents = async () => {
+      try {
+        const fetchedEvents = await fetchEvents();
+        setEvents(fetchedEvents);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    getEvents();
+  }, []);
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -35,40 +35,74 @@ const AllEventContent: React.FC = () => {
     <div className="all-events-content">
       <Header title="งานทั้งหมด" />
       <div className="filters">
-        <div className="date-picker-container">
-          <input type="date" className="date-picker" />
-          <span style={{ color: "black", paddingRight: "20px" }}>-</span>
-          <input type="date" className="date-picker" />
-          <a href="/create-event" className="create-event-button">สร้างงานใหม่ +</a>
-        </div>
+        <a href="/all-events/create-event" className="create-event-button">สร้าง Event ใหม่ +</a>
         <div className="filter-options">
           <div className="filter-item">
-              <img src="/รอจัดงาน.svg" alt="รอจัดงาน icon" className="filter-icon" />
-              <div className="filter-text-container">
-                  <span className="filter-text">รอจัดงาน</span>
-                  <span className="filter-number">15</span>
-              </div>
+            <img src="/รอจัดงาน.svg" alt="รอจัดงาน icon" className="filter-icon" />
+            <div className="filter-text-container">
+              <span className="filter-text">รอจัดงาน</span>
+              <span className="filter-number">15</span>
+            </div>
           </div>
           <div className="filter-item">
-              <img src="/เริ่มงานแล้ว.svg" alt="เริ่มงานแล้ว icon" className="filter-icon" />
-              <div className="filter-text-container">
-                  <span className="filter-text">เริ่มงานแล้ว</span>
-                  <span className="filter-number">15</span>
-              </div>
+            <img src="/เริ่มงานแล้ว.svg" alt="เริ่มงานแล้ว icon" className="filter-icon" />
+            <div className="filter-text-container">
+              <span className="filter-text">เริ่มงานแล้ว</span>
+              <span className="filter-number">15</span>
+            </div>
           </div>
           <div className="filter-item">
-              <img src="/ปิดงาน.svg" alt="ปิดงาน icon" className="filter-icon" />
-              <div className="filter-text-container">
-                  <span className="filter-text">ปิดงาน</span>
-                  <span className="filter-number">15</span>
-              </div>
+            <img src="/ปิดงาน.svg" alt="ปิดงาน icon" className="filter-icon" />
+            <div className="filter-text-container">
+              <span className="filter-text">ปิดงาน</span>
+              <span className="filter-number">15</span>
+            </div>
           </div>
           <div className="filter-item">
-              <img src="/ยกเลิก.svg" alt="ยกเลิก icon" className="filter-icon" />
-              <div className="filter-text-container">
-                  <span className="filter-text">ยกเลิก</span>
-                  <span className="filter-number">15</span>
-              </div>
+            <img src="/ยกเลิก.svg" alt="ยกเลิก icon" className="filter-icon" />
+            <div className="filter-text-container">
+              <span className="filter-text">ยกเลิก</span>
+              <span className="filter-number">15</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="additional-filters">
+          <div className="filter-group">
+            <label htmlFor="sort-by">เรียงตาม:</label>
+            <select id="sort-by" className="filter-select">
+              <option value="publish-date">วันที่เผยแพร่</option>
+              <option value="order">ลำดับ</option>
+              <option value="event-date">วันจัดงาน</option>
+              <option value="event-code">รหัสงาน</option>
+            </select>
+          </div>
+          <div className="filter-group">
+            <label htmlFor="publish-status">เผยแพร่:</label>
+            <select id="publish-status" className="filter-select">
+              <option value="all">ทั้งหมด</option>
+              <option value="published">เผยแพร่</option>
+              <option value="unpublished">ไม่เผยแพร่</option>
+            </select>
+          </div>
+          <div className="filter-group">
+            <label htmlFor="status">สถานะ:</label>
+            <select id="status" className="filter-select">
+              <option value="pending">รอจัดงาน</option>
+              <option value="active">เริ่มงานแล้ว</option>
+              <option value="cancelled">ยกเลิก</option>
+              <option value="closed">ปิดงาน</option>
+            </select>
+          </div>
+          <div className="filter-group search-group">
+            <input type="text" placeholder="รหัสงาน/ชื่องาน" className="search-box" />
+            <button className="search-button">ค้นหา</button>
+          </div>
+
+          <div className="date-picker-container">
+            <input type="date" className="date-picker" />
+            <span style={{ color: "black", paddingRight: "20px" }}>-</span>
+            <input type="date" className="date-picker" />
           </div>
         </div>
       </div>
@@ -86,12 +120,14 @@ const AllEventContent: React.FC = () => {
         {currentItems.map((event, index) => (
           <div key={event.id} className="event-list-item">
             <div className="column" style={{fontWeight:"bold"}}>{indexOfFirstItem + index + 1}.</div>
-            <div className="column">{event.code}</div>
-            <div className="column">{event.name}</div>
-            <div className="column">{event.startDate}</div>
-            <div className="column">{event.endDate}</div>
-            <div className={`column ${event.publishStatus === 'เผยแพร่' ? 'publish' : 'unpublish'}`}>{event.publishStatus}</div>
-            <div className={`column ${event.status === 'รอจัดงาน' ? 'pending' : event.status === 'เริ่มงานแล้ว' ? 'active' : 'closed'}`}>{event.status}</div>
+            <div className="column">{event.Event_Id}</div>
+            <div className="column">{event.Event_Name}</div>
+            <div className="column">{event.Event_Date}</div>
+            <div className="column">{event.Event_Time}</div>
+            <div className={`column ${event.Event_Public === 'Y' ? 'publish' : 'unpublish'}`}>{event.Event_Public === 'Y' ? 'เผยแพร่' : 'ไม่เผยแพร่'}</div>
+            <div className={`column ${event.Event_Status === 1 ? 'pending' : event.Event_Status === 2 ? 'active' : event.Event_Status === 3 ? 'closed' : 'cancelled'}`}>
+              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : 'ยกเลิก'}
+            </div>
             <div className="column"><button className="details-button">รายละเอียด</button></div>
           </div>
         ))}

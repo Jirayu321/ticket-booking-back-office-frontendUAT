@@ -13,7 +13,7 @@
 }
 
 .sidebar * {
-  color: #FFFFFF !important; /* Ensure all text inside sidebar is white */
+  color: #FFFFFF; /* Ensure all text inside sidebar is white */
 }
 
 .sidebar-header {
@@ -42,14 +42,17 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, color 0.3s; /* Added color transition */
 }
 
-.menu-item:hover,
+.menu-item:hover{
+  background-color: #FFD700; /* Ensure background color is applied */
+  color: black; /* Ensure text color is applied */
+}
 .menu-item.active {
-  background-color: #FFD700;
-  width: 81%;
-  color: #1A1A1A;
+  background-color: #FFD700; /* Ensure background color is applied */
+  width: 80%;
+  color: black ; /* Ensure text color is applied */
 }
 
 .icon {

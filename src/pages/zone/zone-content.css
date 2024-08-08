@@ -1,0 +1,153 @@
+.zone-content {
+    position: relative;
+    padding: 20px;
+    background-color: #fff;
+  }
+  
+  .header {
+    background-color: #FFD700;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .header h1 {
+    margin-left: 10px;
+    color: #1A1A1A;
+    font-size: 18px;
+  }
+  
+  .filters {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .create-zone-button {
+    background-color: #0B8600;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    align-self: flex-end;
+  }
+  
+  .create-zone-button:hover {
+    background-color: #007a00;
+  }
+  
+  .additional-filters {
+    display: flex;
+    margin-top: 20px;
+  }
+  
+  .search-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-box {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 30px;
+    margin-right: 10px;
+  }
+  
+  .search-button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #CFB70B;
+    color: black;
+    border: none;
+    cursor: pointer;
+    height: 40px;
+  }
+  
+  .zone-list {
+    margin-top: 30px;
+  }
+  
+  .zone-list-header,
+  .zone-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .zone-list-header {
+    background-color: black;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .zone-list-item {
+    background-color: white;
+    color: #000;
+  }
+  
+  .column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 5px;
+  }
+  
+  .active {
+    background-color: #0B8600;
+    color: white !important;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 100px;
+  }
+  
+  .inactive {
+    background-color: rgba(17, 19, 26, 0.12);
+    color: black !important;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 100px;
+  }
+  
+  .details-button {
+    background-color: #CFB70B;
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 60px;
+  }
+  
+  .pagination button {
+    background-color: #EEECEC;
+    color: black;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    margin: 0 2px;
+    cursor: pointer;
+  }
+  
+  .pagination button.active {
+    background-color: #EEECEC;
+    font-weight: bold;
+    border-radius: 2px;
+    border-color: #CFB70B;
+  }
+  
+  .pagination button:hover {
+    background-color: #CCC;
+  }
+  

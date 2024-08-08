@@ -233,17 +233,17 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
+                        value={seatNumber}
+                        onChange={handleInputChange}
                       />
                     </div>
                     <div className="ticket-amount-row">
-                      <label>จำนวนที่นั่ง/ตั๋ว</label>
+                      <label>จำนวนที่นั่ง/บัตร</label>
                       <input
                         type="number"
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={seatNumber}
-                        onChange={handleInputChange}
                       />
                     </div>
                   </div>

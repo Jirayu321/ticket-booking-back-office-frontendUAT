@@ -325,7 +325,7 @@ button:hover {
 
 .left-box.active, .right-box.active {
   background-color: rgb(207, 183, 11,0.1);
-  color: black;
+  color: black !important;
   font-weight: bold;
 }
 
