@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import GenerateBoxes from "./generate-boxes"; // Import the new component
+import GenerateBoxes from "./generate-boxes";
 import "./zone-price-form.css";
 import deleteOffIcon from '/delete-off.svg';
 import deleteOnIcon from '/delete-on.svg';
 import { useNavigate } from 'react-router-dom';
 import toast from "react-hot-toast";
+import { fetchTicketTypes, fetchPlans, fetchPlanGroups, TicketType, Plan, PlanGroup } from '../../../services/apiService';
 
 const ZonePriceForm = ({ zones, handleSave }) => {
   const [expandedZone, setExpandedZone] = useState<number | null>(null);
@@ -14,6 +15,9 @@ const ZonePriceForm = ({ zones, handleSave }) => {
   const [tableInputMethod, setTableInputMethod] = useState("1");
   const [seatNumber, setSeatNumber] = useState(0);
   const [selectedZoneName, setSelectedZoneName] = useState('');
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [planGroups, setPlanGroups] = useState<PlanGroup[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +41,23 @@ const ZonePriceForm = ({ zones, handleSave }) => {
       }
     }
   }, [expandedZone]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedTicketTypes = await fetchTicketTypes();
+        const fetchedPlans = await fetchPlans();
+        const fetchedPlanGroups = await fetchPlanGroups();
+        setTicketTypes(fetchedTicketTypes);
+        setPlans(fetchedPlans);
+        setPlanGroups(fetchedPlanGroups);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZone(expandedZone === zoneId ? null : zoneId);
@@ -194,9 +215,9 @@ const ZonePriceForm = ({ zones, handleSave }) => {
         <div className="zone-select-container">
           <label>เลือก ZONE GROUP</label>
           <select className="zone-select" onChange={(e) => handleExpandZone(parseInt(e.target.value), e.target.options[e.target.selectedIndex].text)}>
-            <option value="">ผังร้านคุณเอก</option>
-            <option value="">ผังร้านคุณโท</option>
-            <option value="">ผังร้านคุณตรี</option>
+            {planGroups.map((group) => (
+              <option key={group.plangroup_id} value={group.plangroup_id}>{group.plangroup_name}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -218,11 +239,9 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                   <div className="ticket-type">
                     <label>TICKET TYPE*</label>
                     <select className="ticket-type-select">
-                      <option value="โต๊ะ">โต๊ะ</option>
-                      <option value="เก้าอี้">เก้าอี้</option>
-                      <option value="โซฟา">โซฟา</option>
-                      <option value="ห้อง">ห้อง</option>
-                      <option value="คน">คน</option>
+                      {ticketTypes.map((type) => (
+                        <option key={type.ticket_type_id} value={type.ticket_type_id}>{type.ticket_type_name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="ticket-amount">

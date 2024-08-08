@@ -3,69 +3,60 @@ import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
 import toast from "react-hot-toast";
-import Header from "../../common/header"; // Import the new Header component
-import {  useNavigate } from 'react-router-dom';
+import Header from "../../common/header";
+import { useNavigate } from 'react-router-dom';
+import { fetchPlans, Plan } from '../../../services/apiService'; // Import the fetchPlans function
 
 const CreateEventForm = () => {
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [title, setTitle] = useState(localStorage.getItem("title") || "");
   const [title2, setTitle2] = useState(localStorage.getItem("title2") || "");
-  const [description, setDescription] = useState(
-    localStorage.getItem("description") || ""
-  );
+  const [description, setDescription] = useState(localStorage.getItem("description") || "");
   const [date, setDate] = useState(localStorage.getItem("date") || "");
   const [time, setTime] = useState(localStorage.getItem("time") || "");
-  const [status, setStatus] = useState(
-    localStorage.getItem("status") || "รอจัดงาน"
-  );
+  const [status, setStatus] = useState(localStorage.getItem("status") || "รอจัดงาน");
   const [publish, setPublish] = useState(false);
-  const [images, setImages] = useState<Array<string | null>>([
-    null,
-    null,
-    null,
-    null,
-  ]);
+  const [images, setImages] = useState<Array<string | null>>([null, null, null, null]);
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [isDetailCompleted, setIsDetailCompleted] = useState(false);
-  const [zones, setZones] = useState([
-    {
-      id: 1,
-      name: "โซนสีแดง",
-      description:
-        "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.",
-    },
-    {
-      id: 2,
-      name: "โซนสีเขียว",
-      description:
-        "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS.",
-    },
-  ]);
+  const [zones, setZones] = useState([{ id: 1, name: "โซนสีแดง", description: "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS." }, { id: 2, name: "โซนสีเขียว", description: "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS." }]);
+
+  useEffect(() => {
+    const fetchAndSetPlans = async () => {
+      try {
+        const fetchedPlans = await fetchPlans();
+        setPlans(fetchedPlans);
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+      }
+    };
+
+    fetchAndSetPlans();
+  }, []);
 
   useEffect(() => {
     const savedImages = JSON.parse(localStorage.getItem("images") || "[]");
     setImages(savedImages);
   }, []);
 
-  const handleInputChange =
-    (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
-      setter(e.target.value);
-    };
+  const handleInputChange = (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
+    setter(e.target.value);
+  };
 
-  const handleImageUpload =
-    (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Image = reader.result as string;
-          const newImages = [...images];
-          newImages[index] = base64Image;
-          setImages(newImages);
-          localStorage.setItem("images", JSON.stringify(newImages));
-        };
-        reader.readAsDataURL(file);
-      }
-    };
+  const handleImageUpload = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Image = reader.result as string;
+        const newImages = [...images];
+        newImages[index] = base64Image;
+        setImages(newImages);
+        localStorage.setItem("images", JSON.stringify(newImages));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleImageRemove = (index: number) => () => {
     const newImages = [...images];
@@ -90,6 +81,7 @@ const CreateEventForm = () => {
     setActiveTab("โซน & ราคา");
     setIsDetailCompleted(true);
   };
+
   const navigate = useNavigate();
   const handleBackClick = () => {
     if (activeTab === "โซน & ราคา") {
@@ -98,13 +90,12 @@ const CreateEventForm = () => {
     console.log("Back button clicked");
     if (activeTab === "รายละเอียด") {
       navigate('/all-events');
-      
     }
   };
 
   return (
     <div className="create-new-event">
-      <Header title="งานทั้งหมด" /> {/* Use the new Header component */}
+      <Header title="งานทั้งหมด" />
       <div className="sub-header">
         <button className="back-button">
           <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
@@ -129,15 +120,15 @@ const CreateEventForm = () => {
       </div>
       <div className="nav-menu">
         <div className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}>
-        <img
-          src={isDetailCompleted ? "/check-on.svg" : "/check-off.svg"}
-          alt="Check Icon"
-          className="icon"
-        />
+          <img
+            src={isDetailCompleted ? "/check-on.svg" : "/check-off.svg"}
+            alt="Check Icon"
+            className="icon"
+          />
           รายละเอียด
         </div>
         <div className={`right-box ${activeTab === "โซน & ราคา" ? "active" : ""}`}>
-        <img src="/check-off.svg" alt="Check Off Icon" className="icon" />
+          <img src="/check-off.svg" alt="Check Off Icon" className="icon" />
           โซน & ราคา
         </div>
       </div>
@@ -198,7 +189,7 @@ const CreateEventForm = () => {
           <div className="form-section">
             <label>ภาพประกอบ</label>
             <div className="image-grid">
-              {[ "ภาพปก*", "ภาพประกอบ 1 (ไม่บังคับ)", "ภาพประกอบ 2 (ไม่บังคับ)", "ภาพประกอบ 3 (ไม่บังคับ)", ].map((title, index) => (
+              {["ภาพปก*", "ภาพประกอบ 1 (ไม่บังคับ)", "ภาพประกอบ 2 (ไม่บังคับ)", "ภาพประกอบ 3 (ไม่บังคับ)"].map((title, index) => (
                 <div key={index} className="image-upload-container">
                   <span className="image-upload-title">{title}</span>
                   <div className="image-upload-box">

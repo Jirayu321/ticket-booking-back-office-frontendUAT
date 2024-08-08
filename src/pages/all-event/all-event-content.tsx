@@ -126,7 +126,7 @@ const AllEventContent: React.FC = () => {
             <div className="column">{event.Event_Time}</div>
             <div className={`column ${event.Event_Public === 'Y' ? 'publish' : 'unpublish'}`}>{event.Event_Public === 'Y' ? 'เผยแพร่' : 'ไม่เผยแพร่'}</div>
             <div className={`column ${event.Event_Status === 1 ? 'pending' : event.Event_Status === 2 ? 'active' : event.Event_Status === 3 ? 'closed' : 'cancelled'}`}>
-              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : 'ยกเลิก'}
+              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : event.Event_Status === 13 ? 'ยกเลิก' : 'สถานะไม่ถูกต้อง' }
             </div>
             <div className="column"><button className="details-button">รายละเอียด</button></div>
           </div>
