@@ -5,39 +5,54 @@ import { useZoneStore } from '../form-store'; // Import Zustand store
 interface GenerateTableProps {
   method: string;
   seatNumber: number;
-  zoneId: number; // Pass zoneId to associate with specific zone
+  zoneName: string;
+  zoneId: number; // Assuming you pass the zoneId to associate with a specific zone
 }
 
-const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneId }) => {
-  const [startNumber, setStartNumber] = useState<number | null>(null);
-  const [prefix, setPrefix] = useState<string>('');
-  const { setZoneData } = useZoneStore(); // Zustand store action to update the zone data
+const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneName, zoneId }) => {
+  const { setStartNumberAndPrefix, setTableValues, zones } = useZoneStore(); // Zustand store actions
+  const [startNumber, setStartNumber] = useState<number | null>(zones[zoneId]?.startNumber || null);
+  const [prefix, setPrefix] = useState<string>(zones[zoneId]?.prefix || '');
+  const [inputValues, setInputValues] = useState<string[]>([]);
 
   useEffect(() => {
-    const generatedTables = generateBoxesData();
-    setZoneData(zoneId, { generatedTables });
-  }, [method, seatNumber, startNumber, prefix]);
+    const savedStartNumber = zones[zoneId]?.startNumber;
+    const savedPrefix = zones[zoneId]?.prefix;
 
-  const handleStartNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStartNumber(Number(e.target.value));
-  };
+    if (savedStartNumber !== undefined) setStartNumber(savedStartNumber);
+    if (savedPrefix !== undefined) setPrefix(savedPrefix);
 
-  const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrefix(e.target.value);
+    if (zones[zoneId]?.tableValues) {
+      setInputValues(zones[zoneId].tableValues);
+    } else {
+      const generatedValues = generateBoxesData();
+      setTableValues(zoneId, generatedValues); // Save the generated values
+      setInputValues(generatedValues);
+    }
+  }, [method, seatNumber, zoneId]);
+
+  useEffect(() => {
+    setStartNumberAndPrefix(zoneId, startNumber, prefix);
+  }, [startNumber, prefix, zoneId]);
+
+  const handleInputChange = (index: number, value: string) => {
+    const newValues = [...inputValues];
+    newValues[index] = value;
+    setInputValues(newValues);
+    setTableValues(zoneId, newValues); // Save the input values
   };
 
   const generateBoxesData = () => {
-    let boxesData: string[] = [];
-
+    let boxesData = [];
     if (method === "1") {
       for (let i = 0; i < seatNumber; i++) {
-        boxesData.push(`Table ${i + 1}`);
+        boxesData.push(inputValues[i] || '');
       }
     } else if ((method === "2" || method === "3" || method === "4") && startNumber !== null) {
       for (let i = 0; i < seatNumber; i++) {
         const boxValue = method === "3" ? `โต๊ะ ${startNumber + i}` :
-          method === "4" ? `${prefix}${startNumber + i}` :
-          `${startNumber + i}`;
+                         method === "4" ? `${prefix}${startNumber + i}` :
+                         `${startNumber + i}`;
         boxesData.push(boxValue);
       }
     }
@@ -45,14 +60,15 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneI
   };
 
   const renderBoxes = () => {
-    const boxesData = generateBoxesData();
-    return boxesData.map((box, i) => (
+    return generateBoxesData().map((value, index) => (
       <input
-        key={i}
+        key={index}
         type="text"
-        value={box}
+        value={value}
+        placeholder={method === "1" ? 'โปรดระบุ' : ''}
+        onChange={(e) => handleInputChange(index, e.target.value)}
         className="table-input-box"
-        readOnly
+        readOnly={method !== "1"} // Only allow editing if method is "1"
       />
     ));
   };
@@ -68,7 +84,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneI
               id="startNumber"
               type="number"
               value={startNumber ?? ''}
-              onChange={handleStartNumberChange}
+              onChange={(e) => setStartNumber(Number(e.target.value))}
               className="table-input-box"
               placeholder="Enter start number"
             />
@@ -81,7 +97,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneI
               id="prefix"
               type="text"
               value={prefix}
-              onChange={handlePrefixChange}
+              onChange={(e) => setPrefix(e.target.value)}
               className="table-input-box"
               placeholder="Enter prefix"
             />

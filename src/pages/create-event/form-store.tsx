@@ -28,22 +28,18 @@ export const useEventStore = create<EventState>((set) => ({
 }));
 
 // Zone store
-interface Price {
-    id: number;
-    startDate: string | null;
-    endDate: string | null;
-    price: string;
-  }
-  
-  interface ZoneData {
+interface ZoneData {
     ticketType: string;
     seatCount: number;
     seatPerTicket: number;
     prices: Price[];
     tableInputMethod: string;
-    tableValues: string[]; 
-    selectedZoneGroup: number | null; // Add this line
+    selectedZoneGroup: number | null;
+    tableValues?: string[]; // Store table values
+    startNumber?: number | null; // Add startNumber to store the start number
+    prefix?: string; // Add prefix to store the prefix value
   }
+  
   interface ZoneStoreState {
     selectedZoneGroup: number | null;
     zones: Record<number, ZoneData>;
@@ -51,30 +47,26 @@ interface Price {
     setZoneData: (zoneId: number, data: Partial<ZoneData>) => void;
     addZonePrice: (zoneId: number) => void;
     removeZonePrice: (zoneId: number, priceId: number) => void;
-    setTableValues: (zoneId: number, values: string[]) => void; // New action
+    setTableValues: (zoneId: number, values: string[]) => void; // Action to set table values
+    setStartNumberAndPrefix: (zoneId: number, startNumber: number | null, prefix: string) => void; // New action
     resetZoneData: () => void;
   }
-  
   
   export const useZoneStore = create<ZoneStoreState>((set) => ({
     selectedZoneGroup: null,
     zones: {},
   
     setSelectedZoneGroup: (groupId) =>
-      set((state) => {
-        if (!groupId) return { selectedZoneGroup: null };
-  
-        return {
-          selectedZoneGroup: groupId,
-          zones: {
-            ...state.zones,
-            [groupId]: {
-              ...state.zones[groupId],
-              selectedZoneGroup: groupId,
-            },
+      set((state) => ({
+        selectedZoneGroup: groupId,
+        zones: {
+          ...state.zones,
+          [groupId]: {
+            ...state.zones[groupId],
+            selectedZoneGroup: groupId,
           },
-        };
-      }),
+        },
+      })),
   
     setZoneData: (zoneId, data) =>
       set((state) => ({
@@ -126,6 +118,18 @@ interface Price {
           [zoneId]: {
             ...state.zones[zoneId],
             tableValues: values,
+          },
+        },
+      })),
+  
+    setStartNumberAndPrefix: (zoneId, startNumber, prefix) =>
+      set((state) => ({
+        zones: {
+          ...state.zones,
+          [zoneId]: {
+            ...state.zones[zoneId],
+            startNumber,
+            prefix,
           },
         },
       })),
