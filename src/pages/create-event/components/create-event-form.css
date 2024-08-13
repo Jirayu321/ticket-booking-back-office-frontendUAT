@@ -5,7 +5,7 @@
   left: 157px;
   width: 1763px;
   height: 100%; /* Set height to 100% or a specific value */
-  padding-left: 0; 
+  padding-left: 0;
   background-color: #fff;
   overflow-y: scroll; /* Enable vertical scrolling */
 }
@@ -38,7 +38,7 @@
   color: white;
 }
 
-.title{
+.title {
   margin: 0;
   font-size: 22px;
   color: white;
@@ -58,6 +58,7 @@
   height: 34px;
   margin-right: 10px;
 }
+
 .toggle-text {
   font-size: 20px;
   color: white;
@@ -136,6 +137,12 @@ input:checked + .slider:before {
 }
 
 .form-section {
+  margin-bottom: 13px;
+  color: #1A1A1A;
+  margin-left: 15px;
+}
+
+.form-section-date {
   margin-bottom: 13px;
   color: #1A1A1A;
   margin-left: 15px;
@@ -251,7 +258,6 @@ input[type="text"] {
   text-decoration: underline;
   color: black;
   cursor: pointer;
-
 }
 
 .image-upload-input {
@@ -272,7 +278,6 @@ input[type="text"] {
   margin-top: 20px;
   padding: 20px;
   padding-right: 60px;
-  
   background-color: #f2f2f2;
   border-radius: 4px;
   display: flex;
@@ -368,3 +373,8 @@ button.active {
   margin-bottom: 20px;
   width: 98%;
 }
+
+
+
+
+

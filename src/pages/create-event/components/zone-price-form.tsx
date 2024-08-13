@@ -1,179 +1,70 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import DateTimePickerComponent from '../../../components/common/date-time-picker';
 import GenerateBoxes from "./generate-boxes";
 import "./zone-price-form.css";
-import deleteOffIcon from '/delete-off.svg';
 import deleteOnIcon from '/delete-on.svg';
-import { useNavigate } from 'react-router-dom';
-import toast from "react-hot-toast";
-import { fetchTicketTypes, fetchPlans, fetchPlanGroups, TicketType, Plan, PlanGroup } from '../../../services/apiService';
+import { getTicketTypes, getViewPlanList } from '../../../services/apiService';
+import { useZoneStore } from '../form-store'; // Import Zustand store
+import dayjs from "dayjs";
 
-const ZonePriceForm = ({ zones, handleSave }) => {
-  const [expandedZone, setExpandedZone] = useState<number | null>(null);
-  const [prices, setPrices] = useState([]);
-  const [tableInputMethod, setTableInputMethod] = useState("1");
-  const [seatNumber, setSeatNumber] = useState(0);
-  const [selectedZoneName, setSelectedZoneName] = useState('');
+const ZonePriceForm = ({ handleSave }) => {
+  const {
+    selectedZoneGroup,
+    setSelectedZoneGroup,
+    zones,
+    setZoneData,
+    addZonePrice,
+    removeZonePrice,
+  } = useZoneStore();
+
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [planGroups, setPlanGroups] = useState<PlanGroup[]>([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (expandedZone !== null) {
-      const savedSeatNumber = localStorage.getItem(`seatNumber_${expandedZone}`);
-      const savedPrices = localStorage.getItem(`prices_${expandedZone}`);
-      const savedZoneName = localStorage.getItem(`zoneName_${expandedZone}`);
-
-      if (savedSeatNumber) {
-        setSeatNumber(Number(savedSeatNumber));
-      }
-
-      if (savedPrices) {
-        setPrices(JSON.parse(savedPrices));
-      } else {
-        setPrices([{ id: 1, startDate: "16/06/2024", startTime: "10:00 PM", endDate: "16/06/2024", endTime: "10:00 PM", price: "2500.00" }]);
-      }
-
-      if (savedZoneName) {
-        setSelectedZoneName(savedZoneName);
-      }
-    }
-  }, [expandedZone]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fetchedTicketTypes = await fetchTicketTypes();
-        const fetchedPlans = await fetchPlans();
-        const fetchedPlanGroups = await fetchPlanGroups();
-        setTicketTypes(fetchedTicketTypes);
-        setPlans(fetchedPlans);
-        setPlanGroups(fetchedPlanGroups);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleExpandZone = (zoneId: number, zoneName: string) => {
-    setExpandedZone(expandedZone === zoneId ? null : zoneId);
-    setSelectedZoneName(zoneName);
-    localStorage.setItem(`zoneName_${zoneId}`, zoneName);
-    console.log("Selected Zone:", zoneName);
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.target.value);
-    setSeatNumber(value);
-    if (expandedZone !== null) {
-      localStorage.setItem(`seatNumber_${expandedZone}`, value.toString());
-    }
-  };
-
-  const handlePriceChange = (id: number, field: string, value: string) => {
-    const newPrices = prices.map((price) =>
-      price.id === id ? { ...price, [field]: value } : price
-    );
-    setPrices(newPrices);
-    if (expandedZone !== null) {
-      localStorage.setItem(`prices_${expandedZone}`, JSON.stringify(newPrices));
-    }
-  };
-
-  const addPrice = () => {
-    setPrices([
-      ...prices,
-      { id: prices.length + 1, startDate: "", startTime: "", endDate: "", endTime: "", price: "" },
-    ]);
-  };
-
-  const removePrice = (id: number) => {
-    const newPrices = prices.filter((price) => price.id !== id);
-    setPrices(newPrices);
-    if (expandedZone !== null) {
-      localStorage.setItem(`prices_${expandedZone}`, JSON.stringify(newPrices));
-    }
-  };
-
-  const handleSave2 = () => {
-    toast.success("Data uploaded successfully");
-    navigate('/all-events');
-  };
+  const [filteredZones, setFilteredZones] = useState<ViewPlan[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedZones, setExpandedZones] = useState<{ [key: number]: boolean }>({});
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ลำดับ", width: 90, sortable: false, resizable: false, disableColumnMenu: true },
+    { field: "id", headerName: "ลำดับ", width: 120, sortable: false, resizable: false, disableColumnMenu: true },
     {
       field: "startDate",
       headerName: "วันเริ่ม",
-      width: 150,
+      width: 280,
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
       renderCell: (params: GridRenderCellParams) => (
-        <input
-          type="date"
-          value={params.value}
-          onChange={(e) => handlePriceChange(params.row.id, "startDate", e.target.value)}
-          style={{ width: "90%" }}
-        />
-      ),
-    },
-    {
-      field: "startTime",
-      headerName: "เวลาเริ่ม",
-      width: 150,
-      sortable: false,
-      resizable: false,
-      disableColumnMenu: true,
-      renderCell: (params: GridRenderCellParams) => (
-        <input
-          type="time"
-          value={params.value}
-          onChange={(e) => handlePriceChange(params.row.id, "startTime", e.target.value)}
-          style={{ width: "90%" }}
-        />
+        <div className="form-section form-section-inline">
+          <DateTimePickerComponent
+            controlledValue={params.value ? dayjs(params.value) : null}
+            onChange={(date) => handlePriceChange(params.row.id, "startDate", date ? date.toISOString() : "")}
+            label="Select Start Date & Time"
+          />
+        </div>
       ),
     },
     {
       field: "endDate",
       headerName: "วันที่สิ้นสุด",
-      width: 150,
+      width: 280,
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
       renderCell: (params: GridRenderCellParams) => (
-        <input
-          type="date"
-          value={params.value}
-          onChange={(e) => handlePriceChange(params.row.id, "endDate", e.target.value)}
-          style={{ width: "90%" }}
-        />
-      ),
-    },
-    {
-      field: "endTime",
-      headerName: "เวลาที่สิ้นสุด",
-      width: 150,
-      sortable: false,
-      resizable: false,
-      disableColumnMenu: true,
-      renderCell: (params: GridRenderCellParams) => (
-        <input
-          type="time"
-          value={params.value}
-          onChange={(e) => handlePriceChange(params.row.id, "endTime", e.target.value)}
-          style={{ width: "90%" }}
-        />
+        <div className="form-section form-section-inline">
+          <DateTimePickerComponent
+            controlledValue={params.value ? dayjs(params.value) : null}
+            onChange={(date) => handlePriceChange(params.row.id, "endDate", date ? date.toISOString() : "")}
+            label="Select End Date & Time"
+          />
+        </div>
       ),
     },
     {
       field: "price",
       headerName: "ราคา",
-      width: 150,
+      width: 200,
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
@@ -190,46 +81,136 @@ const ZonePriceForm = ({ zones, handleSave }) => {
     {
       field: "delete",
       headerName: "",
-      width: 90,
+      width: 120,
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
       renderCell: (params: GridRenderCellParams) => (
-        params.row.id === 1 ? (
-          <img src={deleteOffIcon} alt="delete-off" />
-        ) : (
-          <img
-            src={deleteOnIcon}
-            alt="delete-on"
-            style={{ cursor: "pointer" }}
-            onClick={() => removePrice(params.row.id)}
-          />
-        )
+        <img
+          src={deleteOnIcon}
+          alt="delete-on"
+          style={{ cursor: "pointer" }}
+          onClick={() => removeZonePrice(params.row.id)}
+        />
       ),
     },
   ];
 
+  const handlePlanGroupChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPlanGroupId = parseInt(event.target.value);
+    setSelectedZoneGroup(newPlanGroupId);
+    forceRefreshFilteredZones(newPlanGroupId);
+  };
+
+  const forceRefreshFilteredZones = async (groupId: number) => {
+    try {
+      const fetchedViewPlans = await getViewPlanList();
+      const newFilteredZones = fetchedViewPlans.filter(plan => plan.plangroup_id === groupId);
+      setFilteredZones(newFilteredZones);
+    } catch (error) {
+      console.error('Error refreshing filtered zones:', error);
+      setError('Failed to refresh zones. Please try again later.');
+    }
+  };
+
+  const handleExpandZone = (zoneId: number, zoneName: string) => {
+    setExpandedZones(prev => ({
+      ...prev,
+      [zoneId]: !prev[zoneId] // Toggle the state of the clicked zone
+    }));
+
+    if (!zones[zoneId]) {
+      setZoneData(zoneId, { 
+        ticketType: '',
+        seatCount: 0,
+        seatPerTicket: 0,
+        prices: [],
+        tableInputMethod: '1'
+      });
+    }
+    setZoneData(zoneId, { zoneName });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedTicketTypes = await getTicketTypes();
+        const fetchedViewPlans = await getViewPlanList();
+
+        if (!Array.isArray(fetchedViewPlans)) {
+          throw new Error('Expected an array but received something else');
+        }
+
+        setTicketTypes(fetchedTicketTypes);
+
+        const planGroupMap = new Map();
+        fetchedViewPlans.forEach(plan => {
+          if (plan.plangroup_id && !planGroupMap.has(plan.plangroup_id)) {
+            planGroupMap.set(plan.plangroup_id, {
+              plangroup_id: plan.plangroup_id,
+              plangroup_name: plan.plangroup_name
+            });
+          }
+        });
+
+        const derivedPlanGroups = Array.from(planGroupMap.values());
+        setPlanGroups(derivedPlanGroups);
+
+        if (derivedPlanGroups.length > 0) {
+          const firstGroupId = derivedPlanGroups[0].plangroup_id;
+          if (firstGroupId !== undefined) {
+            setSelectedZoneGroup(firstGroupId);
+            const initialFilteredZones = fetchedViewPlans.filter(plan => plan.plangroup_id === firstGroupId);
+            setFilteredZones(initialFilteredZones);
+          } else {
+            console.error('First plan group does not have a plangroup_id');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch data. Please try again later.');
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleInputChange = (zoneId: number, field: keyof ZoneData, value: any) => {
+    setZoneData(zoneId, { [field]: value });
+  };
+
+  const handlePriceChange = (zoneId: number, priceId: number, field: keyof Price, value: any) => {
+    const zone = zones[zoneId];
+    if (zone) {
+      const updatedPrices = zone.prices.map((price) =>
+        price.id === priceId ? { ...price, [field]: value } : price
+      );
+      setZoneData(zoneId, { prices: updatedPrices });
+    }
+  };
+
   return (
     <div className="zone-price-form-container">
+      {error && <div className="error-message">{error}</div>}
       <div style={{ paddingTop: "30px" }} className="form-section">
         <div className="zone-select-container">
           <label>เลือก ZONE GROUP</label>
-          <select className="zone-select" onChange={(e) => handleExpandZone(parseInt(e.target.value), e.target.options[e.target.selectedIndex].text)}>
+          <select className="zone-select" onChange={handlePlanGroupChange} value={selectedZoneGroup || ''}>
             {planGroups.map((group) => (
               <option key={group.plangroup_id} value={group.plangroup_id}>{group.plangroup_name}</option>
             ))}
           </select>
         </div>
       </div>
-      {zones.map((zone) => (
-        <div key={zone.id} className="zone-section">
-          <div className="zone-header" onClick={() => handleExpandZone(zone.id, zone.name)}>
+      {filteredZones.map((zone) => (
+        <div key={zone.plan_id} className="zone-section">
+          <div className="zone-header" onClick={() => handleExpandZone(zone.plan_id, zone.plan_name)}>
             <span>
-              {zone.id}. {zone.name}
+              {zone.plan_id}. {zone.plan_name}
             </span>
-            <span>{zone.description}</span>
+            <span>{zone.plan_desc}</span>
           </div>
-          <Collapse in={expandedZone === zone.id} timeout="auto" unmountOnExit>
+          <Collapse in={expandedZones[zone.plan_id]} timeout="auto" unmountOnExit>
             <div className="zone-content">
               <div className="ticket-layout">
                 <div className="empty-image">
@@ -238,7 +219,11 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                 <div className="ticket-details">
                   <div className="ticket-type">
                     <label>TICKET TYPE*</label>
-                    <select className="ticket-type-select">
+                    <select
+                      className="ticket-type-select"
+                      value={zones[zone.plan_id]?.ticketType || ''}
+                      onChange={(e) => handleInputChange(zone.plan_id, 'ticketType', e.target.value)}
+                    >
                       {ticketTypes.map((type) => (
                         <option key={type.ticket_type_id} value={type.ticket_type_id}>{type.ticket_type_name}</option>
                       ))}
@@ -252,8 +237,8 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={seatNumber}
-                        onChange={handleInputChange}
+                        value={zones[zone.plan_id]?.seatCount || 0}
+                        onChange={(e) => handleInputChange(zone.plan_id, 'seatCount', Number(e.target.value))}
                       />
                     </div>
                     <div className="ticket-amount-row">
@@ -263,46 +248,84 @@ const ZonePriceForm = ({ zones, handleSave }) => {
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
                         style={{ backgroundColor: "white", color: "black" }}
+                        value={zones[zone.plan_id]?.seatPerTicket || 0}
+                        onChange={(e) => handleInputChange(zone.plan_id, 'seatPerTicket', Number(e.target.value))}
                       />
                     </div>
                   </div>
                 </div>
               </div>
               <div className="price-section">
-                <h3>ราคา ({prices.length})</h3>
+                <h3>ราคา ({zones[zone.plan_id]?.prices?.length || 0})</h3>
                 <div style={{ height: 'auto', width: '100%' }}>
                   <DataGrid
-                    rows={prices}
-                    columns={columns}
-                    pageSize={prices.length}
+                    rows={zones[zone.plan_id]?.prices || []}
+                    columns={columns.map((col) => ({
+                      ...col,
+                      renderCell: (params: GridRenderCellParams) => {
+                        if (col.field === 'startDate' || col.field === 'endDate') {
+                          return (
+                            <DateTimePickerComponent
+                              controlledValue={params.value ? dayjs(params.value) : null}
+                              onChange={(date) => handlePriceChange(zone.plan_id, params.row.id, col.field, date ? date.toISOString() : '')}
+                              label={col.headerName}
+                            />
+                          );
+                        }
+                        if (col.field === 'price') {
+                          return (
+                            <input
+                              type="number"
+                              min="0"
+                              value={params.value}
+                              onChange={(e) => handlePriceChange(zone.plan_id, params.row.id, col.field, e.target.value)}
+                              style={{ width: "90%", color: "black", backgroundColor: "white" }}
+                            />
+                          );
+                        }
+                        if (col.field === 'delete') {
+                          return (
+                            <img
+                              src={deleteOnIcon}
+                              alt="delete-on"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => removeZonePrice(zone.plan_id, params.row.id)}
+                            />
+                          );
+                        }
+                        return null;
+                      }
+                    }))} 
+                    pageSize={zones[zone.plan_id]?.prices?.length || 0}
                     autoHeight
                     disableSelectionOnClick
                     hideFooterPagination
                   />
                 </div>
-                <button type="button" className="add-price" onClick={addPrice}>+ เพิ่มราคาบัตร</button>
+
+                <button type="button" className="add-price" onClick={() => addZonePrice(zone.plan_id)}>+ เพิ่มราคาบัตร</button>
               </div>
               <div className="table-input-method-section">
-                <label>ระบุเลขโต๊ะ/ที่*</label>
+                <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
                 <select
-                  value={tableInputMethod}
-                  onChange={(e) => setTableInputMethod(e.target.value)}
+                  value={zones[zone.plan_id]?.tableInputMethod || '1'}
+                  onChange={(e) => handleInputChange(zone.plan_id, 'tableInputMethod', e.target.value)}
                   className="table-input-method-select"
                 >
                   <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
-                  <option value="2">2.รันจาก 1 ถึง {seatNumber}</option>
-                  <option value="3">3.นำหน้าด้วย {selectedZoneName} ต่อด้วย รันจาก 1 ถึง {seatNumber} - ({selectedZoneName} 1- {selectedZoneName} {seatNumber})</option>
-                  <option value="4">4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง {seatNumber} ([?] 1- [?] {seatNumber})</option>
+                  <option value="2">2.รันจาก 1 ถึง {zones[zone.plan_id]?.seatCount || 0}</option>
+                  <option value="3">3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง {zones[zone.plan_id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ {zones[zone.plan_id]?.seatCount || 0})</option>
+                  <option value="4">4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง {zones[zone.plan_id]?.seatCount || 0} ([?] 1- [?] {zones[zone.plan_id]?.seatCount || 0})</option>
                   <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
                 </select>
-                <GenerateBoxes method={tableInputMethod} seatNumber={seatNumber} zoneName={selectedZoneName} />
+                <GenerateBoxes method={zones[zone.plan_id]?.tableInputMethod || '1'} seatNumber={zones[zone.plan_id]?.seatCount || 0} zoneId={zone.plan_id} />
               </div>
             </div>
           </Collapse>
         </div>
       ))}
       <div className="save-form-section">
-        <button className="buttonSave" onClick={handleSave2}>
+        <button className="buttonSave" onClick={handleSave}>
           บันทึก
         </button>
       </div>

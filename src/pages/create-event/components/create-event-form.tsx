@@ -5,26 +5,29 @@ import BackIcon from "/back.svg";
 import toast from "react-hot-toast";
 import Header from "../../common/header";
 import { useNavigate } from 'react-router-dom';
-import { fetchPlans, Plan } from '../../../services/apiService'; // Import the fetchPlans function
+import { getViewEventList } from '../../../services/apiService';
+import dayjs, { Dayjs } from 'dayjs';
+import DateTimePickerComponent from '../../../components/common/date-time-picker'; 
+import { useEventStore } from '../form-store'; // Import the Zustand store
 
 const CreateEventForm = () => {
+  const navigate = useNavigate();
+
+  // Access Zustand store values and actions
+  const {
+    title, title2, description, eventDateTime, status, setTitle, setTitle2, setDescription, setEventDateTime, setStatus,
+  } = useEventStore();
+
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [title, setTitle] = useState(localStorage.getItem("title") || "");
-  const [title2, setTitle2] = useState(localStorage.getItem("title2") || "");
-  const [description, setDescription] = useState(localStorage.getItem("description") || "");
-  const [date, setDate] = useState(localStorage.getItem("date") || "");
-  const [time, setTime] = useState(localStorage.getItem("time") || "");
-  const [status, setStatus] = useState(localStorage.getItem("status") || "รอจัดงาน");
   const [publish, setPublish] = useState(false);
   const [images, setImages] = useState<Array<string | null>>([null, null, null, null]);
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [isDetailCompleted, setIsDetailCompleted] = useState(false);
-  const [zones, setZones] = useState([{ id: 1, name: "โซนสีแดง", description: "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS." }, { id: 2, name: "โซนสีเขียว", description: "LOREM IPSUM DOLOR SIT AMET CONSECTETUR. SIT NEC VEL VULPUTATE AC LOREM CRAS." }]);
 
   useEffect(() => {
     const fetchAndSetPlans = async () => {
       try {
-        const fetchedPlans = await fetchPlans();
+        const fetchedPlans = await getViewEventList();
         setPlans(fetchedPlans);
       } catch (error) {
         console.error('Error fetching plans:', error);
@@ -34,13 +37,12 @@ const CreateEventForm = () => {
     fetchAndSetPlans();
   }, []);
 
-  useEffect(() => {
-    const savedImages = JSON.parse(localStorage.getItem("images") || "[]");
-    setImages(savedImages);
-  }, []);
-
   const handleInputChange = (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
     setter(e.target.value);
+  };
+
+  const handleEventDateTimeChange = (date: Dayjs | null) => {
+    setEventDateTime(date);
   };
 
   const handleImageUpload = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +54,6 @@ const CreateEventForm = () => {
         const newImages = [...images];
         newImages[index] = base64Image;
         setImages(newImages);
-        localStorage.setItem("images", JSON.stringify(newImages));
       };
       reader.readAsDataURL(file);
     }
@@ -62,33 +63,50 @@ const CreateEventForm = () => {
     const newImages = [...images];
     newImages[index] = null;
     setImages(newImages);
-    localStorage.setItem("images", JSON.stringify(newImages));
   };
 
-  const handleSave = () => {
-    localStorage.setItem("title", title);
-    localStorage.setItem("title2", title2);
-    localStorage.setItem("description", description);
-    localStorage.setItem("date", date);
-    localStorage.setItem("time", time);
-    localStorage.setItem("status", status);
-    localStorage.setItem("images", JSON.stringify(images));
-    toast.success("Data uploaded successfully");
-    navigate('/all-events');
+  const validateForm = () => {
+    if (!title || !title2 || !eventDateTime) {
+      toast.error("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+      return false;
+    }
+    return true;
   };
 
-  const handleNext = () => {
-    setActiveTab("โซน & ราคา");
-    setIsDetailCompleted(true);
+  const handleNext = (e) => {
+    e.preventDefault(); // Prevent default form submission
+    if (validateForm()) {
+      setActiveTab("โซน & ราคา");
+      setIsDetailCompleted(true);
+    }
   };
 
-  const navigate = useNavigate();
+  const handleSave = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    if (!validateForm()) return;
+
+    try {
+      const eventData = {
+        Event_Name: title,
+        Event_Addr: title2,
+        Event_Desc: description,
+        Event_Date: eventDateTime ? eventDateTime.format("DD/MM/YYYY") : null, // d/m/y format
+        Event_Time: eventDateTime ? eventDateTime.format("HH:mm") : null, // 24-hour format
+        Event_Status: status
+      };
+
+      const savedEvent = await getViewEventList(eventData);
+      toast.success("Event saved successfully");
+      navigate(`/zone-price/${savedEvent.id}`);
+    } catch (error) {
+      toast.error("Failed to save event");
+    }
+  };
+
   const handleBackClick = () => {
     if (activeTab === "โซน & ราคา") {
       setActiveTab("รายละเอียด");
-    }
-    console.log("Back button clicked");
-    if (activeTab === "รายละเอียด") {
+    } else {
       navigate('/all-events');
     }
   };
@@ -133,7 +151,7 @@ const CreateEventForm = () => {
         </div>
       </div>
       {activeTab === "รายละเอียด" && (
-        <form>
+        <form onSubmit={handleSave}>
           <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
           <div className="form-section">
             <label>ชื่องาน*</label>
@@ -160,18 +178,12 @@ const CreateEventForm = () => {
             />
           </div>
           <hr className="custom-hr" />
-          <div className="form-section form-section-inline">
-            <label>วันจัดงาน*</label>
-            <input
-              type="date"
-              value={date}
-              onChange={handleInputChange(setDate)}
-            />
-            <label>เวลาจัดงาน</label>
-            <input
-              type="time"
-              value={time}
-              onChange={handleInputChange(setTime)}
+          <div className="form-section form-section-inline event-form-date-picker-container">
+            <label>วันและเวลาจัดงาน*</label>
+            <DateTimePickerComponent
+              controlledValue={eventDateTime}
+              onChange={handleEventDateTimeChange}
+              label="Select Date & Time"
             />
           </div>
           <div className="form-section">
@@ -180,9 +192,9 @@ const CreateEventForm = () => {
               className="large-select"
               value={status}
               onChange={handleInputChange(setStatus)}
+              disabled // Restrict status to "รอจัดงาน" only
             >
               <option value="รอจัดงาน">รอจัดงาน</option>
-              <option value="จัดงานสำเร็จ">จัดงานสำเร็จ</option>
             </select>
           </div>
           <hr className="custom-hr" />
@@ -238,7 +250,7 @@ const CreateEventForm = () => {
         </form>
       )}
       {activeTab === "โซน & ราคา" && (
-        <ZonePriceForm zones={zones} handleSave={handleNext} />
+        <ZonePriceForm handleSave={handleNext} />
       )}
     </div>
   );

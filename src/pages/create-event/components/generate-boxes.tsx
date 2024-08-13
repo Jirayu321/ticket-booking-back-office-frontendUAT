@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './generate-boxes.css';
+import { useZoneStore } from '../form-store'; // Import Zustand store
 
 interface GenerateTableProps {
   method: string;
   seatNumber: number;
-  zoneName: string;
+  zoneId: number; // Pass zoneId to associate with specific zone
 }
 
-const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneName }) => {
+const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneId }) => {
   const [startNumber, setStartNumber] = useState<number | null>(null);
   const [prefix, setPrefix] = useState<string>('');
+  const { setZoneData } = useZoneStore(); // Zustand store action to update the zone data
 
   useEffect(() => {
-    console.log("Method:", method);
-    console.log("Zone Name:", zoneName);
-    console.log("Seat Number:", seatNumber);
-  }, [method, zoneName, seatNumber]);
+    const generatedTables = generateBoxesData();
+    setZoneData(zoneId, { generatedTables });
+  }, [method, seatNumber, startNumber, prefix]);
 
   const handleStartNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setStartNumber(Number(e.target.value));
@@ -25,37 +26,35 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneN
     setPrefix(e.target.value);
   };
 
-  const renderBoxes = () => {
-    let boxes = [];
+  const generateBoxesData = () => {
+    let boxesData: string[] = [];
 
     if (method === "1") {
       for (let i = 0; i < seatNumber; i++) {
-        boxes.push(
-          <input
-            key={i}
-            type="text"
-            placeholder='โปรดระบุ'
-            className="table-input-box"
-          />
-        );
+        boxesData.push(`Table ${i + 1}`);
       }
     } else if ((method === "2" || method === "3" || method === "4") && startNumber !== null) {
       for (let i = 0; i < seatNumber; i++) {
-        const boxValue = method === "3" ? `${zoneName} ${startNumber + i}` : 
-                         method === "4" ? `${prefix}${startNumber + i}` : 
-                         `${startNumber + i}`;
-        boxes.push(
-          <input
-            key={i}
-            type="text"
-            value={boxValue}
-            className="table-input-box"
-            readOnly
-          />
-        );
+        const boxValue = method === "3" ? `โต๊ะ ${startNumber + i}` :
+          method === "4" ? `${prefix}${startNumber + i}` :
+          `${startNumber + i}`;
+        boxesData.push(boxValue);
       }
     }
-    return boxes;
+    return boxesData;
+  };
+
+  const renderBoxes = () => {
+    const boxesData = generateBoxesData();
+    return boxesData.map((box, i) => (
+      <input
+        key={i}
+        type="text"
+        value={box}
+        className="table-input-box"
+        readOnly
+      />
+    ));
   };
 
   return (

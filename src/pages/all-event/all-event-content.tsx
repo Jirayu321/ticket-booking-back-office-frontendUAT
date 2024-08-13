@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../common/header';
 import './all-event-content.css';
-import { fetchEvents, Event } from '../../services/apiService';
+import { getViewEventList} from '../../services/apiService';
 
 const AllEventContent: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -11,7 +11,7 @@ const AllEventContent: React.FC = () => {
   useEffect(() => {
     const getEvents = async () => {
       try {
-        const fetchedEvents = await fetchEvents();
+        const fetchedEvents = await getViewEventList();
         setEvents(fetchedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -110,7 +110,7 @@ const AllEventContent: React.FC = () => {
         <div className="event-list-header">
           <div className="column">ลำดับ</div>
           <div className="column">รหัสงาน</div>
-          <div className="column">ชื่องาน</div>
+          <div className="column">สถานที่</div>
           <div className="column">วันที่เผยแพร่</div>
           <div className="column">วันจัดงาน</div>
           <div className="column">เผยแพร่</div>
@@ -120,13 +120,13 @@ const AllEventContent: React.FC = () => {
         {currentItems.map((event, index) => (
           <div key={event.id} className="event-list-item">
             <div className="column" style={{fontWeight:"bold"}}>{indexOfFirstItem + index + 1}.</div>
-            <div className="column">{event.Event_Id}</div>
             <div className="column">{event.Event_Name}</div>
+            <div className="column">{event.Event_Addr}</div>
             <div className="column">{event.Event_Date}</div>
             <div className="column">{event.Event_Time}</div>
             <div className={`column ${event.Event_Public === 'Y' ? 'publish' : 'unpublish'}`}>{event.Event_Public === 'Y' ? 'เผยแพร่' : 'ไม่เผยแพร่'}</div>
             <div className={`column ${event.Event_Status === 1 ? 'pending' : event.Event_Status === 2 ? 'active' : event.Event_Status === 3 ? 'closed' : 'cancelled'}`}>
-              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : event.Event_Status === 13 ? 'ยกเลิก' : 'สถานะไม่ถูกต้อง' }
+              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : event.Event_Status === 13 ? 'ยกเลิก' : '' }
             </div>
             <div className="column"><button className="details-button">รายละเอียด</button></div>
           </div>
