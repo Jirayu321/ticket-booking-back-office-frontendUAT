@@ -22,13 +22,9 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneN
     if (savedStartNumber !== undefined) setStartNumber(savedStartNumber);
     if (savedPrefix !== undefined) setPrefix(savedPrefix);
 
-    if (zones[zoneId]?.tableValues) {
-      setInputValues(zones[zoneId].tableValues);
-    } else {
-      const generatedValues = generateBoxesData();
-      setTableValues(zoneId, generatedValues); // Save the generated values
-      setInputValues(generatedValues);
-    }
+    const generatedValues = generateBoxesData();
+    setTableValues(zoneId, generatedValues); // Save the generated values
+    setInputValues(generatedValues);
   }, [method, seatNumber, zoneId]);
 
   useEffect(() => {
@@ -55,6 +51,10 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneN
                          `${startNumber + i}`;
         boxesData.push(boxValue);
       }
+    } else if (method === "5") {
+      for (let i = 0; i < seatNumber; i++) {
+        boxesData.push('ไม่ระบุ');
+      }
     }
     return boxesData;
   };
@@ -68,11 +68,12 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({ method, seatNumber, zoneN
         placeholder={method === "1" ? 'โปรดระบุ' : ''}
         onChange={(e) => handleInputChange(index, e.target.value)}
         className="table-input-box"
-        readOnly={method !== "1"} // Only allow editing if method is "1"
+        readOnly={method !== "1" && method !== "5"} // Allow editing only if method is "1" or "5"
       />
     ));
   };
 
+  console.log("table value", zones);
   return (
     <div className="generate-boxes-container">
       <div className="header-container">

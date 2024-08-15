@@ -6,9 +6,17 @@ import toast from "react-hot-toast";
 import Header from "../../common/header";
 import { useNavigate } from 'react-router-dom';
 import { getViewEventList } from '../../../services/apiService';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import DateTimePickerComponent from '../../../components/common/date-time-picker'; 
 import { useEventStore } from '../form-store'; // Import the Zustand store
+import { handleSave } from './save-form'; // Import the save function
+
+const statusMap: Record<number, string> = {
+  1: "รอเริ่มงาน",
+  2: "เริ่มงาน",
+  3: "ปิดงาน",
+  13: "ยกเลิก",
+};
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -39,6 +47,10 @@ const CreateEventForm = () => {
 
   const handleInputChange = (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
     setter(e.target.value);
+  };
+
+  const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setStatus(parseInt(e.target.value));
   };
 
   const handleEventDateTimeChange = (date: Dayjs | null) => {
@@ -81,32 +93,20 @@ const CreateEventForm = () => {
     }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    if (!validateForm()) return;
-
-    try {
-      const eventData = {
-        Event_Name: title,
-        Event_Addr: title2,
-        Event_Desc: description,
-        Event_Date: eventDateTime ? eventDateTime.format("DD/MM/YYYY") : null, // d/m/y format
-        Event_Time: eventDateTime ? eventDateTime.format("HH:mm") : null, // 24-hour format
-        Event_Status: status
-      };
-
-      const savedEvent = await getViewEventList(eventData);
-      toast.success("Event saved successfully");
-      navigate(`/zone-price/${savedEvent.id}`);
-    } catch (error) {
-      toast.error("Failed to save event");
+  const handleBackClick = () => {
+    if (activeTab === "โซน & ราคา") {
+      const userConfirmed = window.confirm("ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด");
+      if (userConfirmed) {
+        setActiveTab("รายละเอียด");
+      }
+    } else {
+      navigate('/all-events');
     }
   };
 
-  const handleBackClick = () => {
-    if (activeTab === "โซน & ราคา") {
-      setActiveTab("รายละเอียด");
-    } else {
+  const handleCancle = () => {
+    const userConfirmed = window.confirm("ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมดโปรดบันทึกข้อมูลไว้ก่อน");
+    if (userConfirmed) {
       navigate('/all-events');
     }
   };
@@ -129,8 +129,8 @@ const CreateEventForm = () => {
             />
             <span className="slider" />
           </label>
-          <span className="toggle-text">ไม่เผยแพร่</span>
-          <button className="btn-cancel">ยกเลิก</button>
+          <span className="toggle-text">{publish ? "เผยแพร่" : "ไม่เผยแพร่"}</span>
+          <button className="btn-cancel" onClick={handleCancle}>ยกเลิก</button>
           <button className="btn-save" onClick={handleSave}>
             บันทึก
           </button>
@@ -190,11 +190,14 @@ const CreateEventForm = () => {
             <label>สถานะ*</label>
             <select
               className="large-select"
-              value={status}
-              onChange={handleInputChange(setStatus)}
-              disabled // Restrict status to "รอจัดงาน" only
+              value={status.toString()} // Convert to string for select element
+              onChange={handleStatusChange} // Use the new handler
             >
-              <option value="รอจัดงาน">รอจัดงาน</option>
+              {Object.entries(statusMap).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
           <hr className="custom-hr" />

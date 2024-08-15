@@ -8,8 +8,9 @@ import deleteOnIcon from '/delete-on.svg';
 import { getTicketTypes, getViewPlanList } from '../../../services/apiService';
 import { useZoneStore } from '../form-store'; // Import Zustand store
 import dayjs from "dayjs";
+import { handleSave } from './save-form'; // Import the save function
 
-const ZonePriceForm = ({ handleSave }) => {
+const ZonePriceForm = ({ }) => {
   const {
     selectedZoneGroup,
     setSelectedZoneGroup,
@@ -99,7 +100,10 @@ const ZonePriceForm = ({ handleSave }) => {
   const handlePlanGroupChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newPlanGroupId = parseInt(event.target.value);
     setSelectedZoneGroup(newPlanGroupId);
+  
     forceRefreshFilteredZones(newPlanGroupId);
+  
+    setZoneData(newPlanGroupId, { ticketType: '1' }); // Set default ticket type
   };
 
   const forceRefreshFilteredZones = async (groupId: number) => {

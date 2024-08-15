@@ -5,3 +5,5 @@ export const tableInputMethodOptions = (seatNumber: number, selectedZoneName: st
     { value: "4", label: `4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง ${seatNumber} ([?] 1- [?] ${seatNumber})` },
     { value: "5", label: "5.ไม่ระบุเลขโต๊ะ" },
   ];
+
+export const ENV = import.meta.env;
