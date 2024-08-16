@@ -61,18 +61,18 @@ const handleSaveEventStock = async (event_id: number) => {
       return true;
     })
     .map(([zoneId, zoneData]) => ({
-      event_id,
-      plangroup_id: selectedZoneGroup,
-      plan_id: parseInt(zoneId),
-      ticket_type_id: zoneData.ticketType,
-      ticket_qty: zoneData.seatCount,
-      ticket_qty_per: zoneData.seatPerTicket,
-      stc_total: zoneData.seatCount * zoneData.seatPerTicket,
-      ticket_qty_buy: 0,
-      ticket_qty_balance: zoneData.seatCount,
-      stc_total_balance: zoneData.seatCount * zoneData.seatPerTicket,
-      created_by: 'admin',
-      updated_by: ''
+      Event_Id : event_id,
+      PlanGroup_Id: selectedZoneGroup,
+      Plan_Id: parseInt(zoneId),
+      Ticket_Type_Id: zoneData.ticketType,
+      Ticket_Qty: zoneData.seatCount,
+      Ticket_Qty_Per: zoneData.seatPerTicket,
+      STC_Total: zoneData.seatCount * zoneData.seatPerTicket,
+      Ticket_Qty_Buy: 0,
+      Ticket_Qty_Balance: zoneData.seatCount,
+      STC_Toal_Balance: zoneData.seatCount * zoneData.seatPerTicket,
+      Created_By: 'admin',
+      Update_By: ''
     }));
 
   if (zoneDataArray.length === 0) {

@@ -43,7 +43,8 @@ export async function createEvent({
     });
 
     if (response.status !== 200) throw "";
-    
+
+    return response.data;
   } catch (error: any) {
     throw "ล้มเหลวระหว่างสร้าง event";
   }

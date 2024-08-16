@@ -24,7 +24,7 @@ const ZonePriceForm = () => {
     removeZonePrice,
   } = useZoneStore();
 
-  const { handleCreateEvent } = useZonePriceForm();
+  const { handleCreateEvent, handleSaveEventStock } = useZonePriceForm();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
@@ -243,9 +243,17 @@ const ZonePriceForm = () => {
   async function handleSaveEvent() {
     try {
       toast.loading("กำลังบันทึกข้อมูล Event");
-      // สร้าง event
-      await handleCreateEvent();
+
+      const eventId = await handleCreateEvent();
+
+      if (!eventId) {
+        toast.dismiss();
+        toast.error("ไม่สามารถสร้าง Event ได้");
+        return;
+      }
+
       // บันทัึก event stock
+      await handleSaveEventStock(eventId);
       // บันทึก ราคา event
       // บันทึก ticket number
       toast.dismiss();
