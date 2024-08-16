@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Header from '../common/header';
-import './all-event-content.css';
-import { getViewEventList} from '../../services/apiService';
+import React, { useEffect, useState } from "react";
+import Header from "../common/header";
+import "./all-event-content.css";
+import { getViewEventList } from "../../services/apiService";
+import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
+import { CircularProgress } from "@mui/material";
 
 const AllEventContent: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const { data: eventList, isPending: isLoadingEventList } =
+    useFetchEventList();
 
   useEffect(() => {
     const getEvents = async () => {
@@ -14,7 +18,7 @@ const AllEventContent: React.FC = () => {
         const fetchedEvents = await getViewEventList();
         setEvents(fetchedEvents);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
       }
     };
 
@@ -31,21 +35,35 @@ const AllEventContent: React.FC = () => {
 
   const totalPages = Math.ceil(events.length / itemsPerPage);
 
+  if (isLoadingEventList) return <CircularProgress />;
+
+  console.log(eventList);
+
   return (
     <div className="all-events-content">
       <Header title="งานทั้งหมด" />
       <div className="filters">
-        <a href="/all-events/create-event" className="create-event-button">สร้าง Event ใหม่ +</a>
+        <a href="/all-events/create-event" className="create-event-button">
+          สร้าง Event ใหม่ +
+        </a>
         <div className="filter-options">
           <div className="filter-item">
-            <img src="/รอจัดงาน.svg" alt="รอจัดงาน icon" className="filter-icon" />
+            <img
+              src="/รอจัดงาน.svg"
+              alt="รอจัดงาน icon"
+              className="filter-icon"
+            />
             <div className="filter-text-container">
               <span className="filter-text">รอจัดงาน</span>
               <span className="filter-number">15</span>
             </div>
           </div>
           <div className="filter-item">
-            <img src="/เริ่มงานแล้ว.svg" alt="เริ่มงานแล้ว icon" className="filter-icon" />
+            <img
+              src="/เริ่มงานแล้ว.svg"
+              alt="เริ่มงานแล้ว icon"
+              className="filter-icon"
+            />
             <div className="filter-text-container">
               <span className="filter-text">เริ่มงานแล้ว</span>
               <span className="filter-number">15</span>
@@ -95,7 +113,11 @@ const AllEventContent: React.FC = () => {
             </select>
           </div>
           <div className="filter-group search-group">
-            <input type="text" placeholder="รหัสงาน/ชื่องาน" className="search-box" />
+            <input
+              type="text"
+              placeholder="รหัสงาน/ชื่องาน"
+              className="search-box"
+            />
             <button className="search-button">ค้นหา</button>
           </div>
 
@@ -119,31 +141,69 @@ const AllEventContent: React.FC = () => {
         </div>
         {currentItems.map((event, index) => (
           <div key={event.id} className="event-list-item">
-            <div className="column" style={{fontWeight:"bold"}}>{indexOfFirstItem + index + 1}.</div>
+            <div className="column" style={{ fontWeight: "bold" }}>
+              {indexOfFirstItem + index + 1}.
+            </div>
             <div className="column">{event.Event_Name}</div>
             <div className="column">{event.Event_Addr}</div>
             <div className="column">{event.Event_Date}</div>
             <div className="column">{event.Event_Time}</div>
-            <div className={`column ${event.Event_Public === 'Y' ? 'publish' : 'unpublish'}`}>{event.Event_Public === 'Y' ? 'เผยแพร่' : 'ไม่เผยแพร่'}</div>
-            <div className={`column ${event.Event_Status === 1 ? 'pending' : event.Event_Status === 2 ? 'active' : event.Event_Status === 3 ? 'closed' : 'cancelled'}`}>
-              {event.Event_Status === 1 ? 'รอเริ่มงาน' : event.Event_Status === 2 ? 'เริ่มงาน' : event.Event_Status === 3 ? 'ปิดงาน' : event.Event_Status === 13 ? 'ยกเลิก' : '' }
+            <div
+              className={`column ${
+                event.Event_Public === "Y" ? "publish" : "unpublish"
+              }`}
+            >
+              {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
             </div>
-            <div className="column"><button className="details-button">รายละเอียด</button></div>
+            <div
+              className={`column ${
+                event.Event_Status === 1
+                  ? "pending"
+                  : event.Event_Status === 2
+                  ? "active"
+                  : event.Event_Status === 3
+                  ? "closed"
+                  : "cancelled"
+              }`}
+            >
+              {event.Event_Status === 1
+                ? "รอเริ่มงาน"
+                : event.Event_Status === 2
+                ? "เริ่มงาน"
+                : event.Event_Status === 3
+                ? "ปิดงาน"
+                : event.Event_Status === 13
+                ? "ยกเลิก"
+                : ""}
+            </div>
+            <div className="column">
+              <button className="details-button">รายละเอียด</button>
+            </div>
           </div>
         ))}
       </div>
       <div className="pagination">
-        <button onClick={() => handleClick(currentPage - 1)} disabled={currentPage === 1}>&lt;</button>
+        <button
+          onClick={() => handleClick(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          &lt;
+        </button>
         {Array.from({ length: totalPages }, (_, index) => (
           <button
             key={index + 1}
             onClick={() => handleClick(index + 1)}
-            className={currentPage === index + 1 ? 'active' : ''}
+            className={currentPage === index + 1 ? "active" : ""}
           >
             {index + 1}
           </button>
         ))}
-        <button onClick={() => handleClick(currentPage + 1)} disabled={currentPage === totalPages}>&gt;</button>
+        <button
+          onClick={() => handleClick(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          &gt;
+        </button>
       </div>
     </div>
   );

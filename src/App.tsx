@@ -7,6 +7,7 @@ import CreateNewEvent from './pages/create-event/create-event';
 import ZoneGroup from './pages/zone-group/zone-group';
 import Zone from './pages/zone/zone';
 import { Buffer } from 'buffer';
+
 window.Buffer = Buffer;
 
 function App() {
