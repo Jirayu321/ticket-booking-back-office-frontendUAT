@@ -7,8 +7,8 @@ export function useFetchEventList() {
     queryKey: ["get all event list"],
     queryFn: async () => {
       try {
-        const data = await getAllEventList();
-        return data;
+        const { events } = await getAllEventList();
+        return events || [];
       } catch (error: any) {
         toast.error(error.message);
         return null;

@@ -1,29 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
+import React, { useState } from "react";
+import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import "./all-event-content.css";
-import { getViewEventList } from "../../services/apiService";
-import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
-import { CircularProgress } from "@mui/material";
 
 const AllEventContent: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { data: eventList, isPending: isLoadingEventList } =
-    useFetchEventList();
-
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        const fetchedEvents = await getViewEventList();
-        setEvents(fetchedEvents);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
-
-    getEvents();
-  }, []);
+  const { data: events, isPending: isLoadingEventList } = useFetchEventList();
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -31,13 +15,10 @@ const AllEventContent: React.FC = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = events.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(events.length / itemsPerPage);
+  const totalPages = Math.ceil((events?.length ?? 0) / itemsPerPage);
 
   if (isLoadingEventList) return <CircularProgress />;
-
-  console.log(eventList);
 
   return (
     <div className="all-events-content">
@@ -139,7 +120,7 @@ const AllEventContent: React.FC = () => {
           <div className="column">สถานะ</div>
           <div className="column">รายละเอียด</div>
         </div>
-        {currentItems.map((event, index) => (
+        {events.map((event: any, index: number) => (
           <div key={event.id} className="event-list-item">
             <div className="column" style={{ fontWeight: "bold" }}>
               {indexOfFirstItem + index + 1}.
