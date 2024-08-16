@@ -12,6 +12,7 @@ import { handleSave } from "./save-form"; // Import the save function
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import { CircularProgress } from "@mui/material";
 import { getAllTicketTypes } from "../../../services/ticket-type.service";
+import { getAllPlans } from "../../../services/plan.service";
 
 const ZonePriceForm = () => {
   const {
@@ -172,7 +173,7 @@ const ZonePriceForm = () => {
     const fetchData = async () => {
       try {
         const fetchedTicketTypes = (await getAllTicketTypes()).ticketTypes;
-        const fetchedViewPlans = await getViewPlanList();
+        const fetchedViewPlans = (await getAllPlans()).plans;
 
         if (!Array.isArray(fetchedViewPlans)) {
           throw new Error("Expected an array but received something else");
