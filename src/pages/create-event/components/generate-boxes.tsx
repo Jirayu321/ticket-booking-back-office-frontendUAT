@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import './generate-boxes.css';
+import React, { useEffect, useState } from 'react';
 import { useZoneStore } from '../form-store'; // Import Zustand store
+import './generate-boxes.css';
 
 interface GenerateTableProps {
   method: string;

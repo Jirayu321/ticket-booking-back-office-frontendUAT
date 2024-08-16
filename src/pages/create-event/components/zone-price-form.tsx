@@ -1,18 +1,17 @@
-import React, { FC, useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
+import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
+import { getAllPlans } from "../../../services/plan.service";
+import { getAllTicketTypes } from "../../../services/ticket-type.service";
+import { useZoneStore } from "../form-store"; // Import Zustand store
 import GenerateBoxes from "./generate-boxes";
+import { handleSave } from "./save-form"; // Import the save function
 import "./zone-price-form.css";
 import deleteOnIcon from "/delete-on.svg";
-import { getTicketTypes, getViewPlanList } from "../../../services/apiService";
-import { useZoneStore } from "../form-store"; // Import Zustand store
-import dayjs from "dayjs";
-import { handleSave } from "./save-form"; // Import the save function
-import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
-import { CircularProgress } from "@mui/material";
-import { getAllTicketTypes } from "../../../services/ticket-type.service";
-import { getAllPlans } from "../../../services/plan.service";
 
 const ZonePriceForm = () => {
   const {
@@ -140,9 +139,9 @@ const ZonePriceForm = () => {
 
   const forceRefreshFilteredZones = async (groupId: number) => {
     try {
-      const fetchedViewPlans = await getViewPlanList();
+      const fetchedViewPlans = (await getAllPlans()).plans;
       const newFilteredZones = fetchedViewPlans.filter(
-        (plan) => plan.plangroup_id === groupId
+        (plan: any) => plan.PlanGroup_id === groupId
       );
       setFilteredZones(newFilteredZones);
     } catch (error) {
@@ -183,10 +182,11 @@ const ZonePriceForm = () => {
 
         const planGroupMap = new Map();
         fetchedViewPlans.forEach((plan) => {
-          if (plan.plangroup_id && !planGroupMap.has(plan.plangroup_id)) {
-            planGroupMap.set(plan.plangroup_id, {
-              plangroup_id: plan.plangroup_id,
-              plangroup_name: plan.plangroup_name,
+          const { PlanGroup_Id, PlanGroup_Name } = plan;
+          if (plan.plangroup_id && !planGroupMap.has(PlanGroup_Id)) {
+            planGroupMap.set(PlanGroup_Id, {
+              plangroup_id: PlanGroup_Id,
+              plangroup_name: PlanGroup_Name,
             });
           }
         });
@@ -262,18 +262,18 @@ const ZonePriceForm = () => {
         </div>
       </div>
       {filteredZones.map((zone) => (
-        <div key={zone.plan_id} className="zone-section">
+        <div key={zone.Plan_id} className="zone-section">
           <div
             className="zone-header"
-            onClick={() => handleExpandZone(zone.plan_id, zone.plan_name)}
+            onClick={() => handleExpandZone(zone.Plan_id, zone.Plan_Name)}
           >
             <span>
-              {zone.plan_id}. {zone.plan_name}
+              {zone.Plan_id}. {zone.Plan_Name}
             </span>
-            <span>{zone.plan_desc}</span>
+            <span>{zone.Plan_Desc}</span>
           </div>
           <Collapse
-            in={expandedZones[zone.plan_id]}
+            in={expandedZones[zone.Plan_id]}
             timeout="auto"
             unmountOnExit
           >
@@ -287,10 +287,10 @@ const ZonePriceForm = () => {
                     <label>TICKET TYPE*</label>
                     <select
                       className="ticket-type-select"
-                      value={zones[zone.plan_id]?.ticketType || ""}
+                      value={zones[zone.Plan_id]?.ticketType || ""}
                       onChange={(e) =>
                         handleInputChange(
-                          zone.plan_id,
+                          zone.Plan_id,
                           "ticketType",
                           e.target.value
                         )
@@ -298,10 +298,10 @@ const ZonePriceForm = () => {
                     >
                       {ticketTypes.map((type) => (
                         <option
-                          key={type.ticket_type_id}
-                          value={type.ticket_type_id}
+                          key={type.Ticket_Type_Id}
+                          value={type.Ticket_Type_Id}
                         >
-                          {type.ticket_type_name}
+                          {type.Ticket_Type_Name}
                         </option>
                       ))}
                     </select>
@@ -314,10 +314,10 @@ const ZonePriceForm = () => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={zones[zone.plan_id]?.seatCount || 0}
+                        value={zones[zone.Plan_id]?.seatCount || 0}
                         onChange={(e) =>
                           handleInputChange(
-                            zone.plan_id,
+                            zone.Plan_id,
                             "seatCount",
                             Number(e.target.value)
                           )
@@ -331,10 +331,10 @@ const ZonePriceForm = () => {
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={zones[zone.plan_id]?.seatPerTicket || 0}
+                        value={zones[zone.Plan_id]?.seatPerTicket || 0}
                         onChange={(e) =>
                           handleInputChange(
-                            zone.plan_id,
+                            zone.Plan_id,
                             "seatPerTicket",
                             Number(e.target.value)
                           )
@@ -345,10 +345,10 @@ const ZonePriceForm = () => {
                 </div>
               </div>
               <div className="price-section">
-                <h3>ราคา ({zones[zone.plan_id]?.prices?.length || 0})</h3>
+                <h3>ราคา ({zones[zone.Plan_id]?.prices?.length || 0})</h3>
                 <div style={{ height: "auto", width: "100%" }}>
                   <DataGrid
-                    rows={zones[zone.plan_id]?.prices || []}
+                    rows={zones[zone.Plan_id]?.prices || []}
                     columns={columns.map((col) => ({
                       ...col,
                       renderCell: (params: GridRenderCellParams) => {
@@ -363,7 +363,7 @@ const ZonePriceForm = () => {
                               }
                               onChange={(date) =>
                                 handlePriceChange(
-                                  zone.plan_id,
+                                  zone.Plan_id,
                                   params.row.id,
                                   col.field,
                                   date ? date.toISOString() : ""
@@ -381,7 +381,7 @@ const ZonePriceForm = () => {
                               value={params.value}
                               onChange={(e) =>
                                 handlePriceChange(
-                                  zone.plan_id,
+                                  zone.Plan_id,
                                   params.row.id,
                                   col.field,
                                   e.target.value
@@ -402,7 +402,7 @@ const ZonePriceForm = () => {
                               alt="delete-on"
                               style={{ cursor: "pointer" }}
                               onClick={() =>
-                                removeZonePrice(zone.plan_id, params.row.id)
+                                removeZonePrice(zone.Plan_id, params.row.id)
                               }
                             />
                           );
@@ -410,7 +410,7 @@ const ZonePriceForm = () => {
                         return null;
                       },
                     }))}
-                    pageSize={zones[zone.plan_id]?.prices?.length || 0}
+                    pageSize={zones[zone.Plan_id]?.prices?.length || 0}
                     autoHeight
                     disableSelectionOnClick
                     hideFooterPagination
@@ -420,7 +420,7 @@ const ZonePriceForm = () => {
                 <button
                   type="button"
                   className="add-price"
-                  onClick={() => addZonePrice(zone.plan_id)}
+                  onClick={() => addZonePrice(zone.Plan_id)}
                 >
                   + เพิ่มราคาบัตร
                 </button>
@@ -428,10 +428,10 @@ const ZonePriceForm = () => {
               <div className="table-input-method-section">
                 <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
                 <select
-                  value={zones[zone.plan_id]?.tableInputMethod || "1"}
+                  value={zones[zone.Plan_id]?.tableInputMethod || "1"}
                   onChange={(e) =>
                     handleInputChange(
-                      zone.plan_id,
+                      zone.Plan_id,
                       "tableInputMethod",
                       e.target.value
                     )
@@ -440,24 +440,24 @@ const ZonePriceForm = () => {
                 >
                   <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
                   <option value="2">
-                    2.รันจาก 1 ถึง {zones[zone.plan_id]?.seatCount || 0}
+                    2.รันจาก 1 ถึง {zones[zone.Plan_id]?.seatCount || 0}
                   </option>
                   <option value="3">
                     3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-                    {zones[zone.plan_id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-                    {zones[zone.plan_id]?.seatCount || 0})
+                    {zones[zone.Plan_id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
+                    {zones[zone.Plan_id]?.seatCount || 0})
                   </option>
                   <option value="4">
                     4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-                    {zones[zone.plan_id]?.seatCount || 0} ([?] 1- [?]{" "}
-                    {zones[zone.plan_id]?.seatCount || 0})
+                    {zones[zone.Plan_id]?.seatCount || 0} ([?] 1- [?]{" "}
+                    {zones[zone.Plan_id]?.seatCount || 0})
                   </option>
                   <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
                 </select>
                 <GenerateBoxes
-                  method={zones[zone.plan_id]?.tableInputMethod || "1"}
-                  seatNumber={zones[zone.plan_id]?.seatCount || 0}
-                  zoneId={zone.plan_id}
+                  method={zones[zone.Plan_id]?.tableInputMethod || "1"}
+                  seatNumber={zones[zone.Plan_id]?.seatCount || 0}
+                  zoneId={zone.Plan_id}
                 />
               </div>
             </div>
