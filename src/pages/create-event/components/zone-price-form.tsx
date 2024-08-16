@@ -3,14 +3,15 @@ import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import { getAllPlans } from "../../../services/plan.service";
 import { getAllTicketTypes } from "../../../services/ticket-type.service";
 import { useZoneStore } from "../form-store"; // Import Zustand store
 import GenerateBoxes from "./generate-boxes";
-import { handleSave } from "./save-form"; // Import the save function
 import "./zone-price-form.css";
+import { useZonePriceForm } from "./zone-price-form.hooks";
 import deleteOnIcon from "/delete-on.svg";
 
 const ZonePriceForm = () => {
@@ -22,6 +23,8 @@ const ZonePriceForm = () => {
     addZonePrice,
     removeZonePrice,
   } = useZoneStore();
+
+  const { handleCreateEvent } = useZonePriceForm();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
@@ -236,6 +239,22 @@ const ZonePriceForm = () => {
       setZoneData(zoneId, { prices: updatedPrices });
     }
   };
+
+  async function handleSaveEvent() {
+    try {
+      toast.loading("กำลังบันทึกข้อมูล Event");
+      // สร้าง event
+      await handleCreateEvent();
+      // บันทัึก event stock
+      // บันทึก ราคา event
+      // บันทึก ticket number
+      toast.dismiss();
+      toast.success("บันทึกข้อมูล Event สำเร็จ");
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(error.message);
+    }
+  }
 
   if (isLoadingPlanGroups) return <CircularProgress />;
 
@@ -465,7 +484,7 @@ const ZonePriceForm = () => {
         </div>
       ))}
       <div className="save-form-section">
-        <button className="buttonSave" onClick={handleSave}>
+        <button className="buttonSave" onClick={handleSaveEvent}>
           บันทึก
         </button>
       </div>

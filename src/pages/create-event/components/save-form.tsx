@@ -4,17 +4,14 @@ import { useZoneStore } from '../form-store';
 
 export const handleSave = async () => {
   try {
-    // Step 1: Save the event and get the event_id
     const event_id = await handleSaveEvent();
+    
     if (!event_id) throw new Error("Failed to save event");
 
-    // Step 2: Save event stock
     await handleSaveEventStock(event_id);
 
-    // Step 3: Save log event price
     await handleSaveLogEventPrice(event_id);
 
-    // Step 4: Save ticket numbers
     await handleSaveTicketNumbers();
 
     console.log("All data saved successfully!");
