@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import Collapse from "@mui/material/Collapse";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
@@ -11,8 +11,9 @@ import dayjs from "dayjs";
 import { handleSave } from "./save-form"; // Import the save function
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import { CircularProgress } from "@mui/material";
+import { getAllTicketTypes } from "../../../services/ticket-type.service";
 
-const ZonePriceForm = ({}) => {
+const ZonePriceForm = () => {
   const {
     selectedZoneGroup,
     setSelectedZoneGroup,
@@ -128,6 +129,7 @@ const ZonePriceForm = ({}) => {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const newPlanGroupId = parseInt(event.target.value);
+
     setSelectedZoneGroup(newPlanGroupId);
 
     forceRefreshFilteredZones(newPlanGroupId);
@@ -169,7 +171,7 @@ const ZonePriceForm = ({}) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedTicketTypes = await getTicketTypes();
+        const fetchedTicketTypes = (await getAllTicketTypes()).ticketTypes;
         const fetchedViewPlans = await getViewPlanList();
 
         if (!Array.isArray(fetchedViewPlans)) {
@@ -236,8 +238,6 @@ const ZonePriceForm = ({}) => {
 
   if (isLoadingPlanGroups) return <CircularProgress />;
 
-  console.log(planGroups);
-
   return (
     <div className="zone-price-form-container">
       {error && <div className="error-message">{error}</div>}
@@ -249,11 +249,14 @@ const ZonePriceForm = ({}) => {
             onChange={handlePlanGroupChange}
             value={selectedZoneGroup || ""}
           >
-            {planGroups.map((group) => (
-              <option key={group.plangroup_id} value={group.plangroup_id}>
-                {group.plangroup_name}
-              </option>
-            ))}
+            {planGroups.map((group: any) => {
+              const { PlanGroup_id, PlanGroup_Name } = group;
+              return (
+                <option key={PlanGroup_id} value={PlanGroup_id}>
+                  {PlanGroup_Name}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>
