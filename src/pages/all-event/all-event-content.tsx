@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import "./all-event-content.css";
+import { formatThaiDate } from "../../lib/util";
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,48 +121,73 @@ const AllEventContent: React.FC = () => {
           <div className="column">สถานะ</div>
           <div className="column">รายละเอียด</div>
         </div>
-        {events.map((event: any, index: number) => (
-          <div key={event.id} className="event-list-item">
-            <div className="column" style={{ fontWeight: "bold" }}>
-              {indexOfFirstItem + index + 1}.
+        {events.map((event: any, index: number) => {
+          const {
+            id,
+            Event_Public,
+            Event_Status,
+            Event_Name,
+            Event_Addr,
+            Event_Time,
+            Event_Public_Date,
+          } = event;
+          return (
+            <div key={id} className="event-list-item">
+              <div className="column" style={{ fontWeight: "bold" }}>
+                {indexOfFirstItem + index + 1}.
+              </div>
+              <div className="column">{Event_Name}</div>
+              <div className="column">{Event_Addr}</div>
+              <div className="column">
+                {Event_Public_Date
+                  ? formatThaiDate({
+                      date: Event_Public_Date,
+                      option: "datetime",
+                    })
+                  : "ยังไม่ระบุ"}
+              </div>
+              <div className="column">
+                {Event_Time
+                  ? formatThaiDate({
+                      date: Event_Time,
+                      option: "datetime",
+                    })
+                  : "ยังไม่ระบุ"}
+              </div>
+              <div
+                className={`column ${
+                  Event_Public === "Y" ? "publish" : "unpublish"
+                }`}
+              >
+                {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+              </div>
+              <div
+                className={`column ${
+                  Event_Status === 1
+                    ? "pending"
+                    : Event_Status === 2
+                    ? "active"
+                    : Event_Status === 3
+                    ? "closed"
+                    : "cancelled"
+                }`}
+              >
+                {Event_Status === 1
+                  ? "รอเริ่มงาน"
+                  : Event_Status === 2
+                  ? "เริ่มงาน"
+                  : Event_Status === 3
+                  ? "ปิดงาน"
+                  : Event_Status === 13
+                  ? "ยกเลิก"
+                  : ""}
+              </div>
+              <div className="column">
+                <button className="details-button">รายละเอียด</button>
+              </div>
             </div>
-            <div className="column">{event.Event_Name}</div>
-            <div className="column">{event.Event_Addr}</div>
-            <div className="column">{event.Event_Date}</div>
-            <div className="column">{event.Event_Time}</div>
-            <div
-              className={`column ${
-                event.Event_Public === "Y" ? "publish" : "unpublish"
-              }`}
-            >
-              {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-            </div>
-            <div
-              className={`column ${
-                event.Event_Status === 1
-                  ? "pending"
-                  : event.Event_Status === 2
-                  ? "active"
-                  : event.Event_Status === 3
-                  ? "closed"
-                  : "cancelled"
-              }`}
-            >
-              {event.Event_Status === 1
-                ? "รอเริ่มงาน"
-                : event.Event_Status === 2
-                ? "เริ่มงาน"
-                : event.Event_Status === 3
-                ? "ปิดงาน"
-                : event.Event_Status === 13
-                ? "ยกเลิก"
-                : ""}
-            </div>
-            <div className="column">
-              <button className="details-button">รายละเอียด</button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="pagination">
         <button
