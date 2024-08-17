@@ -5,7 +5,10 @@ import AllEvent from './pages/all-event/all-event';
 import Overview from './pages/overview/overview';
 import CreateNewEvent from './pages/create-event/create-event';
 import ZoneGroup from './pages/zone-group/zone-group';
-import Zone from './pages/zone/zone';
+import ZonePage from './pages/zone/zone';
+import TicketTypePage from './pages/ticket-type/ticket-type';
+import PayOptionPage from './pages/pay-option/pay-option';
+import PayByPage from './pages/pay-by/pay-by';
 import { Buffer } from 'buffer';
 
 window.Buffer = Buffer;
@@ -18,8 +21,11 @@ function App() {
         <Route path="/overview" element={<Overview />} />
         <Route path="/all-events" element={<AllEvent />} />
         <Route path="/all-events/create-event" element={<CreateNewEvent />} />
-        <Route path="/zone" element={<Zone />} />
+        <Route path="/zone" element={<ZonePage />} />
         <Route path="/zone-group" element={<ZoneGroup />} />
+        <Route path="/ticket-type" element={<TicketTypePage />} />
+        <Route path="/pay-option" element={<PayOptionPage />} />
+        <Route path="/pay-by" element={<PayByPage />} />
       </Routes>
     </Router>
   );

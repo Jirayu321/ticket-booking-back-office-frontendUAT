@@ -37,6 +37,7 @@
 }
 
 .menu-item {
+  font-size: 14px;
   width: 90%;
   padding: 10px 15px;
   display: flex;
@@ -48,11 +49,13 @@
 .menu-item:hover{
   background-color: #FFD700; /* Ensure background color is applied */
   color: black; /* Ensure text color is applied */
+  width: 82%;
 }
 .menu-item.active {
   background-color: #FFD700; /* Ensure background color is applied */
-  width: 80%;
+  width: 88%;
   color: black ; /* Ensure text color is applied */
+  border-radius: 0;
 }
 
 .icon {
@@ -63,6 +66,8 @@
   margin-top: auto;
   padding: 20px 0;
   font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  background-color: black;
 }
 
 .sidebarTitle {
@@ -93,6 +98,7 @@
   border-radius: 0 0px 0 0; /* Top-right corner with 20px radius */
   border-color: rgba(255, 255, 255, 0.1);
   color: white;
+  background-color: #1A1A1A;
 }
 
 .logoutIcon {

@@ -1,14 +1,13 @@
 import React from 'react';
-import Sidebar from '../../components/Sidebar/Sidebar'; // Assuming you have a reusable Sidebar component
-import ZoneContent from './zone-content';
-import './zone-page.css';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import TicketTypeContent from './zone-content'; // Import the content component
 
 const ZonePage: React.FC = () => {
   return (
-    <div className="zone-page">
-      <Sidebar />
-      <div className="zone-content">
-        <ZoneContent />
+    <div style={{ display: 'flex' }}>
+      <Sidebar /> {/* Sidebar Component */}
+      <div style={{ paddingLeft:140,marginTop:-20, flex: 1 ,width:1800}}>
+        <TicketTypeContent /> {/* Ticket type content */}
       </div>
     </div>
   );

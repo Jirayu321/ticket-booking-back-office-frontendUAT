@@ -68,10 +68,22 @@ const Sidebar: React.FC = () => {
               โซน
             </Link>
           </li>
-          <li className={`menu-item ${activePath === '/ticket-types' ? 'active' : ''}`}>
-            <Link to="/ticket-types">
+          <li className={`menu-item ${activePath === '/ticket-type' ? 'active' : ''}`}>
+            <Link to="/ticket-type">
               <span className="icon">📍</span>
               ประเภทบัตร
+            </Link>
+          </li>
+          <li className={`menu-item ${activePath === '/pay-by' ? 'active' : ''}`}>
+            <Link to="/pay-by">
+              <span className="icon">📍</span>
+              วิธีการจ่ายเงิน
+            </Link>
+          </li>
+          <li className={`menu-item ${activePath === '/pay-option' ? 'active' : ''}`}>
+            <Link to="/pay-option">
+              <span className="icon">📍</span>
+              ตัวเลือกการจ่ายเงิน
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/company-settings' ? 'active' : ''}`}>

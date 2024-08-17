@@ -1,13 +1,16 @@
 import React from 'react';
-import EventsComponent from './EventsComponent';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import ZoneGroupContent from './zone-group-content'; // Import the content component
 
-const ZoneGroup: React.FC = () => {
-    return (
-        <div>
-            <h1>Zone Group Page</h1>
-            <EventsComponent />
-        </div>
-    );
+const ZoneGroupPage: React.FC = () => {
+  return (
+    <div style={{ display: 'flex' }}>
+      <Sidebar /> {/* Sidebar Component */}
+      <div style={{ paddingLeft:140,marginTop:-20, flex: 1 ,width:1800}}>
+        <ZoneGroupContent /> {/* Ticket type content */}
+      </div>
+    </div>
+  );
 };
 
-export default ZoneGroup;
+export default ZoneGroupPage;
