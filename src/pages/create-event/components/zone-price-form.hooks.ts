@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 import { createEvent } from "../../../services/event-list.service";
 import { useEventStore, useZoneStore } from "../form-store";
 import { createEventStock } from "../../../services/event-stock.service";
+import { createLogEventPrice } from "../../../services/log-event-price.service";
 
 export function useZonePriceForm() {
   const { title, title2, description, eventDateTime, status } = useEventStore();
@@ -80,5 +81,45 @@ export function useZonePriceForm() {
     }
   };
 
-  return { handleCreateEvent, handleSaveEventStock };
+  const handleSaveLogEventPrice = async (event_id: number) => {
+    const logPrices = Object.entries(zones)
+      .map(([zoneId, zoneData]) => {
+        if (!zoneData.prices || zoneData.prices.length === 0) {
+          console.error(
+            `Validation Error: Prices are required for zone ${zoneId}`
+          );
+          return null;
+        }
+
+        return zoneData.prices.map((price) => ({
+          Event_Id: event_id,
+          PlanGroup_Id: selectedZoneGroup!,
+          Plan_Id: parseInt(zoneId),
+          Plan_Price: Number(price.price),
+          Start_Datetime: price.startDate!,
+          End_Datetime: price.endDate!,
+          Created_Date: new Date().toISOString(),
+          Created_By: "admin",
+        }));
+      })
+      .filter((plan) => plan !== null)
+      .flat();
+
+    if (logPrices.length === 0) {
+      console.error("Validation Error: No valid price data to save.");
+      throw new Error("Validation Error: Missing or invalid price data.");
+    }
+
+    try {
+      await Promise.all(
+        logPrices.map((logPrice) => createLogEventPrice(logPrice))
+      );
+      //   await postLogEventPrice(logPriceData);
+      //   console.log("Log event prices saved successfully!");
+    } catch (error) {
+      console.error("Failed to save log event price:", error);
+    }
+  };
+
+  return { handleCreateEvent, handleSaveEventStock, handleSaveLogEventPrice };
 }
