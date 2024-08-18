@@ -1,13 +1,5 @@
-import create from 'zustand';
-import dayjs, { Dayjs } from 'dayjs';
-
-// Define a mapping for status values
-const statusMap: Record<number, string> = {
-  1: "รอเริ่มงาน",
-  2: "เริ่มงาน",
-  3: "ปิดงาน",
-  13: "ยกเลิก",
-};
+import dayjs, { Dayjs } from "dayjs";
+import create from "zustand";
 
 // Event store interface and Zustand implementation
 interface EventState {
@@ -63,7 +55,11 @@ interface ZoneStoreState {
   addZonePrice: (zoneId: number) => void;
   removeZonePrice: (zoneId: number, priceId: number) => void;
   setTableValues: (zoneId: number, values: string[]) => void; // Action to set table values
-  setStartNumberAndPrefix: (zoneId: number, startNumber: number | null, prefix: string) => void; // Action to set start number and prefix
+  setStartNumberAndPrefix: (
+    zoneId: number,
+    startNumber: number | null,
+    prefix: string
+  ) => void; // Action to set start number and prefix
   resetZoneData: () => void;
 }
 
