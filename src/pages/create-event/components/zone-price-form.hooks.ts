@@ -3,6 +3,9 @@ import { createEvent } from "../../../services/event-list.service";
 import { useEventStore, useZoneStore } from "../form-store";
 import { createEventStock } from "../../../services/event-stock.service";
 import { createLogEventPrice } from "../../../services/log-event-price.service";
+import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
+
+const DEFAULT_INPUT_METHOD = 1;
 
 export function useZonePriceForm() {
   const { title, title2, description, eventDateTime, status } = useEventStore();
@@ -77,7 +80,7 @@ export function useZonePriceForm() {
       await Promise.all(zoneDataArray.map((data) => createEventStock(data)));
       console.log("Event stock saved successfully!");
     } catch (error) {
-      console.error("Failed to save event stock:", error);
+      throw "ล้มเหลวระหว่างสร้าง stock ของ event";
     }
   };
 
@@ -114,12 +117,54 @@ export function useZonePriceForm() {
       await Promise.all(
         logPrices.map((logPrice) => createLogEventPrice(logPrice))
       );
-      //   await postLogEventPrice(logPriceData);
-      //   console.log("Log event prices saved successfully!");
     } catch (error) {
-      console.error("Failed to save log event price:", error);
+      throw "ล้มเหลวระหว่างสร้าง ราคา event";
     }
   };
 
-  return { handleCreateEvent, handleSaveEventStock, handleSaveLogEventPrice };
+  const handleSaveTicketNumbers = async () => {
+    const ticketNumberData = Object.entries(zones)
+      .flatMap(([zoneId, zoneData]) => {
+        const ticketValues = zoneData.tableValues;
+
+        if (!ticketValues) return null;
+
+        return ticketValues.map((ticketValue, index) => ({
+          PlanGroup_Id: Number(selectedZoneGroup!),
+          Plan_Id: parseInt(zoneId),
+          Line: index + 1,
+          Ticket_No: ticketValue,
+          Ticket_No_Option: Number(
+            zoneData.tableInputMethod ?? DEFAULT_INPUT_METHOD
+          ),
+        }));
+      })
+      .filter((item) => item !== null);
+
+    try {
+      //   await Promise.all(
+      //     ticketNumberData.map(async (ticket) => {
+      //       const { PlanGroup_Id, Plan_Id, Line, Ticket_No, Ticket_No_Option } =
+      //         ticket!;
+      //       createTicketNoPerPlan({
+      //         PlanGroup_Id,
+      //         Plan_Id,
+      //         Line,
+      //         Ticket_No,
+      //         Ticket_No_Option,
+      //       });
+      //     })
+      //   );
+      console.log(ticketNumberData);
+    } catch (error) {
+      throw "ล้มเหลวระหว่างสร้างเลขตั๋ว";
+    }
+  };
+
+  return {
+    handleCreateEvent,
+    handleSaveEventStock,
+    handleSaveLogEventPrice,
+    handleSaveTicketNumbers,
+  };
 }

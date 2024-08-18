@@ -8,7 +8,7 @@ import DateTimePickerComponent from "../../../components/common/date-time-picker
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import { getAllPlans } from "../../../services/plan.service";
 import { getAllTicketTypes } from "../../../services/ticket-type.service";
-import { useZoneStore } from "../form-store"; // Import Zustand store
+import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import "./zone-price-form.css";
 import { useZonePriceForm } from "./zone-price-form.hooks";
@@ -21,11 +21,16 @@ const ZonePriceForm = () => {
     zones,
     setZoneData,
     addZonePrice,
+    resetZoneData,
     removeZonePrice,
   } = useZoneStore();
 
-  const { handleCreateEvent, handleSaveEventStock, handleSaveLogEventPrice } =
-    useZonePriceForm();
+  const {
+    handleCreateEvent,
+    handleSaveEventStock,
+    handleSaveLogEventPrice,
+    handleSaveTicketNumbers,
+  } = useZonePriceForm();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
@@ -133,6 +138,8 @@ const ZonePriceForm = () => {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const newPlanGroupId = parseInt(event.target.value);
+
+    resetZoneData();
 
     setSelectedZoneGroup(newPlanGroupId);
 
@@ -245,18 +252,19 @@ const ZonePriceForm = () => {
     try {
       toast.loading("กำลังบันทึกข้อมูล Event");
 
-      const eventId = await handleCreateEvent();
+      // const eventId = await handleCreateEvent();
 
-      if (!eventId) {
-        toast.dismiss();
-        toast.error("ไม่สามารถสร้าง Event ได้");
-        return;
-      }
+      // if (!eventId) {
+      //   toast.dismiss();
+      //   toast.error("ไม่สามารถสร้าง Event ได้");
+      //   return;
+      // }
 
-      await handleSaveEventStock(eventId);
+      // await handleSaveEventStock(eventId);
+
+      // await handleSaveLogEventPrice(eventId);
       
-      await handleSaveLogEventPrice(eventId);
-      // บันทึก ticket number
+      await handleSaveTicketNumbers();
       toast.dismiss();
       toast.success("บันทึกข้อมูล Event สำเร็จ");
     } catch (error: any) {
