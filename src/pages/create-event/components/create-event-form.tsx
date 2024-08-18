@@ -3,13 +3,14 @@ import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
+import { STATUS_MAP } from "../../../config/constants";
 import Header from "../../common/header";
 import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
-import { handleSave } from "./save-form"; // Import the save function
 import ZonePriceForm from "./zone-price-form";
-import { STATUS_MAP } from "../../../config/constants";
 import BackIcon from "/back.svg";
+import { useZonePriceForm } from "./zone-price-form.hooks";
+import { createEvent } from "../../../services/event-list.service";
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -79,6 +80,31 @@ const CreateEventForm = () => {
     return true;
   };
 
+  async function handleCreateEvent() {
+    try {
+      toast.loading("กำลังสร้าง event ใหม่");
+      const eventData = {
+        Event_Name: title,
+        Event_Addr: title2,
+        Event_Desc: description,
+        Event_Date: eventDateTime!.format("YYYY-MM-DD"),
+        Event_Time: eventDateTime!.toDate().toISOString(),
+        Event_Status: status,
+        Event_Public: "N",
+      };
+
+      const { eventId } = await createEvent(eventData);
+
+      if (!eventId) throw new Error("สร้าง event ล้มเหลว");
+
+      toast.dismiss();
+      toast.success("สร้าง event สำเร็จ");
+      navigate("/all-events")
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(error.message);
+    }
+  }
   const handleNext = (e: any) => {
     e.preventDefault(); // Prevent default form submission
     if (validateForm()) {
@@ -133,7 +159,7 @@ const CreateEventForm = () => {
           <button className="btn-cancel" onClick={handleCancle}>
             ยกเลิก
           </button>
-          <button className="btn-save" onClick={handleSave}>
+          <button className="btn-save" onClick={handleCreateEvent}>
             บันทึก
           </button>
         </div>
@@ -157,7 +183,7 @@ const CreateEventForm = () => {
         </div>
       </div>
       {activeTab === "รายละเอียด" && (
-        <form onSubmit={handleSave}>
+        <form onSubmit={handleCreateEvent}>
           <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
           <div className="form-section">
             <label>ชื่องาน*</label>

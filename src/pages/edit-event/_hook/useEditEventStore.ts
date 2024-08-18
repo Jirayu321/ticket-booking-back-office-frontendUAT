@@ -1,11 +1,11 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { create } from "zustand";
 
 type EditEventStore = {
   title: string;
   title2: string;
   description: string;
-  eventDateTime: dayjs.Dayjs;
+  eventDateTime: Dayjs | null;
   status: number; // Default status: "รอเริ่มงาน" (1)
   setTitle: (title: string) => void;
   setTitle2: (title2: string) => void;
@@ -18,7 +18,7 @@ const useEditEventStore = create<EditEventStore>((set) => ({
   title: "",
   title2: "",
   description: "",
-  eventDateTime: dayjs(new Date().toISOString()),
+  eventDateTime: null,
   status: 1,
   setTitle: (title) => set({ title }),
   setTitle2: (title2) => set({ title2 }),

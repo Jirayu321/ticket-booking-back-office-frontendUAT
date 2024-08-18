@@ -13,6 +13,7 @@ import ZonePriceForm from "../create-event/components/zone-price-form";
 import useEditEventStore from "./_hook/useEditEventStore";
 import { useSyncEventInfo } from "./_hook/useSyncEvetInfo";
 import "./edit-event-form.module.css";
+import { updateEventById } from "../../services/event-list.service";
 
 const EditEventPage = () => {
   const { eventId } = useParams();
@@ -26,6 +27,7 @@ const EditEventPage = () => {
     setTitle2,
     description,
     setDescription,
+    status,
   } = useEditEventStore();
 
   const [activeTab, setActiveTab] = useState("รายละเอียด");
@@ -104,9 +106,30 @@ const EditEventPage = () => {
     setImages(newImages);
   };
 
-  useSyncEventInfo(event);
+  async function handleUpdateEvent() {
+    try {
+      toast.loading("กำลังอัพเดทข้อมูลงาน");
+      if (!eventId) throw "ไม่พบ ID ของงาน";
+      await updateEventById(Number(eventId), {
+        Event_Name: title,
+        Event_Addr: title2,
+        Event_Desc: description,
+        Event_Time: eventDateTime?.toISOString(),
+        Event_Status: status,
+      });
+      toast.dismiss();
+      toast.success("อัพเดทข้อมูลงานสำเร็จ");
 
-  console.log(event);
+      setTimeout(() => {
+        navigate(0);
+      }, 1500);
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(error.message);
+    }
+  }
+
+  useSyncEventInfo(event);
 
   if (isLoadingEvent) return <CircularProgress />;
 
@@ -133,7 +156,7 @@ const EditEventPage = () => {
             <button className="btn-cancel" onClick={handleCancle}>
               ยกเลิก
             </button>
-            <button className="btn-save" onClick={handleSave}>
+            <button className="btn-save" onClick={handleUpdateEvent}>
               บันทึก
             </button>
           </div>
@@ -198,7 +221,7 @@ const EditEventPage = () => {
               <label>สถานะ*</label>
               <select
                 className="large-select"
-                value={status.toString()} // Convert to string for select element
+                value={status} // Convert to string for select element
                 onChange={handleStatusChange} // Use the new handler
               >
                 {Object.entries(STATUS_MAP).map(([value, label]) => (

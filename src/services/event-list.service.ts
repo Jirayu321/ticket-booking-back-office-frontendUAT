@@ -61,3 +61,16 @@ export async function getEventById(eventId: number) {
     throw "ล้มเหลวระหว่างดึงข้อมูล event";
   }
 }
+
+export async function updateEventById(eventId: number, newValue: any) {
+  try {
+    const response = await authAxiosClient.patch(
+      `/event-list/${eventId}`,
+      newValue
+    );
+
+    if (response.status !== 200) throw "";
+  } catch (error: any) {
+    throw "ล้มเหลวระหว่างอัพเดทข้อมูล event";
+  }
+}
