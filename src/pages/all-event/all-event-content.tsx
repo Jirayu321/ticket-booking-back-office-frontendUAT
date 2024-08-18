@@ -5,6 +5,8 @@ import Header from "../common/header";
 import "./all-event-content.css";
 import { formatThaiDate } from "../../lib/util";
 import { useNavigate } from "react-router-dom";
+import { FaCopy } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +25,12 @@ const AllEventContent: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
   const totalPages = Math.ceil((events?.length ?? 0) / itemsPerPage);
+
+  function handleCopyEventLink(eventId: number) {
+    const eventLink = `${import.meta.env.VITE_CUSTOMER_URL}/event/${eventId}`;
+    navigator.clipboard.writeText(eventLink);
+    toast.success("คัดลอกลิงก์งานสำเร็จ");
+  }
 
   if (isLoadingEventList) return <CircularProgress />;
 
@@ -124,6 +132,7 @@ const AllEventContent: React.FC = () => {
           <div className="column">วันจัดงาน</div>
           <div className="column">เผยแพร่</div>
           <div className="column">สถานะ</div>
+          <div className="column">Link</div>
           <div className="column">รายละเอียด</div>
         </div>
         {events.map((event: any, index: number) => {
@@ -186,6 +195,9 @@ const AllEventContent: React.FC = () => {
                   : Event_Status === 13
                   ? "ยกเลิก"
                   : ""}
+              </div>
+              <div className="column">
+                <FaCopy onClick={() => handleCopyEventLink(Event_Id)} />
               </div>
               <div className="column">
                 <button

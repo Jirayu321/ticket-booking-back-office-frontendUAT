@@ -142,7 +142,7 @@ const CreateEventForm = () => {
         </button>
         <h2 className="title">สร้างงานใหม่</h2>
         <div className="toggle-container">
-          <label>
+          {/* <label>
             <input
               onChange={(e) => {
                 if (!isPublishAvailable)
@@ -157,7 +157,7 @@ const CreateEventForm = () => {
           </label>
           <span className="toggle-text">
             {publish ? "เผยแพร่" : "ไม่เผยแพร่"}
-          </span>
+          </span> */}
           <button className="btn-cancel" onClick={handleCancle}>
             ยกเลิก
           </button>
