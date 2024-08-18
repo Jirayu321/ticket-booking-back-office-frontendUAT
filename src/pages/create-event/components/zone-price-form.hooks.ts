@@ -6,16 +6,19 @@ import { createLogEventPrice } from "../../../services/log-event-price.service";
 import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
 
 const DEFAULT_INPUT_METHOD = 1;
+const DEFAULT_ACTIONER = "admin";
 
 export function useZonePriceForm() {
   const { title, title2, description, eventDateTime, status } = useEventStore();
   const { selectedZoneGroup, zones } = useZoneStore();
 
   const handleCreateEvent = async () => {
-    try {
-      if (!eventDateTime || !eventDateTime)
-        return toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
+    if (!eventDateTime) {
+      toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
+      return;
+    }
 
+    try {
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
@@ -68,19 +71,20 @@ export function useZonePriceForm() {
         Ticket_Qty_Buy: 0,
         Ticket_Qty_Balance: Number(zoneData.seatCount),
         STC_Total_Balance: Number(zoneData.seatCount * zoneData.seatPerTicket),
-        Created_By: "admin",
+        Created_By: DEFAULT_ACTIONER,
       }));
 
     if (zoneDataArray.length === 0) {
-      console.error("Validation Error: No valid zone data to save.");
-      throw new Error("Validation Error: Missing or invalid zone data.");
+      throw new Error(
+        "ข้อผิดพลาดในการตรวจสอบ: ข้อมูลโซนที่ขาดหายไปหรือไม่ถูกต้อง"
+      );
     }
 
     try {
       await Promise.all(zoneDataArray.map((data) => createEventStock(data)));
       console.log("Event stock saved successfully!");
     } catch (error) {
-      throw "ล้มเหลวระหว่างสร้าง stock ของ event";
+      throw new Error("ล้มเหลวระหว่างสร้าง stock ของ event");
     }
   };
 
@@ -102,7 +106,7 @@ export function useZonePriceForm() {
           Start_Datetime: price.startDate!,
           End_Datetime: price.endDate!,
           Created_Date: new Date().toISOString(),
-          Created_By: "admin",
+          Created_By: DEFAULT_ACTIONER,
         }));
       })
       .filter((plan) => plan !== null)
@@ -110,7 +114,7 @@ export function useZonePriceForm() {
 
     if (logPrices.length === 0) {
       console.error("Validation Error: No valid price data to save.");
-      throw new Error("Validation Error: Missing or invalid price data.");
+      throw new Error("กรุณาเลือกราคาสำหรับ Event");
     }
 
     try {
@@ -118,11 +122,11 @@ export function useZonePriceForm() {
         logPrices.map((logPrice) => createLogEventPrice(logPrice))
       );
     } catch (error) {
-      throw "ล้มเหลวระหว่างสร้าง ราคา event";
+      throw new Error("ล้มเหลวระหว่างสร้าง ราคา event");
     }
   };
 
-  const handleSaveTicketNumbers = async () => {
+  const handleSaveTicketNumbers = async (eventId: number) => {
     const ticketNumberData = Object.entries(zones)
       .flatMap(([zoneId, zoneData]) => {
         const ticketValues = zoneData.tableValues;
@@ -142,29 +146,108 @@ export function useZonePriceForm() {
       .filter((item) => item !== null);
 
     try {
-      //   await Promise.all(
-      //     ticketNumberData.map(async (ticket) => {
-      //       const { PlanGroup_Id, Plan_Id, Line, Ticket_No, Ticket_No_Option } =
-      //         ticket!;
-      //       createTicketNoPerPlan({
-      //         PlanGroup_Id,
-      //         Plan_Id,
-      //         Line,
-      //         Ticket_No,
-      //         Ticket_No_Option,
-      //       });
-      //     })
-      //   );
-      console.log(ticketNumberData);
+      await Promise.all(
+        ticketNumberData.map(async (ticket) => {
+          const { PlanGroup_Id, Plan_Id, Line, Ticket_No, Ticket_No_Option } =
+            ticket!;
+          await createTicketNoPerPlan({
+            Event_Id: eventId,
+            PlanGroup_Id,
+            Plan_Id,
+            Line,
+            Ticket_No,
+            Ticket_No_Option,
+          });
+        })
+      );
     } catch (error) {
-      throw "ล้มเหลวระหว่างสร้างเลขตั๋ว";
+      throw new Error("ล้มเหลวระหว่างสร้างเลขตั๋ว");
     }
   };
+
+  function isFormValid(): { isValid: boolean; message: string } {
+    if (!eventDateTime) {
+      return {
+        isValid: false,
+        message: "กรุณาเลือกวันจัดงานก่อนทำการสร้าง event",
+      };
+    }
+
+    const zoneDataArray = Object.entries(zones).filter(([zoneId, zoneData]) => {
+      if (!zoneData.ticketType || zoneData.ticketType === "") {
+        return {
+          isValid: false,
+          message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุ ticketType สำหรับโซน ${zoneId}`,
+        };
+      }
+      if (zoneData.seatCount <= 0) {
+        return {
+          isValid: false,
+          message: `ข้อผิดพลาดในการตรวจสอบ: seatCount ต้องมากกว่า 0 สำหรับโซน ${zoneId}`,
+        };
+      }
+      if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
+        return {
+          isValid: false,
+          message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุ seatPerTicket และต้องมีค่ามากกว่า 0 สำหรับโซน ${zoneId}`,
+        };
+      }
+      return { isValid: true, message: "" };
+    });
+
+    if (zoneDataArray.length === 0) {
+      return {
+        isValid: false,
+        message: "ข้อผิดพลาดในการตรวจสอบ: ข้อมูลโซนที่ไม่ถูกต้องหรือขาดหายไป",
+      };
+    }
+
+    const logPrices = Object.entries(zones)
+      .map(([zoneId, zoneData]) => {
+        if (!zoneData.prices || zoneData.prices.length === 0) {
+          return {
+            isValid: false,
+            message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุราคาสำหรับโซน ${zoneId}`,
+          };
+        }
+
+        return zoneData.prices.map((price) => {
+          if (!price.price) {
+            return {
+              isValid: false,
+              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุราคาสำหรับโซน ${zoneId}`,
+            };
+          }
+          if (!price.startDate) {
+            return {
+              isValid: false,
+              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุวันเริ่มต้นสำหรับราคาสำหรับโซน ${zoneId}`,
+            };
+          }
+          if (!price.endDate) {
+            return {
+              isValid: false,
+              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุวันสิ้นสุดสำหรับราคาสำหรับโซน ${zoneId}`,
+            };
+          }
+          return { isValid: true, message: "" };
+        });
+      })
+      .filter((plan) => plan !== null)
+      .flat();
+
+    if (logPrices.length === 0) {
+      return { isValid: false, message: "กรุณาเลือกราคาสำหรับ Event" };
+    }
+
+    return { isValid: true, message: "" };
+  }
 
   return {
     handleCreateEvent,
     handleSaveEventStock,
     handleSaveLogEventPrice,
     handleSaveTicketNumbers,
+    isFormValid,
   };
 }

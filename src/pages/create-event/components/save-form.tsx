@@ -1,4 +1,5 @@
 // import { postEvent, postEventStock, postLogEventPrice, postTicketNumber } from '../../../services/apiService'; 
+import toast from 'react-hot-toast';
 import { useEventStore } from '../form-store'; 
 import { useZoneStore } from '../form-store';
 
@@ -47,15 +48,15 @@ const handleSaveEventStock = async (event_id: number) => {
   const zoneDataArray = Object.entries(zones)
     .filter(([zoneId, zoneData]) => {
       if (!zoneData.ticketType || zoneData.ticketType === "") {
-        console.error(`Validation Error: ticketType is required for zone ${zoneId}`);
+        toast.error(`กรุณาเลือกประเภทตั๋ว zone ที่ ${zoneId}`);
         return false;
       }
       if (zoneData.seatCount <= 0) {
-        console.error(`Validation Error: seatCount must be greater than 0 for zone ${zoneId}`);
+        toast.error(`โปรดรถบุจำนวนโต๊ะ zone ที่ ${zoneId}`);
         return false;
       }
       if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
-        console.error(`Validation Error: seatPerTicket is required and must be greater than 0 for zone ${zoneId}`);
+        toast.error(`โปรดรถบุจำนวนที่นั่งต่อโต๊ะ zone ที่ ${zoneId}`);
         return false;
       }
       return true;
@@ -116,7 +117,7 @@ const handleSaveLogEventPrice = async (event_id: number) => {
 
   if (logPriceData.plans.length === 0) {
     console.error("Validation Error: No valid price data to save.");
-    throw new Error("Validation Error: Missing or invalid price data.");
+    throw new Error("กรุณาเลือกราคาสำหรับโซนที่ต้องการบันทึก");
   }
 
   try {

@@ -13,6 +13,7 @@ import GenerateBoxes from "./generate-boxes";
 import "./zone-price-form.css";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import deleteOnIcon from "/delete-on.svg";
+import ZoneSelectForm from "./ZoneSelectForm";
 
 const ZonePriceForm = () => {
   const {
@@ -30,13 +31,14 @@ const ZonePriceForm = () => {
     handleSaveEventStock,
     handleSaveLogEventPrice,
     handleSaveTicketNumbers,
+    isFormValid,
   } = useZonePriceForm();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
 
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
-  const [filteredZones, setFilteredZones] = useState<ViewPlan[]>([]);
+  const [ticketTypes, setTicketTypes] = useState<any[]>([]);
+  const [filteredZones, setFilteredZones] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [expandedZones, setExpandedZones] = useState<{
     [key: number]: boolean;
@@ -252,19 +254,23 @@ const ZonePriceForm = () => {
     try {
       toast.loading("กำลังบันทึกข้อมูล Event");
 
-      // const eventId = await handleCreateEvent();
+      const { isValid, message } = isFormValid();
 
-      // if (!eventId) {
-      //   toast.dismiss();
-      //   toast.error("ไม่สามารถสร้าง Event ได้");
-      //   return;
-      // }
+      if (!isValid) throw new Error(message);
 
-      // await handleSaveEventStock(eventId);
+      const eventId = await handleCreateEvent();
 
-      // await handleSaveLogEventPrice(eventId);
-      
-      await handleSaveTicketNumbers();
+      if (!eventId) {
+        toast.dismiss();
+        toast.error("ไม่สามารถสร้าง Event ได้");
+        return;
+      }
+
+      await handleSaveEventStock(eventId);
+
+      await handleSaveLogEventPrice(eventId);
+
+      await handleSaveTicketNumbers(eventId);
       toast.dismiss();
       toast.success("บันทึกข้อมูล Event สำเร็จ");
     } catch (error: any) {
@@ -278,25 +284,11 @@ const ZonePriceForm = () => {
   return (
     <div className="zone-price-form-container">
       {error && <div className="error-message">{error}</div>}
-      <div style={{ paddingTop: "30px" }} className="form-section">
-        <div className="zone-select-container">
-          <label>เลือก ZONE GROUP</label>
-          <select
-            className="zone-select"
-            onChange={handlePlanGroupChange}
-            value={selectedZoneGroup || ""}
-          >
-            {planGroups.map((group: any) => {
-              const { PlanGroup_id, PlanGroup_Name } = group;
-              return (
-                <option key={PlanGroup_id} value={PlanGroup_id}>
-                  {PlanGroup_Name}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-      </div>
+      <ZoneSelectForm
+        onChange={handlePlanGroupChange}
+        selectedZoneGroup={selectedZoneGroup}
+        planGroups={planGroups}
+      />
       {filteredZones.map((zone) => (
         <div key={zone.Plan_id} className="zone-section">
           <div
@@ -332,6 +324,7 @@ const ZonePriceForm = () => {
                         )
                       }
                     >
+                      <option value="">เลือกประเภทตั๋ว</option>
                       {ticketTypes.map((type) => (
                         <option
                           key={type.Ticket_Type_Id}
@@ -464,7 +457,7 @@ const ZonePriceForm = () => {
               <div className="table-input-method-section">
                 <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
                 <select
-                  value={zones[zone.Plan_id]?.tableInputMethod || "1"}
+                  value={zones[zone.Plan_id]?.tableInputMethod || ""}
                   onChange={(e) =>
                     handleInputChange(
                       zone.Plan_id,
@@ -474,6 +467,7 @@ const ZonePriceForm = () => {
                   }
                   className="table-input-method-select"
                 >
+                  <option value="">เลือกรูปแบบการระบุ</option>
                   <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
                   <option value="2">
                     2.รันจาก 1 ถึง {zones[zone.Plan_id]?.seatCount || 0}
