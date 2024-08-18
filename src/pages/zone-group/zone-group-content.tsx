@@ -14,11 +14,13 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getAllPlanGroups, createPlanGroup } from "../../services/plan-group.service";
+import { getPlansList } from "../../services/plan-list.service";
 import Header from "../common/header"; // Assuming you have a reusable Header component
 import toast from "react-hot-toast";
 
 const ZoneGroupContent: React.FC = () => {
   const [planGroups, setPlanGroups] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [newPlanGroup, setNewPlanGroup] = useState({
     name: "",
@@ -28,24 +30,35 @@ const ZoneGroupContent: React.FC = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    const fetchPlanGroups = async () => {
+    const fetchPlanGroupsAndPlans = async () => {
       try {
-        const data = await getAllPlanGroups();
-        console.log("Fetched Plan Groups:", data);
+        const planGroupsData = await getAllPlanGroups();
+        const plansData = await getPlansList();
 
-        if (data && data.planGroups && Array.isArray(data.planGroups)) {
-          setPlanGroups(data.planGroups);
+        if (planGroupsData && planGroupsData.planGroups) {
+          setPlanGroups(planGroupsData.planGroups);
         } else {
           setPlanGroups([]);
         }
+
+        if (plansData && plansData.plans) {
+          setPlans(plansData.plans);
+        } else {
+          setPlans([]);
+        }
       } catch (error) {
-        console.error("Failed to fetch plan groups:", error);
+        console.error("Failed to fetch data:", error);
         alert(error);
       }
     };
 
-    fetchPlanGroups();
+    fetchPlanGroupsAndPlans();
   }, []);
+
+  // Calculate plan count for each group
+  const calculatePlanCount = (planGroupId: number) => {
+    return plans.filter((plan) => plan.PlanGroup_id === planGroupId).length;
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -64,7 +77,7 @@ const ZoneGroupContent: React.FC = () => {
 
   const handleCreate = async () => {
     if (newPlanGroup.active !== "Y" && newPlanGroup.active !== "N") {
-      toast.error("ฟิลด์ Active ต้องเป็น 'Y' หรือ 'N'");
+      alert("Active field must be either 'Y' or 'N'");
       return;
     }
 
@@ -169,7 +182,7 @@ const ZoneGroupContent: React.FC = () => {
                 {planGroup.PlanGroup_Name}
               </div>
               <div style={{ flex: 1, color: "black", textAlign: "center" }}>
-                {planGroup.planCount || 0} {/* Assuming planCount is returned from the server */}
+                {calculatePlanCount(planGroup.PlanGroup_id)}
               </div>
               <div
                 style={{

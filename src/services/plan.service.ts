@@ -5,12 +5,12 @@ export async function getAllPlans() {
     const response = await authAxiosClient.get("/plan");
 
     if (response.status !== 200) {
-      throw "ล้มเหลวระหว่างดึงรายการ plan ทั้งหมด";
+      throw new Error("ล้มเหลวระหว่างดึงรายการโซนร้านทั้งหมด");
     }
 
     return response.data;
-  } catch (error: any) {
-    throw "ล้มเหลวระหว่างดึงรายการโซนร้านทั้งหมด";
+  } catch (error) {
+    throw new Error("ล้มเหลวระหว่างดึงรายการโซนร้านทั้งหมด");
   }
 }
 

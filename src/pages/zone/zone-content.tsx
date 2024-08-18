@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { getAllPlans, createPlan } from "../../services/plan.service";
 import { getAllPlanGroups } from "../../services/plan-group.service";
-import Header from "../common/header"; // Assuming you have a reusable Header component
+import Header from "../common/header";
 import { toast } from "react-hot-toast";
 
 const ZoneContent: React.FC = () => {
@@ -33,8 +33,9 @@ const ZoneContent: React.FC = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
+        console.log("Fetching plans...");  // Debugging
         const data = await getAllPlans();
-        console.log("Fetched Plans:", data);
+        console.log("Fetched Plans:", data);  // Debugging
 
         if (data && data.plans && Array.isArray(data.plans)) {
           setPlans(data.plans);
@@ -42,15 +43,16 @@ const ZoneContent: React.FC = () => {
           setPlans([]);
         }
       } catch (error) {
-        console.error("Failed to fetch plans:", error);
-        toast.error("Failed to fetch plans:", error);
+        console.error("Failed to fetch plans:", error);  // Debugging
+        toast.error("Failed to fetch plans");
       }
     };
 
     const fetchPlanGroups = async () => {
       try {
+        console.log("Fetching plan groups...");  // Debugging
         const data = await getAllPlanGroups();
-        console.log("Fetched Plan Groups:", data);
+        console.log("Fetched Plan Groups:", data);  // Debugging
 
         if (data && data.planGroups && Array.isArray(data.planGroups)) {
           setPlanGroups(data.planGroups);
@@ -58,8 +60,8 @@ const ZoneContent: React.FC = () => {
           setPlanGroups([]);
         }
       } catch (error) {
-        console.error("Failed to fetch plan groups:", error);
-        toast.error("Failed to fetch plan groups:", error);
+        console.error("Failed to fetch plan groups:", error);  // Debugging
+        toast.error("Failed to fetch plan groups");
       }
     };
 
@@ -85,7 +87,7 @@ const ZoneContent: React.FC = () => {
 
   const handleCreate = async () => {
     if (newPlan.active !== "Y" && newPlan.active !== "N") {
-      toast.error("Active field must be either 'Y' or 'N'");
+      alert("Active field must be either 'Y' or 'N'");
       return;
     }
 
@@ -95,6 +97,7 @@ const ZoneContent: React.FC = () => {
     }
 
     try {
+      console.log("Creating plan...");  // Debugging
       await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
@@ -102,12 +105,12 @@ const ZoneContent: React.FC = () => {
         Plan_Active: newPlan.active,
         PlanGroup_id: parseInt(newPlan.planGroupId, 10),
       });
-      // Refresh the plans list after creating a new one
+      console.log("Plan created successfully");  // Debugging
       const data = await getAllPlans();
       setPlans(data.plans);
       handleClose();
     } catch (error) {
-      console.error("Failed to create plan:", error);
+      console.error("Failed to create plan:", error);  // Debugging
       toast.error("ไม่สามารถสร้างแผนได้");
     }
   };
