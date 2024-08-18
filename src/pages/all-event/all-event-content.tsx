@@ -4,15 +4,20 @@ import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import "./all-event-content.css";
 import { formatThaiDate } from "../../lib/util";
+import { useNavigate } from "react-router-dom";
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { data: events, isPending: isLoadingEventList } = useFetchEventList();
+  const { data: events, isPending: isLoadingEventList } = useFetchEventList({
+    eventId: null,
+  });
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
+
+  const navigate = useNavigate();
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -123,7 +128,7 @@ const AllEventContent: React.FC = () => {
         </div>
         {events.map((event: any, index: number) => {
           const {
-            id,
+            Event_Id,
             Event_Public,
             Event_Status,
             Event_Name,
@@ -132,7 +137,7 @@ const AllEventContent: React.FC = () => {
             Event_Public_Date,
           } = event;
           return (
-            <div key={id} className="event-list-item">
+            <div key={Event_Id} className="event-list-item">
               <div className="column" style={{ fontWeight: "bold" }}>
                 {indexOfFirstItem + index + 1}.
               </div>
@@ -183,7 +188,12 @@ const AllEventContent: React.FC = () => {
                   : ""}
               </div>
               <div className="column">
-                <button className="details-button">รายละเอียด</button>
+                <button
+                  onClick={() => navigate(`/edit-event/${Event_Id}`)}
+                  className="details-button"
+                >
+                  รายละเอียด
+                </button>
               </div>
             </div>
           );

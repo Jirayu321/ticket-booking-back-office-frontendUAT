@@ -1,17 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllEventList } from "../../services/event-list.service";
+import {
+  getAllEventList,
+  getEventById,
+} from "../../services/event-list.service";
 import toast from "react-hot-toast";
 
-export function useFetchEventList() {
+export function useFetchEventList({ eventId }: { eventId: number | null }) {
   const query = useQuery({
-    queryKey: ["get all event list"],
+    queryKey: ["get event by id", eventId],
     queryFn: async () => {
+      let events: any | null = null;
       try {
-        const { events } = await getAllEventList();
-        return events || [];
+        if (eventId !== null) {
+          const event = await getEventById(eventId);
+          events = event;
+        } else {
+          const data = await getAllEventList();
+          events = data.events;
+        }
+        return events;
       } catch (error: any) {
         toast.error(error.message);
-        return null;
+      } finally {
+        return events;
       }
     },
   });

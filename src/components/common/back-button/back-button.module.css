@@ -1,0 +1,20 @@
+.back-button {
+  width: 58px; /* Adjust size as needed */
+  height: 58px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  /* Remove margin-right to avoid shifting position */
+  margin-right: -400px;
+  display: flex; /* Use flexbox to center the image */
+  justify-content: center;
+  align-items: center;
+}
+
+.back-button img {
+  width: 58px; /* Adjust size as needed */
+  height: 58px; /* Adjust size as needed */
+  /* Remove padding-left to avoid shifting position */
+  padding-left: 0;
+}

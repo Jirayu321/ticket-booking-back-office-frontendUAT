@@ -8,14 +8,8 @@ import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
 import { handleSave } from "./save-form"; // Import the save function
 import ZonePriceForm from "./zone-price-form";
+import { STATUS_MAP } from "../../../config/constants";
 import BackIcon from "/back.svg";
-
-const statusMap: Record<number, string> = {
-  1: "รอเริ่มงาน",
-  2: "เริ่มงาน",
-  3: "ปิดงาน",
-  13: "ยกเลิก",
-};
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -85,7 +79,7 @@ const CreateEventForm = () => {
     return true;
   };
 
-  const handleNext = (e) => {
+  const handleNext = (e: any) => {
     e.preventDefault(); // Prevent default form submission
     if (validateForm()) {
       setActiveTab("โซน & ราคา");
@@ -205,7 +199,7 @@ const CreateEventForm = () => {
               value={status.toString()} // Convert to string for select element
               onChange={handleStatusChange} // Use the new handler
             >
-              {Object.entries(statusMap).map(([value, label]) => (
+              {Object.entries(STATUS_MAP).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
@@ -269,7 +263,7 @@ const CreateEventForm = () => {
           </div>
         </form>
       )}
-      {activeTab === "โซน & ราคา" && <ZonePriceForm handleSave={handleNext} />}
+      {activeTab === "โซน & ราคา" && <ZonePriceForm />}
     </div>
   );
 };

@@ -49,3 +49,15 @@ export async function createEvent({
     throw "ล้มเหลวระหว่างสร้าง event";
   }
 }
+
+export async function getEventById(eventId: number) {
+  try {
+    const response = await authAxiosClient.get(`/event-list/${eventId}`);
+
+    if (response.status !== 200) throw "";
+
+    return response.data.event;
+  } catch (error: any) {
+    throw "ล้มเหลวระหว่างดึงข้อมูล event";
+  }
+}

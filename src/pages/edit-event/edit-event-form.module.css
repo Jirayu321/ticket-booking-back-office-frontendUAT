@@ -1,0 +1,357 @@
+/* Form Layout */
+.create-new-event {
+  position: absolute;
+  top: 0;
+  left: 157px;
+  width: 1763px;
+  height: 100%; /* Set height to 100% or a specific value */
+  padding-left: 0;
+  background-color: #fff;
+  overflow-y: scroll; /* Enable vertical scrolling */
+}
+
+.header {
+  background-color: #ffd700;
+  padding: 15px;
+  height: 10px;
+  display: flex;
+}
+
+.header h1 {
+  margin-top: -4px;
+  color: #1a1a1a;
+  font-size: 18px;
+}
+
+.sub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #000;
+  padding: 10px;
+  color: #ffd700;
+}
+
+.sub-header {
+  margin: 0;
+  font-size: 22px;
+  color: white;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  color: white;
+  margin-left: -650px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.toggle-container label {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-right: 10px;
+}
+
+.toggle-text {
+  font-size: 20px;
+  color: white;
+}
+
+.toggle-container input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: not-allowed; /* Make the slider non-interactive */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-cancel {
+  background-color: #ccc;
+  margin-left: 30px;
+  border-radius: 0px;
+  color: black;
+  font-weight: bold;
+}
+
+.btn-cancel:hover {
+  background-color: #aaa;
+}
+
+.btn-save {
+  background-color: #4caf50;
+  color: white;
+  margin-right: 20px;
+  border-radius: 0px;
+  color: 0B8600;
+  font-weight: bold;
+}
+
+.btn-save:hover {
+  background-color: #45a049;
+}
+
+.form-section {
+  margin-bottom: 13px;
+  color: #1a1a1a;
+  margin-left: 15px;
+}
+
+.form-section-date {
+  margin-bottom: 13px;
+  color: #1a1a1a;
+  margin-left: 15px;
+}
+
+.form-section-inline {
+  display: flex;
+  align-items: center;
+}
+
+.form-section-inline label {
+  margin-right: 10px;
+}
+
+.form-section-inline input[type="date"],
+.form-section-inline input[type="time"] {
+  margin-right: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"],
+select {
+  width: 314px; /* Adjusted the width */
+  height: 25px; /* Adjusted the height */
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white; /* Set background color to white */
+  color: black; /* Set text color to black */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* Invert colors for dark mode */
+}
+
+input[type="text"] {
+  width: 95%; /* Set the width to 100% for text inputs */
+}
+
+.second-input {
+  display: block; /* Ensure it is displayed as a block element */
+}
+
+.large-select {
+  width: 400px; /* Adjust the width as needed */
+  height: 40px; /* Adjust the height as needed */
+  padding: 10px; /* Adjust the padding as needed */
+  font-size: 16px; /* Adjust the font size as needed */
+}
+
+/* Image upload styling */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+}
+
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-upload-title {
+  margin-bottom: 5px;
+}
+
+.image-upload-box {
+  width: 350px;
+  height: 150px;
+  border: 1px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: rgb(255, 255, 255, 0.2);
+}
+
+.image-upload-box input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-upload-box img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.upload-link-container {
+  display: flex;
+  align-items: center;
+}
+
+.image-upload-label {
+  cursor: pointer;
+}
+
+.image-upload-link {
+  text-decoration: underline;
+  color: black;
+  cursor: pointer;
+}
+
+.image-upload-input {
+  display: none;
+}
+
+.image-remove-button {
+  cursor: pointer;
+  color: grey;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 230px;
+}
+
+.next-form-section {
+  margin-top: 20px;
+  padding: 20px;
+  padding-right: 60px;
+  background-color: #f2f2f2;
+  border-radius: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.buttonNext {
+  width: 8%;
+  height: 100%;
+  padding: 10px 20px;
+  background-color: #0b8600;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #7b4c2f;
+}
+
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  margin: 0 auto;
+  padding: 10px;
+  color: black;
+  height: 45px; /* Set the desired height */
+}
+
+.left-box,
+.right-box {
+  height: 35px; /* Increased height */
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  /* cursor: pointer; */
+  font-size: 24px;
+  border-radius: 0px; /* Add rounded corners */
+  border: 1px solid #cfb70b; /* Add border line */
+  margin: 0 10px; /* Separate the boxes from each other */
+}
+
+.left-box.active,
+.right-box.active {
+  background-color: rgb(207, 183, 11, 0.1);
+  color: black !important;
+  font-weight: bold;
+}
+
+/* .left-box:hover, .right-box:hover {
+    background-color:rgb(207, 183, 11,0.1);
+    color: black;
+  } */
+
+button.active {
+  background-color: white;
+  color: black;
+  border: 1px solid #ccc;
+}
+
+.custom-hr {
+  border: none;
+  border-top: 1px dashed rgb(0, 0, 0, 0.25); /* Dashed line */
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 98%;
+}

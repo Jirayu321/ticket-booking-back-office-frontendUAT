@@ -1,6 +1,5 @@
-import React from 'react';
-import CarbonEvent from '/carbon-event.svg';
 import './header.css';
+import CarbonEvent from '/carbon-event.svg';
 
 const Header = ({ title }) => {
   return (
