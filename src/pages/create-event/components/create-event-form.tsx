@@ -1,16 +1,16 @@
-import { Dayjs } from "dayjs";
 import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import { STATUS_MAP } from "../../../config/constants";
+import { createEvent } from "../../../services/event-list.service";
 import Header from "../../common/header";
 import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
-import { useZonePriceForm } from "./zone-price-form.hooks";
-import { createEvent } from "../../../services/event-list.service";
+import { convertLocalTimeToISO, formatISOToLocalTime } from "../../../lib/util";
+
+const TIME_DIFFERENCE = 7 * 60 * 60 * 1000; // 7 hours
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -29,6 +29,8 @@ const CreateEventForm = () => {
   } = useEventStore();
 
   const [publish, setPublish] = useState(false);
+
+  const isPublishAvailable = false;
   const [images, setImages] = useState<Array<string | null>>([
     null,
     null,
@@ -45,10 +47,6 @@ const CreateEventForm = () => {
 
   const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setStatus(parseInt(e.target.value));
-  };
-
-  const handleEventDateTimeChange = (date: Dayjs | null) => {
-    setEventDateTime(date);
   };
 
   const handleImageUpload =
@@ -87,8 +85,8 @@ const CreateEventForm = () => {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
-        Event_Date: eventDateTime!.format("YYYY-MM-DD"),
-        Event_Time: eventDateTime!.toDate().toISOString(),
+        Event_Date: convertLocalTimeToISO(eventDateTime),
+        Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
         Event_Public: "N",
       };
@@ -99,7 +97,7 @@ const CreateEventForm = () => {
 
       toast.dismiss();
       toast.success("สร้าง event สำเร็จ");
-      navigate("/all-events")
+      navigate("/all-events");
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
@@ -146,10 +144,14 @@ const CreateEventForm = () => {
         <div className="toggle-container">
           <label>
             <input
+              onChange={(e) => {
+                if (!isPublishAvailable)
+                  return toast.error("กรุณากรอกข้อมูลให้ครบก่อนทำการแผยเพร่");
+                setPublish(e.target.checked);
+              }}
               className="slider"
               type="checkbox"
               checked={publish}
-              readOnly
             />
             <span className="slider" />
           </label>
@@ -212,10 +214,25 @@ const CreateEventForm = () => {
           <hr className="custom-hr" />
           <div className="form-section form-section-inline event-form-date-picker-container">
             <label>วันและเวลาจัดงาน*</label>
-            <DateTimePickerComponent
-              controlledValue={eventDateTime}
-              onChange={handleEventDateTimeChange}
-              label="Select Date & Time"
+            <input
+              style={{
+                backgroundColor: "white",
+                color: "black",
+              }}
+              type="datetime-local"
+              value={formatISOToLocalTime(eventDateTime)}
+              onChange={(e: any) => {
+                const date = new Date(e.target.value);
+                const localTime = new Date(
+                  date.getTime() -
+                    date.getTimezoneOffset() * 60000 +
+                    TIME_DIFFERENCE
+                ) // 7 hours
+                  .toISOString()
+                  .slice(0, 16);
+
+                setEventDateTime(localTime);
+              }}
             />
           </div>
           <div className="form-section">

@@ -4,6 +4,7 @@ import { useEventStore, useZoneStore } from "../form-store";
 import { createEventStock } from "../../../services/event-stock.service";
 import { createLogEventPrice } from "../../../services/log-event-price.service";
 import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
+import { convertLocalTimeToISO } from "../../../lib/util";
 
 const DEFAULT_INPUT_METHOD = 1;
 const DEFAULT_ACTIONER = "admin";
@@ -23,8 +24,8 @@ export function useZonePriceForm() {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
-        Event_Date: eventDateTime.format("YYYY-MM-DD"),
-        Event_Time: eventDateTime.toDate().toISOString(),
+        Event_Date: convertLocalTimeToISO(eventDateTime),
+        Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
         Event_Public: "N",
       };

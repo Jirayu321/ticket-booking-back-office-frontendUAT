@@ -1,4 +1,3 @@
-import dayjs, { Dayjs } from "dayjs";
 import create from "zustand";
 
 // Event store interface and Zustand implementation
@@ -6,12 +5,12 @@ interface EventState {
   title: string;
   title2: string;
   description: string;
-  eventDateTime: Dayjs | null;
+  eventDateTime: string;
   status: number; // Store status as an integer
   setTitle: (title: string) => void;
   setTitle2: (title2: string) => void;
   setDescription: (description: string) => void;
-  setEventDateTime: (eventDateTime: Dayjs | null) => void;
+  setEventDateTime: (eventDateTime: string) => void;
   setStatus: (status: number) => void;
 }
 
@@ -19,7 +18,7 @@ export const useEventStore = create<EventState>((set) => ({
   title: "",
   title2: "",
   description: "",
-  eventDateTime: dayjs(new Date().toISOString()),
+  eventDateTime: new Date().toISOString(),
   status: 1, // Default status: "รอเริ่มงาน" (1)
   setTitle: (title) => set({ title }),
   setTitle2: (title2) => set({ title2 }),

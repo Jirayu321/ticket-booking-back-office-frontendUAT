@@ -1,19 +1,20 @@
 import { CircularProgress } from "@mui/material";
-import { Dayjs } from "dayjs";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import BackButton from "../../components/common/back-button/BackButton";
 import Container from "../../components/common/Container";
-import DateTimePickerComponent from "../../components/common/date-time-picker";
 import { STATUS_MAP } from "../../config/constants";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
+import { convertLocalTimeToISO, formatISOToLocalTime } from "../../lib/util";
+import { updateEventById } from "../../services/event-list.service";
 import Header from "../common/header";
 import ZonePriceForm from "../create-event/components/zone-price-form";
 import useEditEventStore from "./_hook/useEditEventStore";
 import { useSyncEventInfo } from "./_hook/useSyncEvetInfo";
 import "./edit-event-form.module.css";
-import { updateEventById } from "../../services/event-list.service";
+import BackIcon from "/back.svg";
+
+const TIME_DIFFERENCE = 7 * 60 * 60 * 1000; // 7 hours
 
 const EditEventPage = () => {
   const { eventId } = useParams();
@@ -28,6 +29,7 @@ const EditEventPage = () => {
     description,
     setDescription,
     status,
+    isPublic,
   } = useEditEventStore();
 
   const [activeTab, setActiveTab] = useState("รายละเอียด");
@@ -43,7 +45,11 @@ const EditEventPage = () => {
     null,
   ]);
 
-  console.log(event);
+  const isEventDetailValid = title && title2 && eventDateTime !== null;
+
+  const isEventPerformed = event
+    ? new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
+    : false;
 
   const handleInputChange =
     (setter: (value: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -54,15 +60,24 @@ const EditEventPage = () => {
     setStatus(parseInt(e.target.value));
   };
 
-  const handleEventDateTimeChange = (date: Dayjs | null) => {
-    setEventDateTime(date as Dayjs);
-  };
-
   const handleCancle = () => {
     const userConfirmed = window.confirm(
       "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมดโปรดบันทึกข้อมูลไว้ก่อน"
     );
     if (userConfirmed) {
+      navigate("/all-events");
+    }
+  };
+
+  const handleBackClick = () => {
+    if (activeTab === "โซน & ราคา") {
+      const userConfirmed = window.confirm(
+        "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด"
+      );
+      if (userConfirmed) {
+        setActiveTab("รายละเอียด");
+      }
+    } else {
       navigate("/all-events");
     }
   };
@@ -100,6 +115,23 @@ const EditEventPage = () => {
       }
     };
 
+  async function handlePublish() {
+    try {
+      if (!isEventDetailValid) return toast.error("กรุณาเติมข้อมูลให้ครบ");
+      if (isEventPerformed)
+        return toast.error("ไม่สามารถเผยแพร่งานที่แสดงไปแล้วได้");
+      await updateEventById(Number(eventId), {
+        Event_Public: event.Event_Public === "Y" ? "N" : "Y",
+      });
+
+      toast.success("เปลี่ยนสถานะเผยแพร่งานสำเร็จ");
+
+      navigate(0);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  }
+
   const handleImageRemove = (index: number) => () => {
     const newImages = [...images];
     newImages[index] = null;
@@ -114,7 +146,7 @@ const EditEventPage = () => {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
-        Event_Time: eventDateTime?.toISOString(),
+        Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
       });
       toast.dismiss();
@@ -138,20 +170,24 @@ const EditEventPage = () => {
       <div className="create-new-event">
         <Header title="งานทั้งหมด" />
         <div className="sub-header">
-          <BackButton link="/all-events" />
+          <button className="back-button">
+            <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
+          </button>
           <h2 className="title">แก้ไขข้อมูลงาน</h2>
           <div className="toggle-container">
             <label>
               <input
                 className="slider"
                 type="checkbox"
-                checked={false}
-                readOnly
+                checked={event.Event_Public === "Y"}
+                onChange={(_) => {
+                  handlePublish();
+                }}
               />
               <span className="slider" />
             </label>
             <span className="toggle-text">
-              {true ? "เผยแพร่" : "ไม่เผยแพร่"}
+              {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
             </span>
             <button className="btn-cancel" onClick={handleCancle}>
               ยกเลิก
@@ -211,10 +247,21 @@ const EditEventPage = () => {
             <hr className="custom-hr" />
             <div className="form-section form-section-inline event-form-date-picker-container">
               <label>วันและเวลาจัดงาน*</label>
-              <DateTimePickerComponent
-                controlledValue={eventDateTime}
-                onChange={handleEventDateTimeChange}
-                label="Select Date & Time"
+              <input
+                type="datetime-local"
+                value={formatISOToLocalTime(eventDateTime)}
+                onChange={(e: any) => {
+                  const date = new Date(e.target.value);
+                  const localTime = new Date(
+                    date.getTime() -
+                      date.getTimezoneOffset() * 60000 +
+                      TIME_DIFFERENCE
+                  ) // 7 hours
+                    .toISOString()
+                    .slice(0, 16);
+
+                  setEventDateTime(localTime);
+                }}
               />
             </div>
             <div className="form-section">

@@ -32,7 +32,7 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
         label={label}
         value={value}
         onChange={handleChange}
-        ampm={false}  // Use 24-hour format
+        ampm={false}
         renderInput={(params) => <input {...params} />}
       />
     </LocalizationProvider>
