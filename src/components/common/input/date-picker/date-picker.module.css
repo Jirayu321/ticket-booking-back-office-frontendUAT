@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 250px;
+  color: black;
+}
+
+input {
+  padding: 10px 20px;
+  border: none;
+  background-color: #F0F0F0;
+  border-radius: 10px;
+  color: black;
+}
