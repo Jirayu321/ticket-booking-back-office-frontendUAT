@@ -6,13 +6,14 @@ import { useFetchViewEventStocks } from "../../../hooks/fetch-data/useFetchViewE
 import { useEditZonePriceStore } from "../_hook/useEditZonePriceStore";
 import { useSyncPlanGroup } from "../_hook/useSyncPlanGroup";
 import styles from "./edit-zone-price-form.module.css";
+import Plans from "./Plans";
 
 type EditZonePriceFormProp = {
   eventId: number;
 };
 
 const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
-  const { selectedPlanGroupName, setSelectedPlanGroupName } =
+  const { selectedPlanGroupId, setSelectedPlanGroupId } =
     useEditZonePriceStore();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
@@ -21,7 +22,13 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
   const { data: viewEventStocks, isPending: isLoadingViewEventStocks } =
     useFetchViewEventStocks({ eventId });
 
+  const filteredPlans = viewEventStocks?.filter(
+    (plan: any) => plan.PlanGroup_Id === selectedPlanGroupId
+  );
+
   useSyncPlanGroup(viewEventStocks);
+
+  console.log(selectedPlanGroupId)
 
   if (isLoadingPlanGroups || isLoadingViewEventStocks)
     return <CircularProgress />;
@@ -31,14 +38,15 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
       {/* {error && <div className="error-message">{error}</div>} */}
       {planGroups ? (
         <Select
-          options={planGroups.map((pg: any) => pg.PlanGroup_Name)}
-          value={selectedPlanGroupName}
-          setter={setSelectedPlanGroupName}
-          disabled={true}
+          options={planGroups?.map((pg: any) => pg.PlanGroup_Name)}
+          optionValues={planGroups?.map((pg: any) => pg.PlanGroup_id)}
+          value={selectedPlanGroupId}
+          setter={setSelectedPlanGroupId}
+          // disabled={true}
           placeholder="เลือกผังร้าน"
         />
       ) : null}
-      {/* <FilteredZones filteredZones={filteredZones} zones={zones} /> */}
+      <Plans filteredPlans={filteredPlans} />
       {/* <div className="save-form-section">
         <button className="buttonSave" onClick={handleSaveEvent}>
           บันทึก

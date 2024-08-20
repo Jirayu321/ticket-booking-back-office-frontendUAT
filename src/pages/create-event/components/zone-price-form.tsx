@@ -14,7 +14,6 @@ const ZonePriceForm = () => {
   const {
     selectedZoneGroup,
     setSelectedZoneGroup,
-    zones,
     setZoneData,
     resetZoneData,
   } = useZoneStore();
@@ -148,7 +147,7 @@ const ZonePriceForm = () => {
         selectedZoneGroup={selectedZoneGroup}
         planGroups={planGroups}
       />
-      <FilteredZones filteredZones={filteredZones} zones={zones} />
+      <FilteredZones filteredZones={filteredZones} />
       <div className="save-form-section">
         <button className="buttonSave" onClick={handleSaveEvent}>
           บันทึก

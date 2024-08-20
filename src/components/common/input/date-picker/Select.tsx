@@ -12,6 +12,7 @@ type SelectProps = {
   value: Value;
   setter: (value: Value) => void;
   options: Value[];
+  optionValues: Value[];
   placeholder?: string;
   disabled?: boolean;
 };
@@ -22,6 +23,7 @@ const Select: FC<SelectProps> = ({
   setter,
   options,
   disabled = false,
+  optionValues,
 }) => {
   return (
     <FormControl fullWidth>
@@ -34,7 +36,7 @@ const Select: FC<SelectProps> = ({
       >
         <MenuItem value="">{placeholder}</MenuItem>
         {options.map((option, index) => (
-          <MenuItem key={index} value={option}>
+          <MenuItem key={index} value={optionValues[index]}>
             {option}
           </MenuItem>
         ))}
