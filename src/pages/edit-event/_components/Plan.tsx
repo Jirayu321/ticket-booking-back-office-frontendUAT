@@ -10,6 +10,7 @@ import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTyp
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
 import { useParams } from "react-router-dom";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
+import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 
 type PlanProps = {
   plan: any;
@@ -105,8 +106,15 @@ const Body: FC<BodyProps> = ({
   ticketTypes,
   viewLogEventPrices,
 }) => {
-  const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty } = zone;
-
+  const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty, Plan_Id, PlanGroup_Id } =
+    zone;
+  const { eventId } = useParams();
+  const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
+    useFetchTicketNoPerPlanByEventId({
+      eventId: Number(eventId),
+      planId: Plan_Id,
+      planGroupId: PlanGroup_Id,
+    });
   const columns: GridColDef[] = [
     {
       field: "Start_Datetime",
@@ -173,6 +181,8 @@ const Body: FC<BodyProps> = ({
     //   ),
     // },
   ];
+
+  if (isLoadingTicketNoPerPlans) return <CircularProgress />;
 
   return (
     <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
