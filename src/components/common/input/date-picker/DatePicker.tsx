@@ -8,9 +8,15 @@ type DatePickerProps = {
   dateTimeValue: string;
   setter: (value: string) => void;
   label: string;
+  allowPast?: boolean;
 };
 
-const DatePicker: FC<DatePickerProps> = ({ dateTimeValue, label, setter }) => {
+const DatePicker: FC<DatePickerProps> = ({
+  dateTimeValue,
+  label,
+  setter,
+  allowPast = false,
+}) => {
   return (
     <div className={styles.container}>
       <label>{label}</label>
@@ -18,6 +24,10 @@ const DatePicker: FC<DatePickerProps> = ({ dateTimeValue, label, setter }) => {
         type="datetime-local"
         value={formatISOToLocalTime(dateTimeValue)}
         onChange={(e: any) => {
+
+          if (!allowPast && new Date(e.target.value).getTime() <= Date.now()) {
+            return;
+          }
           const date = new Date(e.target.value);
           const localTime = new Date(
             date.getTime() - date.getTimezoneOffset() * 60000 + TIME_DIFFERENCE
