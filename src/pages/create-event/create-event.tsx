@@ -1,4 +1,4 @@
-import Container from "../../components/common/Container";
+import Container from "../../components/common/container/Container";
 import CreateEventForm from "./components/create-event-form";
 import "./create-event.css";
 

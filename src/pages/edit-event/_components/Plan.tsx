@@ -1,11 +1,12 @@
 import { FC } from "react";
 import styles from "./plan.module.css";
 // import GenerateBoxes from "./GenerateBoxes";
-import { Collapse } from "@mui/material";
+import { CircularProgress, Collapse } from "@mui/material";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import deleteOnIcon from "/delete-on.svg";
 import dayjs from "dayjs";
+import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 
 type PlanProps = {
   plan: any;
@@ -16,8 +17,13 @@ type PlanProps = {
 
 const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
   const { Plan_Id, Plan_Name, Plan_Desc } = plan;
+  const { data: ticketTypes, isPending: isLoadingTicketTypes } =
+    useFetchTicketTypes();
+
+  if (isLoadingTicketTypes) return <CircularProgress />;
+
   return (
-    <div className={styles.planContainer}>
+    <div className={styles.container}>
       <Header
         onExpand={onExpand}
         Plan_Id={Plan_Id}
@@ -32,7 +38,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         handlePriceChange={() => {}}
         removeZonePrice={() => {}}
         addZonePrice={() => {}}
-        ticketTypes={[]}
+        ticketTypes={ticketTypes}
         columns={[]}
       />
     </div>
@@ -88,6 +94,7 @@ const Body: FC<BodyProps> = ({
   ticketTypes,
   columns,
 }) => {
+  const { Ticket_Type_Id } = zone;
   return (
     <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
       <div className="zone-content">
@@ -100,15 +107,18 @@ const Body: FC<BodyProps> = ({
               <label>TICKET TYPE*</label>
               <select
                 className="ticket-type-select"
-                value={zones[zone.Plan_Id]?.ticketType || ""}
+                value={Ticket_Type_Id || ""}
                 onChange={(e) =>
                   handleInputChange(zone.Plan_Id, "ticketType", e.target.value)
                 }
               >
                 <option value="">เลือกประเภทตั๋ว</option>
-                {ticketTypes?.map((type: any) => (
-                  <option key={type.Ticket_Type_Id} value={type.Ticket_Type_Id}>
-                    {type.Ticket_Type_Name}
+                {ticketTypes?.map((ticketType: any) => (
+                  <option
+                    key={ticketType.Ticket_Type_Id}
+                    value={ticketType.Ticket_Type_Id}
+                  >
+                    {ticketType.Ticket_Type_Name}
                   </option>
                 ))}
               </select>

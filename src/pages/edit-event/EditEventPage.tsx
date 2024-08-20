@@ -1,8 +1,8 @@
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Stack } from "@mui/material";
 import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import Container from "../../components/common/Container";
+import Container from "../../components/common/container/Container";
 import DatePicker from "../../components/common/input/date-picker/DatePicker";
 import { STATUS_MAP } from "../../config/constants";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
@@ -12,8 +12,9 @@ import Header from "../common/header";
 import EditZonePriceForm from "./_components/EditZonePriceForm";
 import useEditEventStore from "./_hook/useEditEventStore";
 import { useSyncEventInfo } from "./_hook/useSyncEventInfo";
-import "./edit-event-form.module.css";
+import styles from "./edit-event-form.module.css";
 import BackIcon from "/back.svg";
+import { FaChevronLeft } from "react-icons/fa";
 
 const EditEventPage = () => {
   const { eventId } = useParams();
@@ -167,13 +168,15 @@ const EditEventPage = () => {
 
   return (
     <Container>
-      <div className="create-new-event">
+      <div className={styles.container}>
         <Header title="งานทั้งหมด" />
-        <div className="sub-header">
-          <button className="back-button">
-            <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
-          </button>
-          <h2 className="title">แก้ไขข้อมูลงาน</h2>
+        <div className={styles.subHeader}>
+          <div className={styles.backButtonContainer}>
+            <button onClick={handleBackClick}>
+              <FaChevronLeft />
+            </button>
+            <h2 className={styles.title}>แก้ไขข้อมูลงาน</h2>
+          </div>
           <div className="toggle-container">
             <label>
               <input

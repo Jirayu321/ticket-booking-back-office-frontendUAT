@@ -1,11 +1,5 @@
-/* Form Layout */
-.create-new-event {
-  position: absolute;
-  top: 0;
-  left: 157px;
-  width: 1763px;
+.container {
   height: 100%; /* Set height to 100% or a specific value */
-  padding-left: 0;
   background-color: #fff;
   overflow-y: scroll; /* Enable vertical scrolling */
 }
@@ -23,26 +17,27 @@
   font-size: 18px;
 }
 
-.sub-header {
+.subHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #000;
   padding: 10px;
   color: #ffd700;
+  width: 100%;
 }
 
-.sub-header {
-  margin: 0;
-  font-size: 22px;
-  color: white;
+.backButtonContainer {
+  display: flex;
+}
+
+.backButton {
+  color: 
 }
 
 .title {
-  margin: 0;
   font-size: 22px;
   color: white;
-  margin-left: -650px;
 }
 
 .toggle-container {
