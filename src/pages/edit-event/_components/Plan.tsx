@@ -1,19 +1,13 @@
 import { FC } from "react";
 import styles from "./plan.module.css";
-// import GenerateBoxes from "./GenerateBoxes";
 import { CircularProgress, Collapse } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  gridSortedRowEntriesSelector,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useParams } from "react-router-dom";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
+import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
-import TicketNoCard from "./TicketNoCard";
 import { sortTicketNo } from "../../../lib/util";
 
 type PlanProps = {
@@ -312,11 +306,21 @@ const Body: FC<BodyProps> = ({
             </option>
             <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
           </select>
-          <section className={styles.ticketNoSection}>
-            {sortedTicketNoPerPlans?.map((tnp: any) => (
-              <TicketNoCard key={tnp.Ticket_No} ticketNo={tnp.Ticket_No} />
-            ))}
-          </section>
+          {sortedTicketNoPerPlans ? (
+            sortedTicketNoPerPlans.length > 0 ? (
+              <section className={styles.ticketNoSection}>
+                {sortedTicketNoPerPlans.map((tnp: any) => (
+                  <TicketNoCard key={tnp.Ticket_No} ticketNo={tnp.Ticket_No} />
+                ))}
+              </section>
+            ) : (
+              <>
+                <h4 style={{ color: "#ccc", width: "100%", textAlign : "center" }}>
+                  ไม่พบข้อมูลเลขโต็ะ
+                </h4>
+              </>
+            )
+          ) : null}
           {/* <GenerateBoxes
             method={zones[zone.Plan_Id]?.tableInputMethod || "1"}
             seatNumber={zones[zone.Plan_Id]?.seatCount || 0}
