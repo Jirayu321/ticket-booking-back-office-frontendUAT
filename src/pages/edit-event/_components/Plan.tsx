@@ -7,6 +7,8 @@ import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import deleteOnIcon from "/delete-on.svg";
 import dayjs from "dayjs";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
+import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
+import { useParams } from "react-router-dom";
 
 type PlanProps = {
   plan: any;
@@ -16,11 +18,21 @@ type PlanProps = {
 };
 
 const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
-  const { Plan_Id, Plan_Name, Plan_Desc } = plan;
+  const { eventId } = useParams();
+  const { Plan_Id, Plan_Name, Plan_Desc, PlanGroup_Id } = plan;
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
+  const { data: viewLogEventPrice, isPending: isLoadingViewLogEventPrice } =
+    useFetchViewLogEventPrice({
+      eventId: Number(eventId),
+      planId: Plan_Id,
+      planGroupId: PlanGroup_Id,
+    });
 
-  if (isLoadingTicketTypes) return <CircularProgress />;
+  if (isLoadingTicketTypes || isLoadingViewLogEventPrice)
+    return <CircularProgress />;
+
+  console.log(viewLogEventPrice);
 
   return (
     <div className={styles.container}>
@@ -94,7 +106,7 @@ const Body: FC<BodyProps> = ({
   ticketTypes,
   columns,
 }) => {
-  const { Ticket_Type_Id } = zone;
+  const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty } = zone;
   return (
     <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
       <div className="zone-content">
@@ -106,6 +118,7 @@ const Body: FC<BodyProps> = ({
             <div className="ticket-type">
               <label>TICKET TYPE*</label>
               <select
+                disabled
                 className="ticket-type-select"
                 value={Ticket_Type_Id || ""}
                 onChange={(e) =>
@@ -129,9 +142,10 @@ const Body: FC<BodyProps> = ({
                 <input
                   type="number"
                   min="0"
+                  disabled
                   placeholder="จำนวนบัตร/โซน*"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={zones[zone.Plan_Id]?.seatCount || 0}
+                  value={Ticket_Qty || 0}
                   onChange={(e) =>
                     handleInputChange(
                       zone.Plan_Id,
@@ -146,9 +160,10 @@ const Body: FC<BodyProps> = ({
                 <input
                   type="number"
                   min="0"
+                  disabled
                   placeholder="จำนวนที่นั่ง/ตั๋ว"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={zones[zone.Plan_Id]?.seatPerTicket || 0}
+                  value={Ticket_Qty_Per || 0}
                   onChange={(e) =>
                     handleInputChange(
                       zone.Plan_Id,
