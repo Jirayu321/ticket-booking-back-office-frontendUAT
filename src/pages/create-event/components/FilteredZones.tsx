@@ -7,14 +7,14 @@ import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
 import { useZoneStore } from "../form-store";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
+import { Price, ZoneData } from "../../edit-event/type";
 
 type FilteredZonesProps = {
   filteredZones: any[];
-  zones: any;
 };
 
-const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones, zones }) => {
-  const { setZoneData, removeZonePrice, addZonePrice } = useZoneStore();
+const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
+  const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -26,7 +26,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones, zones }) => {
   const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZones((prev) => ({
       ...prev,
-      [zoneId]: !prev[zoneId], // Toggle the state of the clicked zone
+      [zoneId]: !prev[zoneId],
     }));
 
     if (!zones[zoneId]) {

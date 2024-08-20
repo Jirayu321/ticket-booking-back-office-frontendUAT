@@ -1,16 +1,15 @@
 import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import { STATUS_MAP } from "../../../config/constants";
+import { convertLocalTimeToISO } from "../../../lib/util";
 import { createEvent } from "../../../services/event-list.service";
 import Header from "../../common/header";
 import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
-import { convertLocalTimeToISO, formatISOToLocalTime } from "../../../lib/util";
-
-const TIME_DIFFERENCE = 7 * 60 * 60 * 1000; // 7 hours
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -212,27 +211,11 @@ const CreateEventForm = () => {
             />
           </div>
           <hr className="custom-hr" />
-          <div className="form-section form-section-inline event-form-date-picker-container">
-            <label>วันและเวลาจัดงาน*</label>
-            <input
-              style={{
-                backgroundColor: "white",
-                color: "black",
-              }}
-              type="datetime-local"
-              value={formatISOToLocalTime(eventDateTime)}
-              onChange={(e: any) => {
-                const date = new Date(e.target.value);
-                const localTime = new Date(
-                  date.getTime() -
-                    date.getTimezoneOffset() * 60000 +
-                    TIME_DIFFERENCE
-                ) // 7 hours
-                  .toISOString()
-                  .slice(0, 16);
-
-                setEventDateTime(localTime);
-              }}
+          <div className="form-section">
+            <DatePicker
+              label="วันและเวลาจัดงาน*"
+              dateTimeValue={eventDateTime}
+              setter={setEventDateTime}
             />
           </div>
           <div className="form-section">

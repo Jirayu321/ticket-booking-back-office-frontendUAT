@@ -1,20 +1,19 @@
 import { CircularProgress } from "@mui/material";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Container from "../../components/common/Container";
+import DatePicker from "../../components/common/input/date-picker/DatePicker";
 import { STATUS_MAP } from "../../config/constants";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import { convertLocalTimeToISO, formatISOToLocalTime } from "../../lib/util";
 import { updateEventById } from "../../services/event-list.service";
 import Header from "../common/header";
-import ZonePriceForm from "../create-event/components/zone-price-form";
+import EditZonePriceForm from "./_components/EditZonePriceForm";
 import useEditEventStore from "./_hook/useEditEventStore";
-import { useSyncEventInfo } from "./_hook/useSyncEvetInfo";
+import { useSyncEventInfo } from "./_hook/useSyncEventInfo";
 import "./edit-event-form.module.css";
 import BackIcon from "/back.svg";
-
-const TIME_DIFFERENCE = 7 * 60 * 60 * 1000; // 7 hours
 
 const EditEventPage = () => {
   const { eventId } = useParams();
@@ -33,6 +32,7 @@ const EditEventPage = () => {
   } = useEditEventStore();
 
   const [activeTab, setActiveTab] = useState("รายละเอียด");
+
   const { data: event, isPending: isLoadingEvent } = useFetchEventList({
     eventId: Number(eventId),
   });
@@ -246,22 +246,10 @@ const EditEventPage = () => {
             </div>
             <hr className="custom-hr" />
             <div className="form-section form-section-inline event-form-date-picker-container">
-              <label>วันและเวลาจัดงาน*</label>
-              <input
-                type="datetime-local"
-                value={formatISOToLocalTime(eventDateTime)}
-                onChange={(e: any) => {
-                  const date = new Date(e.target.value);
-                  const localTime = new Date(
-                    date.getTime() -
-                      date.getTimezoneOffset() * 60000 +
-                      TIME_DIFFERENCE
-                  ) // 7 hours
-                    .toISOString()
-                    .slice(0, 16);
-
-                  setEventDateTime(localTime);
-                }}
+              <DatePicker
+                label="วันและเวลาจัดงาน*"
+                setter={setEventDateTime}
+                dateTimeValue={eventDateTime}
               />
             </div>
             <div className="form-section">
@@ -337,7 +325,9 @@ const EditEventPage = () => {
             </div>
           </form>
         )}
-        {activeTab === "โซน & ราคา" && <ZonePriceForm />}
+        {activeTab === "โซน & ราคา" && (
+          <EditZonePriceForm eventId={Number(eventId)} />
+        )}
       </div>
     </Container>
   );

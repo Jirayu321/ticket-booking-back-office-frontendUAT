@@ -1,0 +1,20 @@
+export type Event_List = {
+  Event_Id: number;
+  Event_Name: string;
+  Event_Addr: string;
+  Event_Desc: string;
+  Event_Date: string | null;
+  Event_Time: string | null;
+  Event_Pic_1: string;
+  Event_Pic_2: string;
+  Event_Pic_3: string;
+  Event_Pic_4: string;
+  Event_Status: number;
+  Event_Public: "Y" | "N";
+  Event_Public_Date: string | null;
+  Event_Created_By: string | null;
+  Event_Updated_Date: string | null;
+  Event_Update_By: string | null;
+  Event_Cancel_Date: string | null;
+  Event_Cancel_By: string | null;
+};
