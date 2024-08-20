@@ -16,5 +16,5 @@ export async function getViewLogEventPrice({
   if (response.status !== 200)
     throw new Error("ล้มเหลวระหว่างการดึงข้อมูล Event Price");
 
-  return response.data.logEventPrice;
+  return response.data.logEventPrices;
 }

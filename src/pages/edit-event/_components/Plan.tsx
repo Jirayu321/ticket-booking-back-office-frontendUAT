@@ -3,12 +3,13 @@ import styles from "./plan.module.css";
 // import GenerateBoxes from "./GenerateBoxes";
 import { CircularProgress, Collapse } from "@mui/material";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
-import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import deleteOnIcon from "/delete-on.svg";
 import dayjs from "dayjs";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
 import { useParams } from "react-router-dom";
+import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 
 type PlanProps = {
   plan: any;
@@ -22,7 +23,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
   const { Plan_Id, Plan_Name, Plan_Desc, PlanGroup_Id } = plan;
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
-  const { data: viewLogEventPrice, isPending: isLoadingViewLogEventPrice } =
+  const { data: viewLogEventPrices, isPending: isLoadingViewLogEventPrice } =
     useFetchViewLogEventPrice({
       eventId: Number(eventId),
       planId: Plan_Id,
@@ -31,8 +32,6 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
 
   if (isLoadingTicketTypes || isLoadingViewLogEventPrice)
     return <CircularProgress />;
-
-  console.log(viewLogEventPrice);
 
   return (
     <div className={styles.container}>
@@ -51,7 +50,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         removeZonePrice={() => {}}
         addZonePrice={() => {}}
         ticketTypes={ticketTypes}
-        columns={[]}
+        viewLogEventPrices={viewLogEventPrices}
       />
     </div>
   );
@@ -92,7 +91,7 @@ type BodyProps = {
   removeZonePrice: any;
   addZonePrice: any;
   ticketTypes: any;
-  columns: any;
+  viewLogEventPrices: any[];
 };
 
 const Body: FC<BodyProps> = ({
@@ -104,9 +103,77 @@ const Body: FC<BodyProps> = ({
   removeZonePrice,
   addZonePrice,
   ticketTypes,
-  columns,
+  viewLogEventPrices,
 }) => {
   const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty } = zone;
+
+  const columns: GridColDef[] = [
+    {
+      field: "Start_Datetime",
+      headerName: "วันเริ่ม",
+      width: 280,
+      sortable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? (
+          <DatePicker label="" dateTimeValue={params.value} setter={() => {}} />
+        ) : (
+          "ไม่ได้ระบุ"
+        ),
+    },
+    {
+      field: "End_Datetime",
+      headerName: "วันที่สิ้นสุด",
+      width: 280,
+      sortable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? (
+          <DatePicker label="" dateTimeValue={params.value} setter={() => {}} />
+        ) : (
+          "ไม่ได้ระบุ"
+        ),
+    },
+    {
+      field: "Plan_Price",
+      headerName: "ราคา",
+      width: 200,
+      sortable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      renderCell: (params: GridRenderCellParams) => {
+        <input
+          disabled
+          type="number"
+          min="0"
+          value={Number(params.value)}
+          onChange={(e) =>
+            handlePriceChange(params.row.id, "price", e.target.value)
+          }
+          style={{ width: "90%", color: "black", backgroundColor: "white" }}
+        />;
+      },
+    },
+    // {
+    //   field: "delete",
+    //   headerName: "",
+    //   width: 120,
+    //   sortable: false,
+    //   resizable: false,
+    //   disableColumnMenu: true,
+    //   renderCell: (params: GridRenderCellParams) => (
+    //     <img
+    //       src={deleteOnIcon}
+    //       alt="delete-on"
+    //       style={{ cursor: "pointer" }}
+    //       onClick={() => removeZonePrice(params.row.id)}
+    //     />
+    //   ),
+    // },
+  ];
+
   return (
     <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
       <div className="zone-content">
@@ -180,65 +247,9 @@ const Body: FC<BodyProps> = ({
           <h3>ราคา ({zones[zone.Plan_Id]?.prices?.length || 0})</h3>
           <div style={{ height: "auto", width: "100%" }}>
             <DataGrid
-              rows={zones[zone.Plan_Id]?.prices || []}
-              columns={columns.map((col: any) => ({
-                ...col,
-                renderCell: (params: GridRenderCellParams) => {
-                  if (col.field === "startDate" || col.field === "endDate") {
-                    return (
-                      <DateTimePickerComponent
-                        controlledValue={
-                          params.value ? dayjs(params.value) : null
-                        }
-                        onChange={(date) =>
-                          handlePriceChange(
-                            zone.Plan_Id,
-                            params.row.id,
-                            col.field,
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        label={col.headerName}
-                      />
-                    );
-                  }
-                  if (col.field === "price") {
-                    return (
-                      <input
-                        type="number"
-                        min="0"
-                        value={params.value}
-                        onChange={(e) =>
-                          handlePriceChange(
-                            zone.Plan_Id,
-                            params.row.id,
-                            col.field,
-                            e.target.value
-                          )
-                        }
-                        style={{
-                          width: "90%",
-                          color: "black",
-                          backgroundColor: "white",
-                        }}
-                      />
-                    );
-                  }
-                  if (col.field === "delete") {
-                    return (
-                      <img
-                        src={deleteOnIcon}
-                        alt="delete-on"
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          removeZonePrice(zone.Plan_Id, params.row.id)
-                        }
-                      />
-                    );
-                  }
-                  return null;
-                },
-              }))}
+              getRowId={(_) => crypto.randomUUID()}
+              rows={viewLogEventPrices}
+              columns={columns}
               pageSize={zones[zone.Plan_Id]?.prices?.length || 0}
               autoHeight
               disableSelectionOnClick
