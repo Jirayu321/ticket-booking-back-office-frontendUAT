@@ -28,12 +28,22 @@ export function formatThaiDate({
 
 export function formatISOToLocalTime(isoString: string) {
   const date = new Date(isoString);
-  const thaiDate = new Date(
-    date.toLocaleString("en-US")
-  );
+  const thaiDate = new Date(date.toLocaleString("en-US"));
   return thaiDate.toISOString().slice(0, 16);
 }
 
 export function convertLocalTimeToISO(localTimeString: string) {
   return new Date(localTimeString).toISOString();
+}
+
+export function sortTicketNo(tn1: any, tn2: any) {
+  if (tn1 === tn2) {
+    return 0;
+  }
+  const tn1Match = tn1.Ticket_No.match(/\d+/);
+  const tn1Num = tn1Match ? parseInt(tn1Match[0]) : 0;
+
+  const tn2Match = tn2.Ticket_No.match(/\d+/);
+  const tn2Num = tn2Match ? parseInt(tn2Match[0]) : 0;
+  return tn1Num - tn2Num;
 }

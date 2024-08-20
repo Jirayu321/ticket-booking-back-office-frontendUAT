@@ -40,3 +40,8 @@
 .content {
   padding: 10px;
 }
+
+.ticketNoSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
