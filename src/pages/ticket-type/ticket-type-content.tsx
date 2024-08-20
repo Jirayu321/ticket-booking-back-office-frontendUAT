@@ -7,40 +7,49 @@ import {
   DialogTitle,
   TextField,
   MenuItem,
+  IconButton,
 } from "@mui/material";
-import { getAllTicketTypes, createTicketType } from "../../services/ticket-type.service";
-import Header from "../common/header"; // Assuming you have a reusable Header component
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  getAllTicketTypes,
+  createTicketType,
+  updateTicketType,
+  deleteTicketType,
+} from "../../services/ticket-type.service";
+import Header from "../common/header";
 import toast from "react-hot-toast";
 
 const TicketTypeContent: React.FC = () => {
   const [ticketTypes, setTicketTypes] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [newTicketType, setNewTicketType] = useState({
     name: "",
     unit: "",
     cal: "N", // Default value
   });
+  const [editTicketType, setEditTicketType] = useState<any>(null); // For editing
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchTicketTypes = async () => {
-      try {
-        const data = await getAllTicketTypes();
-        // console.log("Fetched Ticket Types:", data);
+  // Function to fetch and set the ticket types
+  const fetchTicketTypes = async () => {
+    try {
+      const data = await getAllTicketTypes();
 
-        if (data && data.ticketTypes) {
-          setTicketTypes(data.ticketTypes);
-        } else {
-          setTicketTypes([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch ticket types:", error);
-        toast.error("Failed to fetch ticket types: " + error);
+      if (data && data.ticketTypes) {
+        setTicketTypes(data.ticketTypes);
+      } else {
+        setTicketTypes([]);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch ticket types:", error);
+      toast.error("Failed to fetch ticket types: " + error);
+    }
+  };
 
-    fetchTicketTypes();
+  useEffect(() => {
+    fetchTicketTypes(); // Fetch data initially
   }, []);
 
   const handleOpen = () => {
@@ -49,6 +58,11 @@ const TicketTypeContent: React.FC = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setNewTicketType({
+      name: "",
+      unit: "",
+      cal: "N",
+    }); // Reset the form state
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,9 +80,59 @@ const TicketTypeContent: React.FC = () => {
         Ticket_Type_Cal: newTicketType.cal,
       });
       toast.success("สร้างประเภทบัตรสำเร็จ");
+      setNewTicketType({
+        name: "",
+        unit: "",
+        cal: "N",
+      }); // Reset the form state
       handleClose();
+      fetchTicketTypes(); // Refresh data after creating
     } catch (error) {
       toast.error("ล้มเหลวระหว่างสร้างประเภทบัตร");
+    }
+  };
+
+  const handleEditOpen = (ticketType: any) => {
+    setEditTicketType(ticketType);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditTicketType(null);
+  };
+
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEditTicketType({
+      ...editTicketType,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await updateTicketType({
+        Ticket_Type_Id: editTicketType.Ticket_Type_Id,
+        Ticket_Type_Name: editTicketType.Ticket_Type_Name,
+        Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
+        Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
+      });
+      toast.success("อัปเดตประเภทบัตรสำเร็จ");
+      handleEditClose();
+      fetchTicketTypes(); // Refresh data after updating
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตประเภทบัตร");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteTicketType(id);
+      toast.success("ลบประเภทบัตรสำเร็จ");
+      fetchTicketTypes(); // Refresh data after deletion
+    } catch (error) {
+      console.error("Failed to delete ticket type:", error);
+      toast.error("ล้มเหลวระหว่างลบประเภทตั๋ว");
     }
   };
 
@@ -129,6 +193,7 @@ const TicketTypeContent: React.FC = () => {
           <div style={{ flex: 1, color: "black" }}>ชื่อประเภทบัตร</div>
           <div style={{ flex: 1, color: "black" }}>หน่วย</div>
           <div style={{ flex: 1, color: "black" }}>การคำนวณ</div>
+          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
         </div>
         {currentItems.length > 0 ? (
           currentItems.map((ticketType, index) => (
@@ -151,6 +216,21 @@ const TicketTypeContent: React.FC = () => {
               </div>
               <div style={{ flex: 1, color: "black" }}>
                 {ticketType.Ticket_Type_Cal}
+              </div>
+              <div style={{ flex: 1 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEditOpen(ticketType)}
+                >
+                  รายละเอียด
+                </Button>
+                <IconButton
+                  onClick={() => handleDelete(ticketType.Ticket_Type_Id)}
+                  style={{ color: "red" }} // Delete button in red
+                >
+                  <DeleteIcon />
+                </IconButton>
               </div>
             </div>
           ))
@@ -254,6 +334,54 @@ const TicketTypeContent: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Edit Dialog */}
+      {editTicketType && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขประเภทบัตร</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Ticket_Type_Name"
+              label="Ticket Type Name"
+              type="text"
+              fullWidth
+              value={editTicketType.Ticket_Type_Name}
+              onChange={handleEditChange}
+            />
+            <TextField
+              margin="dense"
+              name="Ticket_Type_Unit"
+              label="Unit"
+              type="text"
+              fullWidth
+              value={editTicketType.Ticket_Type_Unit}
+              onChange={handleEditChange}
+            />
+            <TextField
+              select
+              margin="dense"
+              name="Ticket_Type_Cal"
+              label="Calculation (Y/N)"
+              fullWidth
+              value={editTicketType.Ticket_Type_Cal}
+              onChange={handleEditChange}
+            >
+              <MenuItem value="Y">Y</MenuItem>
+              <MenuItem value="N">N</MenuItem>
+            </TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 };

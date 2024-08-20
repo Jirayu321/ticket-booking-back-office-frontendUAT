@@ -6,49 +6,47 @@ import {
   DialogTitle,
   Button,
   TextField,
-  Select,
-  MenuItem,
   FormControl,
-  InputLabel,
+  IconButton,
+  Switch,
 } from "@mui/material";
-
-import { getPayBy, createPayBy } from "../../services/pay-by.service"; // Updated import
-import Header from "../common/header"; // Assuming you have a reusable Header component
+import DeleteIcon from "@mui/icons-material/Delete";
+import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
+import Header from "../common/header";
 import toast from "react-hot-toast";
 
 const PayByContent: React.FC = () => {
   const [payOptions, setPayOptions] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [newPayOption, setNewPayOption] = useState({
     name: "",
     desc: "",
-    active: "",
-    createdBy: "Admin", // Assuming 'Admin' is the creator
   });
+  const [editPayOption, setEditPayOption] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchPayOptions = async () => {
-      try {
-        const data = await getPayBy();
-        console.log("Fetched Pay Options:", data);
-
-        if (data && data.plans) {
-          setPayOptions(data.plans);
-        } else {
-          setPayOptions([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch pay options:", error);
-        toast.error("ไม่สามารถดึงตัวเลือกการจ่ายเงินได้");
+  const fetchPayOptions = async () => {
+    try {
+      const data = await getPayBy();
+      if (data && data.payByMethods) {
+        setPayOptions(data.payByMethods);
+      } else {
+        setPayOptions([]);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch pay options:", error);
+      toast.error("ไม่สามารถดึงตัวเลือกการจ่ายเงินได้");
+    }
+  };
 
+  useEffect(() => {
     fetchPayOptions();
   }, []);
 
   const handleOpen = () => {
+    setNewPayOption({ name: "", desc: "" }); // Reset fields when opening the create dialog
     setOpen(true);
   };
 
@@ -56,29 +54,86 @@ const PayByContent: React.FC = () => {
     setOpen(false);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditOpen = (payOption: any) => {
+    setEditPayOption(payOption);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditPayOption(null);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     setNewPayOption({
       ...newPayOption,
-      [event.target.name]: event.target.value,
+      [event.target.name as string]: event.target.value,
+    });
+  };
+
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    setEditPayOption({
+      ...editPayOption,
+      [event.target.name as string]: event.target.value,
     });
   };
 
   const handleCreate = async () => {
     try {
-      console.log("Creating new pay option:", newPayOption);
       await createPayBy({
         Pay_By_Name: newPayOption.name,
         Pay_By_Desc: newPayOption.desc,
-        Pay_By_Active: newPayOption.active,
-        Created_By: newPayOption.createdBy,
+        Pay_By_Active: "N", // Default to "ไม่เผยแพร่" (Inactive)
+        Created_By: "Admin", // Replace with actual creator
       });
-      toast.success("สร้างตัวเลือกการจ่ายเงินเรียบร้อยแล้ว");
-      // After creating a new pay option, you may want to refetch the data or update the state.
       setOpen(false);
-      // Optionally, refetch pay options or add the new option to the list.
+      fetchPayOptions(); // Refresh the list after creation
     } catch (error) {
       console.error("Failed to create pay option:", error);
       toast.error("ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้");
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await updatePayBy({
+        Pay_By_Id: editPayOption.Pay_By_Id,
+        Pay_By_Name: editPayOption.Pay_By_Name,
+        Pay_By_Desc: editPayOption.Pay_By_Desc,
+        Pay_By_Active: editPayOption.Pay_By_Active,
+      });
+      toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
+      handleEditClose();
+      fetchPayOptions(); // Refresh data after updating
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deletePayBy(id);
+      toast.success("ลบวิธีการจ่ายเงินสำเร็จ");
+      fetchPayOptions(); // Refresh data after deletion
+    } catch (error) {
+      console.error("Failed to delete pay by:", error);
+      toast.error("ล้มเหลวระหว่างลบวิธีการจ่ายเงิน");
+    }
+  };
+
+  const toggleActiveStatus = async (payOption: any) => {
+    try {
+      await updatePayBy({
+        Pay_By_Id: payOption.Pay_By_Id,
+        Pay_By_Name: payOption.Pay_By_Name,
+        Pay_By_Desc: payOption.Pay_By_Desc,
+        Pay_By_Active: payOption.Pay_By_Active === "Y" ? "N" : "Y",
+      });
+      toast.success("สถานะวิธีการจ่ายเงินได้รับการอัปเดตแล้ว");
+      fetchPayOptions(); // Refresh data after updating
+    } catch (error) {
+      console.error("Failed to update active status:", error);
+      toast.error("ล้มเหลวระหว่างอัปเดตสถานะวิธีการจ่ายเงิน");
     }
   };
 
@@ -94,7 +149,7 @@ const PayByContent: React.FC = () => {
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <Header title="ตัวเลือกการจ่ายเงิน" />
+      <Header title="วิธีการจ่ายเงิน" />
       <div
         style={{
           marginBottom: "20px",
@@ -138,7 +193,8 @@ const PayByContent: React.FC = () => {
           <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
           <div style={{ flex: 1, color: "black" }}>ชื่อ</div>
           <div style={{ flex: 2, color: "black" }}>คำอธิบาย</div>
-          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
+          <div style={{ flex: 1, color: "black"  }}>สถานะ</div>
+          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
         </div>
         {currentItems.length > 0 ? (
           currentItems.map((payOption, index) => (
@@ -153,24 +209,35 @@ const PayByContent: React.FC = () => {
               <div style={{ flex: 1, color: "black" }}>
                 {indexOfFirstItem + index + 1}
               </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {payOption.Pay_By_Name}
-              </div>
+              <div style={{ flex: 1, color: "black" }}>{payOption.Pay_By_Name}</div>
               <div style={{ flex: 2, color: "black" }}>
                 {payOption.Pay_By_Desc || "-"}
               </div>
-              <div
-                style={{
-                  flex: 1,
-                  color: "white",
-                  backgroundColor:
-                    payOption.Pay_By_Active === "Y" ? "green" : "gray",
-                  padding: "5px",
-                  borderRadius: "4px",
-                  textAlign: "center",
-                }}
-              >
-                {payOption.Pay_By_Active === "Y" ? "ใช้งาน" : "ไม่ใช้งาน"}
+              <div style={{ flex: 1, textAlign: "center" }}>
+                <Switch
+                  checked={payOption.Pay_By_Active === "Y"}
+                  onChange={() => toggleActiveStatus(payOption)}
+                  inputProps={{ "aria-label": "controlled" }}
+                  color="primary"
+                />
+                <span>
+                  {payOption.Pay_By_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                </span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEditOpen(payOption)}
+                >
+                  รายละเอียด
+                </Button>
+                <IconButton
+                  onClick={() => handleDelete(payOption.Pay_By_Id)}
+                  style={{ color: "red" }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </div>
             </div>
           ))
@@ -252,19 +319,6 @@ const PayByContent: React.FC = () => {
             value={newPayOption.desc}
             onChange={handleChange}
           />
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="active-label">Active (Y/N)</InputLabel>
-            <Select
-              labelId="active-label"
-              name="active"
-              value={newPayOption.active}
-              onChange={handleChange}
-              label="Active (Y/N)"
-            >
-              <MenuItem value="Y">Yes</MenuItem>
-              <MenuItem value="N">No</MenuItem>
-            </Select>
-          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
@@ -275,6 +329,41 @@ const PayByContent: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {editPayOption && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขวิธีการจ่ายเงิน</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Pay_By_Name"
+              label="วิธีการจ่ายเงิน"
+              type="text"
+              fullWidth
+              value={editPayOption.Pay_By_Name}
+              onChange={handleEditChange}
+            />
+            <TextField
+              margin="dense"
+              name="Pay_By_Desc"
+              label="คำอธิบาย"
+              type="text"
+              fullWidth
+              value={editPayOption.Pay_By_Desc}
+              onChange={handleEditChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 };

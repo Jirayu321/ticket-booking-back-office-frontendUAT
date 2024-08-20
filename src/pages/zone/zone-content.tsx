@@ -10,8 +10,11 @@ import {
   Select,
   InputLabel,
   FormControl,
+  IconButton,
+  Switch,
 } from "@mui/material";
-import { getAllPlans, createPlan } from "../../services/plan.service";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { getAllPlans, createPlan, patchPlan, deletePlan } from "../../services/plan.service";
 import { getAllPlanGroups } from "../../services/plan-group.service";
 import Header from "../common/header";
 import { toast } from "react-hot-toast";
@@ -20,47 +23,41 @@ const ZoneContent: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false); // For edit dialog
   const [newPlan, setNewPlan] = useState({
     name: "",
     desc: "",
     pic: "",
-    active: "",
+    active: "N", // Default to "N" (Inactive)
     planGroupId: "",
   });
+  const [editPlan, setEditPlan] = useState<any>(null); // For editing
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        console.log("Fetching plans...");  // Debugging
         const data = await getAllPlans();
-        console.log("Fetched Plans:", data);  // Debugging
-
         if (data && data.plans && Array.isArray(data.plans)) {
           setPlans(data.plans);
         } else {
           setPlans([]);
         }
       } catch (error) {
-        console.error("Failed to fetch plans:", error);  // Debugging
         toast.error("Failed to fetch plans");
       }
     };
 
     const fetchPlanGroups = async () => {
       try {
-        console.log("Fetching plan groups...");  // Debugging
         const data = await getAllPlanGroups();
-        console.log("Fetched Plan Groups:", data);  // Debugging
-
         if (data && data.planGroups && Array.isArray(data.planGroups)) {
           setPlanGroups(data.planGroups);
         } else {
           setPlanGroups([]);
         }
       } catch (error) {
-        console.error("Failed to fetch plan groups:", error);  // Debugging
         toast.error("Failed to fetch plan groups");
       }
     };
@@ -70,11 +67,22 @@ const ZoneContent: React.FC = () => {
   }, []);
 
   const handleOpen = () => {
+    setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" }); // Reset form values
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleEditOpen = (plan: any) => {
+    setEditPlan(plan);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditPlan(null);
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
@@ -85,19 +93,21 @@ const ZoneContent: React.FC = () => {
     }));
   };
 
-  const handleCreate = async () => {
-    if (newPlan.active !== "Y" && newPlan.active !== "N") {
-      alert("Active field must be either 'Y' or 'N'");
-      return;
-    }
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const { name, value } = event.target;
+    setEditPlan((prev: any) => ({
+      ...prev,
+      [name!]: value,
+    }));
+  };
 
+  const handleCreate = async () => {
     if (!newPlan.planGroupId) {
       toast.error("กรุณาเลือกกลุ่มแผน");
       return;
     }
 
     try {
-      console.log("Creating plan...");  // Debugging
       await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
@@ -105,13 +115,60 @@ const ZoneContent: React.FC = () => {
         Plan_Active: newPlan.active,
         PlanGroup_id: parseInt(newPlan.planGroupId, 10),
       });
-      console.log("Plan created successfully");  // Debugging
+      toast.success("สร้างแผนสำเร็จ");
+      setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" }); // Reset form after creation
+      setOpen(false);
       const data = await getAllPlans();
       setPlans(data.plans);
-      handleClose();
     } catch (error) {
-      console.error("Failed to create plan:", error);  // Debugging
       toast.error("ไม่สามารถสร้างแผนได้");
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editPlan) return;
+
+    try {
+      await patchPlan({
+        Plan_id: editPlan.Plan_id,
+        Plan_Desc: editPlan.Plan_Desc,
+        Plan_Name: editPlan.Plan_Name,
+        Plan_Pic: editPlan.Plan_Pic,
+        Plan_Active: editPlan.Plan_Active,
+        PlanGroup_id: editPlan.PlanGroup_id,
+      });
+      toast.success("อัพเดทแผนสำเร็จ");
+      handleEditClose();
+      const data = await getAllPlans();
+      setPlans(data.plans);
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตแผน");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deletePlan(id);
+      toast.success("ลบแผนสำเร็จ");
+      const data = await getAllPlans();
+      setPlans(data.plans);
+    } catch (error) {
+      toast.error("Failed to delete plan");
+    }
+  };
+
+  const toggleActiveStatus = async (plan: any) => {
+    try {
+      const updatedPlan = {
+        ...plan,
+        Plan_Active: plan.Plan_Active === "Y" ? "N" : "Y",
+      };
+      await patchPlan(updatedPlan);
+      toast.success("อัพเดทสถานะสำเร็จ");
+      const data = await getAllPlans();
+      setPlans(data.plans);
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตสถานะ");
     }
   };
 
@@ -172,6 +229,7 @@ const ZoneContent: React.FC = () => {
           <div style={{ flex: 1, color: "black" }}>ชื่อโซน</div>
           <div style={{ flex: 2, color: "black" }}>คำอธิบาย</div>
           <div style={{ flex: 1, color: "black" }}>สถานะ</div>
+          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
         </div>
         {currentItems.length > 0 ? (
           currentItems.map((plan, index) => (
@@ -188,8 +246,30 @@ const ZoneContent: React.FC = () => {
               </div>
               <div style={{ flex: 1, color: "black" }}>{plan.Plan_Name}</div>
               <div style={{ flex: 2, color: "black" }}>{plan.Plan_Desc}</div>
-              <div style={{ flex: 1, color: "black" }}>
-                {plan.Plan_Active === "Y" ? "Active" : "Inactive"}
+              <div style={{ flex: 1, textAlign: "center" }}>
+                <Switch
+                  checked={plan.Plan_Active === "Y"}
+                  onChange={() => toggleActiveStatus(plan)}
+                  color="primary"
+                />
+                <span style={{ color: "black" }}>
+                  {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                </span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEditOpen(plan)}
+                >
+                  รายละเอียด
+                </Button>
+                <IconButton
+                  onClick={() => handleDelete(plan.Plan_id)}
+                  style={{ color: "red" }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </div>
             </div>
           ))
@@ -281,19 +361,6 @@ const ZoneContent: React.FC = () => {
             onChange={handleChange}
           />
           <FormControl fullWidth margin="dense">
-            <InputLabel id="active-label">Active (Y/N)</InputLabel>
-            <Select
-              labelId="active-label"
-              name="active"
-              value={newPlan.active}
-              onChange={handleChange}
-              label="Active (Y/N)"
-            >
-              <MenuItem value="Y">Yes</MenuItem>
-              <MenuItem value="N">No</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="dense">
             <InputLabel id="plan-group-label">ผังร้าน</InputLabel>
             <Select
               labelId="plan-group-label"
@@ -319,6 +386,67 @@ const ZoneContent: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Edit Dialog */}
+      {editPlan && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขโซน</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Plan_Name"
+              label="ชื่อโซน"
+              type="text"
+              fullWidth
+              value={editPlan.Plan_Name}
+              onChange={handleEditChange}
+            />
+            <TextField
+              margin="dense"
+              name="Plan_Desc"
+              label="คำอธิบาย"
+              type="text"
+              fullWidth
+              value={editPlan.Plan_Desc}
+              onChange={handleEditChange}
+            />
+            <TextField
+              margin="dense"
+              name="Plan_Pic"
+              label="รูปภาพ"
+              type="text"
+              fullWidth
+              value={editPlan.Plan_Pic}
+              onChange={handleEditChange}
+            />
+            <FormControl fullWidth margin="dense">
+              <InputLabel id="plan-group-label-edit">ผังร้าน</InputLabel>
+              <Select
+                labelId="plan-group-label-edit"
+                name="PlanGroup_id"
+                value={editPlan.PlanGroup_id}
+                onChange={handleEditChange}
+                fullWidth
+              >
+                {planGroups.map((group) => (
+                  <MenuItem key={group.PlanGroup_id} value={group.PlanGroup_id}>
+                    {group.PlanGroup_Name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 };

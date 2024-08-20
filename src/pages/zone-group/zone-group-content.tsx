@@ -11,21 +11,29 @@ import {
   FormControl,
   InputLabel,
   IconButton,
+  Switch,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getAllPlanGroups, createPlanGroup } from "../../services/plan-group.service";
+import {
+  getAllPlanGroups,
+  createPlanGroup,
+  updatePlanGroup,
+  deletePlanGroup,
+} from "../../services/plan-group.service";
 import { getPlansList } from "../../services/plan-list.service";
-import Header from "../common/header"; // Assuming you have a reusable Header component
+import Header from "../common/header"; 
 import toast from "react-hot-toast";
 
 const ZoneGroupContent: React.FC = () => {
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false); // For edit dialog
   const [newPlanGroup, setNewPlanGroup] = useState({
     name: "",
-    active: "",
+    active: "N", // Default to inactive
   });
+  const [editPlanGroup, setEditPlanGroup] = useState<any>(null); // For editing
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -47,8 +55,7 @@ const ZoneGroupContent: React.FC = () => {
           setPlans([]);
         }
       } catch (error) {
-        console.error("Failed to fetch data:", error);
-        alert(error);
+        toast.error("Failed to fetch data");
       }
     };
 
@@ -61,6 +68,7 @@ const ZoneGroupContent: React.FC = () => {
   };
 
   const handleOpen = () => {
+    setNewPlanGroup({ name: "", active: "N" }); // Reset form values
     setOpen(true);
   };
 
@@ -68,38 +76,91 @@ const ZoneGroupContent: React.FC = () => {
     setOpen(false);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewPlanGroup({
-      ...newPlanGroup,
-      [event.target.name]: event.target.value,
-    });
+  const handleEditOpen = (planGroup: any) => {
+    setEditPlanGroup(planGroup);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditPlanGroup(null);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const { name, value } = event.target;
+    setNewPlanGroup((prev) => ({
+      ...prev,
+      [name!]: value,
+    }));
+  };
+
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const { name, value } = event.target;
+    setEditPlanGroup((prev: any) => ({
+      ...prev,
+      [name!]: value,
+    }));
   };
 
   const handleCreate = async () => {
-    if (newPlanGroup.active !== "Y" && newPlanGroup.active !== "N") {
-      alert("Active field must be either 'Y' or 'N'");
-      return;
-    }
-
     try {
       await createPlanGroup({
         PlanGroup_Name: newPlanGroup.name,
         PlanGroup_Active: newPlanGroup.active,
-        Created_By: "Admin", // Replace with actual user or dynamic data
+        Created_By: "Admin", 
       });
-      // Refresh the plan groups list after creating a new one
+      toast.success("สร้างผังร้านสำเร็จ");
+      setNewPlanGroup({ name: "", active: "N" }); // Reset form after creation
+      setOpen(false);
       const data = await getAllPlanGroups();
       setPlanGroups(data.planGroups);
-      handleClose();
     } catch (error) {
-      console.error("Failed to create plan group:", error);
-      toast.error("Failed to create plan group: " + error);
+      toast.error("Failed to create plan group");
     }
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Deleting plan group with id:", id);
-    // Add your delete plan group logic here
+  const handleSaveEdit = async () => {
+    if (!editPlanGroup) return;
+
+    try {
+      await updatePlanGroup({
+        PlanGroup_id: editPlanGroup.PlanGroup_id,
+        PlanGroup_Name: editPlanGroup.PlanGroup_Name,
+        PlanGroup_Active: editPlanGroup.PlanGroup_Active,
+      });
+      toast.success("อัพเดทผังร้านสำเร็จ");
+      handleEditClose();
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตผังร้าน");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deletePlanGroup(id);
+      toast.success("ลบผังร้านสำเร็จ");
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      toast.error("Failed to delete plan group");
+    }
+  };
+
+  const toggleActiveStatus = async (planGroup: any) => {
+    try {
+      const updatedPlanGroup = {
+        ...planGroup,
+        PlanGroup_Active: planGroup.PlanGroup_Active === "Y" ? "N" : "Y",
+      };
+      await updatePlanGroup(updatedPlanGroup);
+      toast.success("อัพเดทสถานะสำเร็จ");
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตสถานะ");
+    }
   };
 
   const handleClick = (pageNumber: number) => {
@@ -159,7 +220,7 @@ const ZoneGroupContent: React.FC = () => {
           <div style={{ flex: 1, color: "black" }}>รหัสผัง</div>
           <div style={{ flex: 2, color: "black" }}>ชื่อผังร้าน</div>
           <div style={{ flex: 1, color: "black" }}>จำนวนโซน</div>
-          <div style={{ flex: 1, color: "black" }}>ใช้งาน</div>
+          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
           <div style={{ flex: 1, color: "black" }}>จัดการ</div>
         </div>
         {currentItems.length > 0 ? (
@@ -184,23 +245,27 @@ const ZoneGroupContent: React.FC = () => {
               <div style={{ flex: 1, color: "black", textAlign: "center" }}>
                 {calculatePlanCount(planGroup.PlanGroup_id)}
               </div>
-              <div
-                style={{
-                  flex: 1,
-                  color: "white",
-                  backgroundColor:
-                    planGroup.PlanGroup_Active === "Y" ? "green" : "gray",
-                  padding: "5px",
-                  borderRadius: "4px",
-                  textAlign: "center",
-                }}
-              >
-                {planGroup.PlanGroup_Active === "Y" ? "ใช้งาน" : "ไม่ใช้งาน"}
+              <div style={{ flex: 1, textAlign: "center" }}>
+                <Switch
+                  checked={planGroup.PlanGroup_Active === "Y"}
+                  onChange={() => toggleActiveStatus(planGroup)}
+                  color="primary"
+                />
+                <span style={{ color: "black" }}>
+                  {planGroup.PlanGroup_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                </span>
               </div>
-              <div style={{ flex: 1, color: "black", textAlign: "center" }}>
+              <div style={{ flex: 1, textAlign: "center" }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEditOpen(planGroup)}
+                >
+                  รายละเอียด
+                </Button>
                 <IconButton
                   onClick={() => handleDelete(planGroup.PlanGroup_id)}
-                  color="secondary"
+                  style={{ color: "red" }}
                 >
                   <DeleteIcon />
                 </IconButton>
@@ -299,6 +364,46 @@ const ZoneGroupContent: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Edit Dialog */}
+      {editPlanGroup && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขผังร้าน</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="PlanGroup_Name"
+              label="ชื่อผังร้าน"
+              type="text"
+              fullWidth
+              value={editPlanGroup.PlanGroup_Name}
+              onChange={handleEditChange}
+            />
+            <FormControl fullWidth margin="dense">
+              <InputLabel id="active-label-edit">Active (Y/N)</InputLabel>
+              <Select
+                labelId="active-label-edit"
+                name="PlanGroup_Active"
+                value={editPlanGroup.PlanGroup_Active}
+                onChange={handleEditChange}
+                label="Active (Y/N)"
+              >
+                <MenuItem value="Y">Yes</MenuItem>
+                <MenuItem value="N">No</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 };
