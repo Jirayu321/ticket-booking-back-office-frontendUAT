@@ -15,11 +15,11 @@ const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
   const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZones((prev) => ({
       ...prev,
-      [zoneName]: !prev[zoneName],
+      [zoneId]: !prev[zoneId],
     }));
 
     if (!plans[zoneId]) {
-      onSetZoneData(zoneName, {
+      onSetZoneData(zoneId, {
         ticketType: "",
         seatCount: 0,
         seatPerTicket: 0,
@@ -29,6 +29,7 @@ const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
     }
     onSetZoneData(zoneId, { zoneName });
   };
+
   return (
     <Stack className="w-full">
       {plans.map((plan) => (

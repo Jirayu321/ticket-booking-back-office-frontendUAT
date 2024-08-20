@@ -4,6 +4,8 @@ import styles from "./plan.module.css";
 import { Collapse } from "@mui/material";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
+import deleteOnIcon from "/delete-on.svg";
+import dayjs from "dayjs";
 
 type PlanProps = {
   plan: any;
@@ -13,12 +15,12 @@ type PlanProps = {
 };
 
 const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
-  const { Plan_id, Plan_Name, Plan_Desc } = plan;
+  const { Plan_Id, Plan_Name, Plan_Desc } = plan;
   return (
     <div className={styles.planContainer}>
       <Header
         onExpand={onExpand}
-        Plan_id={Plan_id}
+        Plan_Id={Plan_Id}
         Plan_Name={Plan_Name}
         Plan_Desc={Plan_Desc}
       />
@@ -39,24 +41,24 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
 
 type HeaderProps = {
   onExpand: any;
-  Plan_id: number;
+  Plan_Id: number;
   Plan_Name: string;
   Plan_Desc: string;
 };
 
 const Header: FC<HeaderProps> = ({
   onExpand,
-  Plan_id,
+  Plan_Id,
   Plan_Name,
   Plan_Desc,
 }) => {
   return (
     <header
-      onClick={() => onExpand(Plan_id, Plan_Name)}
+      onClick={() => onExpand(Plan_Id, Plan_Name)}
       className={styles.header}
     >
       <h4>
-        {Plan_id}. {Plan_Name}
+        {Plan_Id}. {Plan_Name}
       </h4>
       <h4>{Plan_Desc}</h4>
     </header>
@@ -87,7 +89,7 @@ const Body: FC<BodyProps> = ({
   columns,
 }) => {
   return (
-    <Collapse in={expandedZones[zone.Plan_id]} timeout="auto" unmountOnExit>
+    <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
       <div className="zone-content">
         <div className="ticket-layout">
           <div className="empty-image">
@@ -98,9 +100,9 @@ const Body: FC<BodyProps> = ({
               <label>TICKET TYPE*</label>
               <select
                 className="ticket-type-select"
-                value={zones[zone.Plan_id]?.ticketType || ""}
+                value={zones[zone.Plan_Id]?.ticketType || ""}
                 onChange={(e) =>
-                  handleInputChange(zone.Plan_id, "ticketType", e.target.value)
+                  handleInputChange(zone.Plan_Id, "ticketType", e.target.value)
                 }
               >
                 <option value="">เลือกประเภทตั๋ว</option>
@@ -119,10 +121,10 @@ const Body: FC<BodyProps> = ({
                   min="0"
                   placeholder="จำนวนบัตร/โซน*"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={zones[zone.Plan_id]?.seatCount || 0}
+                  value={zones[zone.Plan_Id]?.seatCount || 0}
                   onChange={(e) =>
                     handleInputChange(
-                      zone.Plan_id,
+                      zone.Plan_Id,
                       "seatCount",
                       Number(e.target.value)
                     )
@@ -136,10 +138,10 @@ const Body: FC<BodyProps> = ({
                   min="0"
                   placeholder="จำนวนที่นั่ง/ตั๋ว"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={zones[zone.Plan_id]?.seatPerTicket || 0}
+                  value={zones[zone.Plan_Id]?.seatPerTicket || 0}
                   onChange={(e) =>
                     handleInputChange(
-                      zone.Plan_id,
+                      zone.Plan_Id,
                       "seatPerTicket",
                       Number(e.target.value)
                     )
@@ -150,11 +152,11 @@ const Body: FC<BodyProps> = ({
           </div>
         </div>
         <div className="price-section">
-          <h3>ราคา ({zones[zone.Plan_id]?.prices?.length || 0})</h3>
+          <h3>ราคา ({zones[zone.Plan_Id]?.prices?.length || 0})</h3>
           <div style={{ height: "auto", width: "100%" }}>
             <DataGrid
-              rows={zones[zone.Plan_id]?.prices || []}
-              columns={columns.map((col) => ({
+              rows={zones[zone.Plan_Id]?.prices || []}
+              columns={columns.map((col: any) => ({
                 ...col,
                 renderCell: (params: GridRenderCellParams) => {
                   if (col.field === "startDate" || col.field === "endDate") {
@@ -165,7 +167,7 @@ const Body: FC<BodyProps> = ({
                         }
                         onChange={(date) =>
                           handlePriceChange(
-                            zone.Plan_id,
+                            zone.Plan_Id,
                             params.row.id,
                             col.field,
                             date ? date.toISOString() : ""
@@ -183,7 +185,7 @@ const Body: FC<BodyProps> = ({
                         value={params.value}
                         onChange={(e) =>
                           handlePriceChange(
-                            zone.Plan_id,
+                            zone.Plan_Id,
                             params.row.id,
                             col.field,
                             e.target.value
@@ -204,7 +206,7 @@ const Body: FC<BodyProps> = ({
                         alt="delete-on"
                         style={{ cursor: "pointer" }}
                         onClick={() =>
-                          removeZonePrice(zone.Plan_id, params.row.id)
+                          removeZonePrice(zone.Plan_Id, params.row.id)
                         }
                       />
                     );
@@ -212,7 +214,7 @@ const Body: FC<BodyProps> = ({
                   return null;
                 },
               }))}
-              pageSize={zones[zone.Plan_id]?.prices?.length || 0}
+              pageSize={zones[zone.Plan_Id]?.prices?.length || 0}
               autoHeight
               disableSelectionOnClick
               hideFooterPagination
@@ -222,7 +224,7 @@ const Body: FC<BodyProps> = ({
           <button
             type="button"
             className="add-price"
-            onClick={() => addZonePrice(zone.Plan_id)}
+            onClick={() => addZonePrice(zone.Plan_Id)}
           >
             + เพิ่มราคาบัตร
           </button>
@@ -230,10 +232,10 @@ const Body: FC<BodyProps> = ({
         <div className="table-input-method-section">
           <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
           <select
-            value={zones[zone.Plan_id]?.tableInputMethod || ""}
+            value={zones[zone.Plan_Id]?.tableInputMethod || ""}
             onChange={(e) =>
               handleInputChange(
-                zone.Plan_id,
+                zone.Plan_Id,
                 "tableInputMethod",
                 e.target.value
               )
@@ -243,24 +245,24 @@ const Body: FC<BodyProps> = ({
             <option value="">เลือกรูปแบบการระบุ</option>
             <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
             <option value="2">
-              2.รันจาก 1 ถึง {zones[zone.Plan_id]?.seatCount || 0}
+              2.รันจาก 1 ถึง {zones[zone.Plan_Id]?.seatCount || 0}
             </option>
             <option value="3">
               3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[zone.Plan_id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-              {zones[zone.Plan_id]?.seatCount || 0})
+              {zones[zone.Plan_Id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
+              {zones[zone.Plan_Id]?.seatCount || 0})
             </option>
             <option value="4">
               4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[zone.Plan_id]?.seatCount || 0} ([?] 1- [?]{" "}
-              {zones[zone.Plan_id]?.seatCount || 0})
+              {zones[zone.Plan_Id]?.seatCount || 0} ([?] 1- [?]{" "}
+              {zones[zone.Plan_Id]?.seatCount || 0})
             </option>
             <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
           </select>
           {/* <GenerateBoxes
-            method={zones[zone.Plan_id]?.tableInputMethod || "1"}
-            seatNumber={zones[zone.Plan_id]?.seatCount || 0}
-            zoneId={zone.Plan_id}
+            method={zones[zone.Plan_Id]?.tableInputMethod || "1"}
+            seatNumber={zones[zone.Plan_Id]?.seatCount || 0}
+            zoneId={zone.Plan_Id}
           /> */}
         </div>
       </div>

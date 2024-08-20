@@ -28,8 +28,6 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
 
   useSyncPlanGroup(viewEventStocks);
 
-  console.log(selectedPlanGroupId)
-
   if (isLoadingPlanGroups || isLoadingViewEventStocks)
     return <CircularProgress />;
 
