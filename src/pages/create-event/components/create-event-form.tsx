@@ -10,6 +10,7 @@ import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
+import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ const CreateEventForm = () => {
     setEventDateTime,
     setStatus,
   } = useEventStore();
+
+  useWarnChangePage();
 
   const [publish, setPublish] = useState(false);
 

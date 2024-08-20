@@ -259,7 +259,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           return (
                             <DateTimePickerComponent
                               controlledValue={
-                                params.value ? dayjs(params.value) : null
+                                params.value
+                                  ? dayjs(params.value)
+                                  : dayjs(new Date())
                               }
                               onChange={(date) =>
                                 handlePriceChange(

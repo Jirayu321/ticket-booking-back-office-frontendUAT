@@ -47,3 +47,7 @@ export function sortTicketNo(tn1: any, tn2: any) {
   const tn2Num = tn2Match ? parseInt(tn2Match[0]) : 0;
   return tn1Num - tn2Num;
 }
+
+export function addHours(date: Date, hours: number) {
+  return new Date(date.getTime() + hours * 60 * 60 * 1000);
+}

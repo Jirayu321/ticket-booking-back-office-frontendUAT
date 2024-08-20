@@ -176,6 +176,7 @@ export function useZonePriceForm() {
 
     console.log(zones)
     const zoneDataArray = Object.entries(zones).filter(([zoneId, zoneData]) => {
+      if (!Object.keys(zoneData).includes("seatPerTicket")) return true;
       if (!zoneData.ticketType || zoneData.ticketType === "") {
         throw new Error("กรุณากรอกประเภทของตั๋วสำหรับโซนทั้งหมด");
       }
