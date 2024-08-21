@@ -1,4 +1,7 @@
 import { authAxiosClient } from "../config/axios.config";
+import { addHours } from "../lib/util";
+
+const HOURS_DIFF = 7;
 
 export async function createLogEventPrice({
   Created_By,
@@ -22,13 +25,16 @@ export async function createLogEventPrice({
   try {
     const response = await authAxiosClient.post("/log-event-price", {
       Created_By,
-      Created_Date,
-      End_Datetime,
+      Created_Date : addHours(new Date(Created_Date), HOURS_DIFF).toISOString(),
+      End_Datetime: addHours(new Date(End_Datetime), HOURS_DIFF).toISOString(),
       Event_Id,
       PlanGroup_Id,
       Plan_Id,
       Plan_Price,
-      Start_Datetime,
+      Start_Datetime: addHours(
+        new Date(Start_Datetime),
+        HOURS_DIFF
+      ).toISOString(),
     });
 
     if (response.status !== 200) throw new Error();

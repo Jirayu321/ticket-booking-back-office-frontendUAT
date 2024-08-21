@@ -8,6 +8,9 @@ import deleteOnIcon from "/delete-on.svg";
 import { useZoneStore } from "../form-store";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { Price, ZoneData } from "../../edit-event/type";
+import { addHours } from "../../../lib/util";
+
+const HOURS_DIFF = 7;
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -259,7 +262,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           return (
                             <DateTimePickerComponent
                               controlledValue={
-                                params.value ? dayjs(params.value) : null
+                                params.value
+                                  ? dayjs(params.value)
+                                  : dayjs(null)
                               }
                               onChange={(date) =>
                                 handlePriceChange(

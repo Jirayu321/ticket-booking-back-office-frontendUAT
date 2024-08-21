@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
-  FormControl,
   IconButton,
   Switch,
+<<<<<<< HEAD
   Table,
   TableBody,
   TableCell,
@@ -17,16 +16,19 @@ import {
   TableRow,
   Paper,
   Pagination,
+=======
+  TextField
+>>>>>>> 2d52d7aa76c3d0fb9a8d14a108911bd8d2acfd76
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
-  getPayOption,
   createPayOption,
-  updatePayOption,
   deletePayOption,
+  getPayOption,
+  updatePayOption,
 } from "../../services/pay-option.service";
 import Header from "../common/header";
-import { toast } from "react-hot-toast";
 
 const PayOptionContent: React.FC = () => {
   const [payOptions, setPayOptions] = useState<any[]>([]);
@@ -168,7 +170,7 @@ const PayOptionContent: React.FC = () => {
   const currentItems = payOptions.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div>
       <Header title="ตัวเลือกการจ่ายเงิน" />
       <div
         style={{

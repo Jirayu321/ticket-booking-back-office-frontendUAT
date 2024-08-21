@@ -22,7 +22,12 @@ import {
   Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getAllPlans, createPlan, patchPlan, deletePlan } from "../../services/plan.service";
+import {
+  getAllPlans,
+  createPlan,
+  patchPlan,
+  deletePlan,
+} from "../../services/plan.service";
 import { getAllPlanGroups } from "../../services/plan-group.service";
 import Header from "../common/header";
 import { toast } from "react-hot-toast";
@@ -87,7 +92,11 @@ const ZoneContent: React.FC = () => {
     setEditPlan(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setNewPlan((prev) => ({
       ...prev,
@@ -95,7 +104,11 @@ const ZoneContent: React.FC = () => {
     }));
   };
 
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleEditChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setEditPlan((prev: any) => ({
       ...prev,
@@ -200,7 +213,7 @@ const ZoneContent: React.FC = () => {
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div>
       <Header title="โซน" />
       <div
         style={{

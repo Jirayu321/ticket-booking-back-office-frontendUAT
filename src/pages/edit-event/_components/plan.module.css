@@ -1,17 +1,16 @@
 .container {
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-bottom: 10px;
-  margin-left: 15px;
   padding: 10px;
-  width: 90%;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   background-color: rgba(207, 183, 11, 0.1);
-  padding: 10px;
+  padding: 0 10px;
   border-radius: 4px;
   cursor: pointer;
   color: black;
@@ -39,4 +38,10 @@
 
 .content {
   padding: 10px;
+}
+
+.ticketNoSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 20px
 }

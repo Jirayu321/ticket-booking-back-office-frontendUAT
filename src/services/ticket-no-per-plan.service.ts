@@ -1,5 +1,29 @@
 import { authAxiosClient } from "../config/axios.config";
 
+// ==================== READ ====================
+export async function getAllTicketNoPerPlanByEventId({
+  eventId,
+  planId,
+  planGroupId,
+}: {
+  eventId: number;
+  planId: number;
+  planGroupId: number;
+}) {
+  try {
+    const response = await authAxiosClient.get(
+      `/ticket-no-per-plan/${eventId}?planId=${planId}&planGroupId=${planGroupId}`
+    );
+
+    if (response.status !== 200) throw new Error();
+
+    return response.data.ticketNoPerPlans;
+  } catch (error: any) {
+    throw new Error("ล้มเหลวระหว่างดึงข้อมูลเลขตั๋ว");
+  }
+}
+
+// ==================== CREATE ====================
 export async function createTicketNoPerPlan({
   Event_Id,
   PlanGroup_Id,

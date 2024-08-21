@@ -31,7 +31,9 @@ const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
   };
 
   return (
-    <Stack className="w-full">
+    <Stack sx={{
+      marginY : 2
+    }} gap={1}>
       {plans.map((plan) => (
         <Plan
           key={plan.Plan_id}

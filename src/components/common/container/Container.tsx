@@ -1,5 +1,6 @@
 import { FC, ReactNode } from "react";
-import Sidebar from "../Sidebar/Sidebar";
+import Sidebar from "../../Sidebar/Sidebar";
+import styles from "./container.module.css";
 
 type ContainerProp = {
   children: ReactNode;
@@ -7,9 +8,9 @@ type ContainerProp = {
 
 const Container: FC<ContainerProp> = ({ children }) => {
   return (
-    <div className="flex h-[100vh] overflow-y-scroll">
+    <div className={styles.container}>
       <Sidebar />
-      <div className="content">{children}</div>
+      <div className={styles.content}>{children}</div>
     </div>
   );
 };

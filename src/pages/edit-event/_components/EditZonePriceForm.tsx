@@ -40,7 +40,7 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
           optionValues={planGroups?.map((pg: any) => pg.PlanGroup_id)}
           value={selectedPlanGroupId}
           setter={setSelectedPlanGroupId}
-          // disabled={true}
+          disabled={true}
           placeholder="เลือกผังร้าน"
         />
       ) : null}

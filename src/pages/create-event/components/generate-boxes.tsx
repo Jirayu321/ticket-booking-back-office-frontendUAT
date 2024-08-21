@@ -17,8 +17,8 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
   const [startNumber, setStartNumber] = useState<number | null>(
     zones[zoneId]?.startNumber || null
   );
+
   const [prefix, setPrefix] = useState<string>(zones[zoneId]?.prefix || "");
-  const [prefixChanged, setPrefixChanged] = useState<boolean>(false);
   const [inputValues, setInputValues] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,23 +36,21 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
 
   useEffect(() => {
     setStartNumberAndPrefix(zoneId, startNumber, prefix);
-  }, [startNumber, prefix, zoneId, inputValues]);
-
-  // Effect to detect when prefix changes and mark it as changed
-  useEffect(() => {
-    if (prefix !== zones[zoneId]?.prefix) {
-      setPrefixChanged(true);
-    }
-  }, [prefix, zoneId, zones]);
+  }, [startNumber, prefix, zoneId]);
 
   useEffect(() => {
-    if (prefixChanged) {
+    const updatedValues = generateBoxesData();
+    setInputValues(updatedValues);
+    setTableValues(zoneId, updatedValues);
+  }, [prefix, seatNumber, method, zoneId]);
+
+  useEffect(() => {
+    if (startNumber !== null) {
       const updatedValues = generateBoxesData();
       setInputValues(updatedValues);
       setTableValues(zoneId, updatedValues);
-      setPrefixChanged(false);
     }
-  }, [prefixChanged, prefix, seatNumber, method, startNumber, zoneId]);
+  }, [seatNumber, method, zoneId]);
 
   const handleInputChange = (index: number, value: string) => {
     const newValues = [...inputValues];
@@ -65,7 +63,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
     let boxesData = [];
     if (method === "1") {
       for (let i = 0; i < seatNumber; i++) {
-        boxesData.push(inputValues[i] || "");
+        boxesData.push(inputValues[i] ? inputValues[i].trimEnd() : "");
       }
     } else if (
       (method === "2" || method === "3" || method === "4") &&
@@ -82,7 +80,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       }
     } else if (method === "5") {
       for (let i = 0; i < seatNumber; i++) {
-        boxesData.push("ไม่ระบุ");
+        boxesData.push("");
       }
     }
     return boxesData;

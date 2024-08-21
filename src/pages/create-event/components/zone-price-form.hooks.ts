@@ -174,26 +174,19 @@ export function useZonePriceForm() {
       };
     }
 
+    console.log(zones)
     const zoneDataArray = Object.entries(zones).filter(([zoneId, zoneData]) => {
+      if (!Object.keys(zoneData).includes("seatPerTicket")) return true;
       if (!zoneData.ticketType || zoneData.ticketType === "") {
-        return {
-          isValid: false,
-          message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุ ticketType สำหรับโซน ${zoneId}`,
-        };
+        throw new Error("กรุณากรอกประเภทของตั๋วสำหรับโซนทั้งหมด");
       }
       if (zoneData.seatCount <= 0) {
-        return {
-          isValid: false,
-          message: `ข้อผิดพลาดในการตรวจสอบ: seatCount ต้องมากกว่า 0 สำหรับโซน ${zoneId}`,
-        };
+        throw new Error("กรุณากรอกจำนวนที่นั่งสำหรับโซนทั้งหมด");
       }
       if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
-        return {
-          isValid: false,
-          message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุ seatPerTicket และต้องมีค่ามากกว่า 0 สำหรับโซน ${zoneId}`,
-        };
+        throw new Error("กรุณากรอกจำนวนที่นั่งต่อตั๋วสำหรับโซนทั้งหมด");
       }
-      return { isValid: true, message: "" };
+      return true;
     });
 
     if (zoneDataArray.length === 0) {
