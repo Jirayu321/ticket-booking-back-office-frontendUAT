@@ -1,6 +1,6 @@
 .sidebar {
-  width: 250px;
-  height: 100vh; /* Full height */
+  width: 12%;
+  height: 100vh;
   background-color: #1a1a1a;
   color: #ffffff;
   display: flex;
@@ -50,6 +50,7 @@
   color: black; /* Ensure text color is applied */
   width: 82%;
 }
+
 .menu-item.active {
   background-color: #ffd700; /* Ensure background color is applied */
   width: 88%;

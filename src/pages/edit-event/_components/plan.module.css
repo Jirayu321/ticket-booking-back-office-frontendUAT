@@ -1,9 +1,8 @@
 .container {
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-bottom: 10px;
-  margin-left: 15px;
   padding: 10px;
+  box-sizing: border-box;
   width: 100%;
 }
 
@@ -11,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   background-color: rgba(207, 183, 11, 0.1);
-  padding: 10px;
+  padding: 0 10px;
   border-radius: 4px;
   cursor: pointer;
   color: black;

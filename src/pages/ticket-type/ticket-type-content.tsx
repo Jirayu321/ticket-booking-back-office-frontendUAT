@@ -147,7 +147,7 @@ const TicketTypeContent: React.FC = () => {
   const totalPages = Math.ceil(ticketTypes.length / itemsPerPage);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div>
       <Header title="ประเภทบัตร" />
       <div
         style={{

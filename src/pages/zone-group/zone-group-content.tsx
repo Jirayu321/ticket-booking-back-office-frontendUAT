@@ -21,7 +21,7 @@ import {
   deletePlanGroup,
 } from "../../services/plan-group.service";
 import { getPlansList } from "../../services/plan-list.service";
-import Header from "../common/header"; 
+import Header from "../common/header";
 import toast from "react-hot-toast";
 
 const ZoneGroupContent: React.FC = () => {
@@ -86,7 +86,11 @@ const ZoneGroupContent: React.FC = () => {
     setEditPlanGroup(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setNewPlanGroup((prev) => ({
       ...prev,
@@ -94,7 +98,11 @@ const ZoneGroupContent: React.FC = () => {
     }));
   };
 
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleEditChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setEditPlanGroup((prev: any) => ({
       ...prev,
@@ -107,7 +115,7 @@ const ZoneGroupContent: React.FC = () => {
       await createPlanGroup({
         PlanGroup_Name: newPlanGroup.name,
         PlanGroup_Active: newPlanGroup.active,
-        Created_By: "Admin", 
+        Created_By: "Admin",
       });
       toast.success("สร้างผังร้านสำเร็จ");
       setNewPlanGroup({ name: "", active: "N" }); // Reset form after creation
@@ -174,7 +182,7 @@ const ZoneGroupContent: React.FC = () => {
   const totalPages = Math.ceil(planGroups.length / itemsPerPage);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div>
       <Header title="ผังร้าน" />
       <div
         style={{
@@ -252,7 +260,9 @@ const ZoneGroupContent: React.FC = () => {
                   color="primary"
                 />
                 <span style={{ color: "black" }}>
-                  {planGroup.PlanGroup_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                  {planGroup.PlanGroup_Active === "Y"
+                    ? "เผยแพร่"
+                    : "ไม่เผยแพร่"}
                 </span>
               </div>
               <div style={{ flex: 1, textAlign: "center" }}>

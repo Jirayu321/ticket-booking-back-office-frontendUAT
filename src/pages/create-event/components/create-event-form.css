@@ -1,9 +1,6 @@
 /* Form Layout */
 .create-new-event {
-  position: absolute;
-  top: 0;
   left: 157px;
-  width: 1763px;
   height: 100%; /* Set height to 100% or a specific value */
   padding-left: 0;
   background-color: #fff;

@@ -1,16 +1,12 @@
-import React from 'react';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import AllEventContent from './all-event-content';
-import './all-event.css';
+import { FC } from "react";
+import Container from "../../components/common/container/Container";
+import AllEventContent from "./all-event-content";
 
-const AllEvent: React.FC = () => {
+const AllEvent: FC = () => {
   return (
-    <div className="main-container">
-      <Sidebar />
-      <div className="content">
-        <AllEventContent />
-      </div>
-    </div>
+    <Container>
+      <AllEventContent />
+    </Container>
   );
 };
 

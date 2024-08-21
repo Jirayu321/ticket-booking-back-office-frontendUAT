@@ -11,7 +11,12 @@ import {
   Switch,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
+import {
+  getPayBy,
+  createPayBy,
+  updatePayBy,
+  deletePayBy,
+} from "../../services/pay-by.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
 
@@ -64,14 +69,22 @@ const PayByContent: React.FC = () => {
     setEditPayOption(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     setNewPayOption({
       ...newPayOption,
       [event.target.name as string]: event.target.value,
     });
   };
 
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleEditChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     setEditPayOption({
       ...editPayOption,
       [event.target.name as string]: event.target.value,
@@ -148,7 +161,7 @@ const PayByContent: React.FC = () => {
   const totalPages = Math.ceil(payOptions.length / itemsPerPage);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div>
       <Header title="วิธีการจ่ายเงิน" />
       <div
         style={{
@@ -193,7 +206,7 @@ const PayByContent: React.FC = () => {
           <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
           <div style={{ flex: 1, color: "black" }}>ชื่อ</div>
           <div style={{ flex: 2, color: "black" }}>คำอธิบาย</div>
-          <div style={{ flex: 1, color: "black"  }}>สถานะ</div>
+          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
           <div style={{ flex: 1, color: "black" }}>จัดการ</div>
         </div>
         {currentItems.length > 0 ? (
@@ -209,7 +222,9 @@ const PayByContent: React.FC = () => {
               <div style={{ flex: 1, color: "black" }}>
                 {indexOfFirstItem + index + 1}
               </div>
-              <div style={{ flex: 1, color: "black" }}>{payOption.Pay_By_Name}</div>
+              <div style={{ flex: 1, color: "black" }}>
+                {payOption.Pay_By_Name}
+              </div>
               <div style={{ flex: 2, color: "black" }}>
                 {payOption.Pay_By_Desc || "-"}
               </div>
