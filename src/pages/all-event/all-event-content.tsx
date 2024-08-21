@@ -8,9 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { FaCopy } from "react-icons/fa";
 import toast from "react-hot-toast";
 
+const MAX_ITEMS_PER_PAGE = 10;
+
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
   const { data: events, isPending: isLoadingEventList } = useFetchEventList({
     eventId: null,
   });
@@ -21,16 +23,18 @@ const AllEventContent: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
+  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
-  const totalPages = Math.ceil((events?.length ?? 0) / itemsPerPage);
+  const totalPages = Math.ceil((events?.length ?? 0) / MAX_ITEMS_PER_PAGE);
 
   function handleCopyEventLink(eventId: number) {
     const eventLink = `${import.meta.env.VITE_CUSTOMER_URL}/event/${eventId}`;
     navigator.clipboard.writeText(eventLink);
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
+
+  const eventsInCurrentPage = events?.slice(indexOfFirstItem, indexOfLastItem);
 
   if (isLoadingEventList) return <CircularProgress />;
 
@@ -87,7 +91,7 @@ const AllEventContent: React.FC = () => {
               <option value="publish-date">วันที่เผยแพร่</option>
               <option value="order">ลำดับ</option>
               <option value="event-date">วันจัดงาน</option>
-              <option value="event-code">รหัสงาน</option>
+              <option value="event-code">ชื่องาน</option>
             </select>
           </div>
           <div className="filter-group">
@@ -126,7 +130,7 @@ const AllEventContent: React.FC = () => {
       <div className="event-list">
         <div className="event-list-header">
           <div className="column">ลำดับ</div>
-          <div className="column">รหัสงาน</div>
+          <div className="column">ชื่องาน</div>
           <div className="column">สถานที่</div>
           <div className="column">วันที่เผยแพร่</div>
           <div className="column">วันจัดงาน</div>
@@ -135,7 +139,7 @@ const AllEventContent: React.FC = () => {
           <div className="column">Link</div>
           <div className="column">รายละเอียด</div>
         </div>
-        {events.map((event: any, index: number) => {
+        {eventsInCurrentPage.map((event: any, index: number) => {
           const {
             Event_Id,
             Event_Public,
