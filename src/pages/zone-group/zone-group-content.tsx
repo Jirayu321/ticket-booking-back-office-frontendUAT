@@ -129,40 +129,58 @@ const ZoneGroupContent: React.FC = () => {
     setStatusFilter(event.target.value as string);
   };
 
+  const isDuplicateName = (name: string, id?: number) => {
+    return planGroups.some(
+      (group) =>
+        group.PlanGroup_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
+        group.PlanGroup_id !== id
+    );
+  };
+  
   const handleCreate = async () => {
-    try {
-      await createPlanGroup({
-        PlanGroup_Name: newPlanGroup.name,
-        PlanGroup_Active: newPlanGroup.active,
-        Created_By: "Admin",
-      });
-      toast.success("สร้างผังร้านสำเร็จ");
-      setNewPlanGroup({ name: "", active: "N" });
-      setOpen(false);
-      const data = await getAllPlanGroups();
-      setPlanGroups(data.planGroups);
-    } catch (error) {
-      toast.error("Failed to create plan group");
-    }
-  };
-
+      if (isDuplicateName(newPlanGroup.name)) {
+        toast.error("ชื่อผังร้านซ้ำกัน");
+        return;
+      }
+  
+      try {
+        await createPlanGroup({
+          PlanGroup_Name: newPlanGroup.name.trim(),
+          PlanGroup_Active: newPlanGroup.active,
+          Created_By: "Admin",
+        });
+        toast.success("สร้างผังร้านสำเร็จ");
+        setNewPlanGroup({ name: "", active: "N" });
+        setOpen(false);
+        const data = await getAllPlanGroups();
+        setPlanGroups(data.planGroups);
+      } catch (error) {
+        toast.error("Failed to create plan group");
+      }
+    };
+  
   const handleSaveEdit = async () => {
-    if (!editPlanGroup) return;
-
-    try {
-      await updatePlanGroup({
-        PlanGroup_id: editPlanGroup.PlanGroup_id,
-        PlanGroup_Name: editPlanGroup.PlanGroup_Name,
-        PlanGroup_Active: editPlanGroup.PlanGroup_Active,
-      });
-      toast.success("อัพเดทผังร้านสำเร็จ");
-      handleEditClose();
-      const data = await getAllPlanGroups();
-      setPlanGroups(data.planGroups);
-    } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตผังร้าน");
-    }
-  };
+      if (!editPlanGroup) return;
+  
+      if (isDuplicateName(editPlanGroup.PlanGroup_Name, editPlanGroup.PlanGroup_id)) {
+        toast.error("ชื่อผังร้านซ้ำกัน");
+        return;
+      }
+  
+      try {
+        await updatePlanGroup({
+          PlanGroup_id: editPlanGroup.PlanGroup_id,
+          PlanGroup_Name: editPlanGroup.PlanGroup_Name.trim(),
+          PlanGroup_Active: editPlanGroup.PlanGroup_Active,
+        });
+        toast.success("อัพเดทผังร้านสำเร็จ");
+        handleEditClose();
+        const data = await getAllPlanGroups();
+        setPlanGroups(data.planGroups);
+      } catch (error) {
+        toast.error("ล้มเหลวระหว่างอัปเดตผังร้าน");
+      }
+    };
 
   const handleDelete = async (id: number) => {
     try {

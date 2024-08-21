@@ -15,7 +15,7 @@ import {
   TableRow,
   Paper,
   Pagination,
-  TextField,
+  TextField
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -98,38 +98,71 @@ const PayOptionContent: React.FC = () => {
     });
   };
 
-  const handleCreate = async () => {
-    try {
-      await createPayOption({
-        Pay_Opt_Name: newPayOption.name,
-        Pay_Opt_Desc: newPayOption.desc,
-        Pay_Opt_Active: "N", // Default to inactive; user can toggle after creation
-        Created_By: "Admin", // Replace with actual creator
-      });
-      setOpen(false);
-      fetchPayOptions(); // Refresh the list after creation
-    } catch (error) {
-      console.error("Failed to create pay option:", error);
-      toast.error(`ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้: ${error}`);
-    }
+  const isDuplicatePayOptionName = (
+    name: string,
+    existingOptions: any[],
+    currentId?: number
+  ): boolean => {
+    return existingOptions.some(
+      (option) =>
+        option.Pay_Opt_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
+        option.Pay_Opt_Id !== currentId
+    );
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      await updatePayOption({
-        Pay_Opt_Id: editPayOption.Pay_Opt_Id,
-        Pay_Opt_Name: editPayOption.Pay_Opt_Name,
-        Pay_Opt_Desc: editPayOption.Pay_Opt_Desc,
-        Pay_Opt_Active: editPayOption.Pay_Opt_Active,
-      });
-      toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
-      handleEditClose();
-      fetchPayOptions(); // Refresh data after updating
-    } catch (error) {
-      console.error("Failed to update pay option:", error);
-      toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+  const handleCreate = async () => {
+  try {
+    // Fetch the latest payment options to ensure accurate duplicate check
+    const latestPayOptions = await getPayOption();
+    if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
+      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      return;
     }
-  };
+
+    await createPayOption({
+      Pay_Opt_Name: newPayOption.name,
+      Pay_Opt_Desc: newPayOption.desc,
+      Pay_Opt_Active: "N", // Default to inactive; user can toggle after creation
+      Created_By: "Admin", // Replace with actual creator
+    });
+    setOpen(false);
+    fetchPayOptions(); // Refresh the list after creation
+    toast.success("สร้างตัวเลือกการจ่ายเงินสำเร็จ");
+  } catch (error) {
+    console.error("Failed to create pay option:", error);
+    toast.error(`ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้: ${error}`);
+  }
+};
+
+const handleSaveEdit = async () => {
+  try {
+    // Fetch the latest payment options to ensure accurate duplicate check
+    const latestPayOptions = await getPayOption();
+    if (
+      isDuplicatePayOptionName(
+        editPayOption.Pay_Opt_Name,
+        latestPayOptions.payOptions,
+        editPayOption.Pay_Opt_Id
+      )
+    ) {
+      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      return;
+    }
+
+    await updatePayOption({
+      Pay_Opt_Id: editPayOption.Pay_Opt_Id,
+      Pay_Opt_Name: editPayOption.Pay_Opt_Name,
+      Pay_Opt_Desc: editPayOption.Pay_Opt_Desc,
+      Pay_Opt_Active: editPayOption.Pay_Opt_Active,
+    });
+    toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
+    handleEditClose();
+    fetchPayOptions(); // Refresh data after updating
+  } catch (error) {
+    console.error("Failed to update pay option:", error);
+    toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+  }
+};
 
   const handleDelete = async (id: number) => {
     try {

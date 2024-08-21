@@ -80,58 +80,83 @@ const TicketTypeContent: React.FC = () => {
     });
   };
 
+  const isDuplicateTicketTypeName = (
+    name: string,
+    existingTicketTypes: any[],
+    currentTicketTypeId?: number
+  ): boolean => {
+    return existingTicketTypes.some(ticketType =>
+      ticketType.Ticket_Type_Name === name &&
+      ticketType.Ticket_Type_Id !== currentTicketTypeId // Ignore the current ticket type being edited
+    );
+  };
+  
   const handleCreate = async () => {
-    try {
-      await createTicketType({
-        Ticket_Type_Name: newTicketType.name,
-        Ticket_Type_Unit: newTicketType.unit,
-        Ticket_Type_Cal: newTicketType.cal,
-      });
-      toast.success("สร้างประเภทบัตรสำเร็จ");
-      setNewTicketType({
-        name: "",
-        unit: "",
-        cal: "N",
-      }); // Reset the form state
-      handleClose();
-      fetchTicketTypes(); // Refresh data after creating
-    } catch (error) {
-      toast.error("ล้มเหลวระหว่างสร้างประเภทบัตร");
-    }
-  };
+  if (isDuplicateTicketTypeName(newTicketType.name, ticketTypes)) {
+    toast.error("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
+    return;
+  }
 
-  const handleEditOpen = (ticketType: any) => {
-    setEditTicketType(ticketType);
-    setEditOpen(true);
-  };
-
-  const handleEditClose = () => {
-    setEditOpen(false);
-    setEditTicketType(null);
-  };
-
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEditTicketType({
-      ...editTicketType,
-      [event.target.name]: event.target.value,
+  try {
+    await createTicketType({
+      Ticket_Type_Name: newTicketType.name,
+      Ticket_Type_Unit: newTicketType.unit,
+      Ticket_Type_Cal: newTicketType.cal,
     });
-  };
+    toast.success("สร้างประเภทบัตรสำเร็จ");
+    setNewTicketType({
+      name: "",
+      unit: "",
+      cal: "N",
+    }); // Reset the form state
+    handleClose();
+    fetchTicketTypes(); // Refresh data after creating
+  } catch (error) {
+    toast.error("ล้มเหลวระหว่างสร้างประเภทบัตร");
+  }
+};
 
-  const handleSaveEdit = async () => {
-    try {
-      await updateTicketType({
-        Ticket_Type_Id: editTicketType.Ticket_Type_Id,
-        Ticket_Type_Name: editTicketType.Ticket_Type_Name,
-        Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
-        Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
-      });
-      toast.success("อัปเดตประเภทบัตรสำเร็จ");
-      handleEditClose();
-      fetchTicketTypes(); // Refresh data after updating
-    } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตประเภทบัตร");
+const handleEditOpen = (ticketType: any) => {
+  setEditTicketType(ticketType);
+  setEditOpen(true);
+};
+
+const handleEditClose = () => {
+  setEditOpen(false);
+  setEditTicketType(null);
+};
+
+const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setEditTicketType({
+    ...editTicketType,
+    [event.target.name]: event.target.value,
+  });
+};
+
+const handleSaveEdit = async () => {
+  if (!editTicketType) return;
+
+  try {
+    // Assuming you have a function to check for duplicates, which can be implemented similarly to what was previously discussed.
+    const isDuplicate = isDuplicateTicketTypeName(editTicketType.Ticket_Type_Name, ticketTypes, editTicketType.Ticket_Type_Id);
+    if (isDuplicate) {
+      toast.error("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
+      return;
     }
-  };
+
+    await updateTicketType({
+      Ticket_Type_Id: editTicketType.Ticket_Type_Id,
+      Ticket_Type_Name: editTicketType.Ticket_Type_Name,
+      Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
+      Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
+    });
+    toast.success("อัปเดตประเภทบัตรสำเร็จ");
+    handleEditClose();
+    fetchTicketTypes(); // Refresh data after updating
+  } catch (error) {
+    toast.error("ล้มเหลวระหว่างอัปเดตประเภทบัตร");
+  }
+};
 
   const handleDelete = async (id: number) => {
     try {

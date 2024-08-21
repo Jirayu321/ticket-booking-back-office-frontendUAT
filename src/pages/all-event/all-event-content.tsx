@@ -1,11 +1,23 @@
-import { CircularProgress, Stack } from "@mui/material";
+import {
+  CircularProgress,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
+  Button,
+} from "@mui/material";
 import React, { useState } from "react";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import "./all-event-content.css";
 import { formatThaiDate } from "../../lib/util";
 import { useNavigate } from "react-router-dom";
-import { FaAlignJustify, FaCopy, FaSearch } from "react-icons/fa";
+import { FaCopy } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const MAX_ITEMS_PER_PAGE = 10;
@@ -47,6 +59,22 @@ const AllEventContent: React.FC = () => {
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
 
+  const eventCounts = events?.reduce(
+    (acc, event) => {
+      if (event.Event_Status === 1) {
+        acc.pending += 1;
+      } else if (event.Event_Status === 2) {
+        acc.active += 1;
+      } else if (event.Event_Status === 3) {
+        acc.closed += 1;
+      } else if (event.Event_Status === 13) {
+        acc.cancelled += 1;
+      }
+      return acc;
+    },
+    { pending: 0, active: 0, closed: 0, cancelled: 0 }
+  );
+
   const eventsInCurrentPage =
     events
       ?.slice(indexOfFirstItem, indexOfLastItem)
@@ -69,8 +97,8 @@ const AllEventContent: React.FC = () => {
               className="filter-icon"
             />
             <div className="filter-text-container">
-              <span className="filter-text">รอจัดงาน</span>
-              <span className="filter-number">15</span>
+              <span className="filter-text">รอเริ่มงาน</span>
+              <span className="filter-number">{eventCounts?.pending}</span>
             </div>
           </div>
           <div className="filter-item">
@@ -81,21 +109,21 @@ const AllEventContent: React.FC = () => {
             />
             <div className="filter-text-container">
               <span className="filter-text">เริ่มงานแล้ว</span>
-              <span className="filter-number">15</span>
+              <span className="filter-number">{eventCounts?.active}</span>
             </div>
           </div>
           <div className="filter-item">
             <img src="/ปิดงาน.svg" alt="ปิดงาน icon" className="filter-icon" />
             <div className="filter-text-container">
               <span className="filter-text">ปิดงาน</span>
-              <span className="filter-number">15</span>
+              <span className="filter-number">{eventCounts?.closed}</span>
             </div>
           </div>
           <div className="filter-item">
             <img src="/ยกเลิก.svg" alt="ยกเลิก icon" className="filter-icon" />
             <div className="filter-text-container">
               <span className="filter-text">ยกเลิก</span>
-              <span className="filter-number">15</span>
+              <span className="filter-number">{eventCounts?.cancelled}</span>
             </div>
           </div>
         </div>
@@ -149,116 +177,111 @@ const AllEventContent: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="event-list">
-        <div className="event-list-header">
-          <div className="column">ลำดับ</div>
-          <div className="column">ชื่องาน</div>
-          <div className="column">สถานที่</div>
-          <div className="column">วันที่เผยแพร่</div>
-          <div className="column">วันจัดงาน</div>
-          <div className="column">เผยแพร่</div>
-          <div className="column">สถานะ</div>
-          <div className="column">Link</div>
-          <div className="column">รายละเอียด</div>
-        </div>
-        {eventsInCurrentPage.map((event: any, index: number) => {
-          const {
-            Event_Id,
-            Event_Public,
-            Event_Status,
-            Event_Name,
-            Event_Addr,
-            Event_Time,
-            Event_Public_Date,
-          } = event;
-          return (
-            <div key={Event_Id} className="event-list-item">
-              <div className="column" style={{ fontWeight: "bold" }}>
-                {indexOfFirstItem + index + 1}.
-              </div>
-              <div className="column">{Event_Name}</div>
-              <div className="column">{Event_Addr}</div>
-              <div className="column">
-                {Event_Public_Date
-                  ? formatThaiDate({
-                      date: Event_Public_Date,
-                      option: "datetime",
-                    })
-                  : "ยังไม่ระบุ"}
-              </div>
-              <div className="column">
-                {Event_Time
-                  ? formatThaiDate({
-                      date: Event_Time,
-                      option: "datetime",
-                    })
-                  : "ยังไม่ระบุ"}
-              </div>
-              <div
-                className={`column ${
-                  Event_Public === "Y" ? "publish" : "unpublish"
-                }`}
-              >
-                {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-              </div>
-              <div
-                className={`column ${
-                  Event_Status === 1
-                    ? "pending"
-                    : Event_Status === 2
-                    ? "active"
-                    : Event_Status === 3
-                    ? "closed"
-                    : "cancelled"
-                }`}
-              >
-                {Event_Status === 1
-                  ? "รอเริ่มงาน"
-                  : Event_Status === 2
-                  ? "เริ่มงาน"
-                  : Event_Status === 3
-                  ? "ปิดงาน"
-                  : Event_Status === 13
-                  ? "ยกเลิก"
-                  : ""}
-              </div>
-              <div className="column">
-                <FaCopy onClick={() => handleCopyEventLink(Event_Id)} />
-              </div>
-              <div className="column">
-                <button
-                  onClick={() => navigate(`/edit-event/${Event_Id}`)}
-                  className="details-button"
-                >
-                  รายละเอียด
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="pagination">
-        <button
-          onClick={() => handleClick(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          &lt;
-        </button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handleClick(index + 1)}
-            className={currentPage === index + 1 ? "active" : ""}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => handleClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          &gt;
-        </button>
+
+      {/* Table Component */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ลำดับ</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ชื่องาน</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานที่</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันที่เผยแพร่</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันจัดงาน</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>เผยแพร่</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานะ</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>Link</TableCell>
+              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>รายละเอียด</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {eventsInCurrentPage.map((event: any, index: number) => {
+              const {
+                Event_Id,
+                Event_Public,
+                Event_Status,
+                Event_Name,
+                Event_Addr,
+                Event_Time,
+                Event_Public_Date,
+              } = event;
+              return (
+                <TableRow key={Event_Id}>
+                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell>{Event_Name}</TableCell>
+                  <TableCell>{Event_Addr}</TableCell>
+                  <TableCell>
+                    {Event_Public_Date
+                      ? formatThaiDate({
+                          date: Event_Public_Date,
+                          option: "datetime",
+                        })
+                      : "ยังไม่ระบุ"}
+                  </TableCell>
+                  <TableCell>
+                    {Event_Time
+                      ? formatThaiDate({
+                          date: Event_Time,
+                          option: "datetime",
+                        })
+                      : "ยังไม่ระบุ"}
+                  </TableCell>
+                  <TableCell
+                    style={{color:"black"}}
+                    className={Event_Public === "Y" ? "publish" : "unpublish"}
+                  >
+                    {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                  </TableCell>
+                  <TableCell
+                  style={{color:"white"}}
+                    className={
+                      Event_Status === 1
+                        ? "pending"
+                        : Event_Status === 2
+                        ? "active"
+                        : Event_Status === 3
+                        ? "closed"
+                        : "cancelled"
+                    }
+                  >
+                    {Event_Status === 1
+                      ? "รอเริ่มงาน"
+                      : Event_Status === 2
+                      ? "เริ่มงาน"
+                      : Event_Status === 3
+                      ? "ปิดงาน"
+                      : Event_Status === 13
+                      ? "ยกเลิก"
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    <FaCopy onClick={() => handleCopyEventLink(Event_Id)} />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => navigate(`/edit-event/${Event_Id}`)}
+                    >
+                      รายละเอียด
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(_, page) => handleClick(page)}
+          color="primary"
+        />
       </div>
     </div>
   );

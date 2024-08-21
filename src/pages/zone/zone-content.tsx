@@ -124,19 +124,39 @@ const ZoneContent: React.FC = () => {
     setStatusFilter(event.target.value as string);
   };
 
+  // Utility function to check for duplicates
+  const isDuplicatePlanName = (
+    name: string,
+    groupId: number,
+    existingPlans: any[]
+  ): boolean => {
+    return existingPlans.some(
+      (plan) =>
+        plan.Plan_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
+        plan.PlanGroup_id === groupId
+    );
+  };
+
   const handleCreate = async () => {
     if (!newPlan.planGroupId) {
       toast.error("กรุณาเลือกกลุ่มแผน");
       return;
     }
-
+  
+    const groupId = parseInt(newPlan.planGroupId, 10);
+  
+    if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
+      toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
+      return;
+    }
+  
     try {
       await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
         Plan_Pic: newPlan.pic,
         Plan_Active: newPlan.active,
-        PlanGroup_id: parseInt(newPlan.planGroupId, 10),
+        PlanGroup_id: groupId,
       });
       toast.success("สร้างแผนสำเร็จ");
       setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" });
@@ -147,27 +167,37 @@ const ZoneContent: React.FC = () => {
       toast.error("ไม่สามารถสร้างแผนได้");
     }
   };
+  
 
   const handleSaveEdit = async () => {
-    if (!editPlan) return;
+  if (!editPlan) return;
 
-    try {
-      await patchPlan({
-        Plan_id: editPlan.Plan_id,
-        Plan_Desc: editPlan.Plan_Desc,
-        Plan_Name: editPlan.Plan_Name,
-        Plan_Pic: editPlan.Plan_Pic,
-        Plan_Active: editPlan.Plan_Active,
-        PlanGroup_id: editPlan.PlanGroup_id,
-      });
-      toast.success("อัพเดทแผนสำเร็จ");
-      handleEditClose();
-      const data = await getAllPlans();
-      setPlans(data.plans);
-    } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตแผน");
-    }
-  };
+  const groupId = editPlan.PlanGroup_id;
+
+  if (isDuplicatePlanName(editPlan.Plan_Name, groupId, plans, editPlan.Plan_id)) {
+    toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
+    return;
+  }
+
+  try {
+    await patchPlan({
+      Plan_id: editPlan.Plan_id,
+      Plan_Desc: editPlan.Plan_Desc,
+      Plan_Name: editPlan.Plan_Name,
+      Plan_Pic: editPlan.Plan_Pic,
+      Plan_Active: editPlan.Plan_Active,
+      PlanGroup_id: groupId,
+    });
+    toast.success("อัพเดทแผนสำเร็จ");
+    handleEditClose();
+    const data = await getAllPlans();
+    setPlans(data.plans);
+  } catch (error) {
+    toast.error("ล้มเหลวระหว่างอัปเดตแผน");
+  }
+};
+
+  
 
   const handleDelete = async (id: number) => {
     try {
@@ -331,6 +361,23 @@ const ZoneContent: React.FC = () => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Create New Plan</DialogTitle>
         <DialogContent>
+        <FormControl fullWidth margin="dense">
+            <InputLabel id="plan-group-label">ผังร้าน</InputLabel>
+            <Select
+              labelId="plan-group-label"
+              name="planGroupId"
+              value={newPlan.planGroupId}
+              onChange={handleChange}
+              fullWidth
+            >
+              {planGroups.map((group) => (
+                <MenuItem key={group.PlanGroup_id} value={group.PlanGroup_id}>
+                  {group.PlanGroup_Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
           <TextField
             autoFocus
             margin="dense"
@@ -359,22 +406,6 @@ const ZoneContent: React.FC = () => {
             value={newPlan.pic}
             onChange={handleChange}
           />
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="plan-group-label">ผังร้าน</InputLabel>
-            <Select
-              labelId="plan-group-label"
-              name="planGroupId"
-              value={newPlan.planGroupId}
-              onChange={handleChange}
-              fullWidth
-            >
-              {planGroups.map((group) => (
-                <MenuItem key={group.PlanGroup_id} value={group.PlanGroup_id}>
-                  {group.PlanGroup_Name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">

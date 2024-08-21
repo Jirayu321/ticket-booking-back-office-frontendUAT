@@ -85,7 +85,21 @@ const PayByContent: React.FC = () => {
     });
   };
 
+  const isDuplicatePayByName = (name: string, options: any[], currentId?: number): boolean => {
+    return options.some(
+      (option) =>
+        option.Pay_By_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
+        option.Pay_By_Id !== currentId
+    );
+  };
+
   const handleCreate = async () => {
+    // Ensure duplicate check before proceeding
+    if (isDuplicatePayByName(newPayOption.name, payOptions)) {
+      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      return;
+    }
+
     try {
       await createPayBy({
         Pay_By_Name: newPayOption.name,
@@ -93,6 +107,8 @@ const PayByContent: React.FC = () => {
         Pay_By_Active: "N", // Default to "ไม่เผยแพร่" (Inactive)
         Created_By: "Admin", // Replace with actual creator
       });
+  
+      toast.success("สร้างตัวเลือกการจ่ายเงินสำเร็จ");
       setOpen(false);
       fetchPayOptions(); // Refresh the list after creation
     } catch (error) {
@@ -100,8 +116,20 @@ const PayByContent: React.FC = () => {
       toast.error("ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้");
     }
   };
-
+  
   const handleSaveEdit = async () => {
+    // Ensure duplicate check before proceeding
+    if (
+      isDuplicatePayByName(
+        editPayOption.Pay_By_Name,
+        payOptions,
+        editPayOption.Pay_By_Id
+      )
+    ) {
+      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      return;
+    }
+
     try {
       await updatePayBy({
         Pay_By_Id: editPayOption.Pay_By_Id,
@@ -109,10 +137,12 @@ const PayByContent: React.FC = () => {
         Pay_By_Desc: editPayOption.Pay_By_Desc,
         Pay_By_Active: editPayOption.Pay_By_Active,
       });
+
       toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
       handleEditClose();
       fetchPayOptions(); // Refresh data after updating
     } catch (error) {
+      console.error("Failed to update pay option:", error);
       toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
     }
   };
@@ -271,55 +301,52 @@ const PayByContent: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-                      onClick={handleClose}
-                      color="secondary"
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreate} color="primary">
-                      Create
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-          
-                {editPayOption && (
-                  <Dialog open={editOpen} onClose={handleEditClose}>
-                    <DialogTitle>แก้ไขวิธีการจ่ายเงิน</DialogTitle>
-                    <DialogContent>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        name="Pay_By_Name"
-                        label="วิธีการจ่ายเงิน"
-                        type="text"
-                        fullWidth
-                        value={editPayOption.Pay_By_Name}
-                        onChange={handleEditChange}
-                      />
-                      <TextField
-                        margin="dense"
-                        name="Pay_By_Desc"
-                        label="คำอธิบาย"
-                        type="text"
-                        fullWidth
-                        value={editPayOption.Pay_By_Desc}
-                        onChange={handleEditChange}
-                      />
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={handleEditClose} color="secondary">
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSaveEdit} color="primary">
-                        Save
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-                )}
-              </div>
-            );
-          };
-          
-          export default PayByContent;
-          
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {editPayOption && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขวิธีการจ่ายเงิน</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Pay_By_Name"
+              label="วิธีการจ่ายเงิน"
+              type="text"
+              fullWidth
+              value={editPayOption.Pay_By_Name}
+              onChange={handleEditChange}
+            />
+            <TextField
+              margin="dense"
+              name="Pay_By_Desc"
+              label="คำอธิบาย"
+              type="text"
+              fullWidth
+              value={editPayOption.Pay_By_Desc}
+              onChange={handleEditChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+    </div>
+  );
+};
+
+export default PayByContent;
+
