@@ -1,17 +1,30 @@
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Stack } from "@mui/material";
 import React, { useState } from "react";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import "./all-event-content.css";
 import { formatThaiDate } from "../../lib/util";
 import { useNavigate } from "react-router-dom";
-import { FaCopy } from "react-icons/fa";
+import { FaAlignJustify, FaCopy, FaSearch } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    sortBy: "publish-date",
+    publishStatus: "all",
+    status: "all",
+    search: "",
+  });
+
+  function handleUpdateFilters(event: React.ChangeEvent<any>) {
+    setFilters((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.value,
+    }));
+  }
 
   const { data: events, isPending: isLoadingEventList } = useFetchEventList({
     eventId: null,
@@ -34,7 +47,10 @@ const AllEventContent: React.FC = () => {
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
 
-  const eventsInCurrentPage = events?.slice(indexOfFirstItem, indexOfLastItem);
+  const eventsInCurrentPage =
+    events
+      ?.slice(indexOfFirstItem, indexOfLastItem)
+      .filter((event: any) => event.Event_Name.includes(filters.search)) ?? [];
 
   if (isLoadingEventList) return <CircularProgress />;
 
@@ -111,14 +127,20 @@ const AllEventContent: React.FC = () => {
               <option value="closed">ปิดงาน</option>
             </select>
           </div>
-          <div className="filter-group search-group">
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
             <input
+              name="search"
+              value={filters.search}
+              onChange={handleUpdateFilters}
               type="text"
               placeholder="รหัสงาน/ชื่องาน"
               className="search-box"
             />
-            <button className="search-button">ค้นหา</button>
-          </div>
+          </Stack>
 
           <div className="date-picker-container">
             <input type="date" className="date-picker" />
