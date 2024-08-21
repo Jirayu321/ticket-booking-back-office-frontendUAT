@@ -8,6 +8,14 @@ import {
   TextField,
   MenuItem,
   IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -174,120 +182,59 @@ const TicketTypeContent: React.FC = () => {
           เพิ่มรายการ +
         </Button>
       </div>
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
-          <div style={{ flex: 1, color: "black" }}>ชื่อประเภทบัตร</div>
-          <div style={{ flex: 1, color: "black" }}>หน่วย</div>
-          <div style={{ flex: 1, color: "black" }}>การคำนวณ</div>
-          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
-        </div>
-        {currentItems.length > 0 ? (
-          currentItems.map((ticketType, index) => (
-            <div
-              key={ticketType.Ticket_Type_Id}
-              style={{
-                display: "flex",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <div style={{ flex: 1, color: "black" }}>
-                {indexOfFirstItem + index + 1}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {ticketType.Ticket_Type_Name}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {ticketType.Ticket_Type_Unit}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {ticketType.Ticket_Type_Cal}
-              </div>
-              <div style={{ flex: 1 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditOpen(ticketType)}
-                >
-                  รายละเอียด
-                </Button>
-                <IconButton
-                  onClick={() => handleDelete(ticketType.Ticket_Type_Id)}
-                  style={{ color: "red" }} // Delete button in red
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ padding: "10px 20px", color: "black" }}>
-            No ticket types available
-          </div>
-        )}
-      </div>
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <button
-          onClick={() => handleClick(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &lt;
-        </button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handleClick(index + 1)}
-            style={{
-              margin: "0 5px",
-              padding: "5px 10px",
-              cursor: "pointer",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd",
-              color: currentPage === index + 1 ? "#fff" : "#000",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => handleClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &gt;
-        </button>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อประเภทบัตร</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>หน่วย</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>การคำนวณ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentItems.length > 0 ? (
+              currentItems.map((ticketType, index) => (
+                <TableRow key={ticketType.Ticket_Type_Id}>
+                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell>{ticketType.Ticket_Type_Name}</TableCell>
+                  <TableCell>{ticketType.Ticket_Type_Unit}</TableCell>
+                  <TableCell>{ticketType.Ticket_Type_Cal}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleEditOpen(ticketType)}
+                    >
+                      รายละเอียด
+                    </Button>
+                    <IconButton
+                      onClick={() => handleDelete(ticketType.Ticket_Type_Id)}
+                      style={{ color: "red" }} // Delete button in red
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} style={{ textAlign: "center" }}>
+                  No ticket types available
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(event, page) => handleClick(page)}
+          color="primary"
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -335,7 +282,6 @@ const TicketTypeContent: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Edit Dialog */}
       {editTicketType && (
         <Dialog open={editOpen} onClose={handleEditClose}>
           <DialogTitle>แก้ไขประเภทบัตร</DialogTitle>
@@ -349,41 +295,43 @@ const TicketTypeContent: React.FC = () => {
               fullWidth
               value={editTicketType.Ticket_Type_Name}
               onChange={handleEditChange}
-            />
-            <TextField
-              margin="dense"
-              name="Ticket_Type_Unit"
-              label="Unit"
-              type="text"
-              fullWidth
-              value={editTicketType.Ticket_Type_Unit}
-              onChange={handleEditChange}
-            />
-            <TextField
-              select
-              margin="dense"
-              name="Ticket_Type_Cal"
-              label="Calculation (Y/N)"
-              fullWidth
-              value={editTicketType.Ticket_Type_Cal}
-              onChange={handleEditChange}
-            >
-              <MenuItem value="Y">Y</MenuItem>
-              <MenuItem value="N">N</MenuItem>
-            </TextField>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleEditClose} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-    </div>
-  );
-};
-
-export default TicketTypeContent;
+              />
+              <TextField
+                margin="dense"
+                name="Ticket_Type_Unit"
+                label="Unit"
+                type="text"
+                fullWidth
+                value={editTicketType.Ticket_Type_Unit}
+                onChange={handleEditChange}
+              />
+              <TextField
+                select
+                margin="dense"
+                name="Ticket_Type_Cal"
+                label="Calculation (Y/N)"
+                fullWidth
+                value={editTicketType.Ticket_Type_Cal}
+                onChange={handleEditChange}
+              >
+                <MenuItem value="Y">Y</MenuItem>
+                <MenuItem value="N">N</MenuItem>
+              </TextField>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleEditClose} color="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} color="primary">
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+      </div>
+    );
+  };
+  
+  export default TicketTypeContent;
+  
+           

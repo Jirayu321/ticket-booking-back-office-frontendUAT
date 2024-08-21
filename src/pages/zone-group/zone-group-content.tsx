@@ -12,6 +12,14 @@ import {
   InputLabel,
   IconButton,
   Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -21,19 +29,21 @@ import {
   deletePlanGroup,
 } from "../../services/plan-group.service";
 import { getPlansList } from "../../services/plan-list.service";
-import Header from "../common/header"; 
+import Header from "../common/header";
 import toast from "react-hot-toast";
 
 const ZoneGroupContent: React.FC = () => {
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false); // For edit dialog
+  const [editOpen, setEditOpen] = useState(false);
   const [newPlanGroup, setNewPlanGroup] = useState({
     name: "",
-    active: "N", // Default to inactive
+    active: "N",
   });
-  const [editPlanGroup, setEditPlanGroup] = useState<any>(null); // For editing
+  const [editPlanGroup, setEditPlanGroup] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ทั้งหมด"); // Default status filter
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -62,13 +72,12 @@ const ZoneGroupContent: React.FC = () => {
     fetchPlanGroupsAndPlans();
   }, []);
 
-  // Calculate plan count for each group
   const calculatePlanCount = (planGroupId: number) => {
     return plans.filter((plan) => plan.PlanGroup_id === planGroupId).length;
   };
 
   const handleOpen = () => {
-    setNewPlanGroup({ name: "", active: "N" }); // Reset form values
+    setNewPlanGroup({ name: "", active: "N" });
     setOpen(true);
   };
 
@@ -86,7 +95,11 @@ const ZoneGroupContent: React.FC = () => {
     setEditPlanGroup(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setNewPlanGroup((prev) => ({
       ...prev,
@@ -94,7 +107,11 @@ const ZoneGroupContent: React.FC = () => {
     }));
   };
 
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleEditChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = event.target;
     setEditPlanGroup((prev: any) => ({
       ...prev,
@@ -102,15 +119,25 @@ const ZoneGroupContent: React.FC = () => {
     }));
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleStatusFilterChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    setStatusFilter(event.target.value as string);
+  };
+
   const handleCreate = async () => {
     try {
       await createPlanGroup({
         PlanGroup_Name: newPlanGroup.name,
         PlanGroup_Active: newPlanGroup.active,
-        Created_By: "Admin", 
+        Created_By: "Admin",
       });
       toast.success("สร้างผังร้านสำเร็จ");
-      setNewPlanGroup({ name: "", active: "N" }); // Reset form after creation
+      setNewPlanGroup({ name: "", active: "N" });
       setOpen(false);
       const data = await getAllPlanGroups();
       setPlanGroups(data.planGroups);
@@ -167,165 +194,177 @@ const ZoneGroupContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  const filteredPlanGroups = planGroups.filter((group) => {
+    return (
+      (statusFilter === "ทั้งหมด" || group.PlanGroup_Active === statusFilter) &&
+      group.PlanGroup_Name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = planGroups.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredPlanGroups.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
-  const totalPages = Math.ceil(planGroups.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPlanGroups.length / itemsPerPage);
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <Header title="ผังร้าน" />
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
           justifyContent: "space-between",
-          paddingTop: 20,
-          paddingLeft: 20,
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "30px",
+          marginLeft: "20px",
         }}
       >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <FormControl
+            variant="outlined"
+            style={{ marginRight: "10px", minWidth: 120 }}
+          >
+            <InputLabel id="status-filter-label">สถานะ</InputLabel>
+            <Select
+              labelId="status-filter-label"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              label="สถานะ"
+            >
+              <MenuItem value="ทั้งหมด">ทั้งหมด</MenuItem>
+              <MenuItem value="Y">เผยแพร่</MenuItem>
+              <MenuItem value="N">ไม่เผยแพร่</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            variant="outlined"
+            placeholder="ค้นหา"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            style={{ marginRight: "10px" }}
+          />
+        </div>
         <Button
           onClick={handleOpen}
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            padding: "10px 20px",
+            marginRight: "1300px",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
-            alignSelf: "flex-end",
           }}
         >
           เพิ่มผังร้าน +
         </Button>
       </div>
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
-          <div style={{ flex: 1, color: "black" }}>รหัสผัง</div>
-          <div style={{ flex: 2, color: "black" }}>ชื่อผังร้าน</div>
-          <div style={{ flex: 1, color: "black" }}>จำนวนโซน</div>
-          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
-          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
-        </div>
-        {currentItems.length > 0 ? (
-          currentItems.map((planGroup, index) => (
-            <div
-              key={planGroup.PlanGroup_id}
-              style={{
-                display: "flex",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <div style={{ flex: 1, color: "black" }}>
-                {indexOfFirstItem + index + 1}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {planGroup.PlanGroup_id}
-              </div>
-              <div style={{ flex: 2, color: "black" }}>
-                {planGroup.PlanGroup_Name}
-              </div>
-              <div style={{ flex: 1, color: "black", textAlign: "center" }}>
-                {calculatePlanCount(planGroup.PlanGroup_id)}
-              </div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Switch
-                  checked={planGroup.PlanGroup_Active === "Y"}
-                  onChange={() => toggleActiveStatus(planGroup)}
-                  color="primary"
-                />
-                <span style={{ color: "black" }}>
-                  {planGroup.PlanGroup_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-                </span>
-              </div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditOpen(planGroup)}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                รหัสผัง
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                ชื่อผังร้าน
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                จำนวนโซน
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                สถานะ
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+              >
+                จัดการ
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentItems.length > 0 ? (
+              currentItems.map((planGroup, index) => (
+                <TableRow key={planGroup.PlanGroup_id}>
+                  <TableCell style={{ color: "black", fontSize: "14px" }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell style={{ color: "black", fontSize: "14px" }}>
+                    {planGroup.PlanGroup_id}
+                  </TableCell>
+                  <TableCell style={{ color: "black", fontSize: "14px" }}>
+                    {planGroup.PlanGroup_Name}
+                  </TableCell>
+                  <TableCell align="left" style={{ paddingLeft: "50px" }}>
+                    {calculatePlanCount(planGroup.PlanGroup_id)}
+                  </TableCell>
+                  <TableCell align="left">
+                    <Switch
+                      checked={planGroup.PlanGroup_Active === "Y"}
+                      onChange={() => toggleActiveStatus(planGroup)}
+                      color="primary"
+                    />
+                    {planGroup.PlanGroup_Active === "Y"
+                      ? "เผยแพร่"
+                      : "ไม่เผยแพร่"}
+                  </TableCell>
+                  <TableCell align="left">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleEditOpen(planGroup)}
+                    >
+                      รายละเอียด
+                    </Button>
+                    <IconButton
+                      onClick={() => handleDelete(planGroup.PlanGroup_id)}
+                      style={{ color: "red" }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  align="center"
+                  style={{ color: "black" }}
                 >
-                  รายละเอียด
-                </Button>
-                <IconButton
-                  onClick={() => handleDelete(planGroup.PlanGroup_id)}
-                  style={{ color: "red" }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ padding: "10px 20px", color: "black" }}>
-            ไม่พบข้อมูล
-          </div>
-        )}
-      </div>
+                  ไม่พบข้อมูล
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >
-        <button
-          onClick={() => handleClick(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &lt;
-        </button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handleClick(index + 1)}
-            style={{
-              margin: "0 5px",
-              padding: "5px 10px",
-              cursor: "pointer",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd",
-              color: currentPage === index + 1 ? "#fff" : "#000",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => handleClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &gt;
-        </button>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(_, page) => handleClick(page)}
+          color="primary"
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -365,7 +404,6 @@ const ZoneGroupContent: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Edit Dialog */}
       {editPlanGroup && (
         <Dialog open={editOpen} onClose={handleEditClose}>
           <DialogTitle>แก้ไขผังร้าน</DialogTitle>
@@ -380,19 +418,6 @@ const ZoneGroupContent: React.FC = () => {
               value={editPlanGroup.PlanGroup_Name}
               onChange={handleEditChange}
             />
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="active-label-edit">Active (Y/N)</InputLabel>
-              <Select
-                labelId="active-label-edit"
-                name="PlanGroup_Active"
-                value={editPlanGroup.PlanGroup_Active}
-                onChange={handleEditChange}
-                label="Active (Y/N)"
-              >
-                <MenuItem value="Y">Yes</MenuItem>
-                <MenuItem value="N">No</MenuItem>
-              </Select>
-            </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleEditClose} color="secondary">

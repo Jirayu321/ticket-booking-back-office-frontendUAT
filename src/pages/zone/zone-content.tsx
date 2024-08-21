@@ -12,6 +12,14 @@ import {
   FormControl,
   IconButton,
   Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getAllPlans, createPlan, patchPlan, deletePlan } from "../../services/plan.service";
@@ -23,15 +31,17 @@ const ZoneContent: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false); // For edit dialog
+  const [editOpen, setEditOpen] = useState(false);
   const [newPlan, setNewPlan] = useState({
     name: "",
     desc: "",
     pic: "",
-    active: "N", // Default to "N" (Inactive)
+    active: "N",
     planGroupId: "",
   });
-  const [editPlan, setEditPlan] = useState<any>(null); // For editing
+  const [editPlan, setEditPlan] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -39,11 +49,7 @@ const ZoneContent: React.FC = () => {
     const fetchPlans = async () => {
       try {
         const data = await getAllPlans();
-        if (data && data.plans && Array.isArray(data.plans)) {
-          setPlans(data.plans);
-        } else {
-          setPlans([]);
-        }
+        setPlans(data.plans || []);
       } catch (error) {
         toast.error("Failed to fetch plans");
       }
@@ -52,11 +58,7 @@ const ZoneContent: React.FC = () => {
     const fetchPlanGroups = async () => {
       try {
         const data = await getAllPlanGroups();
-        if (data && data.planGroups && Array.isArray(data.planGroups)) {
-          setPlanGroups(data.planGroups);
-        } else {
-          setPlanGroups([]);
-        }
+        setPlanGroups(data.planGroups || []);
       } catch (error) {
         toast.error("Failed to fetch plan groups");
       }
@@ -67,7 +69,7 @@ const ZoneContent: React.FC = () => {
   }, []);
 
   const handleOpen = () => {
-    setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" }); // Reset form values
+    setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" });
     setOpen(true);
   };
 
@@ -101,6 +103,14 @@ const ZoneContent: React.FC = () => {
     }));
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleStatusFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setStatusFilter(event.target.value as string);
+  };
+
   const handleCreate = async () => {
     if (!newPlan.planGroupId) {
       toast.error("กรุณาเลือกกลุ่มแผน");
@@ -116,7 +126,7 @@ const ZoneContent: React.FC = () => {
         PlanGroup_id: parseInt(newPlan.planGroupId, 10),
       });
       toast.success("สร้างแผนสำเร็จ");
-      setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" }); // Reset form after creation
+      setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" });
       setOpen(false);
       const data = await getAllPlans();
       setPlans(data.plans);
@@ -176,157 +186,133 @@ const ZoneContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  const filteredPlans = plans.filter((plan) => {
+    return (
+      (statusFilter === "ทั้งหมด" || plan.Plan_Active === statusFilter) &&
+      plan.Plan_Name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = plans.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredPlans.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(plans.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <Header title="โซน" />
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
           justifyContent: "space-between",
-          paddingTop: 20,
-          paddingLeft: 20,
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "30px",
+          marginLeft: "20px",
         }}
       >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <FormControl variant="outlined" style={{ marginRight: "10px", minWidth: 120 }}>
+            <InputLabel id="status-filter-label">สถานะ</InputLabel>
+            <Select
+              labelId="status-filter-label"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              label="สถานะ"
+            >
+              <MenuItem value="ทั้งหมด">ทั้งหมด</MenuItem>
+              <MenuItem value="Y">เผยแพร่</MenuItem>
+              <MenuItem value="N">ไม่เผยแพร่</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            variant="outlined"
+            placeholder="ค้นหา"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            style={{ marginRight: "10px" }}
+          />
+        </div>
         <Button
           onClick={handleOpen}
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            padding: "10px 20px",
+            marginRight: "1270px",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
-            alignSelf: "flex-end",
           }}
         >
           เพิ่มรายการ +
         </Button>
       </div>
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
-          <div style={{ flex: 1, color: "black" }}>ชื่อโซน</div>
-          <div style={{ flex: 2, color: "black" }}>คำอธิบาย</div>
-          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
-          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
-        </div>
-        {currentItems.length > 0 ? (
-          currentItems.map((plan, index) => (
-            <div
-              key={plan.Plan_id}
-              style={{
-                display: "flex",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <div style={{ flex: 1, color: "black" }}>
-                {indexOfFirstItem + index + 1}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>{plan.Plan_Name}</div>
-              <div style={{ flex: 2, color: "black" }}>{plan.Plan_Desc}</div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Switch
-                  checked={plan.Plan_Active === "Y"}
-                  onChange={() => toggleActiveStatus(plan)}
-                  color="primary"
-                />
-                <span style={{ color: "black" }}>
-                  {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-                </span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditOpen(plan)}
-                >
-                  รายละเอียด
-                </Button>
-                <IconButton
-                  onClick={() => handleDelete(plan.Plan_id)}
-                  style={{ color: "red" }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ padding: "10px 20px", color: "black" }}>
-            No plans available
-          </div>
-        )}
-      </div>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อโซน</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentItems.length > 0 ? (
+              currentItems.map((plan, index) => (
+                <TableRow key={plan.Plan_id}>
+                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell>{plan.Plan_Name}</TableCell>
+                  <TableCell>{plan.Plan_Desc}</TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={plan.Plan_Active === "Y"}
+                      onChange={() => toggleActiveStatus(plan)}
+                      color="primary"
+                    />
+                    <span>
+                      {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleEditOpen(plan)}
+                    >
+                      รายละเอียด
+                    </Button>
+                    <IconButton
+                      onClick={() => handleDelete(plan.Plan_id)}
+                      style={{ color: "red" }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  ไม่พบข้อมูล
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >
-        <button
-          onClick={() => handleClick(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &lt;
-        </button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handleClick(index + 1)}
-            style={{
-              margin: "0 5px",
-              padding: "5px 10px",
-              cursor: "pointer",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd",
-              color: currentPage === index + 1 ? "#fff" : "#000",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => handleClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &gt;
-        </button>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(_, page) => handleClick(page)}
+          color="primary"
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -387,7 +373,6 @@ const ZoneContent: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Edit Dialog */}
       {editPlan && (
         <Dialog open={editOpen} onClose={handleEditClose}>
           <DialogTitle>แก้ไขโซน</DialogTitle>
@@ -452,3 +437,4 @@ const ZoneContent: React.FC = () => {
 };
 
 export default ZoneContent;
+
