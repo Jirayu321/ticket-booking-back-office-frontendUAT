@@ -263,7 +263,6 @@ const ZoneGroupContent: React.FC = () => {
           เพิ่มผังร้าน +
         </Button>
       </div>
-<<<<<<< HEAD
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -349,69 +348,6 @@ const ZoneGroupContent: React.FC = () => {
                   colSpan={6}
                   align="center"
                   style={{ color: "black" }}
-=======
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
-          <div style={{ flex: 1, color: "black" }}>รหัสผัง</div>
-          <div style={{ flex: 2, color: "black" }}>ชื่อผังร้าน</div>
-          <div style={{ flex: 1, color: "black" }}>จำนวนโซน</div>
-          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
-          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
-        </div>
-        {currentItems.length > 0 ? (
-          currentItems.map((planGroup, index) => (
-            <div
-              key={planGroup.PlanGroup_id}
-              style={{
-                display: "flex",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <div style={{ flex: 1, color: "black" }}>
-                {indexOfFirstItem + index + 1}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {planGroup.PlanGroup_id}
-              </div>
-              <div style={{ flex: 2, color: "black" }}>
-                {planGroup.PlanGroup_Name}
-              </div>
-              <div style={{ flex: 1, color: "black", textAlign: "center" }}>
-                {calculatePlanCount(planGroup.PlanGroup_id)}
-              </div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Switch
-                  checked={planGroup.PlanGroup_Active === "Y"}
-                  onChange={() => toggleActiveStatus(planGroup)}
-                  color="primary"
-                />
-                <span style={{ color: "black" }}>
-                  {planGroup.PlanGroup_Active === "Y"
-                    ? "เผยแพร่"
-                    : "ไม่เผยแพร่"}
-                </span>
-              </div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditOpen(planGroup)}
->>>>>>> 2d52d7aa76c3d0fb9a8d14a108911bd8d2acfd76
                 >
                   ไม่พบข้อมูล
                 </TableCell>

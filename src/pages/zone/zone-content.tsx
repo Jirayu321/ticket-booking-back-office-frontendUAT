@@ -252,7 +252,7 @@ const ZoneContent: React.FC = () => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            marginRight: "1270px",
+            marginRight: "1220px",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",

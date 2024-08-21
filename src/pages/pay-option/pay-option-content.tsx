@@ -7,7 +7,6 @@ import {
   DialogTitle,
   IconButton,
   Switch,
-<<<<<<< HEAD
   Table,
   TableBody,
   TableCell,
@@ -16,9 +15,7 @@ import {
   TableRow,
   Paper,
   Pagination,
-=======
-  TextField
->>>>>>> 2d52d7aa76c3d0fb9a8d14a108911bd8d2acfd76
+  TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";

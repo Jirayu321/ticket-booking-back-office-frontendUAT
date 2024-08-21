@@ -18,12 +18,7 @@ import {
   Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  getPayBy,
-  createPayBy,
-  updatePayBy,
-  deletePayBy,
-} from "../../services/pay-by.service";
+import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
 
@@ -76,22 +71,14 @@ const PayByContent: React.FC = () => {
     setEditPayOption(null);
   };
 
-  const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | { name?: string; value: unknown }
-    >
-  ) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     setNewPayOption({
       ...newPayOption,
       [event.target.name as string]: event.target.value,
     });
   };
 
-  const handleEditChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | { name?: string; value: unknown }
-    >
-  ) => {
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     setEditPayOption({
       ...editPayOption,
       [event.target.name as string]: event.target.value,
@@ -168,7 +155,7 @@ const PayByContent: React.FC = () => {
   const totalPages = Math.ceil(payOptions.length / itemsPerPage);
 
   return (
-    <div>
+    <div style={{  fontFamily: "Arial, sans-serif" }}>
       <Header title="วิธีการจ่ายเงิน" />
       <div
         style={{
@@ -195,17 +182,16 @@ const PayByContent: React.FC = () => {
           เพิ่มรายการ +
         </Button>
       </div>
-<<<<<<< HEAD
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell>ลำดับ</TableCell>
+              <TableCell>ชื่อ</TableCell>
+              <TableCell>คำอธิบาย</TableCell>
+              <TableCell>สถานะ</TableCell>
+              <TableCell>จัดการ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -259,130 +245,6 @@ const PayByContent: React.FC = () => {
           onChange={(_, page) => handleClick(page)}
           color="primary"
         />
-=======
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          <div style={{ flex: 1, color: "black" }}>ลำดับ</div>
-          <div style={{ flex: 1, color: "black" }}>ชื่อ</div>
-          <div style={{ flex: 2, color: "black" }}>คำอธิบาย</div>
-          <div style={{ flex: 1, color: "black" }}>สถานะ</div>
-          <div style={{ flex: 1, color: "black" }}>จัดการ</div>
-        </div>
-        {currentItems.length > 0 ? (
-          currentItems.map((payOption, index) => (
-            <div
-              key={payOption.Pay_By_Id}
-              style={{
-                display: "flex",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <div style={{ flex: 1, color: "black" }}>
-                {indexOfFirstItem + index + 1}
-              </div>
-              <div style={{ flex: 1, color: "black" }}>
-                {payOption.Pay_By_Name}
-              </div>
-              <div style={{ flex: 2, color: "black" }}>
-                {payOption.Pay_By_Desc || "-"}
-              </div>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <Switch
-                  checked={payOption.Pay_By_Active === "Y"}
-                  onChange={() => toggleActiveStatus(payOption)}
-                  inputProps={{ "aria-label": "controlled" }}
-                  color="primary"
-                />
-                <span>
-                  {payOption.Pay_By_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-                </span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditOpen(payOption)}
-                >
-                  รายละเอียด
-                </Button>
-                <IconButton
-                  onClick={() => handleDelete(payOption.Pay_By_Id)}
-                  style={{ color: "red" }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ padding: "10px 20px", color: "black" }}>
-            No pay options available
-          </div>
-        )}
-      </div>
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <button
-          onClick={() => handleClick(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &lt;
-        </button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handleClick(index + 1)}
-            style={{
-              margin: "0 5px",
-              padding: "5px 10px",
-              cursor: "pointer",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd",
-              color: currentPage === index + 1 ? "#fff" : "#000",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => handleClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            margin: "0 5px",
-            padding: "5px 10px",
-            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            backgroundColor: "#ddd",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          &gt;
-        </button>
->>>>>>> 2d52d7aa76c3d0fb9a8d14a108911bd8d2acfd76
       </div>
 
       <Dialog open={open} onClose={handleClose}>
