@@ -183,15 +183,33 @@ const AllEventContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ลำดับ</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ชื่องาน</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานที่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันที่เผยแพร่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันจัดงาน</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>เผยแพร่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานะ</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>Link</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>รายละเอียด</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                ลำดับ
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                ชื่องาน
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                สถานที่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                วันที่เผยแพร่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                วันจัดงาน
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                เผยแพร่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                สถานะ
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                Link
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                รายละเอียด
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -227,13 +245,13 @@ const AllEventContent: React.FC = () => {
                       : "ยังไม่ระบุ"}
                   </TableCell>
                   <TableCell
-                    style={{color:"black"}}
+                    style={{ color: "black" }}
                     className={Event_Public === "Y" ? "publish" : "unpublish"}
                   >
                     {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                   </TableCell>
                   <TableCell
-                  style={{color:"white"}}
+                    style={{ color: "white" }}
                     className={
                       Event_Status === 1
                         ? "pending"
