@@ -3,14 +3,11 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
-import GenerateBoxes from "./generate-boxes";
-import deleteOnIcon from "/delete-on.svg";
-import { useZoneStore } from "../form-store";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { Price, ZoneData } from "../../edit-event/type";
-import { addHours } from "../../../lib/util";
-
-const HOURS_DIFF = 7;
+import { useZoneStore } from "../form-store";
+import GenerateBoxes from "./generate-boxes";
+import deleteOnIcon from "/delete-on.svg";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -262,9 +259,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           return (
                             <DateTimePickerComponent
                               controlledValue={
-                                params.value
-                                  ? dayjs(params.value)
-                                  : dayjs(null)
+                                params.value ? dayjs(params.value) : dayjs(null)
                               }
                               onChange={(date) =>
                                 handlePriceChange(
@@ -362,7 +357,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                 </select>
                 <GenerateBoxes
                   method={zones[zone.Plan_id]?.tableInputMethod || "1"}
-                  seatNumber={zones[zone.Plan_id]?.seatCount || 0}
+                  totalSeats={zones[zone.Plan_id]?.seatCount || 0}
                   zoneId={zone.Plan_id}
                 />
               </div>
