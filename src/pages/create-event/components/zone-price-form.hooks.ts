@@ -21,7 +21,6 @@ export function useZonePriceForm() {
       toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
       return;
     }
-
     try {
       const eventData = {
         Event_Name: title,
@@ -221,7 +220,7 @@ export function useZonePriceForm() {
             message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุราคาสำหรับโซน ${zoneId}`,
           };
         }
-    
+
         return zoneData.prices.map((price) => {
           if (!price.price) {
             return {
@@ -236,7 +235,7 @@ export function useZonePriceForm() {
             };
           }
           if (!price.endDate) {
-            return null
+            return null;
           }
           return { isValid: true, message: "" };
         });

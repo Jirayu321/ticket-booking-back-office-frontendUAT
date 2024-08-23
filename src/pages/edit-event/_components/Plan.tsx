@@ -114,6 +114,8 @@ const Body: FC<BodyProps> = ({
       planGroupId: PlanGroup_Id,
     });
 
+  console.log(ticketNoPerPlans);
+
   const sortedTicketNoPerPlans = ticketNoPerPlans?.sort(sortTicketNo);
 
   const columns: GridColDef[] = [

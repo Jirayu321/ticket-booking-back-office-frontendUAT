@@ -16,6 +16,7 @@ const ZonePriceForm = () => {
     setSelectedZoneGroup,
     setZoneData,
     resetZoneData,
+    zones,
   } = useZoneStore();
 
   const {
@@ -100,7 +101,7 @@ const ZonePriceForm = () => {
         setError("Failed to fetch data. Please try again later.");
       }
     };
- 
+
     fetchData();
   }, []);
 

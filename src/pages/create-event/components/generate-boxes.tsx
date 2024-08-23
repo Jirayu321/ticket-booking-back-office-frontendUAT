@@ -6,7 +6,7 @@ import "./generate-boxes.css";
 interface GenerateTableProps {
   method: string;
   totalSeats: number;
-  zoneId: number; // Assuming you pass the zoneId to associate with a specific zone
+  zoneId: number;
 }
 
 const GenerateBoxes: React.FC<GenerateTableProps> = ({
@@ -25,7 +25,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       setStartNumberAndPrefix,
       zones,
     });
-
+  console.log(zones);
   return (
     <div className="generate-boxes-container">
       <div className="header-container">

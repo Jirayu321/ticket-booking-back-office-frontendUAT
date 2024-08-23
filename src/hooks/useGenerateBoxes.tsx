@@ -40,7 +40,7 @@ export function useGenerateBoxes(options: {
 
     setTableValues(zoneId, generatedValues);
     setInputValues(generatedValues);
-  }, [method, totalSeats, zoneId, inputValues]);
+  }, [method, totalSeats, zoneId]);
 
   useEffect(() => {
     setStartNumberAndPrefix(zoneId, startNumber, prefix);
@@ -58,7 +58,7 @@ export function useGenerateBoxes(options: {
       setInputValues(updatedValues);
       setTableValues(zoneId, updatedValues);
     }
-  }, [totalSeats, method, zoneId]);
+  }, [totalSeats, method, zoneId, startNumber]);
 
   const handleInputChange = (index: number, value: string) => {
     const newValues = [...inputValues];
@@ -102,14 +102,20 @@ export function useGenerateBoxes(options: {
           type="text"
           value={value}
           placeholder={method === "1" ? "โปรดระบุ" : ""}
-          onChange={(e) => handleInputChange(index, e.target.value)}
+          onChange={(e) => {
+            const doesValueDuplicate = inputValues.includes(e.target.value);
+
+            if (doesValueDuplicate) {
+              return;
+            }
+            handleInputChange(index, e.target.value);
+          }}
           className="table-input-box"
           readOnly={method !== "1" && method !== "5"}
         />
       );
     });
   };
-
   return {
     startNumber,
     prefix,
