@@ -81,6 +81,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         handlePriceChange={() => {}}
         removeZonePrice={() => {}}
         addZonePrice={() => {}}
+        onUpdatePlanInfo={setPlanInfo}
       />
       {expandedZones[Plan_Id] ? (
         <Button

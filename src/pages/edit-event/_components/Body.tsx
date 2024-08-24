@@ -16,6 +16,7 @@ type BodyProps = {
   handlePriceChange: any;
   removeZonePrice: any;
   addZonePrice: any;
+  onUpdatePlanInfo: any;
 };
 
 const Body: FC<BodyProps> = ({
@@ -26,10 +27,16 @@ const Body: FC<BodyProps> = ({
   handlePriceChange,
   removeZonePrice,
   addZonePrice,
+  onUpdatePlanInfo,
 }) => {
-  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket, ticketNumbers, logEventPrices } =
-    zone;
-  
+  const {
+    ticketTypeId,
+    ticketQtyPerPlan,
+    seatQtyPerticket,
+    ticketNumbers,
+    logEventPrices,
+  } = zone;
+
   const sortedTicketNoPerPlans = ticketNumbers?.sort(sortTicketNo);
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
@@ -118,7 +125,10 @@ const Body: FC<BodyProps> = ({
                 className="ticket-type-select"
                 value={ticketTypeId || ""}
                 onChange={(e) =>
-                  handleInputChange(zone.planId, "ticketType", e.target.value)
+                  onUpdatePlanInfo((prev: any) => ({
+                    ...prev,
+                    ticketTypeId: e.target.value,
+                  }))
                 }
               >
                 <option value="">เลือกประเภทตั๋ว</option>
