@@ -51,3 +51,7 @@ export function sortTicketNo(tn1: any, tn2: any) {
 export function addHours(date: Date, hours: number) {
   return new Date(date.getTime() + hours * 60 * 60 * 1000);
 }
+
+export function doesSomeItemDuplicateInMultipleArrays<T>(arrays: T[]): boolean {
+  return new Set(arrays).size !== arrays.length;
+}

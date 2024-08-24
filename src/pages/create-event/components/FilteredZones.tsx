@@ -1,16 +1,13 @@
-import { CircularProgress, Collapse } from "@mui/material";
+import { Button, CircularProgress, Collapse } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
-import GenerateBoxes from "./generate-boxes";
-import deleteOnIcon from "/delete-on.svg";
-import { useZoneStore } from "../form-store";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { Price, ZoneData } from "../../edit-event/type";
-import { addHours } from "../../../lib/util";
-
-const HOURS_DIFF = 7;
+import { useZoneStore } from "../form-store";
+import GenerateBoxes from "./generate-boxes";
+import deleteOnIcon from "/delete-on.svg";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -18,6 +15,14 @@ type FilteredZonesProps = {
 
 const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
+
+  const [ticketQuantityPerPlan, setTicketQuantityPerPlan] = useState<{
+    zone: any | null;
+    ticketQty: number;
+  }>({
+    zone: null,
+    ticketQty: 0,
+  });
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -65,6 +70,10 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     value: any
   ) => {
     setZoneData(zoneId, { [field]: value });
+  };
+
+  const handleUpdateTicketQuantity = (planId: number) => {
+    handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
   };
 
   const columns: GridColDef[] = [
@@ -217,14 +226,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={zones[zone.Plan_id]?.seatCount || 0}
-                        onChange={(e) =>
-                          handleInputChange(
-                            zone.Plan_id,
-                            "seatCount",
-                            Number(e.target.value)
-                          )
-                        }
+                        value={ticketQuantityPerPlan.ticketQty || 0}
+                        onChange={(e) => {
+                          setTicketQuantityPerPlan({
+                            zone,
+                            ticketQty: Number(e.target.value),
+                          });
+                        }}
                       />
                     </div>
                     <div className="ticket-amount-row">
@@ -245,6 +253,19 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                       />
                     </div>
                   </div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={() => handleUpdateTicketQuantity(zone.Plan_id)}
+                    sx={{
+                      height: 45,
+                      marginTop: 2,
+                      width: 150,
+                      marginX: "auto",
+                    }}
+                  >
+                    <p>ยืนยันจำนวนโต๊ะ</p>
+                  </Button>
                 </div>
               </div>
               <div className="price-section">
@@ -262,9 +283,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           return (
                             <DateTimePickerComponent
                               controlledValue={
-                                params.value
-                                  ? dayjs(params.value)
-                                  : dayjs(null)
+                                params.value ? dayjs(params.value) : dayjs(null)
                               }
                               onChange={(date) =>
                                 handlePriceChange(
@@ -362,7 +381,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                 </select>
                 <GenerateBoxes
                   method={zones[zone.Plan_id]?.tableInputMethod || "1"}
-                  seatNumber={zones[zone.Plan_id]?.seatCount || 0}
+                  totalSeats={zones[zone.Plan_id]?.seatCount || 0}
                   zoneId={zone.Plan_id}
                 />
               </div>

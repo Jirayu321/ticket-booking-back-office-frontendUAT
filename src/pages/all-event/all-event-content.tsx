@@ -1,5 +1,8 @@
 import {
+  Button,
   CircularProgress,
+  Pagination,
+  Paper,
   Stack,
   Table,
   TableBody,
@@ -7,18 +10,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Pagination,
-  Button,
 } from "@mui/material";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { FaCopy } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
+import { formatThaiDate } from "../../lib/util";
 import Header from "../common/header";
 import "./all-event-content.css";
-import { formatThaiDate } from "../../lib/util";
-import { useNavigate } from "react-router-dom";
-import { FaCopy } from "react-icons/fa";
-import toast from "react-hot-toast";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -183,15 +183,33 @@ const AllEventContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ลำดับ</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>ชื่องาน</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานที่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันที่เผยแพร่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>วันจัดงาน</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>เผยแพร่</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>สถานะ</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>Link</TableCell>
-              <TableCell style={{fontWeight:"bold",fontSize:"20px"}}>รายละเอียด</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                ลำดับ
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                ชื่องาน
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                สถานที่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                วันที่เผยแพร่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                วันจัดงาน
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                เผยแพร่
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                สถานะ
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                Link
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+                รายละเอียด
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -227,13 +245,13 @@ const AllEventContent: React.FC = () => {
                       : "ยังไม่ระบุ"}
                   </TableCell>
                   <TableCell
-                    style={{color:"black"}}
+                    style={{ color: "black" }}
                     className={Event_Public === "Y" ? "publish" : "unpublish"}
                   >
                     {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                   </TableCell>
                   <TableCell
-                  style={{color:"white"}}
+                    style={{ color: "white" }}
                     className={
                       Event_Status === 1
                         ? "pending"

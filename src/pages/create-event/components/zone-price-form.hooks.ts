@@ -4,7 +4,10 @@ import { useEventStore, useZoneStore } from "../form-store";
 import { createEventStock } from "../../../services/event-stock.service";
 import { createLogEventPrice } from "../../../services/log-event-price.service";
 import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
-import { convertLocalTimeToISO } from "../../../lib/util";
+import {
+  convertLocalTimeToISO,
+  doesSomeItemDuplicateInMultipleArrays,
+} from "../../../lib/util";
 
 const DEFAULT_INPUT_METHOD = 1;
 const DEFAULT_ACTIONER = "admin";
@@ -18,7 +21,6 @@ export function useZonePriceForm() {
       toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
       return;
     }
-
     try {
       const eventData = {
         Event_Name: title,
@@ -174,8 +176,19 @@ export function useZonePriceForm() {
       };
     }
 
-    console.log(zones)
-    const zoneDataArray = Object.entries(zones).filter(([zoneId, zoneData]) => {
+    console.log(zones);
+
+    const allTableValues = Object.entries(zones)
+      .map(([_, zone]) => {
+        return zone.tableValues ?? [];
+      })
+      .flat();
+
+    if (doesSomeItemDuplicateInMultipleArrays<string>(allTableValues)) {
+      throw new Error("ข้อผิดพลาดในการตรวจสอบ: มีเลขตั๋วซ้ำกันในโซนต่างๆ");
+    }
+
+    const zoneDataArray = Object.entries(zones).filter(([_, zoneData]) => {
       if (!Object.keys(zoneData).includes("seatPerTicket")) return true;
       if (!zoneData.ticketType || zoneData.ticketType === "") {
         throw new Error("กรุณากรอกประเภทของตั๋วสำหรับโซนทั้งหมด");
@@ -197,6 +210,9 @@ export function useZonePriceForm() {
     }
 
     const logPrices = Object.entries(zones)
+      .filter(([_, zoneData]) => {
+        return Object.keys(zoneData).includes("tableValues");
+      })
       .map(([zoneId, zoneData]) => {
         if (!zoneData.prices || zoneData.prices.length === 0) {
           return {
@@ -219,16 +235,15 @@ export function useZonePriceForm() {
             };
           }
           if (!price.endDate) {
-            return {
-              isValid: false,
-              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุวันสิ้นสุดสำหรับราคาสำหรับโซน ${zoneId}`,
-            };
+            return null;
           }
           return { isValid: true, message: "" };
         });
       })
       .filter((plan) => plan !== null)
       .flat();
+
+    console.log(logPrices);
 
     if (logPrices.length === 0) {
       return { isValid: false, message: "กรุณาเลือกราคาสำหรับ Event" };

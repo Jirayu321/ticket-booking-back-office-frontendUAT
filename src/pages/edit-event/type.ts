@@ -15,3 +15,12 @@ export type ZoneData = {
   startNumber?: number | null;
   prefix?: string;
 };
+
+export type PlanInfo = {
+  planId: number;
+  ticketTypeId: number | null;
+  ticketQtyPerPlan: number;
+  seatQtyPerticket: number;
+  logEventPrices: any[];
+  ticketNumbers: string[];
+};

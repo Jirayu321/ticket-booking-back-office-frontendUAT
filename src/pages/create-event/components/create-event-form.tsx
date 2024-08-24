@@ -83,6 +83,7 @@ const CreateEventForm = () => {
   async function handleCreateEvent() {
     try {
       toast.loading("กำลังสร้าง event ใหม่");
+      
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
