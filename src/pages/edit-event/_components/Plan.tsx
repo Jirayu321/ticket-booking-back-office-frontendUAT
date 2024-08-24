@@ -1,11 +1,14 @@
-import { CircularProgress } from "@mui/material";
-import { FC } from "react";
+import { Button, CircularProgress } from "@mui/material";
+import { FC, useState } from "react";
 import styles from "./plan.module.css";
 import { useParams } from "react-router-dom";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
 import Header from "./Header";
 import Body from "./Body";
+import { PlanInfo } from "../type";
+import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
+import { useSyncPlanInfo } from "../_hook/useSyncPlanInfo";
 
 type PlanProps = {
   plan: any;
@@ -17,7 +20,15 @@ type PlanProps = {
 const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
   const { eventId } = useParams();
 
-  const { Plan_Id, Plan_Name, Plan_Desc, PlanGroup_Id } = plan;
+  const {
+    Plan_Id,
+    Plan_Name,
+    Plan_Desc,
+    PlanGroup_Id,
+    Ticket_Type_Id,
+    Ticket_Qty_Per,
+    Ticket_Qty,
+  } = plan;
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -29,7 +40,36 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
       planGroupId: PlanGroup_Id,
     });
 
-  if (isLoadingTicketTypes || isLoadingViewLogEventPrice)
+  const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
+    useFetchTicketNoPerPlanByEventId({
+      eventId: Number(eventId),
+      planId: Plan_Id,
+      planGroupId: PlanGroup_Id,
+    });
+
+  const [planInfo, setPlanInfo] = useState<PlanInfo>({
+    ticketTypeId: null,
+    ticketQtyPerPlan: 0,
+    seatQtyPerticket: 0,
+    logEventPrices: [],
+    ticketNumbers: [],
+  });
+
+  useSyncPlanInfo({
+    ticketTypeId: Ticket_Type_Id,
+    ticketQtyPerPlan: Ticket_Qty_Per,
+    seatQtyPerticket: Ticket_Qty,
+    logEventPrices: viewLogEventPrices,
+    ticketNumbers: ticketNoPerPlans,
+    setPlanInfo,
+  });
+
+  console.log(planInfo)
+  if (
+    isLoadingTicketTypes ||
+    isLoadingViewLogEventPrice ||
+    isLoadingTicketNoPerPlans
+  )
     return <CircularProgress />;
 
   return (
@@ -51,6 +91,15 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         ticketTypes={ticketTypes}
         viewLogEventPrices={viewLogEventPrices}
       />
+      {expandedZones[Plan_Id] ? (
+        <Button
+          color="success"
+          variant="contained"
+          className={styles.saveButtonContainer}
+        >
+          บันทึกข้อมูล
+        </Button>
+      ) : null}
     </div>
   );
 };

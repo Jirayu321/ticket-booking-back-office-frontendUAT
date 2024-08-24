@@ -7,6 +7,7 @@ import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { sortTicketNo } from "../../../lib/util";
 import styles from "./plan.module.css";
+import { v4 } from "uuid";
 
 type BodyProps = {
   zone: any;
@@ -34,6 +35,7 @@ const Body: FC<BodyProps> = ({
   const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty, Plan_Id, PlanGroup_Id } =
     zone;
   const { eventId } = useParams();
+  
   const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
     useFetchTicketNoPerPlanByEventId({
       eventId: Number(eventId),
@@ -123,7 +125,6 @@ const Body: FC<BodyProps> = ({
             <div className="ticket-type">
               <label>TICKET TYPE*</label>
               <select
-                disabled
                 className="ticket-type-select"
                 value={Ticket_Type_Id || ""}
                 onChange={(e) =>
@@ -185,7 +186,7 @@ const Body: FC<BodyProps> = ({
           <h3>ราคา ({zones[zone.Plan_Id]?.prices?.length || 0})</h3>
           <div style={{ height: "auto", width: "100%" }}>
             <DataGrid
-              getRowId={(_) => crypto.randomUUID()}
+              getRowId={(_) => v4()}
               rows={viewLogEventPrices}
               columns={columns}
               pageSize={zones[zone.Plan_Id]?.prices?.length || 0}
