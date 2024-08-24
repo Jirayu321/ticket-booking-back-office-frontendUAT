@@ -27,7 +27,7 @@ const Body: FC<BodyProps> = ({
   removeZonePrice,
   addZonePrice,
 }) => {
-  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket, ticketNumbers } =
+  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket, ticketNumbers, logEventPrices } =
     zone;
   
   const sortedTicketNoPerPlans = ticketNumbers?.sort(sortTicketNo);
@@ -177,7 +177,7 @@ const Body: FC<BodyProps> = ({
           <div style={{ height: "auto", width: "100%" }}>
             <DataGrid
               getRowId={(_) => v4()}
-              rows={zones.logEventPrices}
+              rows={logEventPrices}
               columns={columns}
               pageSize={zones[zone.planId]?.prices?.length || 0}
               autoHeight
