@@ -17,7 +17,13 @@ window.Buffer = Buffer;
 function App() {
   return (
     <Router>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 3000, // Duration in milliseconds (e.g., 5000ms = 5 seconds)
+        }}
+      />
       <Routes>
         <Route path="/overview" element={<Overview />} />
         <Route path="/all-events" element={<AllEvent />} />

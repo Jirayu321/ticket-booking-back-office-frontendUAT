@@ -29,6 +29,7 @@ import {
   deletePlanGroup,
 } from "../../services/plan-group.service";
 import { getPlansList } from "../../services/plan-list.service";
+import { getEventStock } from "../../services/event-stock.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
 
@@ -77,7 +78,7 @@ const ZoneGroupContent: React.FC = () => {
   };
 
   const handleOpen = () => {
-    setNewPlanGroup({ name: "", active: "N" });
+    setNewPlanGroup({ name: "", active: "Y" });
     setOpen(true);
   };
 
@@ -150,7 +151,7 @@ const ZoneGroupContent: React.FC = () => {
           Created_By: "Admin",
         });
         toast.success("สร้างผังร้านสำเร็จ");
-        setNewPlanGroup({ name: "", active: "N" });
+        setNewPlanGroup({ name: "", active: "Y" });
         setOpen(false);
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
@@ -182,16 +183,26 @@ const ZoneGroupContent: React.FC = () => {
       }
     };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deletePlanGroup(id);
-      toast.success("ลบผังร้านสำเร็จ");
-      const data = await getAllPlanGroups();
-      setPlanGroups(data.planGroups);
-    } catch (error) {
-      toast.error("Failed to delete plan group");
-    }
-  };
+    const handleDelete = async (id: number) => {
+      try {
+        const eventStocks = await getEventStock();
+        const isUsedInEventStock = eventStocks.some(
+          (stock) => stock.PlanGroup_Id === id
+        );
+  
+        if (isUsedInEventStock) {
+          toast.error("ลบผังร้านไม่ได้ ผังนี้ถูกใช้ใน event แล้ว");
+          return;
+        }
+  
+        await deletePlanGroup(id);
+        toast.success("ลบผังร้านสำเร็จ");
+        const data = await getAllPlanGroups();
+        setPlanGroups(data.planGroups);
+      } catch (error) {
+        toast.error("Failed to delete plan group");
+      }
+    };
 
   const toggleActiveStatus = async (planGroup: any) => {
     try {

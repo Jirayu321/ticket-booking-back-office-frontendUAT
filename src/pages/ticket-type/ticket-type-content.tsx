@@ -24,17 +24,19 @@ import {
   updateTicketType,
   deleteTicketType,
 } from "../../services/ticket-type.service";
+import { getEventStock } from "../../services/event-stock.service"; // Import the getEventStock function
 import Header from "../common/header";
 import toast from "react-hot-toast";
 
 const TicketTypeContent: React.FC = () => {
   const [ticketTypes, setTicketTypes] = useState<any[]>([]);
+  const [eventStocks, setEventStocks] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [newTicketType, setNewTicketType] = useState({
     name: "",
     unit: "",
-    cal: "N", // Default value
+    cal: "Y", // Default value
   });
   const [editTicketType, setEditTicketType] = useState<any>(null); // For editing
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,8 +58,22 @@ const TicketTypeContent: React.FC = () => {
     }
   };
 
+   // Function to fetch and set the event stock data
+   const fetchEventStock = async () => {
+    try {
+      const data = await getEventStock();
+      if (data) {
+        setEventStocks(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch event stock:", error);
+      toast.error("Failed to fetch event stock: " + error);
+    }
+  };
+
   useEffect(() => {
     fetchTicketTypes(); // Fetch data initially
+    fetchEventStock();
   }, []);
 
   const handleOpen = () => {
@@ -69,7 +85,7 @@ const TicketTypeContent: React.FC = () => {
     setNewTicketType({
       name: "",
       unit: "",
-      cal: "N",
+      cal: "",
     }); // Reset the form state
   };
 
@@ -107,7 +123,7 @@ const TicketTypeContent: React.FC = () => {
     setNewTicketType({
       name: "",
       unit: "",
-      cal: "N",
+      cal: "",
     }); // Reset the form state
     handleClose();
     fetchTicketTypes(); // Refresh data after creating
@@ -158,16 +174,26 @@ const handleSaveEdit = async () => {
   }
 };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteTicketType(id);
-      toast.success("ลบประเภทบัตรสำเร็จ");
-      fetchTicketTypes(); // Refresh data after deletion
-    } catch (error) {
-      console.error("Failed to delete ticket type:", error);
-      toast.error("ล้มเหลวระหว่างลบประเภทตั๋ว");
-    }
-  };
+const handleDelete = async (id: number) => {
+  // Check if the ticket type is used in any event stock
+  const isUsedInEventStock = eventStocks.some(
+    (stock) => stock.Ticket_Type_Id === id
+  );
+
+  if (isUsedInEventStock) {
+    toast.error("ลบประเภทบัตรไม่ได้ บัตรนี้ถูกใช้ใน event แล้ว");
+    return;
+  }
+
+  try {
+    await deleteTicketType(id);
+    toast.success("ลบประเภทบัตรสำเร็จ");
+    fetchTicketTypes(); // Refresh data after deletion
+  } catch (error) {
+    console.error("Failed to delete ticket type:", error);
+    toast.error("ล้มเหลวระหว่างลบประเภทตั๋ว");
+  }
+};
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);

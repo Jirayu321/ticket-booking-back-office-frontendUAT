@@ -22,6 +22,8 @@ import {
   Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   getAllPlans,
   createPlan,
@@ -29,6 +31,8 @@ import {
   deletePlan,
 } from "../../services/plan.service";
 import { getAllPlanGroups } from "../../services/plan-group.service";
+import { getEventStock } from "../../services/event-stock.service";
+
 import Header from "../common/header";
 import { toast } from "react-hot-toast";
 
@@ -37,11 +41,12 @@ const ZoneContent: React.FC = () => {
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [imageVisibility, setImageVisibility] = useState<{ [key: number]: boolean }>({}); // State to control image visibility
   const [newPlan, setNewPlan] = useState({
     name: "",
     desc: "",
     pic: "",
-    active: "N",
+    active: "Y",
     planGroupId: "",
   });
   const [editPlan, setEditPlan] = useState<any>(null);
@@ -74,7 +79,7 @@ const ZoneContent: React.FC = () => {
   }, []);
 
   const handleOpen = () => {
-    setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" });
+    setNewPlan({ name: "", desc: "", pic: "", active: "Y", planGroupId: "" });
     setOpen(true);
   };
 
@@ -159,7 +164,7 @@ const ZoneContent: React.FC = () => {
         PlanGroup_id: groupId,
       });
       toast.success("สร้างแผนสำเร็จ");
-      setNewPlan({ name: "", desc: "", pic: "", active: "N", planGroupId: "" });
+      setNewPlan({ name: "", desc: "", pic: "", active: "", planGroupId: "" });
       setOpen(false);
       const data = await getAllPlans();
       setPlans(data.plans);
@@ -167,45 +172,51 @@ const ZoneContent: React.FC = () => {
       toast.error("ไม่สามารถสร้างแผนได้");
     }
   };
-  
 
   const handleSaveEdit = async () => {
-  if (!editPlan) return;
+    if (!editPlan) return;
 
-  const groupId = editPlan.PlanGroup_id;
+    const groupId = editPlan.PlanGroup_id;
 
-  if (isDuplicatePlanName(editPlan.Plan_Name, groupId, plans, editPlan.Plan_id)) {
-    toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
-    return;
-  }
+    if (isDuplicatePlanName(editPlan.Plan_Name, groupId, plans, editPlan.Plan_id)) {
+      toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
+      return;
+    }
 
-  try {
-    await patchPlan({
-      Plan_id: editPlan.Plan_id,
-      Plan_Desc: editPlan.Plan_Desc,
-      Plan_Name: editPlan.Plan_Name,
-      Plan_Pic: editPlan.Plan_Pic,
-      Plan_Active: editPlan.Plan_Active,
-      PlanGroup_id: groupId,
-    });
-    toast.success("อัพเดทแผนสำเร็จ");
-    handleEditClose();
-    const data = await getAllPlans();
-    setPlans(data.plans);
-  } catch (error) {
-    toast.error("ล้มเหลวระหว่างอัปเดตแผน");
-  }
-};
-
-  
+    try {
+      await patchPlan({
+        Plan_id: editPlan.Plan_id,
+        Plan_Desc: editPlan.Plan_Desc,
+        Plan_Name: editPlan.Plan_Name,
+        Plan_Pic: editPlan.Plan_Pic,
+        Plan_Active: editPlan.Plan_Active,
+        PlanGroup_id: groupId,
+      });
+      toast.success("อัพเดทแผนสำเร็จ");
+      handleEditClose();
+      const data = await getAllPlans();
+      setPlans(data.plans);
+    } catch (error) {
+      toast.error("ล้มเหลวระหว่างอัปเดตแผน");
+    }
+  };
 
   const handleDelete = async (id: number) => {
     try {
+      const eventStocks = await getEventStock();
+      const isPlanInUse = eventStocks.some((stock) => stock.Plan_Id === id);
+
+      if (isPlanInUse) {
+        toast.error("ลบโซนไม่ได้ โซนนี้ถูกใช้ใน event แล้ว");
+        return;
+      }
+
       await deletePlan(id);
       toast.success("ลบแผนสำเร็จ");
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
+      console.error("Failed to delete plan:", error);
       toast.error("Failed to delete plan");
     }
   };
@@ -227,6 +238,13 @@ const ZoneContent: React.FC = () => {
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const toggleImageVisibility = (planId: number) => {
+    setImageVisibility(prev => ({
+      ...prev,
+      [planId]: !prev[planId], // Toggle visibility for the specific plan
+    }));
   };
 
   const filteredPlans = plans.filter((plan) => {
@@ -297,8 +315,10 @@ const ZoneContent: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อผัง</TableCell>
               <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อโซน</TableCell>
               <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>รูปภาพ</TableCell>
               <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
               <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
             </TableRow>
@@ -308,8 +328,22 @@ const ZoneContent: React.FC = () => {
               currentItems.map((plan, index) => (
                 <TableRow key={plan.Plan_id}>
                   <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell>{plan.PlanGroup_Name}</TableCell>
                   <TableCell>{plan.Plan_Name}</TableCell>
                   <TableCell>{plan.Plan_Desc}</TableCell>
+                  <TableCell>
+                    <div style={{ position: 'sticky ', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      {imageVisibility[plan.Plan_id] && (
+                        <img src={plan.Plan_Pic} alt="Plan Image" style={{ width: '100px', height: 'auto' }} />
+                      )}
+                      <IconButton
+                        onClick={() => toggleImageVisibility(plan.Plan_id)}
+                        style={{ position: 'absolute', top: 0, right: 0 }}
+                      >
+                        {imageVisibility[plan.Plan_id] ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      </IconButton>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Switch
                       checked={plan.Plan_Active === "Y"}
@@ -339,7 +373,7 @@ const ZoneContent: React.FC = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={7} align="center">
                   ไม่พบข้อมูล
                 </TableCell>
               </TableRow>
@@ -406,6 +440,20 @@ const ZoneContent: React.FC = () => {
             value={newPlan.pic}
             onChange={handleChange}
           />
+
+            <FormControl fullWidth margin="dense">
+            <InputLabel id="active-label">Active (Y/N)</InputLabel>
+            <Select
+              labelId="active-label"
+              name="active"
+              value={newPlan.active}
+              onChange={handleChange}
+              label="Active (Y/N)"
+            >
+              <MenuItem value="Y">Yes</MenuItem>
+              <MenuItem value="N">No</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
@@ -465,6 +513,19 @@ const ZoneContent: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
+            <FormControl fullWidth margin="dense">
+              <InputLabel id="active-label-edit">Active (Y/N)</InputLabel>
+              <Select
+                labelId="active-label-edit"
+                name="Plan_Active"
+                value={editPlan.Plan_Active}
+                onChange={handleEditChange}
+                fullWidth
+              >
+                <MenuItem value="Y">Yes</MenuItem>
+                <MenuItem value="N">No</MenuItem>
+              </Select>
+            </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleEditClose} color="secondary">
@@ -481,4 +542,3 @@ const ZoneContent: React.FC = () => {
 };
 
 export default ZoneContent;
-

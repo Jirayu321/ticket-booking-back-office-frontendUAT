@@ -45,3 +45,17 @@ export async function createEventStock({
     throw "ล้มเหลวระหว่างสร้าง event stock";
   }
 }
+
+export async function getEventStock() {
+  try {
+    const response = await authAxiosClient.get("/event-stock");
+
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch event stock");
+    }
+
+    return response.data.eventStocks;
+  } catch (error) {
+    throw new Error("ล้มเหลวระหว่างดึงข้อมูล event stock");
+  }
+}

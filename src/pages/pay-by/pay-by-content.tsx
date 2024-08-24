@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
+import { getHispayment } from "../../services/his-payment";
 import Header from "../common/header";
 import toast from "react-hot-toast";
 
@@ -104,7 +105,7 @@ const PayByContent: React.FC = () => {
       await createPayBy({
         Pay_By_Name: newPayOption.name,
         Pay_By_Desc: newPayOption.desc,
-        Pay_By_Active: "N", // Default to "ไม่เผยแพร่" (Inactive)
+        Pay_By_Active: "Y", // Default to "ไม่เผยแพร่" (Inactive)
         Created_By: "Admin", // Replace with actual creator
       });
   
@@ -149,11 +150,25 @@ const PayByContent: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
+      // Fetch the payment history data to check if the Pay_By_Id is being used
+      const paymentHistory = await getHispayment();
+  
+      // Check if the Pay_By_Id is used in any payment history record
+      const isUsedInPaymentHistory = paymentHistory.some(
+        (history) => history.Pay_By_Id === id
+      );
+  
+      if (isUsedInPaymentHistory) {
+        toast.error("ลบวิธีการจ่ายเงินไม่ได้ วิธีการนี้ถูกใช้ในประวัติการชำระเงินแล้ว");
+        return;
+      }
+  
+      // Proceed with deletion if not used
       await deletePayBy(id);
       toast.success("ลบวิธีการจ่ายเงินสำเร็จ");
       fetchPayOptions(); // Refresh data after deletion
     } catch (error) {
-      console.error("Failed to delete pay by:", error);
+      console.error("Failed to delete pay by method:", error);
       toast.error("ล้มเหลวระหว่างลบวิธีการจ่ายเงิน");
     }
   };

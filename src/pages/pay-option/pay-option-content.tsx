@@ -25,6 +25,7 @@ import {
   getPayOption,
   updatePayOption,
 } from "../../services/pay-option.service";
+import { getHispayment } from "../../services/his-payment";
 import Header from "../common/header";
 
 const PayOptionContent: React.FC = () => {
@@ -122,7 +123,7 @@ const PayOptionContent: React.FC = () => {
     await createPayOption({
       Pay_Opt_Name: newPayOption.name,
       Pay_Opt_Desc: newPayOption.desc,
-      Pay_Opt_Active: "N", // Default to inactive; user can toggle after creation
+      Pay_Opt_Active: "Y", // Default to inactive; user can toggle after creation
       Created_By: "Admin", // Replace with actual creator
     });
     setOpen(false);
@@ -164,16 +165,30 @@ const handleSaveEdit = async () => {
   }
 };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deletePayOption(id);
-      toast.success("ลบตัวเลือกการจ่ายเงินสำเร็จ");
-      fetchPayOptions(); // Refresh data after deletion
-    } catch (error) {
-      console.error("Failed to delete pay option:", error);
-      toast.error("ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน");
+const handleDelete = async (id: number) => {
+  try {
+    // Fetch the payment history data to check if the Pay_Opt_Id is being used
+    const paymentHistory = await getHispayment();
+
+    // Check if the Pay_Opt_Id is used in any payment history record
+    const isUsedInPaymentHistory = paymentHistory.some(
+      (history) => history.Pay_Opt_Id === id
+    );
+
+    if (isUsedInPaymentHistory) {
+      toast.error("ลบตัวเลือกการจ่ายเงินไม่ได้ ตัวเลือกนี้ถูกใช้ในประวัติการชำระเงินแล้ว");
+      return;
     }
-  };
+
+    // Proceed with deletion if not used
+    await deletePayOption(id);
+    toast.success("ลบตัวเลือกการจ่ายเงินสำเร็จ");
+    fetchPayOptions(); // Refresh data after deletion
+  } catch (error) {
+    console.error("Failed to delete pay option:", error);
+    toast.error("ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน");
+  }
+};
 
   const toggleActiveStatus = async (payOption: any) => {
     try {

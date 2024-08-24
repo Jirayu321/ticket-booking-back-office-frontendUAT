@@ -194,20 +194,25 @@
 .cancelled {
   font-weight: bold;
   border: none;
-  padding: 2px 5px; /* Reduced padding */
-  border-radius: 50px; /* Reduced border-radius */
+  padding: 0; /* Remove padding to minimize background area */
+  border-radius: 8px; /* Reduce border-radius for smaller rounded corners */
   display: inline-flex;
-  width: auto;
-  white-space: nowrap;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8em; /* Optional: Reduce font size */
+  justify-content: center; /* Center text horizontally */
+  align-items: center; /* Center text vertically */
+  font-size: 0.9em; /* Maintain text size */
+  line-height: 1.2; /* Set line-height to control height */
+  min-height: auto; /* Ensure there's no minimum height */
+  min-width: auto; /* Ensure there's no minimum width */
+  width: auto; /* Allow width to fit content */
+  height: auto; /* Allow height to fit content */
+  background-color: inherit; /* Ensure background color isn't causing extra space */
 }
 
 .publish,
 .active {
   color: white !important;
   background-color: #0B8600;
+  
 }
 
 .unpublish,
