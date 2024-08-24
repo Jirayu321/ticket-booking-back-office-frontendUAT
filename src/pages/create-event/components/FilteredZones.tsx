@@ -8,6 +8,7 @@ import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
+import { useSyncTicketQuantityPerPlan } from "./FilteredZones.hook";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -15,6 +16,16 @@ type FilteredZonesProps = {
 
 const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
+
+  const [ticketQuantityPerPlan, setTicketQuantityPerPlan] = useState<{
+    zone: any | null;
+    ticketQty: number;
+  }>({
+    zone: null,
+    ticketQty: 0,
+  });
+
+  console.log(zones);
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -63,6 +74,8 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   ) => {
     setZoneData(zoneId, { [field]: value });
   };
+
+  useSyncTicketQuantityPerPlan(ticketQuantityPerPlan, handleInputChange);
 
   const columns: GridColDef[] = [
     {
@@ -214,14 +227,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={zones[zone.Plan_id]?.seatCount || 0}
-                        onChange={(e) =>
-                          handleInputChange(
-                            zone.Plan_id,
-                            "seatCount",
-                            Number(e.target.value)
-                          )
-                        }
+                        value={ticketQuantityPerPlan.ticketQty || 0}
+                        onChange={(e) => {
+                          setTicketQuantityPerPlan({
+                            zone,
+                            ticketQty: Number(e.target.value),
+                          });
+                        }}
                       />
                     </div>
                     <div className="ticket-amount-row">
