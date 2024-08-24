@@ -14,12 +14,19 @@ type SubHeaderProp = {
 
 const SubHeader: FC<SubHeaderProp> = ({ event }) => {
   const navigate = useNavigate();
-  
-  const { title, title2, eventDateTime, description, status } =
-    useEditEventStore();
+
+  const {
+    title,
+    title2,
+    eventDateTime,
+    description,
+    status,
+    refreshEventInfo,
+  } = useEditEventStore();
 
   async function handleUpdateEvent() {
     try {
+      if (!refreshEventInfo) return;
       toast.loading("กำลังอัพเดทข้อมูลงาน");
 
       if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
@@ -36,9 +43,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
 
       toast.success("อัพเดทข้อมูลงานสำเร็จ");
 
-      setTimeout(() => {
-        navigate(0);
-      }, 1500);
+      refreshEventInfo();
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);

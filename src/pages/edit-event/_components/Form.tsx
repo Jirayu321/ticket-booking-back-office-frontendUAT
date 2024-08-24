@@ -47,6 +47,7 @@ const Form = () => {
       setIsDetailCompleted(true);
     }
   };
+  
   return (
     <form onSubmit={handleSave}>
       <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
