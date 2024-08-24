@@ -13,6 +13,8 @@ type EditEventStore = {
   setStatus: (status: number) => void;
   isPublic: boolean;
   setIsPublic: (isPublic: boolean) => void;
+  activeTab: string;
+  setActiveTab: (activeTab: string) => void;
 };
 
 const useEditEventStore = create<EditEventStore>((set) => ({
@@ -28,6 +30,8 @@ const useEditEventStore = create<EditEventStore>((set) => ({
   setStatus: (status) => set({ status }),
   isPublic: false,
   setIsPublic: (isPublic) => set({ isPublic }),
+  activeTab: "รายละเอียด",
+  setActiveTab: (activeTab) => set({ activeTab }),
 }));
 
 export default useEditEventStore;
