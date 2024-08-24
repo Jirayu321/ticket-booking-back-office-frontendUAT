@@ -1,14 +1,13 @@
 import { Button, CircularProgress } from "@mui/material";
 import { FC, useState } from "react";
-import styles from "./plan.module.css";
 import { useParams } from "react-router-dom";
-import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
-import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
-import Header from "./Header";
-import Body from "./Body";
-import { PlanInfo } from "../type";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
+import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
 import { useSyncPlanInfo } from "../_hook/useSyncPlanInfo";
+import { PlanInfo } from "../type";
+import Body from "./Body";
+import Header from "./Header";
+import styles from "./plan.module.css";
 
 type PlanProps = {
   plan: any;
@@ -30,9 +29,6 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     Ticket_Qty,
   } = plan;
 
-  const { data: ticketTypes, isPending: isLoadingTicketTypes } =
-    useFetchTicketTypes();
-
   const { data: viewLogEventPrices, isPending: isLoadingViewLogEventPrice } =
     useFetchViewLogEventPrice({
       eventId: Number(eventId),
@@ -53,6 +49,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     seatQtyPerticket: 0,
     logEventPrices: [],
     ticketNumbers: [],
+    planId: 0,
   });
 
   useSyncPlanInfo({
@@ -61,15 +58,11 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     seatQtyPerticket: Ticket_Qty,
     logEventPrices: viewLogEventPrices,
     ticketNumbers: ticketNoPerPlans,
+    planId: Number(Plan_Id),
     setPlanInfo,
   });
 
-  console.log(planInfo)
-  if (
-    isLoadingTicketTypes ||
-    isLoadingViewLogEventPrice ||
-    isLoadingTicketNoPerPlans
-  )
+  if (isLoadingViewLogEventPrice || isLoadingTicketNoPerPlans)
     return <CircularProgress />;
 
   return (
@@ -81,15 +74,13 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         Plan_Desc={Plan_Desc}
       />
       <Body
-        zone={plan}
+        zone={planInfo}
         zones={plans}
         expandedZones={expandedZones}
         handleInputChange={() => {}}
         handlePriceChange={() => {}}
         removeZonePrice={() => {}}
         addZonePrice={() => {}}
-        ticketTypes={ticketTypes}
-        viewLogEventPrices={viewLogEventPrices}
       />
       {expandedZones[Plan_Id] ? (
         <Button

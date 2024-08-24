@@ -6,6 +6,7 @@ export function useSyncPlanInfo({
   seatQtyPerticket,
   logEventPrices,
   ticketNumbers,
+  planId,
   setPlanInfo,
 }: {
   ticketTypeId: number | null;
@@ -13,6 +14,7 @@ export function useSyncPlanInfo({
   seatQtyPerticket: number;
   logEventPrices: any[];
   ticketNumbers: string[];
+  planId: number;
   setPlanInfo: any;
 }) {
   useEffect(() => {
@@ -22,6 +24,7 @@ export function useSyncPlanInfo({
       seatQtyPerticket,
       logEventPrices,
       ticketNumbers,
+      planId,
     });
   }, [
     ticketTypeId,

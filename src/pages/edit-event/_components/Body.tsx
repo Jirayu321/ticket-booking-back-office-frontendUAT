@@ -1,13 +1,12 @@
 import { CircularProgress, Collapse } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { FC } from "react";
-import { useParams } from "react-router-dom";
+import { v4 } from "uuid";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
-import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { sortTicketNo } from "../../../lib/util";
 import styles from "./plan.module.css";
-import { v4 } from "uuid";
+import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 
 type BodyProps = {
   zone: any;
@@ -17,8 +16,6 @@ type BodyProps = {
   handlePriceChange: any;
   removeZonePrice: any;
   addZonePrice: any;
-  ticketTypes: any;
-  viewLogEventPrices: any[];
 };
 
 const Body: FC<BodyProps> = ({
@@ -29,21 +26,14 @@ const Body: FC<BodyProps> = ({
   handlePriceChange,
   removeZonePrice,
   addZonePrice,
-  ticketTypes,
-  viewLogEventPrices,
 }) => {
-  const { Ticket_Type_Id, Ticket_Qty_Per, Ticket_Qty, Plan_Id, PlanGroup_Id } =
+  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket, ticketNumbers } =
     zone;
-  const { eventId } = useParams();
   
-  const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
-    useFetchTicketNoPerPlanByEventId({
-      eventId: Number(eventId),
-      planId: Plan_Id,
-      planGroupId: PlanGroup_Id,
-    });
+  const sortedTicketNoPerPlans = ticketNumbers?.sort(sortTicketNo);
 
-  const sortedTicketNoPerPlans = ticketNoPerPlans?.sort(sortTicketNo);
+  const { data: ticketTypes, isPending: isLoadingTicketTypes } =
+    useFetchTicketTypes();
 
   const columns: GridColDef[] = [
     {
@@ -112,10 +102,10 @@ const Body: FC<BodyProps> = ({
     // },
   ];
 
-  if (isLoadingTicketNoPerPlans) return <CircularProgress />;
+  if (isLoadingTicketTypes) return <CircularProgress />;
 
   return (
-    <Collapse in={expandedZones[zone.Plan_Id]} timeout="auto" unmountOnExit>
+    <Collapse in={expandedZones[zone.planId]} timeout="auto" unmountOnExit>
       <div className="zone-content">
         <div className="ticket-layout">
           <div className="empty-image">
@@ -126,9 +116,9 @@ const Body: FC<BodyProps> = ({
               <label>TICKET TYPE*</label>
               <select
                 className="ticket-type-select"
-                value={Ticket_Type_Id || ""}
+                value={ticketTypeId || ""}
                 onChange={(e) =>
-                  handleInputChange(zone.Plan_Id, "ticketType", e.target.value)
+                  handleInputChange(zone.planId, "ticketType", e.target.value)
                 }
               >
                 <option value="">เลือกประเภทตั๋ว</option>
@@ -151,10 +141,10 @@ const Body: FC<BodyProps> = ({
                   disabled
                   placeholder="จำนวนบัตร/โซน*"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={Ticket_Qty || 0}
+                  value={seatQtyPerticket || 0}
                   onChange={(e) =>
                     handleInputChange(
-                      zone.Plan_Id,
+                      zone.planId,
                       "seatCount",
                       Number(e.target.value)
                     )
@@ -169,10 +159,10 @@ const Body: FC<BodyProps> = ({
                   disabled
                   placeholder="จำนวนที่นั่ง/ตั๋ว"
                   style={{ backgroundColor: "white", color: "black" }}
-                  value={Ticket_Qty_Per || 0}
+                  value={ticketQtyPerPlan || 0}
                   onChange={(e) =>
                     handleInputChange(
-                      zone.Plan_Id,
+                      zone.planId,
                       "seatPerTicket",
                       Number(e.target.value)
                     )
@@ -183,13 +173,13 @@ const Body: FC<BodyProps> = ({
           </div>
         </div>
         <div className="price-section">
-          <h3>ราคา ({zones[zone.Plan_Id]?.prices?.length || 0})</h3>
+          <h3>ราคา ({zones[zone.planId]?.prices?.length || 0})</h3>
           <div style={{ height: "auto", width: "100%" }}>
             <DataGrid
               getRowId={(_) => v4()}
-              rows={viewLogEventPrices}
+              rows={zones.logEventPrices}
               columns={columns}
-              pageSize={zones[zone.Plan_Id]?.prices?.length || 0}
+              pageSize={zones[zone.planId]?.prices?.length || 0}
               autoHeight
               disableSelectionOnClick
               hideFooterPagination
@@ -199,7 +189,7 @@ const Body: FC<BodyProps> = ({
           <button
             type="button"
             className="add-price"
-            onClick={() => addZonePrice(zone.Plan_Id)}
+            onClick={() => addZonePrice(zone.planId)}
           >
             + เพิ่มราคาบัตร
           </button>
@@ -207,30 +197,26 @@ const Body: FC<BodyProps> = ({
         <div className="table-input-method-section">
           <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
           <select
-            value={zones[zone.Plan_Id]?.tableInputMethod || ""}
+            value={zones[zone.planId]?.tableInputMethod || ""}
             onChange={(e) =>
-              handleInputChange(
-                zone.Plan_Id,
-                "tableInputMethod",
-                e.target.value
-              )
+              handleInputChange(zone.planId, "tableInputMethod", e.target.value)
             }
             className="table-input-method-select"
           >
             <option value="">เลือกรูปแบบการระบุ</option>
             <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
             <option value="2">
-              2.รันจาก 1 ถึง {zones[zone.Plan_Id]?.seatCount || 0}
+              2.รันจาก 1 ถึง {zones[zone.planId]?.seatCount || 0}
             </option>
             <option value="3">
               3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[zone.Plan_Id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-              {zones[zone.Plan_Id]?.seatCount || 0})
+              {zones[zone.planId]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
+              {zones[zone.planId]?.seatCount || 0})
             </option>
             <option value="4">
               4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[zone.Plan_Id]?.seatCount || 0} ([?] 1- [?]{" "}
-              {zones[zone.Plan_Id]?.seatCount || 0})
+              {zones[zone.planId]?.seatCount || 0} ([?] 1- [?]{" "}
+              {zones[zone.planId]?.seatCount || 0})
             </option>
             <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
           </select>
@@ -252,9 +238,9 @@ const Body: FC<BodyProps> = ({
             )
           ) : null}
           {/* <GenerateBoxes
-              method={zones[zone.Plan_Id]?.tableInputMethod || "1"}
-              seatNumber={zones[zone.Plan_Id]?.seatCount || 0}
-              zoneId={zone.Plan_Id}
+              method={zones[zone.planId]?.tableInputMethod || "1"}
+              seatNumber={zones[zone.planId]?.seatCount || 0}
+              zoneId={zone.planId}
             /> */}
         </div>
       </div>

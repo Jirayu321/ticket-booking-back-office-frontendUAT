@@ -17,6 +17,7 @@ export type ZoneData = {
 };
 
 export type PlanInfo = {
+  planId: number;
   ticketTypeId: number | null;
   ticketQtyPerPlan: number;
   seatQtyPerticket: number;
