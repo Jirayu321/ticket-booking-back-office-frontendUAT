@@ -1,4 +1,4 @@
-import { CircularProgress, Collapse } from "@mui/material";
+import { Button, CircularProgress, Collapse } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
@@ -8,7 +8,6 @@ import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
-import { useSyncTicketQuantityPerPlan } from "./FilteredZones.hook";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -24,8 +23,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     zone: null,
     ticketQty: 0,
   });
-
-  console.log(zones);
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -75,7 +72,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     setZoneData(zoneId, { [field]: value });
   };
 
-  useSyncTicketQuantityPerPlan(ticketQuantityPerPlan, handleInputChange);
+  const handleUpdateTicketQuantity = (planId: number) => {
+    handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
+  };
 
   const columns: GridColDef[] = [
     {
@@ -254,6 +253,19 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                       />
                     </div>
                   </div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={() => handleUpdateTicketQuantity(zone.Plan_id)}
+                    sx={{
+                      height: 45,
+                      marginTop: 2,
+                      width: 150,
+                      marginX: "auto",
+                    }}
+                  >
+                    <p>ยืนยันจำนวนโต๊ะ</p>
+                  </Button>
                 </div>
               </div>
               <div className="price-section">
