@@ -148,16 +148,14 @@ const Body: FC<BodyProps> = ({
                 <input
                   type="number"
                   min="0"
-                  disabled
                   placeholder="จำนวนบัตร/โซน*"
                   style={{ backgroundColor: "white", color: "black" }}
                   value={seatQtyPerticket || 0}
                   onChange={(e) =>
-                    handleInputChange(
-                      zone.planId,
-                      "seatCount",
-                      Number(e.target.value)
-                    )
+                    onUpdatePlanInfo((prev: any) => ({
+                      ...prev,
+                      seatQtyPerticket: Number(e.target.value),
+                    }))
                   }
                 />
               </div>
@@ -166,16 +164,14 @@ const Body: FC<BodyProps> = ({
                 <input
                   type="number"
                   min="0"
-                  disabled
                   placeholder="จำนวนที่นั่ง/ตั๋ว"
                   style={{ backgroundColor: "white", color: "black" }}
                   value={ticketQtyPerPlan || 0}
                   onChange={(e) =>
-                    handleInputChange(
-                      zone.planId,
-                      "seatPerTicket",
-                      Number(e.target.value)
-                    )
+                    onUpdatePlanInfo((prev: any) => ({
+                      ...prev,
+                      ticketQtyPerPlan: Number(e.target.value),
+                    }))
                   }
                 />
               </div>

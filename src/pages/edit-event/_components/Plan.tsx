@@ -8,6 +8,8 @@ import { PlanInfo } from "../type";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
+import toast from "react-hot-toast";
+import { updateEventStock } from "../../../services/event-stock.service";
 
 type PlanProps = {
   plan: any;
@@ -29,7 +31,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     Ticket_Qty,
   } = plan;
 
-  const { data: viewLogEventPrices, isPending: isLoadingViewLogEventPrice } =
+  const { data: viewLogEventPrices, isPending: isLoadingViewLogEventPrice, refetch : refreshViewEventStocks } =
     useFetchViewLogEventPrice({
       eventId: Number(eventId),
       planId: Plan_Id,
@@ -62,6 +64,28 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     setPlanInfo,
   });
 
+  async function handleUpdateViewEventStock() {
+    try {
+      toast.loading("กำลังบันทึกข้อมูล...");
+      await updateEventStock({
+        eventId: Number(eventId),
+        planGroupId: PlanGroup_Id,
+        planId: Plan_Id,
+        newValues: {
+          Ticket_Type_Id: planInfo.ticketTypeId,
+          Ticket_Qty_Per: planInfo.ticketQtyPerPlan,
+          Ticket_Qty: planInfo.seatQtyPerticket,
+        },
+      });
+      toast.dismiss();
+      toast.success("บันทึกข้อมูลสำเร็จ");
+      refreshViewEventStocks();
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(error.message);
+    }
+  }
+
   if (isLoadingViewLogEventPrice || isLoadingTicketNoPerPlans)
     return <CircularProgress />;
 
@@ -88,6 +112,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           color="success"
           variant="contained"
           className={styles.saveButtonContainer}
+          onClick={handleUpdateViewEventStock}
         >
           บันทึกข้อมูล
         </Button>
