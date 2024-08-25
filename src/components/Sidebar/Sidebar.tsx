@@ -49,12 +49,6 @@ const Sidebar: React.FC = () => {
               ที่นั่งทั้งหมด
             </Link>
           </li>
-          <li className={`menu-item ${activePath === '/scan-tickets' ? 'active' : ''}`}>
-            <Link to="/scan-tickets">
-              <span className="icon">📍</span>
-              แสกนบัตร
-            </Link>
-          </li>
           <h2 className="sidebarTitle">จัดการร้าน</h2>
           <li className={`menu-item ${activePath === '/zone-group' ? 'active' : ''}`}>
             <Link to="/zone-group">

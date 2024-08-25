@@ -271,10 +271,26 @@ const ZoneGroupContent: React.FC = () => {
           </FormControl>
           <TextField
             variant="outlined"
-            placeholder="ค้นหา"
+            placeholder="ชื่อผังร้าน"
             value={searchQuery}
             onChange={handleSearchChange}
             style={{ marginRight: "10px" }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
         </div>
         <Button

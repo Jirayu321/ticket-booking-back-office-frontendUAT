@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
-import { getHispayment } from "../../services/his-payment";
+import { getHispayment } from "../../services/his-payment.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
 

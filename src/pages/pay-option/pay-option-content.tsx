@@ -25,7 +25,7 @@ import {
   getPayOption,
   updatePayOption,
 } from "../../services/pay-option.service";
-import { getHispayment } from "../../services/his-payment";
+import { getHispayment } from "../../services/his-payment.service";
 import Header from "../common/header";
 
 const PayOptionContent: React.FC = () => {

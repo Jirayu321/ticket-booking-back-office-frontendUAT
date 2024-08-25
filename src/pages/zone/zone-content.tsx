@@ -289,10 +289,26 @@ const ZoneContent: React.FC = () => {
           </FormControl>
           <TextField
             variant="outlined"
-            placeholder="ค้นหา"
+            placeholder="ค้นหาโซน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px" }}
+            style={{ marginRight: "10px",marginTop:"10px" }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
         </div>
         <Button
@@ -332,7 +348,7 @@ const ZoneContent: React.FC = () => {
                   <TableCell>{plan.Plan_Name}</TableCell>
                   <TableCell>{plan.Plan_Desc}</TableCell>
                   <TableCell>
-                    <div style={{ position: 'sticky ', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div style={{ position: 'sticky', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                       {imageVisibility[plan.Plan_id] && (
                         <img src={plan.Plan_Pic} alt="Plan Image" style={{ width: '100px', height: 'auto' }} />
                       )}
@@ -496,6 +512,9 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Pic}
               onChange={handleEditChange}
+              InputProps={{
+                style: { textAlign: 'left' },
+              }}
             />
             <FormControl fullWidth margin="dense">
               <InputLabel id="plan-group-label-edit">ผังร้าน</InputLabel>
