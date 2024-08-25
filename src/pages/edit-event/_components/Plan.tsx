@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { FC, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
@@ -8,6 +8,7 @@ import { PlanInfo } from "../type";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
+import SaveButton from "./SaveButton";
 
 type PlanProps = {
   plan: any;
@@ -29,12 +30,15 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     Ticket_Qty,
   } = plan;
 
-  const { data: viewLogEventPrices, isPending: isLoadingViewLogEventPrice } =
-    useFetchViewLogEventPrice({
-      eventId: Number(eventId),
-      planId: Plan_Id,
-      planGroupId: PlanGroup_Id,
-    });
+  const {
+    data: viewLogEventPrices,
+    isPending: isLoadingViewLogEventPrice,
+    refetch: refreshViewEventStocks,
+  } = useFetchViewLogEventPrice({
+    eventId: Number(eventId),
+    planId: Plan_Id,
+    planGroupId: PlanGroup_Id,
+  });
 
   const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
     useFetchTicketNoPerPlanByEventId({
@@ -81,15 +85,15 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         handlePriceChange={() => {}}
         removeZonePrice={() => {}}
         addZonePrice={() => {}}
+        onUpdatePlanInfo={setPlanInfo}
       />
       {expandedZones[Plan_Id] ? (
-        <Button
-          color="success"
-          variant="contained"
-          className={styles.saveButtonContainer}
-        >
-          บันทึกข้อมูล
-        </Button>
+        <SaveButton
+          planId={Plan_Id}
+          planGroupId={PlanGroup_Id}
+          planInfo={planInfo}
+          refreshViewEventStocks={refreshViewEventStocks}
+        />
       ) : null}
     </div>
   );

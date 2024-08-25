@@ -13,6 +13,12 @@ type EditEventStore = {
   setStatus: (status: number) => void;
   isPublic: boolean;
   setIsPublic: (isPublic: boolean) => void;
+  activeTab: string;
+  setActiveTab: (activeTab: string) => void;
+  refreshEventInfo: (() => void) | null;
+  setRefreshEventInfo: (refreshEventInfo: () => void) => void;
+  isDetailCompleted: boolean;
+  setIsDetailCompleted: (isDetailCompleted: boolean) => void;
 };
 
 const useEditEventStore = create<EditEventStore>((set) => ({
@@ -28,6 +34,12 @@ const useEditEventStore = create<EditEventStore>((set) => ({
   setStatus: (status) => set({ status }),
   isPublic: false,
   setIsPublic: (isPublic) => set({ isPublic }),
+  activeTab: "รายละเอียด",
+  setActiveTab: (activeTab) => set({ activeTab }),
+  refreshEventInfo: null,
+  setRefreshEventInfo: (refreshEventInfo) => set({ refreshEventInfo }),
+  isDetailCompleted: false,
+  setIsDetailCompleted: (isDetailCompleted) => set({ isDetailCompleted }),
 }));
 
 export default useEditEventStore;

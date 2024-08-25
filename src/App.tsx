@@ -19,7 +19,7 @@ function App() {
   return (
     <Router>
       <Toaster
-        position="top-center"
+        position="top-right"
         reverseOrder={false}
         toastOptions={{
           duration: 3000, // Duration in milliseconds (e.g., 5000ms = 5 seconds)

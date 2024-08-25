@@ -14,7 +14,6 @@ export async function getAllPlans() {
   }
 }
 
-// Function to create a new plan
 export async function createPlan({
   Plan_Desc,
   Plan_Name,
@@ -45,7 +44,6 @@ export async function createPlan({
   }
 }
 
-// Function to patch (update) an existing plan
 export async function patchPlan({
   Plan_id,
   Plan_Desc,
@@ -78,7 +76,6 @@ export async function patchPlan({
   }
 }
 
-// Function to delete an existing plan
 export async function deletePlan(Plan_id: number) {
   try {
     const response = await authAxiosClient.delete(`/plan/${Plan_id}`);

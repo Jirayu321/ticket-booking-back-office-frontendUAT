@@ -1,13 +1,14 @@
 import { Stack } from "@mui/material";
 import { FC, useState } from "react";
+import { useEditZonePriceStore } from "../_hook/useEditZonePriceStore";
 import Plan from "./Plan";
 
 type PlanListProps = {
   plans: any[];
-  onSetZoneData: any;
 };
 
-const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
+const PlanList: FC<PlanListProps> = ({ plans }) => {
+  const { setZoneData } = useEditZonePriceStore();
   const [expandedZones, setExpandedZones] = useState<{
     [key: string]: boolean;
   }>({});
@@ -19,7 +20,7 @@ const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
     }));
 
     if (!plans[zoneId]) {
-      onSetZoneData(zoneId, {
+      setZoneData(zoneId, {
         ticketType: "",
         seatCount: 0,
         seatPerTicket: 0,
@@ -27,13 +28,16 @@ const PlanList: FC<PlanListProps> = ({ plans, onSetZoneData }) => {
         tableInputMethod: "1",
       });
     }
-    onSetZoneData(zoneId, { zoneName });
+    setZoneData(zoneId, { zoneName });
   };
 
   return (
-    <Stack sx={{
-      marginY : 2
-    }} gap={1}>
+    <Stack
+      sx={{
+        marginY: 2,
+      }}
+      gap={1}
+    >
       {plans.map((plan) => (
         <Plan
           key={plan.Plan_id}

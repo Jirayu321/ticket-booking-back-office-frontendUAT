@@ -1,5 +1,6 @@
 import { authAxiosClient } from "../config/axios.config";
 
+// ================ CREATE ================
 export async function createEventStock({
   Event_Id,
   PlanGroup_Id,
@@ -46,6 +47,8 @@ export async function createEventStock({
   }
 }
 
+// ================ READ ================
+
 export async function getEventStock() {
   try {
     const response = await authAxiosClient.get("/event-stock");
@@ -57,5 +60,31 @@ export async function getEventStock() {
     return response.data.eventStocks;
   } catch (error) {
     throw new Error("ล้มเหลวระหว่างดึงข้อมูล event stock");
+  }
+}
+
+// ================ UPDATE ================
+
+export async function updateEventStock({
+  eventId,
+  planGroupId,
+  planId,
+  newValues,
+}: {
+  eventId: number;
+  planGroupId: number;
+  planId: number;
+  newValues: any;
+}) {
+  try {
+    const response = await authAxiosClient.patch(
+      `/event-stock/${eventId}?planGroupId=${planGroupId}&planId=${planId}`,
+      newValues
+    );
+
+    if (response.status !== 200)
+      throw new Error("ล้มเหลวระหว่างอัพเดท event stock");
+  } catch (error) {
+    throw new Error("ล้มเหลวระหว่างอัพเดท event stock");
   }
 }

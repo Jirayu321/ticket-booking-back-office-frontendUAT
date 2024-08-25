@@ -50,10 +50,9 @@
 
 .toggle-container label {
   position: relative;
-  display: inline-block;
   width: 60px;
   height: 34px;
-  margin-right: 10px;
+  margin-right: 50px;
 }
 
 .toggle-text {
