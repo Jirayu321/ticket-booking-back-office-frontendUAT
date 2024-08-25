@@ -7,6 +7,7 @@ import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
 import { sortTicketNo } from "../../../lib/util";
 import styles from "./plan.module.css";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
+import LogPrices from "./LogPrices";
 
 type BodyProps = {
   zone: any;
@@ -178,28 +179,12 @@ const Body: FC<BodyProps> = ({
             </div>
           </div>
         </div>
-        <div className="price-section">
-          <h3>ราคา ({zones[zone.planId]?.prices?.length || 0})</h3>
-          <div style={{ height: "auto", width: "100%" }}>
-            <DataGrid
-              getRowId={(_) => v4()}
-              rows={logEventPrices}
-              columns={columns}
-              pageSize={zones[zone.planId]?.prices?.length || 0}
-              autoHeight
-              disableSelectionOnClick
-              hideFooterPagination
-            />
-          </div>
-
-          <button
-            type="button"
-            className="add-price"
-            onClick={() => addZonePrice(zone.planId)}
-          >
-            + เพิ่มราคาบัตร
-          </button>
-        </div>
+        <LogPrices 
+          planId={zone.planId}
+          zones={zones}
+          logEventPrices={logEventPrices}
+          handlePriceChange={handlePriceChange}
+        />
         <div className="table-input-method-section">
           <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
           <select

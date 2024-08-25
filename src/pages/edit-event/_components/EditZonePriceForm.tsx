@@ -6,7 +6,7 @@ import { useFetchViewEventStocks } from "../../../hooks/fetch-data/useFetchViewE
 import { useEditZonePriceStore } from "../_hook/useEditZonePriceStore";
 import { useSyncPlanGroup } from "../_hook/useSyncPlanGroup";
 import styles from "./edit-zone-price-form.module.css";
-import Plans from "./Plans";
+import PlanList from "./PlanList";
 
 type EditZonePriceFormProp = {
   eventId: number;
@@ -44,7 +44,7 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
           placeholder="เลือกผังร้าน"
         />
       ) : null}
-      <Plans filteredPlans={filteredPlans} />
+      <PlanList plans={filteredPlans} />
       {/* <div className="save-form-section">
         <button className="buttonSave" onClick={handleSaveEvent}>
           บันทึก
