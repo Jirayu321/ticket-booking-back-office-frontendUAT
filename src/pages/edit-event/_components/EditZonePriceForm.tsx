@@ -33,7 +33,6 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
 
   return (
     <div className={styles.container}>
-      {/* {error && <div className="error-message">{error}</div>} */}
       {planGroups ? (
         <Select
           options={planGroups?.map((pg: any) => pg.PlanGroup_Name)}
@@ -45,11 +44,6 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
         />
       ) : null}
       <PlanList plans={filteredPlans} />
-      {/* <div className="save-form-section">
-        <button className="buttonSave" onClick={handleSaveEvent}>
-          บันทึก
-        </button>
-      </div> */}
     </div>
   );
 };

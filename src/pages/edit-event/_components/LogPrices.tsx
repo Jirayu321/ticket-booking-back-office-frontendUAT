@@ -2,6 +2,8 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { FC } from "react";
 import { v4 } from "uuid";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
+import usePlanInfoStore from "../_hook/usePlanInfoStore";
+import toast from "react-hot-toast";
 
 type LogPricesProps = {
   zones: any[];
@@ -16,6 +18,23 @@ const LogPrices: FC<LogPricesProps> = ({
   handlePriceChange,
   planId,
 }) => {
+  const { onAddLogEventPrice } = usePlanInfoStore((state: any) => state);
+
+  function handleAddLogEventPrice() {
+    try {
+      const emptyLogEventPrice = {
+        Start_Datetime: null,
+        End_Datetime: null,
+        Plan_Price: 0,
+      };
+
+      onAddLogEventPrice(emptyLogEventPrice);
+
+      toast.success("เพิ่มราคาโซนสำเร็จ");
+    } catch (error: any) {
+      toast.error("ล้มเหลวระหว่างเพิ่มราคาโซน");
+    }
+  }
   const columns: GridColDef[] = [
     {
       field: "Start_Datetime",
@@ -97,7 +116,11 @@ const LogPrices: FC<LogPricesProps> = ({
         />
       </div>
 
-      <button type="button" className="add-price" onClick={() => {}}>
+      <button
+        type="button"
+        className="add-price"
+        onClick={handleAddLogEventPrice}
+      >
         + เพิ่มราคาบัตร
       </button>
     </div>
