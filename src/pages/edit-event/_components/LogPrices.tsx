@@ -1,30 +1,30 @@
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { FC } from "react";
+import toast from "react-hot-toast";
 import { v4 } from "uuid";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
-import toast from "react-hot-toast";
+import deleteOnIcon from "/delete-on.svg";
 
 type LogPricesProps = {
   zones: any[];
   planId: number;
-  logEventPrices: any[];
   handlePriceChange: any;
 };
 
 const LogPrices: FC<LogPricesProps> = ({
   zones,
-  logEventPrices,
   handlePriceChange,
   planId,
 }) => {
-  const { onAddLogEventPrice } = usePlanInfoStore((state: any) => state);
+  const { onAddLogEventPrice, onUpdateLogEventPrice, logEventPrices } =
+    usePlanInfoStore((state: any) => state);
 
   function handleAddLogEventPrice() {
     try {
       const emptyLogEventPrice = {
-        Start_Datetime: null,
-        End_Datetime: null,
+        Start_Datetime: new Date(),
+        End_Datetime: new Date(),
         Plan_Price: 0,
       };
 
@@ -35,6 +35,43 @@ const LogPrices: FC<LogPricesProps> = ({
       toast.error("ล้มเหลวระหว่างเพิ่มราคาโซน");
     }
   }
+
+  function handleUpdateLogEventPriceStartTime(
+    newStartTime: string,
+    logEventPriceId: number
+  ) {
+    try {
+      const newLogEventPrice = {
+        ...logEventPrices.find((lve: any) => lve.id === logEventPriceId),
+        Start_Datetime: newStartTime,
+      };
+
+      onUpdateLogEventPrice(newLogEventPrice);
+
+      toast.success("อัพเดทเวลาเริ่มสำเร็จ");
+    } catch (error: any) {
+      toast.error("ล้มเหลวระหว่างอัพเดทเวลาเริ่ม");
+    }
+  }
+
+  function handleUpdateLogEventPriceEndTime(
+    newEndTime: string,
+    logEventPriceId: number
+  ) {
+    try {
+      const newLogEventPrice = {
+        ...logEventPrices.find((lve: any) => lve.id === logEventPriceId),
+        End_Datetime: newEndTime,
+      };
+
+      onUpdateLogEventPrice(newLogEventPrice);
+
+      toast.success("อัพเดทเวลาสิ้นสุดสำเร็จ");
+    } catch (error: any) {
+      toast.error("ล้มเหลวระหว่างอัพเดทเวลาสิ้นสุด");
+    }
+  }
+
   const columns: GridColDef[] = [
     {
       field: "Start_Datetime",
@@ -43,12 +80,15 @@ const LogPrices: FC<LogPricesProps> = ({
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
-      renderCell: (params: GridRenderCellParams) =>
-        params.value ? (
-          <DatePicker label="" dateTimeValue={params.value} setter={() => {}} />
-        ) : (
-          "ไม่ได้ระบุ"
-        ),
+      renderCell: (params: GridRenderCellParams) => (
+        <DatePicker
+          label=""
+          dateTimeValue={params.value}
+          setter={(newTime: string) => {
+            handleUpdateLogEventPriceStartTime(newTime, params.row.id);
+          }}
+        />
+      ),
     },
     {
       field: "End_Datetime",
@@ -57,12 +97,15 @@ const LogPrices: FC<LogPricesProps> = ({
       sortable: false,
       resizable: false,
       disableColumnMenu: true,
-      renderCell: (params: GridRenderCellParams) =>
-        params.value ? (
-          <DatePicker label="" dateTimeValue={params.value} setter={() => {}} />
-        ) : (
-          "ไม่ได้ระบุ"
-        ),
+      renderCell: (params: GridRenderCellParams) => (
+        <DatePicker
+          label=""
+          dateTimeValue={params.value}
+          setter={(newTime: string) => {
+            handleUpdateLogEventPriceEndTime(newTime, params.row.id);
+          }}
+        />
+      ),
     },
     {
       field: "Plan_Price",
@@ -86,22 +129,24 @@ const LogPrices: FC<LogPricesProps> = ({
         );
       },
     },
-    // {
-    //   field: "delete",
-    //   headerName: "",
-    //   width: 120,
-    //   sortable: false,
-    //   resizable: false,
-    //   disableColumnMenu: true,
-    //   renderCell: (params: GridRenderCellParams) => (
-    //     <img
-    //       src={deleteOnIcon}
-    //       alt="delete-on"
-    //       style={{ cursor: "pointer" }}
-    //       onClick={() => removeZonePrice(params.row.id)}
-    //     />
-    //   ),
-    // },
+    {
+      field: "delete",
+      headerName: "",
+      width: 120,
+      sortable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      renderCell: (params: GridRenderCellParams) => (
+        <img
+          src={deleteOnIcon}
+          alt="delete-on"
+          style={{ cursor: "pointer" }}
+          onClick={() => {
+            //removeZonePrice(params.row.id)
+          }}
+        />
+      ),
+    },
   ];
   return (
     <div className="price-section">

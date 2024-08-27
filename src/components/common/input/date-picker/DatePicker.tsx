@@ -23,12 +23,14 @@ const DatePicker: FC<DatePickerProps> = ({
       <input
         type="datetime-local"
         value={formatISOToLocalTime(dateTimeValue)}
-        onChange={(e: any) => {
+        onInputCapture={(e: any) => {
 
           if (!allowPast && new Date(e.target.value).getTime() <= Date.now()) {
             return;
           }
+
           const date = new Date(e.target.value);
+
           const localTime = new Date(
             date.getTime() - date.getTimezoneOffset() * 60000 + TIME_DIFFERENCE
           )

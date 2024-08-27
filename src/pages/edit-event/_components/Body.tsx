@@ -27,7 +27,6 @@ const Body: FC<BodyProps> = ({
     ticketTypeId,
     ticketQtyPerPlan,
     seatQtyPerticket,
-    logEventPrices,
     ticketNumbers,
     onUpdatePlanInfo,
   } = state;
@@ -109,7 +108,6 @@ const Body: FC<BodyProps> = ({
         <LogPrices
           planId={planId}
           zones={zones}
-          logEventPrices={logEventPrices}
           handlePriceChange={handlePriceChange}
         />
         <div className="table-input-method-section">

@@ -8,6 +8,7 @@ import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
 import SaveButton from "./SaveButton";
+import { v4 } from "uuid";
 
 type PlanProps = {
   plan: any;
@@ -55,7 +56,10 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         ticketTypeId: Ticket_Type_Id,
         ticketQtyPerPlan: Ticket_Qty_Per,
         seatQtyPerticket: Ticket_Qty,
-        logEventPrices: viewLogEventPrices,
+        logEventPrices: viewLogEventPrices.map((vle: any) => ({
+          id: v4(),
+          ...vle,
+        })),
         ticketNumbers: ticketNoPerPlans,
         planId: Number(Plan_Id),
       }}
