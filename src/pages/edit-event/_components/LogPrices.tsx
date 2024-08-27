@@ -1,10 +1,10 @@
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { FC } from "react";
 import toast from "react-hot-toast";
-import { v4 } from "uuid";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import deleteOnIcon from "/delete-on.svg";
+import { v4 } from "uuid";
 
 type LogPricesProps = {
   zones: any[];
@@ -25,6 +25,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
   function handleAddLogEventPrice() {
     try {
       const emptyLogEventPrice = {
+        id: v4(),
         Start_Datetime: new Date(),
         End_Datetime: new Date(),
         Plan_Price: 0,
@@ -49,8 +50,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       };
 
       onUpdateLogEventPrice(newLogEventPrice);
-
-      toast.success("อัพเดทเวลาเริ่มสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างอัพเดทเวลาเริ่ม");
     }
