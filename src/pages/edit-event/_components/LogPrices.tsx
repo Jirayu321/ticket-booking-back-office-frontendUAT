@@ -20,6 +20,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     onUpdatePrice,
     seatQtyPerticket,
     onUpdatePlanInfo,
+    onDeleteLogEventPrice,
   } = state;
 
   function handleAddLogEventPrice() {
@@ -78,6 +79,15 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       onUpdatePrice(newPrice, logEventPriceId);
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างอัพเดทราคา");
+    }
+  }
+
+  function handleDeleteLogEventPrice(logEventPriceId: string) {
+    try {
+      onDeleteLogEventPrice(logEventPriceId);
+      toast.success("ลบราคาโซนสำเร็จ");
+    } catch (error: any) {
+      toast.error("ล้มเหลวระหว่างลบราคาโซน");
     }
   }
 
@@ -151,7 +161,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
           alt="delete-on"
           style={{ cursor: "pointer" }}
           onClick={() => {
-            //removeZonePrice(params.row.id)
+            handleDeleteLogEventPrice(params.row.id);
           }}
         />
       ),
@@ -161,15 +171,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
   return (
     <div className="price-section">
       <h3>ราคา ({zones[planId]?.prices?.length || 0})</h3>
-      <input
-        value={seatQtyPerticket}
-        onChange={(e: any) =>
-          onUpdatePlanInfo({
-            ...state,
-            seatQtyPerticket: Number(e.target.value),
-          })
-        }
-      />
       <div style={{ height: "auto", width: "100%" }}>
         <DataGrid
           getRowId={(row) => row.id}

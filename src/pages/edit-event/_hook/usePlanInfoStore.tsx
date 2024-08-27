@@ -48,6 +48,13 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
             logEventPrices: updatedLogEventPrices,
           };
         }),
+      onDeleteLogEventPrice: (logEventPriceId: string) =>
+        set((state: any) => ({
+          ...state,
+          logEventPrices: state.logEventPrices.filter(
+            (logEventPrice: any) => logEventPrice.id !== logEventPriceId
+          ),
+        })),
     }))
   );
 
