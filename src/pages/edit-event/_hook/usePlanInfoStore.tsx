@@ -23,11 +23,24 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
         })),
       onUpdateLogEventPrice: (newLogEventPrice: any) =>
         set((state: any) => {
-          console.log(newLogEventPrice)
+          console.log(newLogEventPrice);
           const updatedLogEventPrices = state.logEventPrices.map(
             (logEventPrice: any) =>
               logEventPrice.id === newLogEventPrice.id
                 ? newLogEventPrice
+                : logEventPrice
+          );
+          return {
+            ...state,
+            logEventPrices: updatedLogEventPrices,
+          };
+        }),
+      onUpdatePrice: (newPrice: number, logEventPriceId: string) =>
+        set((state: any) => {
+          const updatedLogEventPrices = state.logEventPrices.map(
+            (logEventPrice: any) =>
+              logEventPrice.id === logEventPriceId
+                ? { ...logEventPrice, Plan_Price: newPrice }
                 : logEventPrice
           );
           return {

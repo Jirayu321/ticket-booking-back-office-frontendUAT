@@ -9,16 +9,18 @@ import deleteOnIcon from "/delete-on.svg";
 type LogPricesProps = {
   zones: any[];
   planId: number;
-  handlePriceChange: any;
 };
 
-const LogPrices: FC<LogPricesProps> = ({
-  zones,
-  handlePriceChange,
-  planId,
-}) => {
-  const { onAddLogEventPrice, onUpdateLogEventPrice, logEventPrices } =
-    usePlanInfoStore((state: any) => state);
+const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
+  const state = usePlanInfoStore((state: any) => state);
+  const {
+    onAddLogEventPrice,
+    onUpdateLogEventPrice,
+    logEventPrices,
+    onUpdatePrice,
+    seatQtyPerticket,
+    onUpdatePlanInfo,
+  } = state;
 
   function handleAddLogEventPrice() {
     try {
@@ -72,6 +74,14 @@ const LogPrices: FC<LogPricesProps> = ({
     }
   }
 
+  function handleUpdatePrice(newPrice: number, logEventPriceId: string) {
+    try {
+      onUpdatePrice(newPrice, logEventPriceId);
+    } catch (error: any) {
+      toast.error("ล้มเหลวระหว่างอัพเดทราคา");
+    }
+  }
+
   const columns: GridColDef[] = [
     {
       field: "Start_Datetime",
@@ -117,13 +127,13 @@ const LogPrices: FC<LogPricesProps> = ({
       renderCell: (params: GridRenderCellParams) => {
         return (
           <input
-            disabled
             type="number"
             min="0"
             value={Number(params.value)}
-            onChange={(e) =>
-              handlePriceChange(params.row.id, "price", e.target.value)
-            }
+            onChange={(e) => {
+              e.preventDefault();
+              handleUpdatePrice(Number(e.target.value), params.row.id);
+            }}
             style={{ width: "90%", color: "black", backgroundColor: "white" }}
           />
         );
@@ -148,12 +158,22 @@ const LogPrices: FC<LogPricesProps> = ({
       ),
     },
   ];
+
   return (
     <div className="price-section">
       <h3>ราคา ({zones[planId]?.prices?.length || 0})</h3>
+      <input
+        value={seatQtyPerticket}
+        onChange={(e: any) =>
+          onUpdatePlanInfo({
+            ...state,
+            seatQtyPerticket: Number(e.target.value),
+          })
+        }
+      />
       <div style={{ height: "auto", width: "100%" }}>
         <DataGrid
-          getRowId={(_) => v4()}
+          getRowId={(row) => row.id}
           rows={logEventPrices}
           columns={columns}
           autoHeight

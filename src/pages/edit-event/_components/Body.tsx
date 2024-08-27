@@ -11,16 +11,10 @@ type BodyProps = {
   zones: any;
   expandedZones: any;
   handleInputChange: any;
-  handlePriceChange: any;
   removeZonePrice: any;
 };
 
-const Body: FC<BodyProps> = ({
-  zones,
-  expandedZones,
-  handleInputChange,
-  handlePriceChange,
-}) => {
+const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
   const state = usePlanInfoStore((state: any) => state);
   const {
     planId,
@@ -105,11 +99,7 @@ const Body: FC<BodyProps> = ({
             </div>
           </div>
         </div>
-        <LogPrices
-          planId={planId}
-          zones={zones}
-          handlePriceChange={handlePriceChange}
-        />
+        <LogPrices planId={planId} zones={zones} />
         <div className="table-input-method-section">
           <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
           <select
