@@ -1,10 +1,10 @@
 import Container from "../../components/common/container/Container";
-import OrderDetailContent from "./order-detail-content"; // Import the content component
+import OrderDetailContent from "./order-detail-content";
 
 const OrderDetailPage = () => {
   return (
     <Container>
-      <OrderDetailContent /> {/* Order detail content */}
+      <OrderDetailContent />
     </Container>
   );
 };

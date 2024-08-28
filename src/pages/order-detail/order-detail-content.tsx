@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import {
-  CircularProgress,
   Box,
+  Button,
+  CircularProgress,
   Container,
   Paper,
-  Button,
-  Tabs,
   Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Header from "../common/header";
-import { getOrderH } from "../../services/order-h.service";
+import { useNavigate, useParams } from "react-router-dom";
 import { getOrderD } from "../../services/order-d.service";
+import { getOrderH } from "../../services/order-h.service";
+import Header from "../common/header";
 import BuyerInfo from "./details/BuyerInfo";
 import OrderItems from "./details/OrderItems";
 import PaymentHistory from "./details/PaymentHistory";
+import { useFetchPaymentHistories } from "../../hooks/fetch-data/useFetchPaymentHistories";
+import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
 const OrderDetailContent: React.FC = () => {
   const { order_id } = useParams<{ order_id: string }>();
@@ -25,6 +27,13 @@ const OrderDetailContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
+
+  const { data: paymentHistories, isFetching: isPaymentHistoriesLoading } =
+    useFetchPaymentHistories({ orderId: order_id });
+
+  const isOrderPaid = paymentHistories?.some((ph: any) => {
+    return ph.Total_Balance === 0;
+  });
 
   const handleNavigateBack = () => {
     navigate("/all-orders");
@@ -44,16 +53,16 @@ const OrderDetailContent: React.FC = () => {
         const orderH = await getOrderH();
         const orderD = await getOrderD();
         const order = orderH.find((o: any) => String(o.Order_id) === order_id);
-  
+
         if (order) {
           setOrderDetail(order);
           const relatedOrderItems = orderD.filter(
             (item: any) => item.Order_id === order.Order_id
           );
-  
+
           // Log the filtered orderD items
-          console.log('Filtered orderD items:', relatedOrderItems);
-  
+          console.log("Filtered orderD items:", relatedOrderItems);
+
           setOrderItems(relatedOrderItems);
         } else {
           toast.error("Order not found");
@@ -64,7 +73,7 @@ const OrderDetailContent: React.FC = () => {
         setIsLoading(false);
       }
     }
-  
+
     fetchOrderDetail();
   }, [order_id]);
 
@@ -75,32 +84,44 @@ const OrderDetailContent: React.FC = () => {
   let statusLabel;
   let bgColor;
 
-  if (orderDetail.Order_Status === 1 && orderDetail.Total_Balance === 0) {
-    statusLabel = "สำเร็จ";
-    bgColor = "#28a745"; // Green for success
-  } else if (orderDetail.Order_Status === 1 && orderDetail.Total_Balance > 0) {
-    statusLabel = "ค้างจ่าย";
-    bgColor = "#ffc107"; // Yellow for pending payment
-  } else if (orderDetail.Order_Status === 2) {
-    statusLabel = "มีแก้ไข";
-    bgColor = "#17a2b8"; // Blue for modifications
-  } else if (orderDetail.Order_Status === 13) {
-    statusLabel = "ขอคืนเงิน";
-    bgColor = "#dc3545"; // Red for refund
-  } else if (orderDetail.Order_Status === 3) {
-    statusLabel = "ไม่สำเร็จเพราะติด R";
-    bgColor = "#343a40"; // Dark gray for failure due to R
-  } else if (orderDetail.Order_Status === 4) {
-    statusLabel = "ไม่สำเร็จจาก Omise";
-    bgColor = "#6c757d"; // Gray for Omise failure
-  } else {
-    statusLabel = "ไม่ระบุ";
-    bgColor = "#f8f9fa"; // Light gray for unknown status
+  switch (orderDetail.Order_Status) {
+    case 1:
+      if (orderDetail.Total_Balance === 0) {
+        statusLabel = "สำเร็จ";
+        bgColor = "#28a745"; // Green for success
+      } else {
+        statusLabel = "ค้างจ่าย";
+        bgColor = "#ffc107"; // Yellow for pending payment
+      }
+      break;
+    case 2:
+      statusLabel = "มีแก้ไข";
+      bgColor = "#17a2b8"; // Blue for modifications
+      break;
+    case 13:
+      statusLabel = "ขอคืนเงิน";
+      bgColor = "#dc3545"; // Red for refund
+      break;
+    case 3:
+      statusLabel = "ไม่สำเร็จเพราะติด R";
+      bgColor = "#343a40"; // Dark gray for failure due to R
+      break;
+    case 4:
+      statusLabel = "ไม่สำเร็จจาก Omise";
+      bgColor = "#6c757d"; // Gray for Omise failure
+      break;
+    default:
+      statusLabel = "ไม่ระบุ";
+      bgColor = "#f8f9fa"; // Light gray for unknown status
+      break;
   }
+
+  if (isPaymentHistoriesLoading) return <CircularProgress />;
 
   return (
     <div className="create-new-event">
       <Header title="รายละเอียดคำสั่งซื้อ" />
+
       <div
         style={{
           backgroundColor: "#000",
@@ -159,17 +180,23 @@ const OrderDetailContent: React.FC = () => {
             fontSize: "16px",
             height: "50px",
           }}
-          startIcon={<img src="/link-icon.svg" alt="Order Site Icon" />} // Adjust the icon path
+          startIcon={
+            isOrderPaid ? (
+              <FaPrint style={{ color: "black" }} />
+            ) : (
+              <FaMoneyBill style={{ color: "black" }} />
+            )
+          }
         >
-          ORDER SITE
+          {isOrderPaid ? "Print QR" : "ชำระส่วนที่เหลือ"}
         </Button>
       </div>
       <Container maxWidth={false} sx={{ mt: 4, mb: 4 }}>
-        <Box style={{ width: '100%' }}>
-          <Tabs value={tabIndex} onChange={handleTabChange} centered >
-            <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: '33.33%' }}/>
-            <Tab label="คำสั่งซื้อ" sx={{ width: '33.33%' }}/>
-            <Tab label="ประวัติการชำระ" sx={{ width: '33.33%' }}/>
+        <Box style={{ width: "100%" }}>
+          <Tabs value={tabIndex} onChange={handleTabChange} centered>
+            <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "33.33%" }} />
+            <Tab label="คำสั่งซื้อ" sx={{ width: "33.33%" }} />
+            <Tab label="ประวัติการชำระ" sx={{ width: "33.33%" }} />
           </Tabs>
         </Box>
         <Paper

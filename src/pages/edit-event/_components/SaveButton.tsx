@@ -20,6 +20,7 @@ const SaveButton: FC<SaveButtonProps> = ({
   const state = usePlanInfoStore((state: any) => state);
   const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket } = state;
   const { eventId } = useParams();
+
   async function handleUpdateViewEventStock() {
     try {
       toast.loading("กำลังบันทึกข้อมูล...");
