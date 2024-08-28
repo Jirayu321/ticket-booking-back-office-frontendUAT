@@ -1,14 +1,14 @@
 import { CircularProgress } from "@mui/material";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useParams } from "react-router-dom";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
-import { useSyncPlanInfo } from "../_hook/useSyncPlanInfo";
-import { PlanInfo } from "../type";
+import { PlanInfoProvider } from "../_hook/usePlanInfoStore";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
 import SaveButton from "./SaveButton";
+import { v4 } from "uuid";
 
 type PlanProps = {
   plan: any;
@@ -47,55 +47,45 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
       planGroupId: PlanGroup_Id,
     });
 
-  const [planInfo, setPlanInfo] = useState<PlanInfo>({
-    ticketTypeId: null,
-    ticketQtyPerPlan: 0,
-    seatQtyPerticket: 0,
-    logEventPrices: [],
-    ticketNumbers: [],
-    planId: 0,
-  });
-
-  useSyncPlanInfo({
-    ticketTypeId: Ticket_Type_Id,
-    ticketQtyPerPlan: Ticket_Qty_Per,
-    seatQtyPerticket: Ticket_Qty,
-    logEventPrices: viewLogEventPrices,
-    ticketNumbers: ticketNoPerPlans,
-    planId: Number(Plan_Id),
-    setPlanInfo,
-  });
-
   if (isLoadingViewLogEventPrice || isLoadingTicketNoPerPlans)
     return <CircularProgress />;
 
   return (
-    <div className={styles.container}>
-      <Header
-        onExpand={onExpand}
-        Plan_Id={Plan_Id}
-        Plan_Name={Plan_Name}
-        Plan_Desc={Plan_Desc}
-      />
-      <Body
-        zone={planInfo}
-        zones={plans}
-        expandedZones={expandedZones}
-        handleInputChange={() => {}}
-        handlePriceChange={() => {}}
-        removeZonePrice={() => {}}
-        addZonePrice={() => {}}
-        onUpdatePlanInfo={setPlanInfo}
-      />
-      {expandedZones[Plan_Id] ? (
-        <SaveButton
-          planId={Plan_Id}
-          planGroupId={PlanGroup_Id}
-          planInfo={planInfo}
-          refreshViewEventStocks={refreshViewEventStocks}
+    <PlanInfoProvider
+      initialPlanInfo={{
+        ticketTypeId: Ticket_Type_Id,
+        ticketQtyPerPlan: Ticket_Qty_Per,
+        seatQtyPerticket: Ticket_Qty,
+        logEventPrices: viewLogEventPrices.map((vle: any) => ({
+          id: v4(),
+          ...vle,
+        })),
+        ticketNumbers: ticketNoPerPlans,
+        planId: Number(Plan_Id),
+      }}
+    >
+      <div className={styles.container}>
+        <Header
+          onExpand={onExpand}
+          Plan_Id={Plan_Id}
+          Plan_Name={Plan_Name}
+          Plan_Desc={Plan_Desc}
         />
-      ) : null}
-    </div>
+        <Body
+          zones={plans}
+          expandedZones={expandedZones}
+          handleInputChange={() => {}}
+          removeZonePrice={() => {}}
+        />
+        {expandedZones[Plan_Id] ? (
+          <SaveButton
+            planId={Plan_Id}
+            planGroupId={PlanGroup_Id}
+            refreshViewEventStocks={refreshViewEventStocks}
+          />
+        ) : null}
+      </div>
+    </PlanInfoProvider>
   );
 };
 

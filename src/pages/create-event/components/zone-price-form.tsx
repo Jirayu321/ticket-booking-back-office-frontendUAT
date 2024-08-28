@@ -16,7 +16,6 @@ const ZonePriceForm = () => {
     setSelectedZoneGroup,
     setZoneData,
     resetZoneData,
-    zones,
   } = useZoneStore();
 
   const {

@@ -4,20 +4,21 @@ import toast from "react-hot-toast";
 import styles from "./plan.module.css";
 import { useParams } from "react-router-dom";
 import { updateEventStock } from "../../../services/event-stock.service";
+import usePlanInfoStore from "../_hook/usePlanInfoStore";
 
 type SaveButtonProps = {
   planGroupId: number;
   planId: number;
-  planInfo: any;
   refreshViewEventStocks: () => void;
 };
 
 const SaveButton: FC<SaveButtonProps> = ({
   planGroupId,
   planId,
-  planInfo,
   refreshViewEventStocks,
 }) => {
+  const state = usePlanInfoStore((state: any) => state);
+  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket } = state;
   const { eventId } = useParams();
   async function handleUpdateViewEventStock() {
     try {
@@ -27,9 +28,9 @@ const SaveButton: FC<SaveButtonProps> = ({
         planGroupId,
         planId,
         newValues: {
-          Ticket_Type_Id: planInfo.ticketTypeId,
-          Ticket_Qty_Per: planInfo.ticketQtyPerPlan,
-          Ticket_Qty: planInfo.seatQtyPerticket,
+          Ticket_Type_Id: ticketTypeId,
+          Ticket_Qty_Per: ticketQtyPerPlan,
+          Ticket_Qty: seatQtyPerticket,
         },
       });
       toast.dismiss();
