@@ -18,11 +18,9 @@ import {
   Stack,
 } from "@mui/material";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import Header from "../common/header";
 import { getOrderH } from "../../services/order-h.service";
 import { getOrderD } from "../../services/order-d.service";
-import { formatThaiDate } from "../../lib/util";
 import { Link } from 'react-router-dom';
 
 const MAX_ITEMS_PER_PAGE = 10;
@@ -80,7 +78,6 @@ const AllOrderContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const navigate = useNavigate();
 
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
@@ -503,16 +500,10 @@ const AllOrderContent: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell style={{ paddingLeft: "40px" }}>
-                    {new Intl.NumberFormat("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(order.Net_Price)}
+                  {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Net_Price)}
                   </TableCell>
-                  <TableCell>
-                    {formatThaiDate({
-                      date: order.Order_datetime,
-                      option: "datetime",
-                    })}
+                  <TableCell style={{ paddingLeft: "40px" }}>
+                    {new Intl.DateTimeFormat('th-TH', { dateStyle: 'short' }).format(new Date(order.Order_datetime))}
                   </TableCell>
                   <TableCell>
                     <Button variant="contained" color="primary">

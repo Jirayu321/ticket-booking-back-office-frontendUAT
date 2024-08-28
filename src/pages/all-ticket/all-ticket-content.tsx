@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  Button,
   CircularProgress,
-  Pagination,
   Paper,
   Table,
   TableBody,
@@ -10,18 +8,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Pagination,
+  Stack,
+  Button,
+  Link,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
   TextField,
-  FormControl,
-  InputLabel,
-  Stack,
 } from "@mui/material";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import Header from "../common/header";
 import { getOrderD } from "../../services/order-d.service";
-import { formatThaiDate } from "../../lib/util";
+import toast from "react-hot-toast";
+import Header from "../common/header"; // Assuming you have a Header component
+import { Link as RouterLink } from 'react-router-dom';
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -30,17 +30,15 @@ const AllTicketContent: React.FC = () => {
   const [orderDData, setOrderDData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
-    date: "",
-    status: "all",
-    paymentStatus: "all",
-    ticketType: "all",
     search: "",
+    status: "all",
+    event: "all",
   });
 
   useEffect(() => {
     async function fetchOrderDData() {
       try {
-        const data = await getOrderD();
+        const data = await getOrderD(); // Fetch data from your service
         setOrderDData(data);
       } catch (error) {
         toast.error("Failed to fetch order data");
@@ -71,19 +69,15 @@ const AllTicketContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const navigate = useNavigate();
-
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
-  const filteredOrders = orderDData
-    .filter((order) => {
-      const matchesSearch = order.Event_Name.includes(filters.search);
-      const matchesStatus = filters.status === "all" || order.Order_Status === parseInt(filters.status);
-      const matchesPaymentStatus = filters.paymentStatus === "all" || order.Payment_Status === filters.paymentStatus;
-      // Add more filter conditions as needed
-      return matchesSearch && matchesStatus && matchesPaymentStatus;
-    });
+  const filteredOrders = orderDData.filter((order) => {
+    const matchesSearch = order.Order_no.includes(filters.search);
+    const matchesStatus = filters.status === "all" || order.OrderStatus_Name === filters.status;
+    const matchesEvent = filters.event === "all" || order.Event_Name.includes(filters.event);
+    return matchesSearch && matchesStatus && matchesEvent;
+  });
 
   const ordersInCurrentPage = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / MAX_ITEMS_PER_PAGE);
@@ -92,41 +86,71 @@ const AllTicketContent: React.FC = () => {
 
   return (
     <div className="all-orders-content">
-      <Header title="คำสั่งซื้อทั้งหมด" />
+      <Header title="บัตรทั้งหมด" /> {/* Add the header */}
       <div className="filter-options">
         <div className="filter-item">
           <img
-            src="/รอจัดงาน.svg"
-            alt="รอจัดงาน icon"
+            src="/cart.svg"
+            alt="คำสั่งซื้อทั้งหมด icon"
             className="filter-icon"
           />
           <div className="filter-text-container">
-            <span className="filter-text">คำสั่งซื้อทั้งหมด</span>
-            <span className="filter-number">300</span>
+            <span className="filter-text">คำสั่งซื้อ</span>
+            <span className="filter-number">{}</span> {/* Dynamic total order count */}
           </div>
         </div>
         <div className="filter-item">
           <img
-            src="/เริ่มงานแล้ว.svg"
-            alt="เริ่มงานแล้ว icon"
+            src="/not-pay.svg"
+            alt="ค้างชำระ icon"
             className="filter-icon"
           />
           <div className="filter-text-container">
-            <span className="filter-text">เริ่มงานแล้ว</span>
-            <span className="filter-number">2</span>
+            <span className="filter-text">บัตรที่เปิดขาย</span>
+            <span className="filter-number">{``}</span> {/* Number of orders with balance / total orders */}
           </div>
         </div>
         <div className="filter-item">
-          <img src="/ปิดงาน.svg" alt="ปิดงาน icon" className="filter-icon" />
+          <img src="/money.svg" alt="ยอดขาย icon" className="filter-icon" />
           <div className="filter-text-container">
-            <span className="filter-text">ปิดงาน</span>
-            <span className="filter-number">3</span>
+            <span className="filter-text" style={{marginLeft:"-50px"}}>บัตรแสกนแล้ว</span>
+            <span className="filter-number" style={{fontSize:"20px",marginLeft:"-50px"}}>
+            </span> {/* Net Price / Total Balance formatted in Thai Baht */}
+          </div>
+        </div>
+        <div className="filter-item">
+          <img src="/money.svg" alt="ยอดขาย icon" className="filter-icon" />
+          <div className="filter-text-container">
+            <span className="filter-text" style={{marginLeft:"-50px"}}>ยอดขายรวม</span>
+            <span className="filter-number" style={{fontSize:"20px",marginLeft:"-50px"}}>
+            </span> {/* Net Price / Total Balance formatted in Thai Baht */}
           </div>
         </div>
       </div>
       <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
-          <FormControl variant="outlined" style={{ minWidth: 120 }}>
+          <TextField
+            variant="outlined"
+            label="ค้นหา"
+            value={filters.search}
+            onChange={handleSearchChange}
+            placeholder="ค้นหาโดย รหัสสั่งซื้อ"
+            style={{ minWidth: 300 ,paddingTop: "10px"}}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
+          />
+          <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>สถานะ</InputLabel>
             <Select
               label="สถานะ"
@@ -135,145 +159,68 @@ const AllTicketContent: React.FC = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="1">สำเร็จ</MenuItem>
-              <MenuItem value="2">กำลังดำเนินการ</MenuItem>
-              <MenuItem value="3">ยกเลิก</MenuItem>
+              <MenuItem value="ขายแล้ว">ขายแล้ว</MenuItem>
+              <MenuItem value="รอขาย">รอขาย</MenuItem>
             </Select>
           </FormControl>
-
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะการชำระเงิน</InputLabel>
+            <InputLabel>งาน</InputLabel>
             <Select
-              label="สถานะการชำระเงิน"
-              name="paymentStatus"
-              value={filters.paymentStatus}
+              label="งาน"
+              name="event"
+              value={filters.event}
               onChange={handleFilterChange}
             >
-              <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="paid">จ่ายแล้ว</MenuItem>
-              <MenuItem value="pending">ยังไม่จ่าย</MenuItem>
+              <MenuItem value="all">ทุกงาน</MenuItem>
+              <MenuItem value="ILLSLICK LIVE">ILLSLICK LIVE</MenuItem>
+              <MenuItem value="Concert B">Concert B</MenuItem>
             </Select>
           </FormControl>
-
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>บัตร</InputLabel>
-            <Select
-              label="บัตร"
-              name="ticketType"
-              value={filters.ticketType}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">ทุกประเภท</MenuItem>
-              <MenuItem value="vip">VIP</MenuItem>
-              <MenuItem value="regular">ปกติ</MenuItem>
-            </Select>
-          </FormControl>
-
-          <TextField
-            variant="outlined"
-            label="ค้นหา"
-            value={filters.search}
-            onChange={handleSearchChange}
-            placeholder="ค้นหาโดย รหัสสั่งซื้อ, LINE ID, เบอร์โทรฯ"
-            style={{ minWidth: 300 }}
-          />
         </Stack>
       </div>
 
-      {/* Table Component */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ลำดับ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                รหัสคำสั่งซื้อ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ชื่องาน
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                จำนวนบัตร
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                จำนวนที่
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                สถานะ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ราคาสุทธิ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                วันที่สั่งซื้อ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ประวัติการชำระเงิน
-              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ลำดับ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>เลขที่บัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ประเภทบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนที่/บัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ราคาต่อใบ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ราคาทั้งหมด</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ดูคำสั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>งาน</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {ordersInCurrentPage.map((order: any, index: number) => {
-              return (
-                <TableRow key={order.DT_order_id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{order.Order_no}</TableCell>
-                  <TableCell>{order.Event_Name}</TableCell>
-                  <TableCell>
-                    <div
-                      style={{
-                        border: '1px solid #ccc',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        display: 'inline-block',
-                        width: '50px',
-                        backgroundColor: '#f9f9f9',
-                      }}
-                    >
-                      {order.Web_Qty_Buy}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div
-                      style={{
-                        border: '1px solid #ccc',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        display: 'inline-block',
-                        width: '50px',
-                        backgroundColor: '#f9f9f9',
-                      }}
-                    >
-                      {order.Total_stc}
-                    </div>
-                  </TableCell>
-                  <TableCell>{order.OrderStatus_Name}</TableCell>
-                  <TableCell>{order.Total_Price}</TableCell>
-                  <TableCell>
-                    {formatThaiDate({
-                      date: order.Order_datetime,
-                      option: 'datetime',
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="contained" color="primary">
-                      ดูประวัติ
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {ordersInCurrentPage.map((order, index) => (
+              <TableRow key={order.DT_order_id}>
+                <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                <TableCell>{order.DT_order_id}</TableCell>
+                <TableCell>{order.ticket_no}</TableCell>
+                <TableCell>{order.Ticket_Type_Name}</TableCell>
+                <TableCell>{order.Ticket_Qty_Per}</TableCell>
+                <TableCell>{new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Plan_Price)}</TableCell>
+                <TableCell>{new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Total_Price)}</TableCell>
+                <TableCell>
+                  <Link
+                    component={RouterLink}
+                    to={`/order-detail/${order.Order_id}`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'block', width: '100%', height: '100%' }}
+                  >
+                    {order.Order_no}
+                  </Link>
+                </TableCell>
+                <TableCell>{order.Event_Name}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
         <Pagination
           count={totalPages}
           page={currentPage}

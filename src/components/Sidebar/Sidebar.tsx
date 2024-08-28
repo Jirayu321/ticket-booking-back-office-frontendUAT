@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
               Event ทั้งหมด
             </Link>
           </li>
-          <li className={`menu-item ${activePath === '/all-orders' ? 'active' : ''}`}>
+          <li className={`menu-item ${activePath === '/all-orders' || activePath.startsWith('/order-detail') ? 'active' : ''}`}>
             <Link to="/all-orders">
               <span className="icon">📦</span>
               คำสั่งซื้อทั้งหมด

@@ -5,7 +5,7 @@ import PayOptionContent from "./pay-option-content"; // Import the content compo
 const PayOptionPage: React.FC = () => {
   return (
     <Container>
-      <PayOptionContent /> {/* Ticket type content */}
+      <PayOptionContent /> Ticket type content
     </Container>
   );
 };

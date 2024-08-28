@@ -12,6 +12,9 @@ import PayByPage from "./pages/pay-by/pay-by";
 import { Buffer } from "buffer";
 import EditEventPage from "./pages/edit-event/EditEventPage";
 import AllOrder from "./pages/all-order/all-order";
+import OrderDetailPage from "./pages/order-detail/order-detail";
+import AllTicketPage from "./pages/all-ticket/all-ticket";
+import AllSeatPage from "./pages/all-seat/all-seat";
 
 window.Buffer = Buffer;
 
@@ -36,6 +39,9 @@ function App() {
         <Route path="/pay-option" element={<PayOptionPage />} />
         <Route path="/pay-by" element={<PayByPage />} />
         <Route path="/all-orders" element={<AllOrder />} />
+        <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
+        <Route path="/all-tickets" element={<AllTicketPage />} />
+        <Route path="/all-seats" element={<AllSeatPage />} />
       </Routes>
     </Router>
   );

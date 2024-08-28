@@ -1,13 +1,13 @@
 import { FC } from "react";
 import Container from "../../components/common/container/Container";
-import AllTicketContent from "./all-ticket-content";
+import AllSeatContent from "./all-seat-content";
 
-const AllTicketPage: FC = () => {
+const AllSeatPage: FC = () => {
   return (
     <Container>
-      <AllTicketContent />
+      <AllSeatContent />
     </Container>
   );
 };
 
-export default AllTicketPage;
+export default AllSeatPage;
