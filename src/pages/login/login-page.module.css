@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.card {
+  padding: 1rem;
+  width: 100%;
+  max-width: 400px;
+  min-width: 400px;
+  margin: auto auto;
+}
+
+.title {
+  font-size: 2rem;
+}
+
+.form {
+  color: black;
+}
+
+.errorMessage {
+  color: red;
+}
+
+.cardFooter {
+    width: 100%;
+}

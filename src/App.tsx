@@ -15,6 +15,7 @@ import AllOrder from "./pages/all-order/all-order";
 import OrderDetailPage from "./pages/order-detail/order-detail";
 import AllTicketPage from "./pages/all-ticket/all-ticket";
 import AllSeatPage from "./pages/all-seat/all-seat";
+import LoginPage from "./pages/login/LoginPage";
 
 window.Buffer = Buffer;
 
@@ -42,6 +43,7 @@ function App() {
         <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
         <Route path="/all-tickets" element={<AllTicketPage />} />
         <Route path="/all-seats" element={<AllSeatPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
   );
