@@ -33,6 +33,7 @@ export async function login({
 export async function getUserInfo() {
   const token = localStorage.getItem("token");
   try {
+    if (!token) return null;
     const response = await authAxiosClient.get("/auth", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,4 +57,8 @@ export async function getUserInfo() {
 
     throw new Error(errorMessage);
   }
+}
+
+export async function logOut() {
+  localStorage.removeItem("token");
 }

@@ -11,7 +11,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FaCopy } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -19,12 +19,10 @@ import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import { formatThaiDate } from "../../lib/util";
 import Header from "../common/header";
 import "./all-event-content.css";
-import { ProtectRouteContext } from "../../components/common/ProtectedRoute";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
 const AllEventContent: React.FC = () => {
-  const { userInfo } = useContext(ProtectRouteContext);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     sortBy: "publish-date",
@@ -83,8 +81,6 @@ const AllEventContent: React.FC = () => {
       .filter((event: any) => event.Event_Name.includes(filters.search)) ?? [];
 
   if (isLoadingEventList) return <CircularProgress />;
-
-  console.log(userInfo)
 
   return (
     <div className="all-events-content">
