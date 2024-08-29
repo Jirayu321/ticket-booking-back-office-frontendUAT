@@ -4,8 +4,11 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { User, UserSchema } from "../../model/user.model";
 import styles from "./login-page.module.css";
+import { login } from "../../services/auth.service";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const {
     handleSubmit,
     register,
@@ -19,10 +22,17 @@ function LoginPage() {
     resolver: zodResolver(UserSchema),
   });
 
-  function onSubmit(data: User) {
+  async function onSubmit(data: User) {
     try {
-      console.log(data);
+      toast.loading("กำลังเข้าสู่ระบบ...");
+      const { username, password } = data;
+      toast.dismiss();
+      const token = await login({ username, password });
+      localStorage.setItem("token", token);
+      toast.success("เข้าสู่ระบบสำเร็จ");
+      navigate("/all-events");
     } catch (error: any) {
+      toast.dismiss();
       toast.error(error.message);
     }
   }
