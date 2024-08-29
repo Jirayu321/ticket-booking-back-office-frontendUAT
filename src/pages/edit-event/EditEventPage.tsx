@@ -10,6 +10,7 @@ import SubHeader from "./_components/sub-header/SubHeader";
 import useEditEventStore from "./_hook/useEditEventStore";
 import { useSyncEventInfo } from "./_hook/useSyncEventInfo";
 import Form from "./_components/Form";
+import ProtectedRoute from "../../components/common/ProtectedRoute";
 
 const EditEventPage = () => {
   const { eventId } = useParams();
