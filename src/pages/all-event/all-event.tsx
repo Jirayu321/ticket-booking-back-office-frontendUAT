@@ -1,12 +1,15 @@
 import { FC } from "react";
 import Container from "../../components/common/container/Container";
 import AllEventContent from "./all-event-content";
+import ProtectedRoute from "../../components/common/ProtectedRoute";
 
 const AllEvent: FC = () => {
   return (
-    <Container>
-      <AllEventContent />
-    </Container>
+    <ProtectedRoute>
+      <Container>
+        <AllEventContent />
+      </Container>
+    </ProtectedRoute>
   );
 };
 
