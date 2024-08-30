@@ -18,8 +18,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     onUpdateLogEventPrice,
     logEventPrices,
     onUpdatePrice,
-    seatQtyPerticket,
-    onUpdatePlanInfo,
     onDeleteLogEventPrice,
   } = state;
 

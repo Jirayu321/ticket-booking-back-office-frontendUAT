@@ -15,6 +15,8 @@ import AllOrder from "./pages/all-order/all-order";
 import OrderDetailPage from "./pages/order-detail/order-detail";
 import AllTicketPage from "./pages/all-ticket/all-ticket";
 import AllSeatPage from "./pages/all-seat/all-seat";
+import LoginPage from "./pages/login/LoginPage";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 window.Buffer = Buffer;
 
@@ -29,19 +31,111 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/overview" element={<Overview />} />
-        <Route path="/all-events" element={<AllEvent />} />
-        <Route path="/all-events/create-event" element={<CreateNewEvent />} />
-        <Route path="/edit-event/:eventId" element={<EditEventPage />} />
-        <Route path="/zone" element={<ZonePage />} />
-        <Route path="/zone-group" element={<ZoneGroup />} />
-        <Route path="/ticket-type" element={<TicketTypePage />} />
-        <Route path="/pay-option" element={<PayOptionPage />} />
-        <Route path="/pay-by" element={<PayByPage />} />
-        <Route path="/all-orders" element={<AllOrder />} />
-        <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
-        <Route path="/all-tickets" element={<AllTicketPage />} />
-        <Route path="/all-seats" element={<AllSeatPage />} />
+        <Route
+          path="/overview"
+          element={
+            <ProtectedRoute>
+              <Overview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-events"
+          element={
+            <ProtectedRoute>
+              <AllEvent />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-events/create-event"
+          element={
+            <ProtectedRoute>
+              <CreateNewEvent />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-event/:eventId"
+          element={
+            <ProtectedRoute>
+              <EditEventPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/zone"
+          element={
+            <ProtectedRoute>
+              <ZonePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/zone-group"
+          element={
+            <ProtectedRoute>
+              <ZoneGroup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ticket-type"
+          element={
+            <ProtectedRoute>
+              <TicketTypePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pay-option"
+          element={
+            <ProtectedRoute>
+              <PayOptionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pay-by"
+          element={
+            <ProtectedRoute>
+              <PayByPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-orders"
+          element={
+            <ProtectedRoute>
+              <AllOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-detail/:order_id"
+          element={
+            <ProtectedRoute>
+              <OrderDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-tickets"
+          element={
+            <ProtectedRoute>
+              <AllTicketPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-seats"
+          element={
+            <ProtectedRoute>
+              <AllSeatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
   );
