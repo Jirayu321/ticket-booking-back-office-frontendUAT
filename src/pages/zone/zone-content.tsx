@@ -20,10 +20,10 @@ import {
   TableRow,
   Paper,
   Pagination,
+  Box,
+  Modal,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   getAllPlans,
   createPlan,
@@ -35,13 +35,15 @@ import { getEventStock } from "../../services/event-stock.service";
 
 import Header from "../common/header";
 import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const ZoneContent: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [imageVisibility, setImageVisibility] = useState<{ [key: number]: boolean }>({}); // State to control image visibility
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [newPlan, setNewPlan] = useState({
     name: "",
     desc: "",
@@ -61,7 +63,10 @@ const ZoneContent: React.FC = () => {
         const data = await getAllPlans();
         setPlans(data.plans || []);
       } catch (error) {
-        toast.error("Failed to fetch plans");
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+        });
       }
     };
 
@@ -70,7 +75,10 @@ const ZoneContent: React.FC = () => {
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups || []);
       } catch (error) {
-        toast.error("Failed to fetch plan groups");
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+        });
       }
     };
 
@@ -144,14 +152,20 @@ const ZoneContent: React.FC = () => {
 
   const handleCreate = async () => {
     if (!newPlan.planGroupId) {
-      toast.error("กรุณาเลือกกลุ่มแผน");
+      Swal.fire({
+        icon: "error",
+        title: "กรุณาเลือกผังร้าน",
+      });
       return;
     }
   
     const groupId = parseInt(newPlan.planGroupId, 10);
   
     if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
-      toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
+      Swal.fire({
+        icon: "error",
+        title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
+      });
       return;
     }
   
@@ -159,17 +173,23 @@ const ZoneContent: React.FC = () => {
       await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
-        Plan_Pic: newPlan.pic,
+        Plan_Pic: '',
         Plan_Active: newPlan.active,
         PlanGroup_id: groupId,
       });
-      toast.success("สร้างแผนสำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "สร้างแผนสำเร็จ",
+      });
       setNewPlan({ name: "", desc: "", pic: "", active: "", planGroupId: "" });
       setOpen(false);
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
-      toast.error("ไม่สามารถสร้างแผนได้");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการสร้างแผน",
+      });
     }
   };
 
@@ -179,7 +199,10 @@ const ZoneContent: React.FC = () => {
     const groupId = editPlan.PlanGroup_id;
 
     if (isDuplicatePlanName(editPlan.Plan_Name, groupId, plans, editPlan.Plan_id)) {
-      toast.error("มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
+      Swal.fire({
+        icon: "error",
+        title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
+      });
       return;
     }
 
@@ -192,12 +215,18 @@ const ZoneContent: React.FC = () => {
         Plan_Active: editPlan.Plan_Active,
         PlanGroup_id: groupId,
       });
-      toast.success("อัพเดทแผนสำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดตแผนสำเร็จ",
+      });
       handleEditClose();
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตแผน");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตแผน",
+      });
     }
   };
 
@@ -207,17 +236,26 @@ const ZoneContent: React.FC = () => {
       const isPlanInUse = eventStocks.some((stock) => stock.Plan_Id === id);
 
       if (isPlanInUse) {
-        toast.error("ลบโซนไม่ได้ โซนนี้ถูกใช้ใน event แล้ว");
+        Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลบโซนที่กำลังใช้งานอยู่",
+        });
         return;
       }
 
       await deletePlan(id);
-      toast.success("ลบแผนสำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "ลบโซนสำเร็จ",
+      });
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
       console.error("Failed to delete plan:", error);
-      toast.error("Failed to delete plan");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการลบโซน",
+      });
     }
   };
 
@@ -228,11 +266,17 @@ const ZoneContent: React.FC = () => {
         Plan_Active: plan.Plan_Active === "Y" ? "N" : "Y",
       };
       await patchPlan(updatedPlan);
-      toast.success("อัพเดทสถานะสำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดตสถานะสำเร็จ",
+      });
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตสถานะ");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตสถานะ",
+      });
     }
   };
 
@@ -240,11 +284,15 @@ const ZoneContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const toggleImageVisibility = (planId: number) => {
-    setImageVisibility(prev => ({
-      ...prev,
-      [planId]: !prev[planId], // Toggle visibility for the specific plan
-    }));
+
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedImage(null);
   };
 
   const filteredPlans = plans.filter((plan) => {
@@ -259,6 +307,26 @@ const ZoneContent: React.FC = () => {
   const currentItems = filteredPlans.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
+  
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setNewPlan({ ...newPlan, pic: e.target?.result as string });
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  };
+
+  const handleEditImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEditPlan({ ...editPlan, Plan_Pic: e.target?.result as string });
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  };
 
   return (
     <div>
@@ -348,17 +416,14 @@ const ZoneContent: React.FC = () => {
                   <TableCell>{plan.Plan_Name}</TableCell>
                   <TableCell>{plan.Plan_Desc}</TableCell>
                   <TableCell>
-                    <div style={{ position: 'sticky', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                      {imageVisibility[plan.Plan_id] && (
-                        <img src={plan.Plan_Pic} alt="Plan Image" style={{ width: '100px', height: 'auto' }} />
-                      )}
-                      <IconButton
-                        onClick={() => toggleImageVisibility(plan.Plan_id)}
-                        style={{ position: 'absolute', top: 0, right: 0 }}
-                      >
-                        {imageVisibility[plan.Plan_id] ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                      </IconButton>
-                    </div>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <img
+                      src={plan.Plan_Pic}
+                      alt="Plan Image"
+                      style={{ width: '100px', height: 'auto', cursor: 'pointer' }}
+                      onClick={() => handleImageClick(plan.Plan_Pic)}
+                    />
+                  </div>
                   </TableCell>
                   <TableCell>
                     <Switch
@@ -437,6 +502,19 @@ const ZoneContent: React.FC = () => {
             fullWidth
             value={newPlan.name}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
           <TextField
             margin="dense"
@@ -446,16 +524,33 @@ const ZoneContent: React.FC = () => {
             fullWidth
             value={newPlan.desc}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
-          <TextField
-            margin="dense"
-            name="pic"
-            label="รูปภาพ"
-            type="text"
-            fullWidth
-            value={newPlan.pic}
-            onChange={handleChange}
+          <input
+            accept="image/*"
+            style={{ display: 'block', margin: 'dense' }}
+            type="file"
+            onChange={handleImageChange}
           />
+          {newPlan.pic && (
+            <img
+              src={newPlan.pic}
+              alt="Selected"
+              style={{ width: '100px', height: 'auto', cursor: 'pointer', marginTop: '10px' }}
+            />
+          )}
 
             <FormControl fullWidth margin="dense">
             <InputLabel id="active-label">Active (Y/N)</InputLabel>
@@ -494,6 +589,19 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Name}
               onChange={handleEditChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
             />
             <TextField
               margin="dense"
@@ -503,19 +611,38 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Desc}
               onChange={handleEditChange}
-            />
-            <TextField
-              margin="dense"
-              name="Plan_Pic"
-              label="รูปภาพ"
-              type="text"
-              fullWidth
-              value={editPlan.Plan_Pic}
-              onChange={handleEditChange}
-              InputProps={{
-                style: { textAlign: 'left' },
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
               }}
             />
+            <div style={{ margin: 'dense' }}>
+              <label htmlFor="upload-image" style={{ display: 'block', marginBottom: '8px' }}>รูปภาพ</label>
+              <input
+                id="upload-image"
+                accept="image/*"
+                style={{ display: 'block', marginBottom: '8px' }}
+                type="file"
+                onChange={handleEditImageChange}
+              />
+              {editPlan.Plan_Pic && (
+                <img
+                  src={editPlan.Plan_Pic}
+                  alt="Selected"
+                  style={{ width: '100px', height: 'auto', cursor: 'pointer', marginTop: '10px' }}
+                />
+              )}
+            </div>
+              
             <FormControl fullWidth margin="dense">
               <InputLabel id="plan-group-label-edit">ผังร้าน</InputLabel>
               <Select
@@ -556,6 +683,30 @@ const ZoneContent: React.FC = () => {
           </DialogActions>
         </Dialog>
       )}
+
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          {selectedImage && (
+            <img
+              src={selectedImage}
+              alt="Selected Plan"
+              style={{ width: "100%", height: "auto" }}
+            />
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };

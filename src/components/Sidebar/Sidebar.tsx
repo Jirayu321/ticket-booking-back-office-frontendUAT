@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import EventIcon from '@mui/icons-material/Event';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import EventSeatIcon from '@mui/icons-material/EventSeat';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
+import PaymentIcon from '@mui/icons-material/Payment';
+import PaidIcon from '@mui/icons-material/Paid';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Sidebar: React.FC = () => {
   const [activePath, setActivePath] = useState<string>('');
@@ -21,31 +31,31 @@ const Sidebar: React.FC = () => {
           <h2 className="sidebarTitle">เมนูหลัก</h2>
           <li className={`menu-item ${activePath === '/overview' ? 'active' : ''}`}>
             <Link to="/overview">
-              <span className="icon">🔄</span>
+              <DashboardIcon style={{paddingRight:"10px"}}/>
               ภาพรวม
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/all-events' ? 'active' : ''}`}>
             <Link to="/all-events">
-              <span className="icon">🛒</span>
+              <EventIcon style={{paddingRight:"10px"}}/>
               Event ทั้งหมด
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/all-orders' || activePath.startsWith('/order-detail') ? 'active' : ''}`}>
             <Link to="/all-orders">
-              <span className="icon">📦</span>
+              <ShoppingCartIcon style={{paddingRight:"10px"}}/>
               คำสั่งซื้อทั้งหมด
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/all-tickets' ? 'active' : ''}`}>
             <Link to="/all-tickets">
-              <span className="icon">💳</span>
+              <ConfirmationNumberIcon style={{paddingRight:"10px"}}/>
               บัตรทั้งหมด
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/all-seats' ? 'active' : ''}`}>
             <Link to="/all-seats">
-              <span className="icon">🎫</span>
+              <EventSeatIcon style={{paddingRight:"10px"}}/>
               ที่นั่งทั้งหมด
             </Link>
           </li>
@@ -64,32 +74,32 @@ const Sidebar: React.FC = () => {
           </li>
           <li className={`menu-item ${activePath === '/ticket-type' ? 'active' : ''}`}>
             <Link to="/ticket-type">
-              <span className="icon">📍</span>
+              <LocalActivityIcon style={{paddingRight:"10px"}}/>
               ประเภทบัตร
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/pay-by' ? 'active' : ''}`}>
             <Link to="/pay-by">
-              <span className="icon">📍</span>
+              <PaymentIcon style={{paddingRight:"10px"}}/>
               วิธีการจ่ายเงิน
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/pay-option' ? 'active' : ''}`}>
             <Link to="/pay-option">
-              <span className="icon">📍</span>
+              <PaidIcon style={{paddingRight:"10px"}}/>
               ตัวเลือกการจ่ายเงิน
             </Link>
           </li>
           <li className={`menu-item ${activePath === '/company-settings' ? 'active' : ''}`}>
             <Link to="/company-settings">
-              <span className="icon">📄</span>
+              <ManageAccountsIcon style={{paddingRight:"10px"}}/>
               ตั้งค่าบริษัท
             </Link>
           </li>
           <h2 className="sidebarTitle">ทั่วไป</h2>
           <li className={`menu-item ${activePath === '/profile' ? 'active' : ''}`}>
             <Link to="/profile">
-              <span className="icon">🏢</span>
+              <AccountCircleIcon style={{paddingRight:"10px"}}/>
               Profile
             </Link>
           </li>

@@ -11,6 +11,7 @@ import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
 import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
+import Swal from 'sweetalert2';
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -99,7 +100,10 @@ const CreateEventForm = () => {
       if (!eventId) throw new Error("สร้าง event ล้มเหลว");
 
       toast.dismiss();
-      toast.success("สร้าง event สำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "สร้าง event สำเร็จ",
+      });
       navigate("/all-events");
     } catch (error: any) {
       toast.dismiss();

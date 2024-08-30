@@ -53,9 +53,14 @@
 
 .menu-item.active {
   background-color: #ffd700; /* Ensure background color is applied */
-  width: 88%;
-  color: black; /* Ensure text color is applied */
+  width: 100%;
+  height: 40px;
+  color: black !important;
   border-radius: 0;
+}
+
+.menu-item.active * {
+  color: black !important; /* Ensure text color is applied to all child elements */
 }
 
 .icon {

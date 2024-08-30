@@ -32,6 +32,7 @@ import { getPlansList } from "../../services/plan-list.service";
 import { getEventStock } from "../../services/event-stock.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const ZoneGroupContent: React.FC = () => {
   const [planGroups, setPlanGroups] = useState<any[]>([]);
@@ -66,7 +67,10 @@ const ZoneGroupContent: React.FC = () => {
           setPlans([]);
         }
       } catch (error) {
-        toast.error("Failed to fetch data");
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+        });
       }
     };
 
@@ -140,7 +144,10 @@ const ZoneGroupContent: React.FC = () => {
   
   const handleCreate = async () => {
       if (isDuplicateName(newPlanGroup.name)) {
-        toast.error("ชื่อผังร้านซ้ำกัน");
+        Swal.fire({
+          icon: "error",
+          title: "ชื่อผังร้านซ้ำกัน",
+        });
         return;
       }
   
@@ -150,13 +157,19 @@ const ZoneGroupContent: React.FC = () => {
           PlanGroup_Active: newPlanGroup.active,
           Created_By: "Admin",
         });
-        toast.success("สร้างผังร้านสำเร็จ");
+        Swal.fire({
+          icon: "success",
+          title: "สร้างผังร้านสำเร็จ",
+        });
         setNewPlanGroup({ name: "", active: "Y" });
         setOpen(false);
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
       } catch (error) {
-        toast.error("Failed to create plan group");
+        Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวในการสร้างผังร้าน",
+        });
       }
     };
   
@@ -164,7 +177,10 @@ const ZoneGroupContent: React.FC = () => {
       if (!editPlanGroup) return;
   
       if (isDuplicateName(editPlanGroup.PlanGroup_Name, editPlanGroup.PlanGroup_id)) {
-        toast.error("ชื่อผังร้านซ้ำกัน");
+        Swal.fire({
+          icon: "error",
+          title: "ชื่อผังร้านซ้ำกัน",
+        });
         return;
       }
   
@@ -174,12 +190,18 @@ const ZoneGroupContent: React.FC = () => {
           PlanGroup_Name: editPlanGroup.PlanGroup_Name.trim(),
           PlanGroup_Active: editPlanGroup.PlanGroup_Active,
         });
-        toast.success("อัพเดทผังร้านสำเร็จ");
+        Swal.fire({
+          icon: "success",
+          title: "อัปเดตผังร้านสำเร็จ",
+        });
         handleEditClose();
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
       } catch (error) {
-        toast.error("ล้มเหลวระหว่างอัปเดตผังร้าน");
+        Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวในการอัปเดตผังร้าน",
+        });
       }
     };
 
@@ -191,16 +213,25 @@ const ZoneGroupContent: React.FC = () => {
         );
   
         if (isUsedInEventStock) {
-          toast.error("ลบผังร้านไม่ได้ ผังนี้ถูกใช้ใน event แล้ว");
+          Swal.fire({
+            icon: "error",
+            title: "ไม่สามารถลบผังร้านที่ถูกใช้ในการจัดการสินค้า",
+          });
           return;
         }
   
         await deletePlanGroup(id);
-        toast.success("ลบผังร้านสำเร็จ");
+        Swal.fire({
+          icon: "success",
+          title: "ลบผังร้านสำเร็จ",
+        });
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
       } catch (error) {
-        toast.error("Failed to delete plan group");
+        Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวในการลบผังร้าน",
+        });
       }
     };
 
@@ -211,11 +242,17 @@ const ZoneGroupContent: React.FC = () => {
         PlanGroup_Active: planGroup.PlanGroup_Active === "Y" ? "N" : "Y",
       };
       await updatePlanGroup(updatedPlanGroup);
-      toast.success("อัพเดทสถานะสำเร็จ");
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดตสถานะสำเร็จ",
+      });
       const data = await getAllPlanGroups();
       setPlanGroups(data.planGroups);
     } catch (error) {
-      toast.error("ล้มเหลวระหว่างอัปเดตสถานะ");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตสถานะ",
+      });
     }
   };
 
@@ -424,6 +461,19 @@ const ZoneGroupContent: React.FC = () => {
             fullWidth
             value={newPlanGroup.name}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
           <FormControl fullWidth margin="dense">
             <InputLabel id="active-label">Active (Y/N)</InputLabel>
@@ -462,6 +512,19 @@ const ZoneGroupContent: React.FC = () => {
               fullWidth
               value={editPlanGroup.PlanGroup_Name}
               onChange={handleEditChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
             />
           </DialogContent>
           <DialogActions>

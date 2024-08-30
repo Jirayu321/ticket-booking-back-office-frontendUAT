@@ -34,12 +34,21 @@ const AllTicketContent: React.FC = () => {
     status: "all",
     event: "all",
   });
+  const [uniqueEvents, setUniqueEvents] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchOrderDData() {
       try {
         const data = await getOrderD(); // Fetch data from your service
-        setOrderDData(data);
+        
+        // Filter out orders where Net_Price is null
+        const filteredData = data.filter(order => order.Net_Price !== null);
+        
+        setOrderDData(filteredData);
+        
+        // Extract unique event names
+        const events = Array.from(new Set(filteredData.map((order: any) => order.Event_Name)));
+        setUniqueEvents(events);
       } catch (error) {
         toast.error("Failed to fetch order data");
       } finally {
@@ -75,7 +84,7 @@ const AllTicketContent: React.FC = () => {
   const filteredOrders = orderDData.filter((order) => {
     const matchesSearch = order.Order_no.includes(filters.search);
     const matchesStatus = filters.status === "all" || order.OrderStatus_Name === filters.status;
-    const matchesEvent = filters.event === "all" || order.Event_Name.includes(filters.event);
+    const matchesEvent = filters.event === "all" || order.Event_Name === filters.event;
     return matchesSearch && matchesStatus && matchesEvent;
   });
 
@@ -95,8 +104,8 @@ const AllTicketContent: React.FC = () => {
             className="filter-icon"
           />
           <div className="filter-text-container">
-            <span className="filter-text">คำสั่งซื้อ</span>
-            <span className="filter-number">{}</span> {/* Dynamic total order count */}
+            <span className="filter-text">บัตรทั้งหมด</span>
+            <span className="filter-number">{filteredOrders.length}</span> {/* Dynamic total order count */}
           </div>
         </div>
         <div className="filter-item">
@@ -107,7 +116,7 @@ const AllTicketContent: React.FC = () => {
           />
           <div className="filter-text-container">
             <span className="filter-text">บัตรที่เปิดขาย</span>
-            <span className="filter-number">{``}</span> {/* Number of orders with balance / total orders */}
+            <span className="filter-number">{`${filteredOrders.length}`}</span> {/* Number of orders with balance / total orders */}
           </div>
         </div>
         <div className="filter-item">
@@ -115,6 +124,7 @@ const AllTicketContent: React.FC = () => {
           <div className="filter-text-container">
             <span className="filter-text" style={{marginLeft:"-50px"}}>บัตรแสกนแล้ว</span>
             <span className="filter-number" style={{fontSize:"20px",marginLeft:"-50px"}}>
+              {/* Add logic for scanned tickets here */}
             </span> {/* Net Price / Total Balance formatted in Thai Baht */}
           </div>
         </div>
@@ -123,6 +133,7 @@ const AllTicketContent: React.FC = () => {
           <div className="filter-text-container">
             <span className="filter-text" style={{marginLeft:"-50px"}}>ยอดขายรวม</span>
             <span className="filter-number" style={{fontSize:"20px",marginLeft:"-50px"}}>
+              {/* Add logic for total sales here */}
             </span> {/* Net Price / Total Balance formatted in Thai Baht */}
           </div>
         </div>
@@ -172,8 +183,11 @@ const AllTicketContent: React.FC = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="all">ทุกงาน</MenuItem>
-              <MenuItem value="ILLSLICK LIVE">ILLSLICK LIVE</MenuItem>
-              <MenuItem value="Concert B">Concert B</MenuItem>
+              {uniqueEvents.map((event) => (
+                <MenuItem key={event} value={event}>
+                  {event}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Stack>

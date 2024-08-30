@@ -27,6 +27,7 @@ import {
 import { getEventStock } from "../../services/event-stock.service"; // Import the getEventStock function
 import Header from "../common/header";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const TicketTypeContent: React.FC = () => {
   const [ticketTypes, setTicketTypes] = useState<any[]>([]);
@@ -54,7 +55,10 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch ticket types:", error);
-      toast.error("Failed to fetch ticket types: " + error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to fetch ticket types"+error,
+      });
     }
   };
 
@@ -67,7 +71,10 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch event stock:", error);
-      toast.error("Failed to fetch event stock: " + error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to fetch event stock"+error,
+      });
     }
   };
 
@@ -109,7 +116,10 @@ const TicketTypeContent: React.FC = () => {
   
   const handleCreate = async () => {
   if (isDuplicateTicketTypeName(newTicketType.name, ticketTypes)) {
-    toast.error("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
+    Swal.fire({
+      icon: "error",
+      title: "มีประเภทบัตรที่มีชื่อเดียวกันแล้ว",
+    });
     return;
   }
 
@@ -119,7 +129,10 @@ const TicketTypeContent: React.FC = () => {
       Ticket_Type_Unit: newTicketType.unit,
       Ticket_Type_Cal: newTicketType.cal,
     });
-    toast.success("สร้างประเภทบัตรสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "สร้างประเภทบัตรสำเร็จ",
+    });
     setNewTicketType({
       name: "",
       unit: "",
@@ -128,7 +141,10 @@ const TicketTypeContent: React.FC = () => {
     handleClose();
     fetchTicketTypes(); // Refresh data after creating
   } catch (error) {
-    toast.error("ล้มเหลวระหว่างสร้างประเภทบัตร");
+    Swal.fire({
+      icon: "error",
+      title: "ล้มเหลวระหว่างสร้างประเภทบัตร",
+    });
   }
 };
 
@@ -156,7 +172,10 @@ const handleSaveEdit = async () => {
     // Assuming you have a function to check for duplicates, which can be implemented similarly to what was previously discussed.
     const isDuplicate = isDuplicateTicketTypeName(editTicketType.Ticket_Type_Name, ticketTypes, editTicketType.Ticket_Type_Id);
     if (isDuplicate) {
-      toast.error("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
+      Swal.fire({
+        icon: "error",
+        title: "มีประเภทบัตรที่มีชื่อเดียวกันแล้ว",
+      });
       return;
     }
 
@@ -166,11 +185,17 @@ const handleSaveEdit = async () => {
       Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
       Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
     });
-    toast.success("อัปเดตประเภทบัตรสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "อัปเดตประเภทบัตรสำเร็จ",
+    });
     handleEditClose();
     fetchTicketTypes(); // Refresh data after updating
   } catch (error) {
-    toast.error("ล้มเหลวระหว่างอัปเดตประเภทบัตร");
+    Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวระหว่างอัปเดตประเภทบัตร",
+        });
   }
 };
 
@@ -181,17 +206,26 @@ const handleDelete = async (id: number) => {
   );
 
   if (isUsedInEventStock) {
-    toast.error("ลบประเภทบัตรไม่ได้ บัตรนี้ถูกใช้ใน event แล้ว");
+    Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลบประเภทบัตรที่ถูกใช้ในสต๊อกงาน",
+        });
     return;
   }
 
   try {
     await deleteTicketType(id);
-    toast.success("ลบประเภทบัตรสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "ลบประเภทบัตรสำเร็จ",
+    });
     fetchTicketTypes(); // Refresh data after deletion
   } catch (error) {
     console.error("Failed to delete ticket type:", error);
-    toast.error("ล้มเหลวระหว่างลบประเภทตั๋ว");
+    Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวในการลบประเภทบัตร",
+        });
   }
 };
 
@@ -300,6 +334,19 @@ const handleDelete = async (id: number) => {
             fullWidth
             value={newTicketType.name}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
           <TextField
             margin="dense"
@@ -309,6 +356,19 @@ const handleDelete = async (id: number) => {
             fullWidth
             value={newTicketType.unit}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
           <TextField
             select
@@ -346,6 +406,19 @@ const handleDelete = async (id: number) => {
               fullWidth
               value={editTicketType.Ticket_Type_Name}
               onChange={handleEditChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
               />
               <TextField
                 margin="dense"
@@ -355,6 +428,19 @@ const handleDelete = async (id: number) => {
                 fullWidth
                 value={editTicketType.Ticket_Type_Unit}
                 onChange={handleEditChange}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'transparent', // Remove the border
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'transparent', // Remove the border on hover
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'transparent', // Remove the border when focused
+                    },
+                  },
+                }}
               />
               <TextField
                 select

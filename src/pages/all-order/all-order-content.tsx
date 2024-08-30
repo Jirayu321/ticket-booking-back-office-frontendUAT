@@ -96,33 +96,6 @@ const AllOrderContent: React.FC = () => {
   });
 
   const filteredOrders = combinedOrders.filter((order) => {
-    // Determine the status based on the Order_Status and Total_Balance
-    let statusLabel;
-    let paymentStatusLabel;
-  
-    if (order.Order_Status === 1 && order.Total_Balance === 0) {
-      statusLabel = "สำเร็จ";
-      paymentStatusLabel = "จ่ายครบ"; // Paid in full
-    } else if (order.Order_Status === 1 && order.Total_Balance > 0) {
-      statusLabel = "ค้างจ่าย";
-      paymentStatusLabel = "ค้างจ่าย"; // Payment pending
-    } else if (order.Order_Status === 2) {
-      statusLabel = "มีแก้ไข";
-      paymentStatusLabel = order.Total_Balance > 0 ? "ค้างจ่าย" : "จ่ายครบ";
-    } else if (order.Order_Status === 13) {
-      statusLabel = "ขอคืนเงิน";
-      paymentStatusLabel = "ค้างจ่าย"; // Assuming refund is treated as pending
-    } else if (order.Order_Status === 3) {
-      statusLabel = "ไม่สำเร็จเพราะติด R";
-      paymentStatusLabel = "ค้างจ่าย";
-    } else if (order.Order_Status === 4) {
-      statusLabel = "ไม่สำเร็จจาก Omise";
-      paymentStatusLabel = "ค้างจ่าย";
-    } else {
-      statusLabel = "ไม่ระบุ";
-      paymentStatusLabel = "ค้างจ่าย"; // Default to pending if status is unknown
-    }
-  
     const matchesSearch =
       order.Event_Name.includes(filters.eventName) &&
       order.Order_no.includes(filters.orderNo) &&
@@ -130,13 +103,20 @@ const AllOrderContent: React.FC = () => {
       order.Cust_tel.includes(filters.customerPhone);
   
     const matchesStatus =
-      filters.status === "all" || statusLabel === filters.status;
+      filters.status === "all" || order.OrderStatus_Name === filters.status;
+  
+    let paymentStatusLabel;
+    if (order.Order_Status === 1) {
+      paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
+    } else if (order.Order_Status === 2 || order.Order_Status === 13 || order.Order_Status === 3 || order.Order_Status === 4) {
+      paymentStatusLabel = "ไม่สำเร็จ";
+    } else {
+      paymentStatusLabel = "ไม่ระบุ";
+    }
   
     const matchesPaymentStatus =
-      filters.paymentStatus === "all" ||
-      paymentStatusLabel === filters.paymentStatus;
+      filters.paymentStatus === "all" || paymentStatusLabel === filters.paymentStatus;
   
-    // Add date range filtering here if needed
     return matchesSearch && matchesStatus && matchesPaymentStatus;
   });
 
@@ -146,14 +126,12 @@ const AllOrderContent: React.FC = () => {
   // Calculate the number of orders with a balance and total orders
   const totalOrders = orderHData.length;
   const ordersWithBalance = orderHData.filter((order) => order.Total_Balance > 0).length;
-  
+
   // Calculate the total net price and total balance for the overall sales data
   const totalNetPrice = orderHData.reduce((sum, order) => sum + (order.Net_Price || 0), 0);
-  const totalBalanceSum = orderHData.reduce((sum, order) => sum + (order.Total_Balance || 0), 0);
+  const totalPaySum = orderHData.reduce((sum, order) => sum + (order.Total_Pay || 0), 0);
 
   if (isLoading) return <CircularProgress />;
-
-
 
   return (
     <div className="all-orders-content">
@@ -184,9 +162,9 @@ const AllOrderContent: React.FC = () => {
         <div className="filter-item">
           <img src="/money.svg" alt="ยอดขาย icon" className="filter-icon" />
           <div className="filter-text-container">
-            <span className="filter-text" style={{marginLeft:"-50px"}}>ยอดขาย</span>
-            <span className="filter-number" style={{fontSize:"20px",marginLeft:"-50px"}}>
-              {`${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalBalanceSum)} / 
+            <span className="filter-text" style={{ marginLeft: "-50px" }}>ยอดขาย</span>
+            <span className="filter-number" style={{ fontSize: "20px", marginLeft: "-50px" }}>
+              {`${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalPaySum)} / 
                 ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalNetPrice)}`}
             </span> {/* Net Price / Total Balance formatted in Thai Baht */}
           </div>
@@ -194,7 +172,7 @@ const AllOrderContent: React.FC = () => {
       </div>
       <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
-        <TextField
+          <TextField
             variant="outlined"
             label="ช่วงเวลาสั่งซื้อ จาก"
             type="date"
@@ -242,7 +220,6 @@ const AllOrderContent: React.FC = () => {
               },
             }}
           />
-
         </Stack>
 
         <Stack direction="row" spacing={2} marginTop={2}>
@@ -269,7 +246,7 @@ const AllOrderContent: React.FC = () => {
               },
             }}
           />
-           <TextField
+          <TextField
             variant="outlined"
             label="ชื่องาน"
             name="eventName"
@@ -339,7 +316,7 @@ const AllOrderContent: React.FC = () => {
             }}
           />
           <FormControl variant="outlined" style={{ minWidth: 120 }}>
-            <InputLabel>สถานะ</InputLabel>
+            <InputLabel>สถานะคำสั่งซื้อ</InputLabel>
             <Select
               label="สถานะ"
               name="status"
@@ -348,7 +325,6 @@ const AllOrderContent: React.FC = () => {
             >
               <MenuItem value="all">ทั้งหมด</MenuItem>
               <MenuItem value="สำเร็จ">สำเร็จ</MenuItem>
-              <MenuItem value="ค้างจ่าย">ค้างจ่าย</MenuItem>
               <MenuItem value="มีแก้ไข">มีแก้ไข</MenuItem>
               <MenuItem value="ขอคืนเงิน">ขอคืนเงิน</MenuItem>
               <MenuItem value="ไม่สำเร็จเพราะติด R">ไม่สำเร็จเพราะติด R</MenuItem>
@@ -365,8 +341,9 @@ const AllOrderContent: React.FC = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="จ่ายครบ">จ่ายครบ</MenuItem>
+              <MenuItem value="สำเร็จ">จ่ายครบ</MenuItem>
               <MenuItem value="ค้างจ่าย">ค้างจ่าย</MenuItem>
+              <MenuItem value="ไม่สำเร็จ">ไม่สำเร็จ</MenuItem>
             </Select>
           </FormControl>
 
@@ -399,8 +376,11 @@ const AllOrderContent: React.FC = () => {
               <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
                 จำนวนที่
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft:"40px"}}>
-                สถานะ
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>
+                สถานะคำสั่งซื้อ
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>
+                สถานะการจ่ายเงิน
               </TableCell>
               <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
                 ราคาสุทธิ
@@ -415,31 +395,40 @@ const AllOrderContent: React.FC = () => {
           </TableHead>
           <TableBody>
             {ordersInCurrentPage.map((order: any, index: number) => {
-              // Determine the status based on the Order_Status and Total_Balance
-              let statusLabel;
-              let bgColor;
+              // Order status and background color based on OrderStatus_Name and OrderSetColour
+              const statusLabel = order.OrderStatus_Name;
+              const bgColor = order.OrderSetColour;
 
-              if (order.Order_Status === 1 && order.Total_Balance === 0) {
-                statusLabel = "สำเร็จ";
-                bgColor = "#28a745"; // Green for success
-              } else if (order.Order_Status === 1 && order.Total_Balance > 0) {
-                statusLabel = "ค้างจ่าย";
-                bgColor = "#ffc107"; // Yellow for pending payment
+              // Payment status logic based on Order_Status and Total_Balance
+              let paymentStatusLabel;
+              let paymentStatusBgColor;
+
+              if (order.Order_Status === 1) {
+                if (order.Total_Balance === 0) {
+                  paymentStatusLabel = "สำเร็จ";
+                  paymentStatusBgColor = "#28a745"; // Green for success
+                } else if (order.Total_Balance > 0) {
+                  paymentStatusLabel = "ค้างจ่าย";
+                  paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
+                } else {
+                  paymentStatusLabel = "ไม่สำเร็จ";
+                  paymentStatusBgColor = "#dc3545"; // Red for failure
+                }
               } else if (order.Order_Status === 2) {
-                statusLabel = "มีแก้ไข";
-                bgColor = "#17a2b8"; // Blue for modifications
+                paymentStatusLabel = "ไม่สำเร็จ";
+                paymentStatusBgColor = "#343a40"; // Blue for modifications
               } else if (order.Order_Status === 13) {
-                statusLabel = "ขอคืนเงิน";
-                bgColor = "#dc3545"; // Red for refund
+                paymentStatusLabel = "ไม่สำเร็จ";
+                paymentStatusBgColor = "#343a40"; // Red for refund
               } else if (order.Order_Status === 3) {
-                statusLabel = "ไม่สำเร็จเพราะติด R";
-                bgColor = "#343a40"; // Dark gray for failure due to R
+                paymentStatusLabel = "ไม่สำเร็จ";
+                paymentStatusBgColor = "#343a40"; // Dark gray for failure due to R
               } else if (order.Order_Status === 4) {
-                statusLabel = "ไม่สำเร็จจาก Omise";
-                bgColor = "#6c757d"; // Gray for Omise failure
+                paymentStatusLabel = "ไม่สำเร็จ";
+                paymentStatusBgColor = "#343a40"; // Gray for Omise failure
               } else {
-                statusLabel = "ไม่ระบุ";
-                bgColor = "#f8f9fa"; // Light gray for unknown status
+                paymentStatusLabel = "ไม่ระบุ";
+                paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
               }
 
               return (
@@ -499,8 +488,24 @@ const AllOrderContent: React.FC = () => {
                       {statusLabel}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <div
+                      style={{
+                        border: "1px solid #ccc",
+                        padding: "8px",
+                        borderRadius: "20px",
+                        textAlign: "center",
+                        display: "inline-block",
+                        width: "100px",
+                        backgroundColor: paymentStatusBgColor,
+                        color: "#fff",
+                      }}
+                    >
+                      {paymentStatusLabel}
+                    </div>
+                  </TableCell>
                   <TableCell style={{ paddingLeft: "40px" }}>
-                  {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Net_Price)}
+                    {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Net_Price)}
                   </TableCell>
                   <TableCell style={{ paddingLeft: "40px" }}>
                     {new Intl.DateTimeFormat('th-TH', { dateStyle: 'short' }).format(new Date(order.Order_datetime))}
@@ -532,4 +537,3 @@ const AllOrderContent: React.FC = () => {
 };
 
 export default AllOrderContent;
-

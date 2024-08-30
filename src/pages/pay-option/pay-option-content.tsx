@@ -27,6 +27,7 @@ import {
 } from "../../services/pay-option.service";
 import { getHispayment } from "../../services/his-payment.service";
 import Header from "../common/header";
+import Swal from "sweetalert2";
 
 const PayOptionContent: React.FC = () => {
   const [payOptions, setPayOptions] = useState<any[]>([]);
@@ -50,7 +51,10 @@ const PayOptionContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      toast.error(`ไม่สามารถดึงตัวเลือกการจ่ายเงินได้: ${error}`);
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สามารถดึงข้อมูลตัวเลือกการจ่ายเงินได้"+error,
+      });
     }
   };
 
@@ -116,7 +120,10 @@ const PayOptionContent: React.FC = () => {
     // Fetch the latest payment options to ensure accurate duplicate check
     const latestPayOptions = await getPayOption();
     if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
-      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      Swal.fire({
+        icon: "error",
+        title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
+      });
       return;
     }
 
@@ -128,10 +135,16 @@ const PayOptionContent: React.FC = () => {
     });
     setOpen(false);
     fetchPayOptions(); // Refresh the list after creation
-    toast.success("สร้างตัวเลือกการจ่ายเงินสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "ลบตัวเลือกการจ่ายเงินสำเร็จ",
+    });
   } catch (error) {
     console.error("Failed to create pay option:", error);
-    toast.error(`ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้: ${error}`);
+    Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวระหว่างสร้างตัวเลือกการจ่ายเงิน",
+        });
   }
 };
 
@@ -146,7 +159,10 @@ const handleSaveEdit = async () => {
         editPayOption.Pay_Opt_Id
       )
     ) {
-      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      Swal.fire({
+          icon: "error",
+          title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
+        });
       return;
     }
 
@@ -156,12 +172,18 @@ const handleSaveEdit = async () => {
       Pay_Opt_Desc: editPayOption.Pay_Opt_Desc,
       Pay_Opt_Active: editPayOption.Pay_Opt_Active,
     });
-    toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "อัปเดตตัวเลือกการจ่ายเงินสำเร็จ",
+    });
     handleEditClose();
     fetchPayOptions(); // Refresh data after updating
   } catch (error) {
     console.error("Failed to update pay option:", error);
-    toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+    Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน",
+        });
   }
 };
 
@@ -176,17 +198,26 @@ const handleDelete = async (id: number) => {
     );
 
     if (isUsedInPaymentHistory) {
-      toast.error("ลบตัวเลือกการจ่ายเงินไม่ได้ ตัวเลือกนี้ถูกใช้ในประวัติการชำระเงินแล้ว");
+      Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลบตัวเลือกการจ่ายเงินที่ใช้งานอยู่",
+        });
       return;
     }
 
     // Proceed with deletion if not used
     await deletePayOption(id);
-    toast.success("ลบตัวเลือกการจ่ายเงินสำเร็จ");
+    Swal.fire({
+      icon: "success",
+      title: "ลบตัวเลือกการจ่ายเงินสำเร็จ",
+    });
     fetchPayOptions(); // Refresh data after deletion
   } catch (error) {
     console.error("Failed to delete pay option:", error);
-    toast.error("ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน");
+    Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน",
+        });
   }
 };
 
@@ -198,11 +229,17 @@ const handleDelete = async (id: number) => {
         Pay_Opt_Desc: payOption.Pay_Opt_Desc,
         Pay_Opt_Active: payOption.Pay_Opt_Active === "Y" ? "N" : "Y",
       });
-      toast.success("สถานะการจ่ายเงินได้รับการอัปเดตแล้ว");
+      Swal.fire({
+        icon: "success",
+        title: "ลบวิธีการจ่ายเงินสำเร็จ",
+      });
       fetchPayOptions(); // Refresh data after updating
     } catch (error) {
       console.error("Failed to update active status:", error);
-      toast.error("ล้มเหลวระหว่างอัปเดตสถานะการจ่ายเงิน");
+      Swal.fire({
+          icon: "error",
+          title: "ล้มเหลวระหว่างอัปเดตสถานะการใช้งาน",
+        });
     }
   };
 
@@ -320,6 +357,19 @@ const handleDelete = async (id: number) => {
             fullWidth
             value={newPayOption.name}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
             />
             <TextField
               margin="dense"
@@ -329,6 +379,19 @@ const handleDelete = async (id: number) => {
               fullWidth
               value={newPayOption.desc}
               onChange={handleChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
             />
           </DialogContent>
           <DialogActions>
@@ -355,6 +418,19 @@ const handleDelete = async (id: number) => {
                 fullWidth
                 value={editPayOption.Pay_Opt_Name}
                 onChange={handleEditChange}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'transparent', // Remove the border
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'transparent', // Remove the border on hover
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'transparent', // Remove the border when focused
+                    },
+                  },
+                }}
               />
               <TextField
                 margin="dense"
@@ -364,6 +440,19 @@ const handleDelete = async (id: number) => {
                 fullWidth
                 value={editPayOption.Pay_Opt_Desc}
                 onChange={handleEditChange}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'transparent', // Remove the border
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'transparent', // Remove the border on hover
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'transparent', // Remove the border when focused
+                    },
+                  },
+                }}
               />
             </DialogContent>
             <DialogActions>

@@ -20,7 +20,7 @@ import {
 import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import toast from "react-hot-toast";
 import Header from "../common/header";
-import { Link as RouterLink } from 'react-router-dom';
+import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -28,17 +28,20 @@ const AllSeatContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [ticketData, setTicketData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     status: "all",
     event: "all",
+    ticketType: "all",
+    printStatus: "all",
   });
 
   useEffect(() => {
     async function fetchTicketData() {
       try {
         const data = await getViewTicketList(); // Fetch data from your service
-        console.log("API Response:", data); // Log the response to see its structure
         if (Array.isArray(data)) {
           setTicketData(data);
         } else if (data?.ticketList && Array.isArray(data.ticketList)) {
@@ -56,22 +59,32 @@ const AllSeatContent: React.FC = () => {
     fetchTicketData();
   }, []);
 
-  const handleFilterChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+  const handleOpenModal = (ticket) => {
+    setSelectedTicket(ticket);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedTicket(null);
+  };
+
+  const handleFilterChange = (event) => {
     const { name, value } = event.target;
     setFilters((prev) => ({
       ...prev,
-      [name as string]: value,
+      [name]: value,
     }));
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (event) => {
     setFilters((prev) => ({
       ...prev,
       search: event.target.value,
     }));
   };
 
-  const handleClick = (pageNumber: number) => {
+  const handleClick = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
@@ -79,20 +92,24 @@ const AllSeatContent: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
   const filteredTickets = ticketData.filter((ticket) => {
-    const matchesSearch = ticket.ticket_no.includes(filters.search);
+    const matchesSearch = ticket.ticket_running.includes(filters.search) || ticket.Order_no.includes(filters.search);
     const matchesStatus = filters.status === "all" || ticket.status === filters.status;
-    const matchesEvent = filters.event === "all" || ticket.event_name.includes(filters.event);
-    return matchesSearch && matchesStatus && matchesEvent;
+    const matchesEvent = filters.event === "all" || ticket.Event_Name.includes(filters.event);
+    const matchesTicketType = filters.ticketType === "all" || ticket.Ticket_Type_Name.includes(filters.ticketType);
+    const matchesPrintStatus = filters.printStatus === "all" || ticket.PrintStatus_Name === filters.printStatus;
+    return matchesSearch && matchesStatus && matchesEvent && matchesTicketType && matchesPrintStatus;
   });
 
   const ticketsInCurrentPage = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
+  const uniqueEventNames = Array.from(new Set(ticketData.map(ticket => ticket.Event_Name)));
+
   if (isLoading) return <CircularProgress />;
 
   return (
     <div className="all-seats-content">
-      <Header title="ที่นั่งทั้งหมด" /> {/* Add the header */}
+      <Header title="ที่นั่งทั้งหมด" />
       <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
           <TextField
@@ -100,7 +117,7 @@ const AllSeatContent: React.FC = () => {
             label="ค้นหา"
             value={filters.search}
             onChange={handleSearchChange}
-            placeholder="ค้นหาโดย เลขที่นั่ง"
+            placeholder="ค้นหาโดย เลขที่นั่ง หรือ รหัสบัตร"
             style={{ minWidth: 300, paddingTop: "10px" }}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -117,19 +134,6 @@ const AllSeatContent: React.FC = () => {
             }}
           />
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะ</InputLabel>
-            <Select
-              label="สถานะ"
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="sold">ขายแล้ว</MenuItem>
-              <MenuItem value="pending">รอขาย</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>งาน</InputLabel>
             <Select
               label="งาน"
@@ -138,8 +142,22 @@ const AllSeatContent: React.FC = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="all">ทุกงาน</MenuItem>
-              <MenuItem value="ILLSLICK LIVE">ILLSLICK LIVE</MenuItem>
-              <MenuItem value="Concert B">Concert B</MenuItem>
+              {uniqueEventNames.map(eventName => (
+                <MenuItem key={eventName} value={eventName}>{eventName}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl variant="outlined" style={{ minWidth: 150 }}>
+            <InputLabel>สถานะการพิมพ์</InputLabel>
+            <Select
+              label="สถานะการพิมพ์"
+              name="printStatus"
+              value={filters.printStatus}
+              onChange={handleFilterChange}
+            >
+              <MenuItem value="all">ทั้งหมด</MenuItem>
+              <MenuItem value="ยังไม่ปริ้น">ยังไม่ปริ้น</MenuItem>
+              <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -149,18 +167,18 @@ const AllSeatContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ลำดับ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>งาน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>รหัสที่นั่ง</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อโซน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ประเภทบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>เลขโต๊ะ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อที่นั่ง</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>รหัสบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>สถานะ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>เวลาแสกน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ครั้งที่พิมพ์</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>QR CODE</TableCell>
+              <TableCell>ลำดับ</TableCell>
+              <TableCell>งาน</TableCell>
+              <TableCell>รหัสที่นั่ง</TableCell>
+              <TableCell>ชื่อโซน</TableCell>
+              <TableCell>ประเภทบัตร</TableCell>
+              <TableCell>เลขโต๊ะ</TableCell>
+              <TableCell>ชื่อที่นั่ง</TableCell>
+              <TableCell>รหัสบัตร</TableCell>
+              <TableCell>สถานะ</TableCell>
+              <TableCell>เวลาแสกน</TableCell>
+              <TableCell>ครั้งที่พิมพ์</TableCell>
+              <TableCell>QR CODE</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -171,16 +189,31 @@ const AllSeatContent: React.FC = () => {
                 <TableCell>{ticket.ticket_running}</TableCell>
                 <TableCell>{ticket.Plan_Name}</TableCell>
                 <TableCell>{ticket.Ticket_Type_Name}</TableCell>
-                <TableCell>{ticket.ticket_qty}</TableCell>
-                <TableCell>{ticket.status}</TableCell>
+                <TableCell>{ticket.ticket_no}</TableCell>
+                <TableCell>ที่นั่ง {ticket.ticket_line}</TableCell>
+                <TableCell>{ticket.Order_no}</TableCell>
+                <TableCell>
+                  <div
+                    style={{
+                      backgroundColor: ticket.PrintStatus_Name === 'ยังไม่ปริ้น' ? 'orange' : 'blue',
+                      color: 'white',
+                      padding: '4px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {ticket.PrintStatus_Name}
+                  </div>
+                </TableCell>
+                <TableCell>{ticket.Print_Datetime}</TableCell>
+                <TableCell>{ticket.print_count}</TableCell>
                 <TableCell>
                   <Button
-                    component={RouterLink}
-                    to={`/order-detail/${ticket.order_id}`}
+                    onClick={() => handleOpenModal(ticket)}
                     variant="contained"
-                    color="primary"
+                    color="secondary"
                   >
-                    ดูคำสั่งซื้อ
+                    ดูบัตร
                   </Button>
                 </TableCell>
               </TableRow>
@@ -197,6 +230,14 @@ const AllSeatContent: React.FC = () => {
           color="primary"
         />
       </div>
+
+      {selectedTicket && (
+        <QRCodeModal
+          open={modalOpen}
+          handleClose={handleCloseModal}
+          ticketData={selectedTicket}
+        />
+      )}
     </div>
   );
 };

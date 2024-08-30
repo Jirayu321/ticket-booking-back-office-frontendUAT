@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Box,
   Dialog,
   DialogActions,
   DialogContent,
@@ -22,6 +23,7 @@ import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/
 import { getHispayment } from "../../services/his-payment.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const PayByContent: React.FC = () => {
   const [payOptions, setPayOptions] = useState<any[]>([]);
@@ -45,7 +47,10 @@ const PayByContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      toast.error("ไม่สามารถดึงตัวเลือกการจ่ายเงินได้");
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สามารถดึงข้อมูลวิธีการจ่ายเงินได้",
+      });
     }
   };
 
@@ -97,7 +102,10 @@ const PayByContent: React.FC = () => {
   const handleCreate = async () => {
     // Ensure duplicate check before proceeding
     if (isDuplicatePayByName(newPayOption.name, payOptions)) {
-      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      Swal.fire({
+        icon: "error",
+        title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
+      });
       return;
     }
 
@@ -109,12 +117,19 @@ const PayByContent: React.FC = () => {
         Created_By: "Admin", // Replace with actual creator
       });
   
-      toast.success("สร้างตัวเลือกการจ่ายเงินสำเร็จ");
+      toast.dismiss();
+      Swal.fire({
+        icon: "success",
+        title: "สร้าง วิธีการจ่ายเงิน สำเร็จ",
+      });
       setOpen(false);
       fetchPayOptions(); // Refresh the list after creation
     } catch (error) {
       console.error("Failed to create pay option:", error);
-      toast.error("ไม่สามารถสร้างตัวเลือกการจ่ายเงินได้");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการสร้างตัวเลือกการจ่ายเงิน",
+      });
     }
   };
   
@@ -127,7 +142,11 @@ const PayByContent: React.FC = () => {
         editPayOption.Pay_By_Id
       )
     ) {
-      toast.error("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+      toast.dismiss();
+      Swal.fire({
+        icon: "warning",
+        title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
+      });
       return;
     }
 
@@ -139,12 +158,19 @@ const PayByContent: React.FC = () => {
         Pay_By_Active: editPayOption.Pay_By_Active,
       });
 
-      toast.success("อัพเดทตัวเลือกการจ่ายเงินสำเร็จ");
+      toast.dismiss();
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดต วิธีการจ่ายเงิน สำเร็จ",
+      });
       handleEditClose();
       fetchPayOptions(); // Refresh data after updating
     } catch (error) {
       console.error("Failed to update pay option:", error);
-      toast.error("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตตัวเลือกการจ่ายเงิน",
+      });
     }
   };
 
@@ -159,17 +185,27 @@ const PayByContent: React.FC = () => {
       );
   
       if (isUsedInPaymentHistory) {
-        toast.error("ลบวิธีการจ่ายเงินไม่ได้ วิธีการนี้ถูกใช้ในประวัติการชำระเงินแล้ว");
+        Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลบวิธีการจ่ายเงินที่ใช้งานอยู่",
+        });
         return;
       }
   
       // Proceed with deletion if not used
       await deletePayBy(id);
-      toast.success("ลบวิธีการจ่ายเงินสำเร็จ");
+      toast.dismiss();
+      Swal.fire({
+        icon: "success",
+        title: "ลบวิธีการจ่ายเงินสำเร็จ",
+      });
       fetchPayOptions(); // Refresh data after deletion
     } catch (error) {
       console.error("Failed to delete pay by method:", error);
-      toast.error("ล้มเหลวระหว่างลบวิธีการจ่ายเงิน");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการลบวิธีการจ่ายเงิน",
+      });
     }
   };
 
@@ -181,11 +217,18 @@ const PayByContent: React.FC = () => {
         Pay_By_Desc: payOption.Pay_By_Desc,
         Pay_By_Active: payOption.Pay_By_Active === "Y" ? "N" : "Y",
       });
-      toast.success("สถานะวิธีการจ่ายเงินได้รับการอัปเดตแล้ว");
+      toast.dismiss();
+      Swal.fire({
+        icon: "success",
+        title: "สถานะการใช้งานถูกอัปเดต",
+      });
       fetchPayOptions(); // Refresh data after updating
     } catch (error) {
       console.error("Failed to update active status:", error);
-      toast.error("ล้มเหลวระหว่างอัปเดตสถานะวิธีการจ่ายเงิน");
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตสถานะการใช้งาน",
+      });
     }
   };
 
@@ -304,6 +347,19 @@ const PayByContent: React.FC = () => {
             fullWidth
             value={newPayOption.name}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
           <TextField
             margin="dense"
@@ -313,6 +369,19 @@ const PayByContent: React.FC = () => {
             fullWidth
             value={newPayOption.desc}
             onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'transparent', // Remove the border
+                },
+                '&:hover fieldset': {
+                  borderColor: 'transparent', // Remove the border on hover
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // Remove the border when focused
+                },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -338,6 +407,19 @@ const PayByContent: React.FC = () => {
               fullWidth
               value={editPayOption.Pay_By_Name}
               onChange={handleEditChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
             />
             <TextField
               margin="dense"
@@ -347,6 +429,19 @@ const PayByContent: React.FC = () => {
               fullWidth
               value={editPayOption.Pay_By_Desc}
               onChange={handleEditChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'transparent', // Remove the border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'transparent', // Remove the border on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'transparent', // Remove the border when focused
+                  },
+                },
+              }}
             />
           </DialogContent>
           <DialogActions>
