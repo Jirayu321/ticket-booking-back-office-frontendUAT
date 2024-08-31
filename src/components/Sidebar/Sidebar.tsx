@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
@@ -11,7 +12,14 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PaidIcon from '@mui/icons-material/Paid';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { useNavigate } from 'react-router-dom';
+=======
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import "./Sidebar.css";
+import { logOut } from "../../services/auth.service";
+import toast from "react-hot-toast";
+>>>>>>> 10d4c298e1997a17e4b829bc1083024ea2e27c7e
+
 const Sidebar: React.FC = () => {
   const [activePath, setActivePath] = useState<string>("");
   const location = useLocation();
@@ -42,7 +50,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/overview">
-              <DashboardIcon style={{paddingRight:"10px"}}/>
+              <DashboardIcon style={{ paddingRight: "10px" }} />
               ภาพรวม
             </Link>
           </li>
@@ -52,7 +60,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/all-events">
-              <EventIcon style={{paddingRight:"10px"}}/>
+              <EventIcon style={{ paddingRight: "10px" }} />
               Event ทั้งหมด
             </Link>
           </li>
@@ -65,7 +73,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/all-orders">
-              <ShoppingCartIcon style={{paddingRight:"10px"}}/>
+              <ShoppingCartIcon style={{ paddingRight: "10px" }} />
               คำสั่งซื้อทั้งหมด
             </Link>
           </li>
@@ -75,7 +83,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/all-tickets">
-              <ConfirmationNumberIcon style={{paddingRight:"10px"}}/>
+              <ConfirmationNumberIcon style={{ paddingRight: "10px" }} />
               บัตรทั้งหมด
             </Link>
           </li>
@@ -85,7 +93,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/all-seats">
-              <EventSeatIcon style={{paddingRight:"10px"}}/>
+              <EventSeatIcon style={{ paddingRight: "10px" }} />
               ที่นั่งทั้งหมด
             </Link>
           </li>
@@ -112,7 +120,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/ticket-type">
-              <LocalActivityIcon style={{paddingRight:"10px"}}/>
+              <LocalActivityIcon style={{ paddingRight: "10px" }} />
               ประเภทบัตร
             </Link>
           </li>
@@ -120,7 +128,7 @@ const Sidebar: React.FC = () => {
             className={`menu-item ${activePath === "/pay-by" ? "active" : ""}`}
           >
             <Link to="/pay-by">
-              <PaymentIcon style={{paddingRight:"10px"}}/>
+              <PaymentIcon style={{ paddingRight: "10px" }} />
               วิธีการจ่ายเงิน
             </Link>
           </li>
@@ -130,7 +138,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/pay-option">
-              <PaidIcon style={{paddingRight:"10px"}}/>
+              <PaidIcon style={{ paddingRight: "10px" }} />
               ตัวเลือกการจ่ายเงิน
             </Link>
           </li>
@@ -140,7 +148,7 @@ const Sidebar: React.FC = () => {
             }`}
           >
             <Link to="/company-settings">
-              <ManageAccountsIcon style={{paddingRight:"10px"}}/>
+              <ManageAccountsIcon style={{ paddingRight: "10px" }} />
               ตั้งค่าบริษัท
             </Link>
           </li>
@@ -149,7 +157,7 @@ const Sidebar: React.FC = () => {
             className={`menu-item ${activePath === "/profile" ? "active" : ""}`}
           >
             <Link to="/profile">
-              <AccountCircleIcon style={{paddingRight:"10px"}}/>
+              <AccountCircleIcon style={{ paddingRight: "10px" }} />
               Profile
             </Link>
           </li>
