@@ -21,6 +21,8 @@ import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import toast from "react-hot-toast";
 import Header from "../common/header";
 import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
+import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -36,6 +38,8 @@ const AllSeatContent: React.FC = () => {
     event: "all",
     ticketType: "all",
     printStatus: "all",
+    printStatusName: "all", // Filter for PrintStatus_Name
+    scanStatus: "all", // New filter for Scan Status
   });
 
   useEffect(() => {
@@ -97,19 +101,42 @@ const AllSeatContent: React.FC = () => {
     const matchesEvent = filters.event === "all" || ticket.Event_Name.includes(filters.event);
     const matchesTicketType = filters.ticketType === "all" || ticket.Ticket_Type_Name.includes(filters.ticketType);
     const matchesPrintStatus = filters.printStatus === "all" || ticket.PrintStatus_Name === filters.printStatus;
-    return matchesSearch && matchesStatus && matchesEvent && matchesTicketType && matchesPrintStatus;
+    const matchesPrintStatusName = filters.printStatusName === "all" || ticket.PrintStatus_Name === filters.printStatusName;
+    const matchesScanStatus = filters.scanStatus === "all" || (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) || (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
+    return matchesSearch && matchesStatus && matchesEvent && matchesTicketType && matchesPrintStatus && matchesPrintStatusName && matchesScanStatus;
   });
 
   const ticketsInCurrentPage = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
   const uniqueEventNames = Array.from(new Set(ticketData.map(ticket => ticket.Event_Name)));
+  const uniquePrintStatusNames = Array.from(new Set(ticketData.map(ticket => ticket.PrintStatus_Name)));
+
+  // Calculate the number of tickets with specific statuses
+  const scannedCount = ticketData.filter(ticket => ticket.check_in_status === 1).length;
+  const printedCount = ticketData.filter(ticket => ticket.PrintStatus_Name === "ปริ้นแล้ว").length;
 
   if (isLoading) return <CircularProgress />;
 
   return (
     <div className="all-seats-content">
       <Header title="ที่นั่งทั้งหมด" />
+      <div className="filter-options">
+        <div className="filter-item">
+          <LocalPrintshopIcon style={{ color: "black", fontSize: "80px" }} />
+          <div className="filter-text-container">
+            <span className="filter-text">แสกนแล้ว</span>
+            <span className="filter-number">{scannedCount}</span> {/* Dynamic total count for scanned tickets */}
+          </div>
+        </div>
+        <div className="filter-item">
+          <QrCodeScannerIcon style={{ color: "black", fontSize: "80px" }} />
+          <div className="filter-text-container">
+            <span className="filter-text">ปริ้นแล้ว</span>
+            <span className="filter-number">{printedCount}</span> {/* Dynamic total count for printed tickets */}
+          </div>
+        </div>
+      </div>
       <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
           <TextField
@@ -160,6 +187,19 @@ const AllSeatContent: React.FC = () => {
               <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
             </Select>
           </FormControl>
+          <FormControl variant="outlined" style={{ minWidth: 150 }}>
+            <InputLabel>สถานะการแสกน</InputLabel>
+            <Select
+              label="สถานะการแสกน"
+              name="scanStatus"
+              value={filters.scanStatus}
+              onChange={handleFilterChange}
+            >
+              <MenuItem value="all">ทั้งหมด</MenuItem>
+              <MenuItem value="แสกนแล้ว">แสกนแล้ว</MenuItem>
+              <MenuItem value="ยังไม่แสกน">ยังไม่แสกน</MenuItem>
+            </Select>
+          </FormControl>
         </Stack>
       </div>
 
@@ -175,7 +215,8 @@ const AllSeatContent: React.FC = () => {
               <TableCell>เลขโต๊ะ</TableCell>
               <TableCell>ชื่อที่นั่ง</TableCell>
               <TableCell>รหัสบัตร</TableCell>
-              <TableCell>สถานะ</TableCell>
+              <TableCell>สถานะการพิมพ์</TableCell>
+              <TableCell>สถานะการแสกน</TableCell>
               <TableCell>เวลาแสกน</TableCell>
               <TableCell>ครั้งที่พิมพ์</TableCell>
               <TableCell>QR CODE</TableCell>
@@ -203,6 +244,19 @@ const AllSeatContent: React.FC = () => {
                     }}
                   >
                     {ticket.PrintStatus_Name}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div
+                    style={{
+                      backgroundColor: ticket.check_in_status === 0 ? 'grey' : 'blue',
+                      color: 'white', // Ensure text is readable
+                      padding: '4px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {ticket.check_in_status === 0 ? "ยังไม่แสกน" : "แสกนแล้ว"}
                   </div>
                 </TableCell>
                 <TableCell>{ticket.Print_Datetime}</TableCell>

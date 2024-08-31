@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
@@ -12,14 +11,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PaidIcon from '@mui/icons-material/Paid';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-=======
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import "./Sidebar.css";
-import { logOut } from "../../services/auth.service";
-import toast from "react-hot-toast";
->>>>>>> 10d4c298e1997a17e4b829bc1083024ea2e27c7e
-
+import { useNavigate } from 'react-router-dom';
 const Sidebar: React.FC = () => {
   const [activePath, setActivePath] = useState<string>("");
   const location = useLocation();
