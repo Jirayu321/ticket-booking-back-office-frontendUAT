@@ -122,17 +122,17 @@ function App() {
         <Route
           path="/all-tickets"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <AllTicketPage />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/all-seats"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <AllSeatPage />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route path="/login" element={<LoginPage />} />
