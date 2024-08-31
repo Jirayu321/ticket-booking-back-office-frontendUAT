@@ -5,12 +5,11 @@ import Container from "../../components/common/container/Container";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import EditZonePriceForm from "./_components/EditZonePriceForm";
+import Form from "./_components/Form";
 import Steps from "./_components/Steps";
 import SubHeader from "./_components/sub-header/SubHeader";
 import useEditEventStore from "./_hook/useEditEventStore";
 import { useSyncEventInfo } from "./_hook/useSyncEventInfo";
-import Form from "./_components/Form";
-import ProtectedRoute from "../../components/common/ProtectedRoute";
 
 const EditEventPage = () => {
   const { eventId } = useParams();
