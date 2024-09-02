@@ -20,6 +20,8 @@ import PaymentHistory from "./details/PaymentHistory";
 import { useFetchPaymentHistories } from "../../hooks/fetch-data/useFetchPaymentHistories";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
+const ENDPOINT = "https://deedclub.appsystemyou.com";
+
 const OrderDetailContent: React.FC = () => {
   const { order_id } = useParams<{ order_id: string }>();
   const [orderDetail, setOrderDetail] = useState<any>(null);
@@ -40,7 +42,7 @@ const OrderDetailContent: React.FC = () => {
   };
 
   const handleNavigateToOrderSite = () => {
-    window.open("https://deedclub.appsystemyou.com/ConcertInfo/${orderId}", "_blank"); // Replace with the actual URL
+    window.open("http://your-order-site-url.com", "_blank"); // Replace with the actual URL
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
