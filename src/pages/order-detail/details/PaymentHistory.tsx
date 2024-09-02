@@ -1,45 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { getViewTicketList } from '../../../services/view-tikcet-list.service';
+import { getPaymentHistoriesByOrderId } from '../../../services/his-payment.service';
 
 interface PaymentHistoryProps {
   dtOrderId: string; // Pass the DT_order_id to filter the tickets
 }
 
-interface Ticket {
+interface PaymentHistory {
   date: string;
   amount: number;
   method: string;
-  dt_order_id: string; // Add other necessary fields based on your data structure
+  dt_order_id: string;
 }
 
 const PaymentHistory: React.FC<PaymentHistoryProps> = ({ dtOrderId }) => {
-  const [payments, setPayments] = useState<Ticket[]>([]);
+  const [payments, setPayments] = useState<PaymentHistory[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchPayments() {
       try {
-        const response = await getViewTicketList();
-        
-        // Log the entire response to inspect its structure
-        console.log('API Response:', response);
-
-        // Assuming the correct data is inside a 'data' property (adjust as needed)
-        const tickets = response.data || response; // Adjust according to the actual structure
-
-        if (Array.isArray(tickets)) {
-          const filteredPayments = tickets.filter((ticket: Ticket) => ticket.dt_order_id === dtOrderId);
-          setPayments(filteredPayments);
-        } else {
-          console.error('Expected an array, but received:', typeof tickets);
-        }
-      } catch (error) {
-        console.error('Failed to fetch ticket list:', error);
+        const paymentHistories = await getPaymentHistoriesByOrderId(dtOrderId);
+        setPayments(paymentHistories);
+      } catch (error: any) {
+        setError("Failed to load payment history.");
+        console.error('Error fetching payment histories:', error);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchPayments();
   }, [dtOrderId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <TableContainer>
@@ -55,10 +51,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ dtOrderId }) => {
           {payments.map((payment, index) => (
             <TableRow key={index}>
               <TableCell>{payment.date}</TableCell>
-              {/* <TableCell align="right">
+              <TableCell align="right">
                 {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(payment.amount)}
               </TableCell>
-              <TableCell align="right">{payment.method}</TableCell> */}
+              <TableCell align="right">{payment.method}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -80,7 +80,7 @@ const Sidebar: React.FC = () => {
           >
             <Link to="/all-tickets">
               <ConfirmationNumberIcon style={{ paddingRight: "10px" }} />
-              บัตรทั้งหมด
+              จำนวนบัตรทั้งหมด
             </Link>
           </li>
           <li

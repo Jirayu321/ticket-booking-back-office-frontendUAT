@@ -24,6 +24,7 @@ import {
   Modal,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   getAllPlans,
   createPlan,
@@ -34,8 +35,8 @@ import { getAllPlanGroups } from "../../services/plan-group.service";
 import { getEventStock } from "../../services/event-stock.service";
 
 import Header from "../common/header";
-import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
+import imageCompression from "browser-image-compression";
 
 const ZoneContent: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
@@ -133,11 +134,12 @@ const ZoneContent: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
-  const handleStatusFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleStatusFilterChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
     setStatusFilter(event.target.value as string);
   };
 
-  // Utility function to check for duplicates
   const isDuplicatePlanName = (
     name: string,
     groupId: number,
@@ -155,25 +157,31 @@ const ZoneContent: React.FC = () => {
       Swal.fire({
         icon: "error",
         title: "กรุณาเลือกผังร้าน",
+        customClass: {
+          popup: 'swal2-custom-zindex'
+        },
       });
       return;
     }
-  
+
     const groupId = parseInt(newPlan.planGroupId, 10);
-  
+
     if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
       Swal.fire({
         icon: "error",
         title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
+        customClass: {
+          popup: 'swal2-top-zindex'
+        },
       });
       return;
     }
-  
+
     try {
       await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
-        Plan_Pic: '',
+        Plan_Pic: newPlan.pic,
         Plan_Active: newPlan.active,
         PlanGroup_id: groupId,
       });
@@ -198,7 +206,12 @@ const ZoneContent: React.FC = () => {
 
     const groupId = editPlan.PlanGroup_id;
 
-    if (isDuplicatePlanName(editPlan.Plan_Name, groupId, plans, editPlan.Plan_id)) {
+    // Exclude the plan being edited from the duplicate check
+    const filteredPlans = plans.filter(
+      (plan) => plan.Plan_id !== editPlan.Plan_id
+    );
+
+    if (isDuplicatePlanName(editPlan.Plan_Name, groupId, filteredPlans)) {
       Swal.fire({
         icon: "error",
         title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
@@ -284,7 +297,6 @@ const ZoneContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-
   const handleImageClick = (image) => {
     setSelectedImage(image);
     setModalOpen(true);
@@ -307,24 +319,35 @@ const ZoneContent: React.FC = () => {
   const currentItems = filteredPlans.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
-  
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+  
       const reader = new FileReader();
       reader.onload = (e) => {
-        setNewPlan({ ...newPlan, pic: e.target?.result as string });
+        setNewPlan((prev) => ({
+          ...prev,
+          pic: e.target?.result as string, // Store the base64 string in state
+        }));
       };
-      reader.readAsDataURL(event.target.files[0]);
+      reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
     }
   };
+  
 
   const handleEditImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+  
       const reader = new FileReader();
       reader.onload = (e) => {
-        setEditPlan({ ...editPlan, Plan_Pic: e.target?.result as string });
+        setEditPlan((prev) => ({
+          ...prev,
+          Plan_Pic: e.target?.result as string, // Store the base64 string in state
+        }));
       };
-      reader.readAsDataURL(event.target.files[0]);
+      reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
     }
   };
 
@@ -342,7 +365,10 @@ const ZoneContent: React.FC = () => {
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
-          <FormControl variant="outlined" style={{ marginRight: "10px", minWidth: 120 }}>
+          <FormControl
+            variant="outlined"
+            style={{ marginRight: "10px", minWidth: 120 }}
+          >
             <InputLabel id="status-filter-label">สถานะ</InputLabel>
             <Select
               labelId="status-filter-label"
@@ -360,20 +386,20 @@ const ZoneContent: React.FC = () => {
             placeholder="ค้นหาโซน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px",marginTop:"10px" }}
+            style={{ marginRight: "10px", marginTop: "10px" }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent",
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent",
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent",
                 },
               },
             }}
@@ -398,13 +424,41 @@ const ZoneContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อผัง</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อโซน</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>รูปภาพ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                ชื่อผัง
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                ชื่อโซน
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                คำอธิบาย
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                รูปภาพ
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                สถานะ
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+              >
+                จัดการ
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -416,14 +470,25 @@ const ZoneContent: React.FC = () => {
                   <TableCell>{plan.Plan_Name}</TableCell>
                   <TableCell>{plan.Plan_Desc}</TableCell>
                   <TableCell>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                    <img
-                      src={plan.Plan_Pic}
-                      alt="Plan Image"
-                      style={{ width: '100px', height: 'auto', cursor: 'pointer' }}
-                      onClick={() => handleImageClick(plan.Plan_Pic)}
-                    />
-                  </div>
+                    <div
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <img
+                        src={plan.Plan_Pic}
+                        alt="Plan Image"
+                        style={{
+                          width: "100px",
+                          height: "auto",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleImageClick(plan.Plan_Pic)}
+                      />
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Switch
@@ -473,10 +538,13 @@ const ZoneContent: React.FC = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create New Plan</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle>สร้างโซนใหม่</DialogTitle>
         <DialogContent>
-        <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense">
             <InputLabel id="plan-group-label">ผังร้าน</InputLabel>
             <Select
               labelId="plan-group-label"
@@ -492,7 +560,7 @@ const ZoneContent: React.FC = () => {
               ))}
             </Select>
           </FormControl>
-          
+
           <TextField
             autoFocus
             margin="dense"
@@ -503,15 +571,15 @@ const ZoneContent: React.FC = () => {
             value={newPlan.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent",
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent",
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent",
                 },
               },
             }}
@@ -525,22 +593,22 @@ const ZoneContent: React.FC = () => {
             value={newPlan.desc}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent",
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent",
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent",
                 },
               },
             }}
           />
           <input
             accept="image/*"
-            style={{ display: 'block', margin: 'dense' }}
+            style={{ display: "block", margin: "dense" }}
             type="file"
             onChange={handleImageChange}
           />
@@ -548,11 +616,16 @@ const ZoneContent: React.FC = () => {
             <img
               src={newPlan.pic}
               alt="Selected"
-              style={{ width: '100px', height: 'auto', cursor: 'pointer', marginTop: '10px' }}
+              style={{
+                width: "100px",
+                height: "auto",
+                cursor: "pointer",
+                marginTop: "10px",
+              }}
             />
           )}
 
-            <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense">
             <InputLabel id="active-label">Active (Y/N)</InputLabel>
             <Select
               labelId="active-label"
@@ -577,72 +650,12 @@ const ZoneContent: React.FC = () => {
       </Dialog>
 
       {editPlan && (
-        <Dialog open={editOpen} onClose={handleEditClose}>
+        <Dialog
+          open={editOpen}
+          onClose={handleEditClose}
+        >
           <DialogTitle>แก้ไขโซน</DialogTitle>
           <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              name="Plan_Name"
-              label="ชื่อโซน"
-              type="text"
-              fullWidth
-              value={editPlan.Plan_Name}
-              onChange={handleEditChange}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
-                  },
-                },
-              }}
-            />
-            <TextField
-              margin="dense"
-              name="Plan_Desc"
-              label="คำอธิบาย"
-              type="text"
-              fullWidth
-              value={editPlan.Plan_Desc}
-              onChange={handleEditChange}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
-                  },
-                },
-              }}
-            />
-            <div style={{ margin: 'dense' }}>
-              <label htmlFor="upload-image" style={{ display: 'block', marginBottom: '8px' }}>รูปภาพ</label>
-              <input
-                id="upload-image"
-                accept="image/*"
-                style={{ display: 'block', marginBottom: '8px' }}
-                type="file"
-                onChange={handleEditImageChange}
-              />
-              {editPlan.Plan_Pic && (
-                <img
-                  src={editPlan.Plan_Pic}
-                  alt="Selected"
-                  style={{ width: '100px', height: 'auto', cursor: 'pointer', marginTop: '10px' }}
-                />
-              )}
-            </div>
-              
             <FormControl fullWidth margin="dense">
               <InputLabel id="plan-group-label-edit">ผังร้าน</InputLabel>
               <Select
@@ -659,19 +672,78 @@ const ZoneContent: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="active-label-edit">Active (Y/N)</InputLabel>
-              <Select
-                labelId="active-label-edit"
-                name="Plan_Active"
-                value={editPlan.Plan_Active}
-                onChange={handleEditChange}
-                fullWidth
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Plan_Name"
+              label="ชื่อโซน"
+              type="text"
+              fullWidth
+              value={editPlan.Plan_Name}
+              onChange={handleEditChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "transparent",
+                  },
+                },
+              }}
+            />
+            <TextField
+              margin="dense"
+              name="Plan_Desc"
+              label="คำอธิบาย"
+              type="text"
+              fullWidth
+              value={editPlan.Plan_Desc}
+              onChange={handleEditChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "transparent",
+                  },
+                },
+              }}
+            />
+            <div style={{ margin: "dense" }}>
+              <label
+                htmlFor="upload-image"
+                style={{ display: "block", marginBottom: "8px" }}
               >
-                <MenuItem value="Y">Yes</MenuItem>
-                <MenuItem value="N">No</MenuItem>
-              </Select>
-            </FormControl>
+                รูปภาพ
+              </label>
+              <input
+                id="upload-image"
+                accept="image/*"
+                style={{ display: "block", marginBottom: "8px" }}
+                type="file"
+                onChange={handleEditImageChange}
+              />
+              {editPlan.Plan_Pic && (
+                <img
+                  src={editPlan.Plan_Pic}
+                  alt="Selected"
+                  style={{
+                    width: "100px",
+                    height: "auto",
+                    cursor: "pointer",
+                    marginTop: "10px",
+                  }}
+                />
+              )}
+            </div>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleEditClose} color="secondary">
@@ -687,22 +759,36 @@ const ZoneContent: React.FC = () => {
       <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box
           sx={{
-            position: "absolute",
+            position: "relative", // Changed to relative to position the close button
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "80%",
+            width: "40%", // Adjust the width as needed
+            maxWidth: "500px", // Limit the maximum width
             bgcolor: "background.paper",
             border: "2px solid #000",
             boxShadow: 24,
             p: 4,
+            borderRadius: "8px", // Optional: Add rounded corners
           }}
         >
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{
+              position: "absolute",
+              right: 9,
+              top: 0,
+              color: "black",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           {selectedImage && (
             <img
               src={selectedImage}
               alt="Selected Plan"
-              style={{ width: "100%", height: "auto" }}
+              style={{ width: "100%", height: "auto", borderRadius: "4px" }} // Control image size
             />
           )}
         </Box>

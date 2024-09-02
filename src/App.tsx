@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
@@ -19,6 +20,22 @@ import LoginPage from "./pages/login/LoginPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 window.Buffer = Buffer;
+
+// Set global configuration for SweetAlert2 with a higher z-index
+Swal.mixin({
+  toast: true,
+  position: 'top',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  customClass: {
+    container: 'swal-custom-zindex'
+  },
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer);
+    toast.addEventListener('mouseleave', Swal.resumeTimer);
+  }
+});
 
 function App() {
   return (
@@ -66,73 +83,55 @@ function App() {
         <Route
           path="/zone"
           element={
-            <ProtectedRoute>
-              <ZonePage />
-            </ProtectedRoute>
+            <ZonePage />
           }
         />
         <Route
           path="/zone-group"
           element={
-            <ProtectedRoute>
-              <ZoneGroup />
-            </ProtectedRoute>
+            <ZoneGroup />
           }
         />
         <Route
           path="/ticket-type"
           element={
-            <ProtectedRoute>
-              <TicketTypePage />
-            </ProtectedRoute>
+            <TicketTypePage />
           }
         />
         <Route
           path="/pay-option"
           element={
-            <ProtectedRoute>
-              <PayOptionPage />
-            </ProtectedRoute>
+            <PayOptionPage />
           }
         />
         <Route
           path="/pay-by"
           element={
-            <ProtectedRoute>
-              <PayByPage />
-            </ProtectedRoute>
+            <PayByPage />
           }
         />
         <Route
           path="/all-orders"
           element={
-            <ProtectedRoute>
-              <AllOrder />
-            </ProtectedRoute>
+            <AllOrder />
           }
         />
         <Route
           path="/order-detail/:order_id"
           element={
-            <ProtectedRoute>
-              <OrderDetailPage />
-            </ProtectedRoute>
+            <OrderDetailPage />
           }
         />
         <Route
           path="/all-tickets"
           element={
-            <ProtectedRoute>
-              <AllTicketPage />
-            </ProtectedRoute>
+            <AllTicketPage />
           }
         />
         <Route
           path="/all-seats"
           element={
-            <ProtectedRoute>
-              <AllSeatPage />
-            </ProtectedRoute>
+            <AllSeatPage />
           }
         />
         <Route path="/login" element={<LoginPage />} />

@@ -40,7 +40,7 @@ const OrderDetailContent: React.FC = () => {
   };
 
   const handleNavigateToOrderSite = () => {
-    window.open("http://your-order-site-url.com", "_blank"); // Replace with the actual URL
+    window.open("https://deedclub.appsystemyou.com/ConcertInfo/${orderId}", "_blank"); // Replace with the actual URL
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
