@@ -1,4 +1,4 @@
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
@@ -24,30 +24,31 @@ window.Buffer = Buffer;
 // Set global configuration for SweetAlert2 with a higher z-index
 Swal.mixin({
   toast: true,
-  position: 'top',
+  position: "top",
   showConfirmButton: false,
   timer: 3000,
   timerProgressBar: true,
   customClass: {
-    container: 'swal-custom-zindex'
+    container: "swal-custom-zindex",
   },
   didOpen: (toast) => {
-    toast.addEventListener('mouseenter', Swal.stopTimer);
-    toast.addEventListener('mouseleave', Swal.resumeTimer);
-  }
+    toast.addEventListener("mouseenter", Swal.stopTimer);
+    toast.addEventListener("mouseleave", Swal.resumeTimer);
+  },
 });
 
 function App() {
   return (
     <Router>
       <Toaster
-        position="center-top"
+        position="top-right"
         reverseOrder={false}
         toastOptions={{
           duration: 3000, // Duration in milliseconds (e.g., 5000ms = 5 seconds)
         }}
       />
       <Routes>
+        <Route path="/" element={<LoginPage />} />
         <Route
           path="/overview"
           element={
@@ -80,60 +81,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/zone"
-          element={
-            <ZonePage />
-          }
-        />
-        <Route
-          path="/zone-group"
-          element={
-            <ZoneGroup />
-          }
-        />
-        <Route
-          path="/ticket-type"
-          element={
-            <TicketTypePage />
-          }
-        />
-        <Route
-          path="/pay-option"
-          element={
-            <PayOptionPage />
-          }
-        />
-        <Route
-          path="/pay-by"
-          element={
-            <PayByPage />
-          }
-        />
-        <Route
-          path="/all-orders"
-          element={
-            <AllOrder />
-          }
-        />
-        <Route
-          path="/order-detail/:order_id"
-          element={
-            <OrderDetailPage />
-          }
-        />
-        <Route
-          path="/all-tickets"
-          element={
-            <AllTicketPage />
-          }
-        />
-        <Route
-          path="/all-seats"
-          element={
-            <AllSeatPage />
-          }
-        />
+        <Route path="/zone" element={<ZonePage />} />
+        <Route path="/zone-group" element={<ZoneGroup />} />
+        <Route path="/ticket-type" element={<TicketTypePage />} />
+        <Route path="/pay-option" element={<PayOptionPage />} />
+        <Route path="/pay-by" element={<PayByPage />} />
+        <Route path="/all-orders" element={<AllOrder />} />
+        <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
+        <Route path="/all-tickets" element={<AllTicketPage />} />
+        <Route path="/all-seats" element={<AllSeatPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
