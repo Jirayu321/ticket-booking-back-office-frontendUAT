@@ -1,5 +1,5 @@
 import { CircularProgress } from "@mui/material";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
@@ -9,6 +9,7 @@ import Header from "./Header";
 import styles from "./plan.module.css";
 import SaveButton from "./SaveButton";
 import { v4 } from "uuid";
+import { sortTicketNo } from "../../../lib/util";
 
 type PlanProps = {
   plan: any;
@@ -40,12 +41,13 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     planGroupId: PlanGroup_Id,
   });
 
-  const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
+  const { data: ticketNoPerPlans, isFetching: isLoadingTicketNoPerPlans } =
     useFetchTicketNoPerPlanByEventId({
       eventId: Number(eventId),
       planId: Plan_Id,
       planGroupId: PlanGroup_Id,
     });
+
 
   if (isLoadingViewLogEventPrice || isLoadingTicketNoPerPlans)
     return <CircularProgress />;
@@ -60,7 +62,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           id: v4(),
           ...vle,
         })),
-        ticketNumbers: ticketNoPerPlans,
+        ticketNumbers : ticketNoPerPlans.sort(sortTicketNo),
         planId: Number(Plan_Id),
       }}
     >

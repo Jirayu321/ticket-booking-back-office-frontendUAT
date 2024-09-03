@@ -24,3 +24,5 @@ export type PlanInfo = {
   logEventPrices: any[];
   ticketNumbers: string[];
 };
+
+export type TicketNoOption = "1" | "2" | "3" | "4" | "5" | "";

@@ -1,11 +1,12 @@
 import { CircularProgress, Collapse } from "@mui/material";
-import { FC } from "react";
+import { FC, useState } from "react";
 import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
-import { sortTicketNo } from "../../../lib/util";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import LogPrices from "./LogPrices";
 import styles from "./plan.module.css";
+import SelectInputMethod from "./SelectInputMethod";
+import { TicketNoOption } from "../type";
 
 type BodyProps = {
   zones: any;
@@ -25,10 +26,19 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
     onUpdatePlanInfo,
   } = state;
 
-  const sortedTicketNoPerPlans = ticketNumbers?.sort(sortTicketNo);
+  const [tempTicketNumbers, setTempTicketNumbers] =
+    useState<any[]>(ticketNumbers);
+
+  const [ticketNoOption, setTicketNoOption] = useState<TicketNoOption>(
+    tempTicketNumbers[0]?.Ticket_No_Option ?? ""
+  );
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
+
+  function handleTicketOptionChange(option: TicketNoOption) {
+    setTicketNoOption(option);
+  }
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -101,48 +111,30 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
         </div>
         <LogPrices planId={planId} zones={zones} />
         <div className="table-input-method-section">
-          <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
-          <select
-            value={zones[planId]?.tableInputMethod || ""}
-            onChange={(e) =>
-              handleInputChange(planId, "tableInputMethod", e.target.value)
+          <SelectInputMethod
+            currentPlan={
+              zones.filter((zone: any) => zone.Plan_Id === planId)[0]
             }
-            className="table-input-method-select"
-          >
-            <option value="">เลือกรูปแบบการระบุ</option>
-            <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
-            <option value="2">
-              2.รันจาก 1 ถึง {zones[planId]?.seatCount || 0}
-            </option>
-            <option value="3">
-              3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[planId]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-              {zones[planId]?.seatCount || 0})
-            </option>
-            <option value="4">
-              4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[planId]?.seatCount || 0} ([?] 1- [?]{" "}
-              {zones[planId]?.seatCount || 0})
-            </option>
-            <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
-          </select>
-          {sortedTicketNoPerPlans ? (
-            sortedTicketNoPerPlans.length > 0 ? (
-              <section className={styles.ticketNoSection}>
-                {sortedTicketNoPerPlans.map((tnp: any) => (
-                  <TicketNoCard key={tnp.Ticket_No} ticketNo={tnp.Ticket_No} />
-                ))}
-              </section>
-            ) : (
-              <>
-                <h4
-                  style={{ color: "#ccc", width: "100%", textAlign: "center" }}
-                >
-                  ไม่พบข้อมูลเลขโต็ะ
-                </h4>
-              </>
-            )
-          ) : null}
+            currentOption={ticketNoOption}
+            setTicketOption={handleTicketOptionChange}
+          />
+          {Boolean(tempTicketNumbers) ? (
+            <section className={styles.ticketNoSection}>
+              {tempTicketNumbers.map((tnp: any) => (
+                <TicketNoCard
+                  key={tnp.Ticket_No}
+                  ticketNo={tnp.Ticket_No}
+                  onChange={() => {}}
+                />
+              ))}
+            </section>
+          ) : (
+            <>
+              <h4 style={{ color: "#ccc", width: "100%", textAlign: "center" }}>
+                ไม่พบข้อมูลเลขโต็ะ
+              </h4>
+            </>
+          )}
           {/* <GenerateBoxes
               method={zones[planId]?.tableInputMethod || "1"}
               seatNumber={zones[planId]?.seatCount || 0}
