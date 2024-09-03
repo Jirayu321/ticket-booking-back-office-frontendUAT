@@ -55,7 +55,8 @@ export function addHours(date: Date, hours: number) {
 }
 
 export function doesSomeItemDuplicateInMultipleArrays<T>(arrays: T[]): boolean {
-  return new Set(arrays).size !== arrays.length;
+  const filteredArrays = arrays.filter((item) => Boolean(item));
+  return new Set(filteredArrays).size !== filteredArrays.length;
 }
 
 export function printCanvas(canvasId: string) {

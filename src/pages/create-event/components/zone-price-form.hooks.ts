@@ -176,8 +176,6 @@ export function useZonePriceForm() {
       };
     }
 
-    console.log(zones);
-
     const allTableValues = Object.entries(zones)
       .map(([_, zone]) => {
         return zone.tableValues ?? [];
