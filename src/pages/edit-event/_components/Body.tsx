@@ -40,6 +40,14 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
     setTicketNoOption(option);
   }
 
+  function handleTicketNumberChange(newTicketNumber: string, index: number) {
+    setTempTicketNumbers((prev) =>
+      prev.map((tnp, i) =>
+        i === index ? { ...tnp, Ticket_No: newTicketNumber } : tnp
+      )
+    );
+  }
+
   if (isLoadingTicketTypes) return <CircularProgress />;
 
   return (
@@ -120,11 +128,13 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
           />
           {Boolean(tempTicketNumbers) ? (
             <section className={styles.ticketNoSection}>
-              {tempTicketNumbers.map((tnp: any) => (
+              {tempTicketNumbers.map((tnp: any, index) => (
                 <TicketNoCard
-                  key={tnp.Ticket_No}
+                  key={index}
+                  index={index}
+                  ticketNumbers={tempTicketNumbers.map((tn) => tn.Ticket_No)}
                   ticketNo={tnp.Ticket_No}
-                  onChange={() => {}}
+                  onChange={handleTicketNumberChange}
                 />
               ))}
             </section>

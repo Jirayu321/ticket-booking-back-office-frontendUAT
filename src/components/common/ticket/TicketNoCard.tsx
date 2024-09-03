@@ -3,16 +3,28 @@ import styles from "./ticket-no-card.module.css";
 
 type Props = {
   ticketNo: string;
-  onChange: (e: any) => void;
+  index: number;
+  ticketNumbers: string[];
+  onChange: (newTicketNumber: string, index: number) => void;
 };
 
-const TicketNoCard: FC<Props> = ({ ticketNo, onChange }) => {
+const TicketNoCard: FC<Props> = ({
+  ticketNo,
+  index,
+  ticketNumbers,
+  onChange,
+}) => {
   return (
     <div className={styles.container}>
       <input
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          onChange(e.target.value as string)
-        }
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          const doesTheTicketNoExist = ticketNumbers.some(
+            (tn) => tn === e.target.value
+          );
+
+          if (doesTheTicketNoExist) return;
+          onChange(e.target.value as string, index);
+        }}
         value={ticketNo}
       />
     </div>
