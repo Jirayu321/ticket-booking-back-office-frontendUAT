@@ -70,6 +70,10 @@ button:focus-visible {
   }
 }
 
+.sweet-alert-popup {
+  z-index: 999999999 !important;
+}
+
 @font-face {
   font-family: 'Cloud';
   src: url('./fonts/cloud-webfont.woff2') format('woff2'),

@@ -1,3 +1,5 @@
+import { SwalError } from "./sweetalert";
+
 const BC_YEAR = 543;
 
 export function formatThaiDate({
@@ -54,4 +56,38 @@ export function addHours(date: Date, hours: number) {
 
 export function doesSomeItemDuplicateInMultipleArrays<T>(arrays: T[]): boolean {
   return new Set(arrays).size !== arrays.length;
+}
+
+export function printCanvas(canvasId: string) {
+  const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
+
+  if (!canvas) {
+    SwalError("ไม่สามารถพิมพ์บัตรที่นั่งได้");
+    return;
+  }
+
+  const dataUrl = canvas.toDataURL("image/png");
+
+  const printWindow = window.open("", "_blank");
+
+  printWindow?.document.write(`
+  <html>
+    <head>
+      <title>Print Canvas</title>
+    </head>
+    <body>
+      <img src="${dataUrl}" style="width:100%; height:auto;"/>
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() {
+            window.close();
+          };
+        };
+      </script>
+    </body>
+  </html>
+`);
+
+  printWindow?.document.close();
 }
