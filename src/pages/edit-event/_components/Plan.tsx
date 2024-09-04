@@ -9,7 +9,6 @@ import { PlanInfoProvider } from "../_hook/usePlanInfoStore";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
-import SaveButton from "./SaveButton";
 
 type PlanProps = {
   plan: any;
@@ -48,7 +47,6 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
       planGroupId: PlanGroup_Id,
     });
 
-
   if (isLoadingViewLogEventPrice || isLoadingTicketNoPerPlans)
     return <CircularProgress />;
 
@@ -62,7 +60,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           id: v4(),
           ...vle,
         })),
-        ticketNumbers : ticketNoPerPlans.sort(sortTicketNo),
+        ticketNumbers: ticketNoPerPlans.sort(sortTicketNo),
         planId: Number(Plan_Id),
       }}
     >
@@ -78,14 +76,10 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           expandedZones={expandedZones}
           handleInputChange={() => {}}
           removeZonePrice={() => {}}
+          Plan_Id={Number(Plan_Id)}
+          Plan_GroupId={PlanGroup_Id}
+          refreshViewEventStocks={refreshViewEventStocks}
         />
-        {expandedZones[Plan_Id] ? (
-          <SaveButton
-            planId={Plan_Id}
-            planGroupId={PlanGroup_Id}
-            refreshViewEventStocks={refreshViewEventStocks}
-          />
-        ) : null}
       </div>
     </PlanInfoProvider>
   );

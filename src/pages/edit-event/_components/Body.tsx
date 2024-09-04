@@ -1,11 +1,13 @@
 import { CircularProgress, Collapse } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
-import { getStartNumber } from "../helper";
+import { useUpdateTicketNumbers } from "../_hook/useUpdateTicketNumbers";
+import { getPrefix, getStartNumber } from "../helper";
 import { TicketNoOption } from "../type";
 import LogPrices from "./LogPrices";
 import NumberAndPrefix from "./NumberAndPrefix";
+import SaveButton from "./SaveButton";
 import SelectInputMethod from "./SelectInputMethod";
 import TicketNoList from "./TicketNoList";
 
@@ -14,9 +16,18 @@ type BodyProps = {
   expandedZones: any;
   handleInputChange: any;
   removeZonePrice: any;
+  Plan_Id: number;
+  Plan_GroupId: number;
+  refreshViewEventStocks: any;
 };
 
-const Body: FC<BodyProps> = ({ zones, expandedZones }) => {
+const Body: FC<BodyProps> = ({
+  zones,
+  expandedZones,
+  Plan_Id,
+  Plan_GroupId,
+  refreshViewEventStocks,
+}) => {
   const state = usePlanInfoStore((state: any) => state);
   const {
     planId,
@@ -40,7 +51,7 @@ const Body: FC<BodyProps> = ({ zones, expandedZones }) => {
     getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
   );
 
-  const [prefix, setPrefix] = useState<string>(firstTicketNumber?.Prefix ?? "");
+  const [prefix, setPrefix] = useState<string>(getPrefix(ticketNoOption));
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -57,36 +68,15 @@ const Body: FC<BodyProps> = ({ zones, expandedZones }) => {
     );
   }
 
-  useEffect(() => {
-    switch (ticketNoOption) {
-      case "1":
-        break;
-      case "2":
-        setTempTicketNumbers((prev: any[]) => {
-          return prev.map((tnp, index) => {
-            return {
-              ...tnp,
-              Ticket_No: `${Number(startNumber) + index}`,
-            };
-          });
-        });
-        break;
-      case "3":
-        setStartNumber(
-          getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
-        );
-        setPrefix("");
-        break;
-      case "4":
-        setStartNumber(
-          getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
-        );
-        setPrefix(firstTicketNumber?.Prefix);
-        break;
-      default:
-        break;
-    }
-  }, [startNumber, prefix, ticketNoOption]);
+  useUpdateTicketNumbers({
+    startNumber,
+    prefix,
+    ticketNoOption,
+    ticketNumber: firstTicketNumber,
+    setStartNumber,
+    setPrefix,
+    setTempTicketNumbers,
+  });
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -180,6 +170,15 @@ const Body: FC<BodyProps> = ({ zones, expandedZones }) => {
             handleTicketNumberChange={handleTicketNumberChange}
           />
         </div>
+        {expandedZones[Plan_Id] ? (
+          <SaveButton
+            planId={Plan_Id}
+            planGroupId={Plan_GroupId}
+            refreshViewEventStocks={refreshViewEventStocks}
+            ticketNumbers={tempTicketNumbers}
+            ticketNoOption={ticketNoOption}
+          />
+        ) : null}
       </div>
     </Collapse>
   );

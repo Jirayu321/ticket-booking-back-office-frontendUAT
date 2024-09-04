@@ -20,7 +20,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     logEventPrices,
     onUpdatePrice,
     onDeleteLogEventPrice,
-    deletedLogEventPrices,
   } = state;
 
   function handleAddLogEventPrice() {

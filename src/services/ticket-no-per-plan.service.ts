@@ -52,6 +52,27 @@ export async function createTicketNoPerPlan({
 
     if (response.status !== 200) throw new Error();
   } catch (error: any) {
-    throw "ล้มเหลวระหว่างเพิ่มเลขตั๋ว";
+    throw new Error("ล้มเหลวระหว่างเพิ่มเลขตั๋ว");
+  }
+}
+
+// ==================== DELETE ====================
+export async function deleteTicketNoPerPlan({
+  eventId,
+  planId,
+  planGroupId,
+}: {
+  eventId: number;
+  planId: number;
+  planGroupId: number;
+}) {
+  try {
+    const response = await authAxiosClient.delete(
+      `/ticket-no-per-plan/${eventId}?planId=${planId}&planGroupId=${planGroupId}`
+    );
+
+    if (response.status !== 200) throw new Error();
+  } catch (error: any) {
+    throw new Error("ล้มเหลวระหว่างการลบเลขตั๋ว");
   }
 }

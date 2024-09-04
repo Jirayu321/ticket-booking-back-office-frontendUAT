@@ -12,16 +12,24 @@ import {
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import styles from "./plan.module.css";
 import { validateLogEventPrices } from "../helper";
+import {
+  createTicketNoPerPlan,
+  deleteTicketNoPerPlan,
+} from "../../../services/ticket-no-per-plan.service";
 
 type SaveButtonProps = {
   planGroupId: number;
   planId: number;
+  ticketNumbers: string[];
+  ticketNoOption: string;
   refreshViewEventStocks: () => void;
 };
 
 const SaveButton: FC<SaveButtonProps> = ({
   planGroupId,
   planId,
+  ticketNumbers,
+  ticketNoOption,
   refreshViewEventStocks,
 }) => {
   const state = usePlanInfoStore((state: any) => state);
@@ -109,6 +117,27 @@ const SaveButton: FC<SaveButtonProps> = ({
       );
 
       await updateLogEventPricePromises;
+
+      // ลบเลขโต๊ะทั้งหมด
+      await deleteTicketNoPerPlan({
+        eventId: Number(eventId),
+        planId,
+        planGroupId,
+      });
+
+      // สร้างเลขโต๊ะใหม่
+      await Promise.all(
+        ticketNumbers.map((tn: any, index: number) => {
+          return createTicketNoPerPlan({
+            Event_Id: Number(eventId),
+            PlanGroup_Id: planGroupId,
+            Plan_Id: planId,
+            Line: index + 1,
+            Ticket_No: tn.Ticket_No,
+            Ticket_No_Option: Number(ticketNoOption),
+          });
+        })
+      );
 
       toast.dismiss();
 

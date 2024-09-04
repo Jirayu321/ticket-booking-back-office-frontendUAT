@@ -10,6 +10,11 @@ export function getStartNumber(
   return null;
 }
 
+export function getPrefix(option: TicketNoOption): string {
+  if (option === "3") return "โต๊ะ";
+  return "";
+}
+
 export function validateLogEventPrices(logEventPrices: any[]): {
   message: string;
   isValid: boolean;
