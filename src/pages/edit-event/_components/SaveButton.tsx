@@ -5,6 +5,8 @@ import styles from "./plan.module.css";
 import { useParams } from "react-router-dom";
 import { updateEventStock } from "../../../services/event-stock.service";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
+import { deleteLogEventPrice } from "../../../services/log-event-price.service";
+import { SwalSuccess } from "../../../lib/sweetalert";
 
 type SaveButtonProps = {
   planGroupId: number;
@@ -18,12 +20,18 @@ const SaveButton: FC<SaveButtonProps> = ({
   refreshViewEventStocks,
 }) => {
   const state = usePlanInfoStore((state: any) => state);
-  const { ticketTypeId, ticketQtyPerPlan, seatQtyPerticket } = state;
+  const {
+    ticketTypeId,
+    ticketQtyPerPlan,
+    seatQtyPerticket,
+    deletedLogEventPriceIds,
+  } = state;
   const { eventId } = useParams();
 
   async function handleUpdateViewEventStock() {
     try {
       toast.loading("กำลังบันทึกข้อมูล...");
+
       await updateEventStock({
         eventId: Number(eventId),
         planGroupId,
@@ -34,8 +42,19 @@ const SaveButton: FC<SaveButtonProps> = ({
           Ticket_Qty: seatQtyPerticket,
         },
       });
+
+      const deleteLogEventPricePromises = Promise.all(
+        deletedLogEventPriceIds.map((id: number) => {
+          return deleteLogEventPrice(id);
+        })
+      );
+
+      await deleteLogEventPricePromises;
+
       toast.dismiss();
-      toast.success("บันทึกข้อมูลสำเร็จ");
+
+      SwalSuccess("บันทึกข้อมูลสำเร็จ");
+
       refreshViewEventStocks();
     } catch (error: any) {
       toast.dismiss();

@@ -92,3 +92,7 @@ export function printCanvas(canvasId: string) {
 
   printWindow?.document.close();
 }
+
+export function getOnlyNumber(value: string) : number{
+  return value.replace(/[^0-9]/g, "");
+}

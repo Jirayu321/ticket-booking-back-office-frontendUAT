@@ -1,15 +1,15 @@
 import { CircularProgress } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { useParams } from "react-router-dom";
+import { v4 } from "uuid";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
+import { sortTicketNo } from "../../../lib/util";
 import { PlanInfoProvider } from "../_hook/usePlanInfoStore";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
 import SaveButton from "./SaveButton";
-import { v4 } from "uuid";
-import { sortTicketNo } from "../../../lib/util";
 
 type PlanProps = {
   plan: any;

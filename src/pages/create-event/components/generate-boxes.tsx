@@ -25,7 +25,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       setStartNumberAndPrefix,
       zones,
     });
-  console.log(zones);
+  
   return (
     <div className="generate-boxes-container">
       <div className="header-container">

@@ -1,12 +1,13 @@
 import { CircularProgress, Collapse } from "@mui/material";
-import { FC, useState } from "react";
-import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
+import { FC, useEffect, useState } from "react";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
-import LogPrices from "./LogPrices";
-import styles from "./plan.module.css";
-import SelectInputMethod from "./SelectInputMethod";
+import { getStartNumber } from "../helper";
 import { TicketNoOption } from "../type";
+import LogPrices from "./LogPrices";
+import NumberAndPrefix from "./NumberAndPrefix";
+import SelectInputMethod from "./SelectInputMethod";
+import TicketNoList from "./TicketNoList";
 
 type BodyProps = {
   zones: any;
@@ -15,7 +16,7 @@ type BodyProps = {
   removeZonePrice: any;
 };
 
-const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
+const Body: FC<BodyProps> = ({ zones, expandedZones }) => {
   const state = usePlanInfoStore((state: any) => state);
   const {
     planId,
@@ -29,9 +30,17 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
   const [tempTicketNumbers, setTempTicketNumbers] =
     useState<any[]>(ticketNumbers);
 
+  const firstTicketNumber = tempTicketNumbers[0];
+
   const [ticketNoOption, setTicketNoOption] = useState<TicketNoOption>(
-    tempTicketNumbers[0]?.Ticket_No_Option ?? ""
+    firstTicketNumber?.Ticket_No_Option ?? ""
   );
+
+  const [startNumber, setStartNumber] = useState<number | null>(
+    getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
+  );
+
+  const [prefix, setPrefix] = useState<string>(firstTicketNumber?.Prefix ?? "");
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
@@ -47,6 +56,37 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
       )
     );
   }
+
+  useEffect(() => {
+    switch (ticketNoOption) {
+      case "1":
+        break;
+      case "2":
+        setTempTicketNumbers((prev: any[]) => {
+          return prev.map((tnp, index) => {
+            return {
+              ...tnp,
+              Ticket_No: `${Number(startNumber) + index}`,
+            };
+          });
+        });
+        break;
+      case "3":
+        setStartNumber(
+          getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
+        );
+        setPrefix("");
+        break;
+      case "4":
+        setStartNumber(
+          getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
+        );
+        setPrefix(firstTicketNumber?.Prefix);
+        break;
+      default:
+        break;
+    }
+  }, [startNumber, prefix, ticketNoOption]);
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -126,30 +166,19 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
             currentOption={ticketNoOption}
             setTicketOption={handleTicketOptionChange}
           />
-          {Boolean(tempTicketNumbers) ? (
-            <section className={styles.ticketNoSection}>
-              {tempTicketNumbers.map((tnp: any, index) => (
-                <TicketNoCard
-                  key={index}
-                  index={index}
-                  ticketNumbers={tempTicketNumbers.map((tn) => tn.Ticket_No)}
-                  ticketNo={tnp.Ticket_No}
-                  onChange={handleTicketNumberChange}
-                />
-              ))}
-            </section>
-          ) : (
-            <>
-              <h4 style={{ color: "#ccc", width: "100%", textAlign: "center" }}>
-                ไม่พบข้อมูลเลขโต็ะ
-              </h4>
-            </>
-          )}
-          {/* <GenerateBoxes
-              method={zones[planId]?.tableInputMethod || "1"}
-              seatNumber={zones[planId]?.seatCount || 0}
-              zoneId={planId}
-            /> */}
+          <NumberAndPrefix
+            ticketQtyPerPlan={seatQtyPerticket}
+            ticketNoOption={ticketNoOption}
+            startNumber={startNumber ?? 0}
+            setStartNumber={setStartNumber}
+            prefix={prefix}
+            setPrefix={setPrefix}
+          />
+          <TicketNoList
+            tempTicketNumbers={tempTicketNumbers}
+            currentOption={ticketNoOption}
+            handleTicketNumberChange={handleTicketNumberChange}
+          />
         </div>
       </div>
     </Collapse>

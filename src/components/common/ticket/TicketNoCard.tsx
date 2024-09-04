@@ -5,6 +5,7 @@ type Props = {
   ticketNo: string;
   index: number;
   ticketNumbers: string[];
+  disabled?: boolean;
   onChange: (newTicketNumber: string, index: number) => void;
 };
 
@@ -12,11 +13,14 @@ const TicketNoCard: FC<Props> = ({
   ticketNo,
   index,
   ticketNumbers,
+  disabled = false,
   onChange,
 }) => {
   return (
     <div className={styles.container}>
       <input
+        disabled={disabled}
+        min={0}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const doesTheTicketNoExist = ticketNumbers.some(
             (tn) => tn === e.target.value

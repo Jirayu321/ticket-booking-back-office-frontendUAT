@@ -5,6 +5,7 @@ import DatePicker from "../../../components/common/input/date-picker/DatePicker"
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import deleteOnIcon from "/delete-on.svg";
 import { v4 } from "uuid";
+import { SwalConfirmAction } from "../../../lib/sweetalert";
 
 type LogPricesProps = {
   zones: any[];
@@ -19,6 +20,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     logEventPrices,
     onUpdatePrice,
     onDeleteLogEventPrice,
+    deletedLogEventPriceIds,
   } = state;
 
   function handleAddLogEventPrice() {
@@ -31,8 +33,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       };
 
       onAddLogEventPrice(emptyLogEventPrice);
-
-      toast.success("เพิ่มราคาโซนสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างเพิ่มราคาโซน");
     }
@@ -65,8 +65,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       };
 
       onUpdateLogEventPrice(newLogEventPrice);
-
-      toast.success("อัพเดทเวลาสิ้นสุดสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างอัพเดทเวลาสิ้นสุด");
     }
@@ -83,7 +81,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
   function handleDeleteLogEventPrice(logEventPriceId: string) {
     try {
       onDeleteLogEventPrice(logEventPriceId);
-      toast.success("ลบราคาโซนสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างลบราคาโซน");
     }
@@ -139,7 +136,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
             value={Number(params.value)}
             onChange={(e) => {
               e.preventDefault();
-              handleUpdatePrice(Number(e.target.value), params.row.id);
+              handleUpdatePrice(Number(e.target.value), params.row.Log_Id);
             }}
             style={{ width: "90%", color: "black", backgroundColor: "white" }}
           />
@@ -158,8 +155,12 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
           src={deleteOnIcon}
           alt="delete-on"
           style={{ cursor: "pointer" }}
-          onClick={() => {
-            handleDeleteLogEventPrice(params.row.id);
+          onClick={async () => {
+            const isConfirmed = await SwalConfirmAction(
+              "คุณต้องการลบราคาโซนนี้ใช้หรือไม่?"
+            );
+            if (!isConfirmed) return;
+            handleDeleteLogEventPrice(params.row.Log_Id);
           }}
         />
       ),
@@ -171,7 +172,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       <h3>ราคา ({zones[planId]?.prices?.length || 0})</h3>
       <div style={{ height: "auto", width: "100%" }}>
         <DataGrid
-          getRowId={(row) => row.id}
+          getRowId={(row) => row.Log_Id}
           rows={logEventPrices}
           columns={columns}
           autoHeight
