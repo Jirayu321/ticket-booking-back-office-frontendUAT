@@ -170,7 +170,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
   return (
     <div className="price-section">
       <h3>ราคา ({zones[planId]?.prices?.length || 0})</h3>
-      <h3>{JSON.stringify(deletedLogEventPrices)}</h3>
       <div style={{ height: "auto", width: "100%" }}>
         <DataGrid
           getRowId={(row) => row.id}

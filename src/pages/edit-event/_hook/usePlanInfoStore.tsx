@@ -64,6 +64,9 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
             ...state.deletedLogEventPrices,
             logEventPriceParam,
           ],
+          createdLogEventPriceIds: state.createdLogEventPriceIds.filter(
+            (id: number) => id !== logEventPriceParam.id
+          ),
         })),
     }))
   );
