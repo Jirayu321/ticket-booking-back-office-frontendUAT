@@ -1,20 +1,15 @@
 import { useEffect } from "react";
-import { getStartNumber } from "../helper";
 
 export function useUpdateTicketNumbers({
   startNumber,
   prefix,
   ticketNoOption,
-  ticketNumber,
-  setStartNumber,
   setPrefix,
   setTempTicketNumbers,
 }: {
   startNumber: number | null;
   prefix: string;
   ticketNoOption: string;
-  ticketNumber: any;
-  setStartNumber: any;
   setPrefix: any;
   setTempTicketNumbers: (value: any) => void;
 }) {
@@ -33,12 +28,36 @@ export function useUpdateTicketNumbers({
         });
         break;
       case "3":
-        setStartNumber(getStartNumber(ticketNumber?.Ticket_No, ticketNoOption));
-        setPrefix("");
+        setPrefix("โต๊ะ");
+        setTempTicketNumbers((prev: any[]) => {
+          return prev.map((tnp, index) => {
+            return {
+              ...tnp,
+              Ticket_No: `${prefix} ${Number(startNumber) + index}`,
+            };
+          });
+        });
         break;
       case "4":
-        setStartNumber(getStartNumber(ticketNumber?.Ticket_No, ticketNoOption));
-        setPrefix(ticketNumber?.Prefix);
+        setTempTicketNumbers((prev: any[]) => {
+          return prev.map((tnp, index) => {
+            return {
+              ...tnp,
+              Ticket_No: `${prefix}${Number(startNumber) + index}`,
+            };
+          });
+        });
+        break;
+      case "5":
+        setTempTicketNumbers((prev: any[]) => {
+          return prev.map((tnp) => {
+            return {
+              ...tnp,
+              Ticket_No: "",
+            };
+          });
+        });
+
         break;
       default:
         break;

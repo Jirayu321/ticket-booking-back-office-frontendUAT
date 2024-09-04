@@ -72,8 +72,6 @@ const Body: FC<BodyProps> = ({
     startNumber,
     prefix,
     ticketNoOption,
-    ticketNumber: firstTicketNumber,
-    setStartNumber,
     setPrefix,
     setTempTicketNumbers,
   });
