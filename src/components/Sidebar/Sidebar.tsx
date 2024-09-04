@@ -140,10 +140,10 @@ const Sidebar: React.FC = () => {
           </li>
           <li
             className={`menu-item ${
-              activePath === "/company-settings" ? "active" : ""
+              activePath === "/employee" ? "active" : ""
             }`}
           >
-            <Link to="/company-settings">
+            <Link to="/employee">
               <ManageAccountsIcon style={{ paddingRight: "10px" }} />
               ตั้งค่าบริษัท
             </Link>

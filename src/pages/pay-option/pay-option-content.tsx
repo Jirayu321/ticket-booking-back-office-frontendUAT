@@ -295,7 +295,7 @@ const handleDelete = async (id: number) => {
               currentItems.map((payOption, index) => (
                 <TableRow key={payOption.Pay_Opt_Id}>
                   <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{payOption.Pay_Opt_Name}</TableCell>
+                  <TableCell>{payOption.Pay_Opt_Name_Int}</TableCell>
                   <TableCell>{payOption.Pay_Opt_Desc || "-"}</TableCell>
                   <TableCell>
                     <Switch

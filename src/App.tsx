@@ -59,25 +59,25 @@ function App() {
         <Route
           path="/all-events"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <AllEvent />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/all-events/create-event"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <CreateNewEvent />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/edit-event/:eventId"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <EditEventPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
