@@ -172,7 +172,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       <h3>ราคา ({zones[planId]?.prices?.length || 0})</h3>
       <div style={{ height: "auto", width: "100%" }}>
         <DataGrid
-          getRowId={(row) => row.Log_Id}
+          getRowId={(row) => row.id}
           rows={logEventPrices}
           columns={columns}
           autoHeight
