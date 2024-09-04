@@ -11,6 +11,7 @@ import {
 } from "../../../services/log-event-price.service";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import styles from "./plan.module.css";
+import { validateLogEventPrices } from "../helper";
 
 type SaveButtonProps = {
   planGroupId: number;
@@ -37,6 +38,14 @@ const SaveButton: FC<SaveButtonProps> = ({
   async function handleUpdateViewEventStock() {
     try {
       toast.loading("กำลังบันทึกข้อมูล...");
+
+      const { isValid, message } = validateLogEventPrices(logEventPrices);
+
+      if (!isValid) {
+        SwalError(message);
+        toast.dismiss();
+        return;
+      }
 
       await updateEventStock({
         eventId: Number(eventId),

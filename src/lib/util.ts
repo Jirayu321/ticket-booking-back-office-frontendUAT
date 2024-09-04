@@ -93,6 +93,18 @@ export function printCanvas(canvasId: string) {
   printWindow?.document.close();
 }
 
-export function getOnlyNumber(value: string) : number{
+export function getOnlyNumber(value: string): number {
   return value.replace(/[^0-9]/g, "");
+}
+
+export function isInTimeRange({
+  targetDate,
+  from,
+  to,
+}: {
+  targetDate: Date;
+  from: Date;
+  to: Date;
+}) {
+  return targetDate >= from && targetDate <= to;
 }
