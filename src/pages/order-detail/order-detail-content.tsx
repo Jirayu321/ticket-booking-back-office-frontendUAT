@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getOrderD } from "../../services/order-d.service";
 import { getOrderH } from "../../services/order-h.service";
 import Header from "../common/header";
@@ -20,14 +20,15 @@ import PaymentHistory from "./details/PaymentHistory";
 import { useFetchPaymentHistories } from "../../hooks/fetch-data/useFetchPaymentHistories";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
-const ENDPOINT = "https://deedclub.appsystemyou.com";
-
 const OrderDetailContent: React.FC = () => {
   const { order_id } = useParams<{ order_id: string }>();
+  const location = useLocation();
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
+  const queryParams = new URLSearchParams(location.search);
+  const initialTabIndex = parseInt(queryParams.get('tabIndex') || '0', 10);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [tabIndex, setTabIndex] = useState(0);
+  const [tabIndex, setTabIndex] = useState<number>(0);
   const navigate = useNavigate();
 
   const { data: paymentHistories, isFetching: isPaymentHistoriesLoading } =
@@ -41,13 +42,17 @@ const OrderDetailContent: React.FC = () => {
     navigate("/all-orders");
   };
 
-  const handleNavigateToOrderSite = () => {
-    window.open("http://your-order-site-url.com", "_blank"); // Replace with the actual URL
+  const handleNavigateToOrderSite = (order_id: string | number) => {
+    const orderIdStr = String(order_id); // Ensure order_id is a string
+    window.open(`https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}`, "_blank");
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
+  useEffect(() => {
+    setTabIndex(initialTabIndex);
+  }, [initialTabIndex]);
 
   useEffect(() => {
     async function fetchOrderDetail() {
@@ -62,9 +67,6 @@ const OrderDetailContent: React.FC = () => {
             (item: any) => item.Order_id === order.Order_id
           );
 
-          // Log the filtered orderD items
-          console.log("Filtered orderD items:", relatedOrderItems);
-
           setOrderItems(relatedOrderItems);
         } else {
           toast.error("Order not found");
@@ -77,12 +79,18 @@ const OrderDetailContent: React.FC = () => {
     }
 
     fetchOrderDetail();
-  }, [order_id]);
+
+    // Check if location state has a tab index to set
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setTabIndex(Number(tab));
+    }
+  }, [order_id, location.search]);
 
   if (isLoading) return <CircularProgress />;
   if (!orderDetail) return <Typography>Order not found</Typography>;
 
-  // Determine the status based on the Order_Status and Total_Balance
   let statusLabel;
   let bgColor;
 
@@ -90,35 +98,37 @@ const OrderDetailContent: React.FC = () => {
     case 1:
       if (orderDetail.Total_Balance === 0) {
         statusLabel = "สำเร็จ";
-        bgColor = "#28a745"; // Green for success
+        bgColor = "#28a745";
       } else {
         statusLabel = "ค้างจ่าย";
-        bgColor = "#ffc107"; // Yellow for pending payment
+        bgColor = "#ffc107";
       }
       break;
     case 2:
       statusLabel = "มีแก้ไข";
-      bgColor = "#17a2b8"; // Blue for modifications
+      bgColor = "#17a2b8";
       break;
     case 13:
       statusLabel = "ขอคืนเงิน";
-      bgColor = "#dc3545"; // Red for refund
+      bgColor = "#dc3545";
       break;
     case 3:
       statusLabel = "ไม่สำเร็จเพราะติด R";
-      bgColor = "#343a40"; // Dark gray for failure due to R
+      bgColor = "#343a40";
       break;
     case 4:
       statusLabel = "ไม่สำเร็จจาก Omise";
-      bgColor = "#6c757d"; // Gray for Omise failure
+      bgColor = "#6c757d";
       break;
     default:
       statusLabel = "ไม่ระบุ";
-      bgColor = "#f8f9fa"; // Light gray for unknown status
+      bgColor = "#f8f9fa";
       break;
   }
 
   if (isPaymentHistoriesLoading) return <CircularProgress />;
+
+  
 
   return (
     <div className="create-new-event">
@@ -173,7 +183,7 @@ const OrderDetailContent: React.FC = () => {
           </h2>
         </div>
         <Button
-          onClick={handleNavigateToOrderSite}
+          onClick={handleNavigateToOrderSite(order_id)}
           variant="contained"
           style={{
             backgroundColor: "#CFB70B",
@@ -181,6 +191,7 @@ const OrderDetailContent: React.FC = () => {
             fontWeight: "bold",
             fontSize: "16px",
             height: "50px",
+            
           }}
           startIcon={
             isOrderPaid ? (
@@ -211,8 +222,8 @@ const OrderDetailContent: React.FC = () => {
           }}
         >
           {tabIndex === 0 && <BuyerInfo buyer={orderDetail} />}
-          {tabIndex === 1 && <OrderItems items={orderItems} />}
-          {tabIndex === 2 && <PaymentHistory payments={[]} />}
+          {tabIndex === 1 && <OrderItems order_id={order_id} />}
+          {tabIndex === 2 && <PaymentHistory dtOrderId={order_id} />}
         </Paper>
       </Container>
     </div>

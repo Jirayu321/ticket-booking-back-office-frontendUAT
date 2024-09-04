@@ -21,7 +21,8 @@ import toast from "react-hot-toast";
 import Header from "../common/header";
 import { getOrderH } from "../../services/order-h.service";
 import { getOrderD } from "../../services/order-d.service";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import StartEndDatePickers from "../../components/common/input/date-picker/date";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -31,8 +32,8 @@ const AllOrderContent: React.FC = () => {
   const [orderDData, setOrderDData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
-    dateFrom: "",
-    dateTo: "",
+    startDate: null, // Start date for filtering
+    endDate: null,   // End date for filtering
     orderNo: "",
     eventName: "",
     customerName: "",
@@ -67,6 +68,22 @@ const AllOrderContent: React.FC = () => {
     }));
   };
 
+  const handleDateRangeChange = (startDate: any, endDate: any) => {
+    setFilters((prev) => ({
+      ...prev,
+      startDate,
+      endDate,
+    }));
+  };
+
+  const handleClearDates = () => {
+    setFilters((prev) => ({
+      ...prev,
+      startDate: null,
+      endDate: null,
+    }));
+  };
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({
       ...prev,
@@ -77,7 +94,6 @@ const AllOrderContent: React.FC = () => {
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
-
 
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
@@ -108,7 +124,12 @@ const AllOrderContent: React.FC = () => {
     let paymentStatusLabel;
     if (order.Order_Status === 1) {
       paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
-    } else if (order.Order_Status === 2 || order.Order_Status === 13 || order.Order_Status === 3 || order.Order_Status === 4) {
+    } else if (
+      order.Order_Status === 2 ||
+      order.Order_Status === 13 ||
+      order.Order_Status === 3 ||
+      order.Order_Status === 4
+    ) {
       paymentStatusLabel = "ไม่สำเร็จ";
     } else {
       paymentStatusLabel = "ไม่ระบุ";
@@ -117,7 +138,15 @@ const AllOrderContent: React.FC = () => {
     const matchesPaymentStatus =
       filters.paymentStatus === "all" || paymentStatusLabel === filters.paymentStatus;
   
-    return matchesSearch && matchesStatus && matchesPaymentStatus;
+    const orderDate = new Date(order.Order_datetime);
+    const startDate = filters.startDate ? new Date(filters.startDate).setHours(0, 0, 0, 0) : null;
+    const endDate = filters.endDate ? new Date(filters.endDate).setHours(23, 59, 59, 999) : null;
+  
+    const matchesDateRange =
+      (!startDate || orderDate >= startDate) &&
+      (!endDate || orderDate <= endDate);
+  
+    return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange;
   });
 
   const ordersInCurrentPage = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
@@ -130,6 +159,10 @@ const AllOrderContent: React.FC = () => {
   // Calculate the total net price and total balance for the overall sales data
   const totalNetPrice = orderHData.reduce((sum, order) => sum + (order.Net_Price || 0), 0);
   const totalPaySum = orderHData.reduce((sum, order) => sum + (order.Total_Pay || 0), 0);
+  const navigate = useNavigate();
+  const handleViewHistoryClick = (orderId: string) => {
+    navigate(`/order-detail/${orderId}?tabIndex=2`);
+  };
 
   if (isLoading) return <CircularProgress />;
 
@@ -172,54 +205,20 @@ const AllOrderContent: React.FC = () => {
       </div>
       <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
-          <TextField
-            variant="outlined"
-            label="ช่วงเวลาสั่งซื้อ จาก"
-            type="date"
-            name="dateFrom"
-            value={filters.dateFrom}
-            onChange={handleSearchChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
-                },
-              },
-            }}
+          <StartEndDatePickers
+            startDate={filters.startDate}
+            endDate={filters.endDate}
+            onStartDateChange={(date) => handleDateRangeChange(date, filters.endDate)}
+            onEndDateChange={(date) => handleDateRangeChange(filters.startDate, date)}
           />
-          <TextField
+          <Button
             variant="outlined"
-            label="ถึง"
-            type="date"
-            name="dateTo"
-            value={filters.dateTo}
-            onChange={handleSearchChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
-                },
-              },
-            }}
-          />
+            color="primary"
+            onClick={handleClearDates}
+            style={{ marginTop: "8px" }}
+          >
+            Clear
+          </Button>
         </Stack>
 
         <Stack direction="row" spacing={2} marginTop={2}>
@@ -233,15 +232,15 @@ const AllOrderContent: React.FC = () => {
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent", // Remove the border
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent", // Remove the border on hover
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent", // Remove the border when focused
                 },
               },
             }}
@@ -256,15 +255,15 @@ const AllOrderContent: React.FC = () => {
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent", // Remove the border
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent", // Remove the border on hover
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent", // Remove the border when focused
                 },
               },
             }}
@@ -279,15 +278,15 @@ const AllOrderContent: React.FC = () => {
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent", // Remove the border
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent", // Remove the border on hover
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent", // Remove the border when focused
                 },
               },
             }}
@@ -302,15 +301,15 @@ const AllOrderContent: React.FC = () => {
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent", // Remove the border
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent", // Remove the border on hover
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent", // Remove the border when focused
                 },
               },
             }}
@@ -346,7 +345,6 @@ const AllOrderContent: React.FC = () => {
               <MenuItem value="ไม่สำเร็จ">ไม่สำเร็จ</MenuItem>
             </Select>
           </FormControl>
-
         </Stack>
       </div>
 
@@ -355,42 +353,18 @@ const AllOrderContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ลำดับ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                เลขคำสั่งซื้อ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ชื่อลูกค้า
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                เบอร์โทร
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ชื่องาน
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                จำนวนบัตร
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                จำนวนที่
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>
-                สถานะคำสั่งซื้อ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>
-                สถานะการจ่ายเงิน
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ราคาสุทธิ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                วันที่สั่งซื้อ
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
-                ประวัติการชำระเงิน
-              </TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ลำดับ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>เลขคำสั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ชื่อลูกค้า</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>เบอร์โทร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ชื่องาน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>จำนวนบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>จำนวนที่</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>สถานะคำสั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>สถานะการจ่ายเงิน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ราคาสุทธิ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>วันที่สั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ประวัติการชำระเงิน</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -435,7 +409,7 @@ const AllOrderContent: React.FC = () => {
                 <TableRow key={order.Order_id}>
                   <TableCell>{indexOfFirstItem + index + 1}</TableCell>
                   <TableCell>
-                    <Link to={`/order-detail/${order.Order_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link to={`/order-detail/${order.Order_id}`} style={{ textDecoration: "none", color: "inherit" }}>
                       {order.Order_no}
                     </Link>
                   </TableCell>
@@ -505,13 +479,17 @@ const AllOrderContent: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell style={{ paddingLeft: "40px" }}>
-                    {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(order.Net_Price)}
+                    {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(order.Net_Price)}
                   </TableCell>
                   <TableCell style={{ paddingLeft: "40px" }}>
-                    {new Intl.DateTimeFormat('th-TH', { dateStyle: 'short' }).format(new Date(order.Order_datetime))}
+                    {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(order.Order_datetime))}
                   </TableCell>
                   <TableCell>
-                    <Button variant="contained" color="primary">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleViewHistoryClick(order.Order_id)} // Pass the appropriate order.Order_id
+                    >
                       ดูประวัติ
                     </Button>
                   </TableCell>
@@ -522,15 +500,8 @@ const AllOrderContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        />
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+        <Pagination count={totalPages} page={currentPage} onChange={(_, page) => handleClick(page)} color="primary" />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import {
 import { getEventStock } from "../../services/event-stock.service"; // Import the correct service
 import toast from "react-hot-toast";
 import Header from "../common/header"; // Assuming you have a Header component
+import InventoryIcon from '@mui/icons-material/Inventory';
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -32,6 +33,8 @@ const AllTicketContent: React.FC = () => {
   });
   const [uniqueEvents, setUniqueEvents] = useState<string[]>([]);
   const [totalTickets, setTotalTickets] = useState<number>(0); // State for total tickets
+  const [totalTicketsBuy, setTotalTicketsBuy] = useState<number>(0); // State for total tickets bought
+  const [totalTicketsBalance, setTotalTicketsBalance] = useState<number>(0); // State for total remaining tickets
 
   useEffect(() => {
     async function fetchEventStockData() {
@@ -43,6 +46,14 @@ const AllTicketContent: React.FC = () => {
           // Calculate the total number of tickets (sum of Ticket_Qty)
           const totalTicketsSum = data.reduce((sum, item) => sum + (item.Ticket_Qty || 0), 0);
           setTotalTickets(totalTicketsSum);
+
+          // Calculate the total number of tickets bought (sum of Ticket_Qty_Buy)
+          const totalTicketsBuySum = data.reduce((sum, item) => sum + (item.Ticket_Qty_Buy || 0), 0);
+          setTotalTicketsBuy(totalTicketsBuySum);
+
+          // Calculate the total number of remaining tickets (sum of Ticket_Qty_Balance)
+          const totalTicketsBalanceSum = data.reduce((sum, item) => sum + (item.Ticket_Qty_Balance || 0), 0);
+          setTotalTicketsBalance(totalTicketsBalanceSum);
 
           // Extract unique event names safely
           const events = Array.from(new Set(data.map((item: any) => item.Event_Name).filter(Boolean)));
@@ -91,6 +102,7 @@ const AllTicketContent: React.FC = () => {
   const stocksInCurrentPage = filteredStocks.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredStocks.length / MAX_ITEMS_PER_PAGE);
   const numberFormatter = new Intl.NumberFormat('en-US');
+
   if (isLoading) return <CircularProgress />;
 
   return (
@@ -111,12 +123,19 @@ const AllTicketContent: React.FC = () => {
         <div className="filter-item">
           <img
             src="/not-pay.svg"
-            alt="ค้างชำระ icon"
+            alt="บัตรที่ขายไปแล้ว icon"
             className="filter-icon"
           />
           <div className="filter-text-container">
-            <span className="filter-text">บัตรที่เปิดขาย</span>
-            <span className="filter-number">{filteredStocks.length}</span>
+            <span className="filter-text">บัตรที่ขายไปแล้ว</span>
+            <span className="filter-number">{numberFormatter.format(totalTicketsBuy)}</span> {/* Display total tickets bought */}
+          </div>
+        </div>
+        <div className="filter-item">
+          <InventoryIcon style={{ fontSize: 80 }} />  
+          <div className="filter-text-container">
+            <span className="filter-text">บัตรคงเหลือทั้งหมด</span>
+            <span className="filter-number">{numberFormatter.format(totalTicketsBalance)}</span> {/* Display total remaining tickets */}
           </div>
         </div>
       </div>
@@ -167,13 +186,13 @@ const AllTicketContent: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ลำดับ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>รหัสสต็อก</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อแผน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อผังร้าน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อโซน</TableCell>
               <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ประเภทบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนที่นั่งต่อบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนที่/บัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรทั้งหมด</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรที่ซื้อ</TableCell>
               <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรคงเหลือ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อที่นั่ง</TableCell>
               <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>งาน</TableCell>
             </TableRow>
           </TableHead>
@@ -181,13 +200,13 @@ const AllTicketContent: React.FC = () => {
             {stocksInCurrentPage.map((stock, index) => (
               <TableRow key={stock.Event_STC_Id}>
                 <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell>{stock.Event_STC_Id}</TableCell>
+                <TableCell>{stock.PlanGroup_Name}</TableCell>
                 <TableCell>{stock.Plan_Name}</TableCell>
-                <TableCell>{stock.Ticket_Type_Name}</TableCell>
-                <TableCell>{stock.Ticket_Qty}</TableCell>
-                <TableCell>{stock.Ticket_Qty_Per}</TableCell>
-                <TableCell>{stock.Ticket_Qty_Balance}</TableCell>
-                <TableCell>{stock.Plan_Desc}</TableCell>
+                <TableCell style={{textAlign:"center"}} >{stock.Ticket_Type_Name}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Per}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Buy}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Balance}</TableCell>
                 <TableCell>{stock.Event_Name}</TableCell>
               </TableRow>
             ))}
