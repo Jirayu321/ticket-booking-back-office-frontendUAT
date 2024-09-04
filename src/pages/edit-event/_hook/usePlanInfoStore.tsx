@@ -15,11 +15,17 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
   const [store] = useState(() =>
     createStore((set) => ({
       ...initialPlanInfo,
+      deletedLogEventPrices: [],
+      createdLogEventPriceIds: [],
       onUpdatePlanInfo: (newPlanInfo: any) => set((_: any) => newPlanInfo),
       onAddLogEventPrice: (newLogEventPrice: any) =>
         set((state: any) => ({
           ...state,
           logEventPrices: [...state.logEventPrices, newLogEventPrice],
+          createdLogEventPriceIds: [
+            ...state.createdLogEventPriceIds,
+            newLogEventPrice.id,
+          ],
         })),
       onUpdateLogEventPrice: (newLogEventPrice: any) =>
         set((state: any) => {
@@ -48,11 +54,18 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
             logEventPrices: updatedLogEventPrices,
           };
         }),
-      onDeleteLogEventPrice: (logEventPriceId: string) =>
+      onDeleteLogEventPrice: (logEventPriceParam: any) =>
         set((state: any) => ({
           ...state,
           logEventPrices: state.logEventPrices.filter(
-            (logEventPrice: any) => logEventPrice.id !== logEventPriceId
+            (logEventPrice: any) => logEventPrice.id !== logEventPriceParam.id
+          ),
+          deletedLogEventPrices: [
+            ...state.deletedLogEventPrices,
+            logEventPriceParam,
+          ],
+          createdLogEventPriceIds: state.createdLogEventPriceIds.filter(
+            (id: number) => id !== logEventPriceParam.id
           ),
         })),
     }))

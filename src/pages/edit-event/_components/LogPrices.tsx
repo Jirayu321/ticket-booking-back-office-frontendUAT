@@ -5,6 +5,7 @@ import DatePicker from "../../../components/common/input/date-picker/DatePicker"
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import deleteOnIcon from "/delete-on.svg";
 import { v4 } from "uuid";
+import { SwalConfirmAction } from "../../../lib/sweetalert";
 
 type LogPricesProps = {
   zones: any[];
@@ -31,8 +32,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       };
 
       onAddLogEventPrice(emptyLogEventPrice);
-
-      toast.success("เพิ่มราคาโซนสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างเพิ่มราคาโซน");
     }
@@ -65,8 +64,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       };
 
       onUpdateLogEventPrice(newLogEventPrice);
-
-      toast.success("อัพเดทเวลาสิ้นสุดสำเร็จ");
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างอัพเดทเวลาสิ้นสุด");
     }
@@ -80,10 +77,9 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     }
   }
 
-  function handleDeleteLogEventPrice(logEventPriceId: string) {
+  function handleDeleteLogEventPrice(logEventPrice: any) {
     try {
-      onDeleteLogEventPrice(logEventPriceId);
-      toast.success("ลบราคาโซนสำเร็จ");
+      onDeleteLogEventPrice(logEventPrice);
     } catch (error: any) {
       toast.error("ล้มเหลวระหว่างลบราคาโซน");
     }
@@ -158,8 +154,12 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
           src={deleteOnIcon}
           alt="delete-on"
           style={{ cursor: "pointer" }}
-          onClick={() => {
-            handleDeleteLogEventPrice(params.row.id);
+          onClick={async () => {
+            const isConfirmed = await SwalConfirmAction(
+              "คุณต้องการลบราคาโซนนี้ใช้หรือไม่?"
+            );
+            if (!isConfirmed) return;
+            handleDeleteLogEventPrice(params.row);
           }}
         />
       ),

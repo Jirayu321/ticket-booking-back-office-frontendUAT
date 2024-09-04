@@ -1,14 +1,14 @@
 import { CircularProgress } from "@mui/material";
 import { FC } from "react";
 import { useParams } from "react-router-dom";
+import { v4 } from "uuid";
 import { useFetchTicketNoPerPlanByEventId } from "../../../hooks/fetch-data/useFetchTicketNoPerPlanByEventId";
 import { useFetchViewLogEventPrice } from "../../../hooks/fetch-data/useFetchViewLogEventPrice";
+import { sortTicketNo } from "../../../lib/util";
 import { PlanInfoProvider } from "../_hook/usePlanInfoStore";
 import Body from "./Body";
 import Header from "./Header";
 import styles from "./plan.module.css";
-import SaveButton from "./SaveButton";
-import { v4 } from "uuid";
 
 type PlanProps = {
   plan: any;
@@ -40,7 +40,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     planGroupId: PlanGroup_Id,
   });
 
-  const { data: ticketNoPerPlans, isPending: isLoadingTicketNoPerPlans } =
+  const { data: ticketNoPerPlans, isFetching: isLoadingTicketNoPerPlans } =
     useFetchTicketNoPerPlanByEventId({
       eventId: Number(eventId),
       planId: Plan_Id,
@@ -60,7 +60,7 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           id: v4(),
           ...vle,
         })),
-        ticketNumbers: ticketNoPerPlans,
+        ticketNumbers: ticketNoPerPlans.sort(sortTicketNo),
         planId: Number(Plan_Id),
       }}
     >
@@ -76,14 +76,10 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
           expandedZones={expandedZones}
           handleInputChange={() => {}}
           removeZonePrice={() => {}}
+          Plan_Id={Number(Plan_Id)}
+          Plan_GroupId={PlanGroup_Id}
+          refreshViewEventStocks={refreshViewEventStocks}
         />
-        {expandedZones[Plan_Id] ? (
-          <SaveButton
-            planId={Plan_Id}
-            planGroupId={PlanGroup_Id}
-            refreshViewEventStocks={refreshViewEventStocks}
-          />
-        ) : null}
       </div>
     </PlanInfoProvider>
   );

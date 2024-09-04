@@ -1,20 +1,33 @@
 import { CircularProgress, Collapse } from "@mui/material";
-import { FC } from "react";
-import TicketNoCard from "../../../components/common/ticket/TicketNoCard";
+import { FC, useState } from "react";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
-import { sortTicketNo } from "../../../lib/util";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
+import { useUpdateTicketNumbers } from "../_hook/useUpdateTicketNumbers";
+import { getPrefix, getStartNumber } from "../helper";
+import { TicketNoOption } from "../type";
 import LogPrices from "./LogPrices";
-import styles from "./plan.module.css";
+import NumberAndPrefix from "./NumberAndPrefix";
+import SaveButton from "./SaveButton";
+import SelectInputMethod from "./SelectInputMethod";
+import TicketNoList from "./TicketNoList";
 
 type BodyProps = {
   zones: any;
   expandedZones: any;
   handleInputChange: any;
   removeZonePrice: any;
+  Plan_Id: number;
+  Plan_GroupId: number;
+  refreshViewEventStocks: any;
 };
 
-const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
+const Body: FC<BodyProps> = ({
+  zones,
+  expandedZones,
+  Plan_Id,
+  Plan_GroupId,
+  refreshViewEventStocks,
+}) => {
   const state = usePlanInfoStore((state: any) => state);
   const {
     planId,
@@ -25,10 +38,43 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
     onUpdatePlanInfo,
   } = state;
 
-  const sortedTicketNoPerPlans = ticketNumbers?.sort(sortTicketNo);
+  const [tempTicketNumbers, setTempTicketNumbers] =
+    useState<any[]>(ticketNumbers);
+
+  const firstTicketNumber = tempTicketNumbers[0];
+
+  const [ticketNoOption, setTicketNoOption] = useState<TicketNoOption>(
+    firstTicketNumber?.Ticket_No_Option ?? ""
+  );
+
+  const [startNumber, setStartNumber] = useState<number | null>(
+    getStartNumber(firstTicketNumber?.Ticket_No, ticketNoOption)
+  );
+
+  const [prefix, setPrefix] = useState<string>(getPrefix(ticketNoOption));
 
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
+
+  function handleTicketOptionChange(option: TicketNoOption) {
+    setTicketNoOption(option);
+  }
+
+  function handleTicketNumberChange(newTicketNumber: string, index: number) {
+    setTempTicketNumbers((prev) =>
+      prev.map((tnp, i) =>
+        i === index ? { ...tnp, Ticket_No: newTicketNumber } : tnp
+      )
+    );
+  }
+
+  useUpdateTicketNumbers({
+    startNumber,
+    prefix,
+    ticketNoOption,
+    setPrefix,
+    setTempTicketNumbers,
+  });
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -101,54 +147,36 @@ const Body: FC<BodyProps> = ({ zones, expandedZones, handleInputChange }) => {
         </div>
         <LogPrices planId={planId} zones={zones} />
         <div className="table-input-method-section">
-          <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
-          <select
-            value={zones[planId]?.tableInputMethod || ""}
-            onChange={(e) =>
-              handleInputChange(planId, "tableInputMethod", e.target.value)
+          <SelectInputMethod
+            currentPlan={
+              zones.filter((zone: any) => zone.Plan_Id === planId)[0]
             }
-            className="table-input-method-select"
-          >
-            <option value="">เลือกรูปแบบการระบุ</option>
-            <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
-            <option value="2">
-              2.รันจาก 1 ถึง {zones[planId]?.seatCount || 0}
-            </option>
-            <option value="3">
-              3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[planId]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-              {zones[planId]?.seatCount || 0})
-            </option>
-            <option value="4">
-              4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-              {zones[planId]?.seatCount || 0} ([?] 1- [?]{" "}
-              {zones[planId]?.seatCount || 0})
-            </option>
-            <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
-          </select>
-          {sortedTicketNoPerPlans ? (
-            sortedTicketNoPerPlans.length > 0 ? (
-              <section className={styles.ticketNoSection}>
-                {sortedTicketNoPerPlans.map((tnp: any) => (
-                  <TicketNoCard key={tnp.Ticket_No} ticketNo={tnp.Ticket_No} />
-                ))}
-              </section>
-            ) : (
-              <>
-                <h4
-                  style={{ color: "#ccc", width: "100%", textAlign: "center" }}
-                >
-                  ไม่พบข้อมูลเลขโต็ะ
-                </h4>
-              </>
-            )
-          ) : null}
-          {/* <GenerateBoxes
-              method={zones[planId]?.tableInputMethod || "1"}
-              seatNumber={zones[planId]?.seatCount || 0}
-              zoneId={planId}
-            /> */}
+            currentOption={ticketNoOption}
+            setTicketOption={handleTicketOptionChange}
+          />
+          <NumberAndPrefix
+            ticketQtyPerPlan={seatQtyPerticket}
+            ticketNoOption={ticketNoOption}
+            startNumber={startNumber ?? 0}
+            setStartNumber={setStartNumber}
+            prefix={prefix}
+            setPrefix={setPrefix}
+          />
+          <TicketNoList
+            tempTicketNumbers={tempTicketNumbers}
+            currentOption={ticketNoOption}
+            handleTicketNumberChange={handleTicketNumberChange}
+          />
         </div>
+        {expandedZones[Plan_Id] ? (
+          <SaveButton
+            planId={Plan_Id}
+            planGroupId={Plan_GroupId}
+            refreshViewEventStocks={refreshViewEventStocks}
+            ticketNumbers={tempTicketNumbers}
+            ticketNoOption={ticketNoOption}
+          />
+        ) : null}
       </div>
     </Collapse>
   );

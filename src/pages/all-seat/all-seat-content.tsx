@@ -21,8 +21,8 @@ import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import toast from "react-hot-toast";
 import Header from "../common/header";
 import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
-import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -96,25 +96,55 @@ const AllSeatContent: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
   const filteredTickets = ticketData.filter((ticket) => {
-    const matchesSearch = ticket.ticket_running.includes(filters.search) || ticket.Order_no.includes(filters.search);
-    const matchesStatus = filters.status === "all" || ticket.status === filters.status;
-    const matchesEvent = filters.event === "all" || ticket.Event_Name.includes(filters.event);
-    const matchesTicketType = filters.ticketType === "all" || ticket.Ticket_Type_Name.includes(filters.ticketType);
-    const matchesPrintStatus = filters.printStatus === "all" || ticket.PrintStatus_Name === filters.printStatus;
-    const matchesPrintStatusName = filters.printStatusName === "all" || ticket.PrintStatus_Name === filters.printStatusName;
-    const matchesScanStatus = filters.scanStatus === "all" || (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) || (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
-    return matchesSearch && matchesStatus && matchesEvent && matchesTicketType && matchesPrintStatus && matchesPrintStatusName && matchesScanStatus;
+    const matchesSearch =
+      ticket.ticket_running.includes(filters.search) ||
+      ticket.Order_no.includes(filters.search);
+    const matchesStatus =
+      filters.status === "all" || ticket.status === filters.status;
+    const matchesEvent =
+      filters.event === "all" || ticket.Event_Name.includes(filters.event);
+    const matchesTicketType =
+      filters.ticketType === "all" ||
+      ticket.Ticket_Type_Name.includes(filters.ticketType);
+    const matchesPrintStatus =
+      filters.printStatus === "all" ||
+      ticket.PrintStatus_Name === filters.printStatus;
+    const matchesPrintStatusName =
+      filters.printStatusName === "all" ||
+      ticket.PrintStatus_Name === filters.printStatusName;
+    const matchesScanStatus =
+      filters.scanStatus === "all" ||
+      (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) ||
+      (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesEvent &&
+      matchesTicketType &&
+      matchesPrintStatus &&
+      matchesPrintStatusName &&
+      matchesScanStatus
+    );
   });
 
-  const ticketsInCurrentPage = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
+  const ticketsInCurrentPage = filteredTickets.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
-  const uniqueEventNames = Array.from(new Set(ticketData.map(ticket => ticket.Event_Name)));
-  const uniquePrintStatusNames = Array.from(new Set(ticketData.map(ticket => ticket.PrintStatus_Name)));
+  const uniqueEventNames = Array.from(
+    new Set(ticketData.map((ticket) => ticket.Event_Name))
+  );
+  // const uniquePrintStatusNames = Array.from(new Set(ticketData.map(ticket => ticket.PrintStatus_Name)));
 
   // Calculate the number of tickets with specific statuses
-  const scannedCount = ticketData.filter(ticket => ticket.check_in_status === 1).length;
-  const printedCount = ticketData.filter(ticket => ticket.PrintStatus_Name === "ปริ้นแล้ว").length;
+  const scannedCount = ticketData.filter(
+    (ticket) => ticket.check_in_status === 1
+  ).length;
+  const printedCount = ticketData.filter(
+    (ticket) => ticket.PrintStatus_Name === "ปริ้นแล้ว"
+  ).length;
 
   if (isLoading) return <CircularProgress />;
 
@@ -126,18 +156,28 @@ const AllSeatContent: React.FC = () => {
           <LocalPrintshopIcon style={{ color: "black", fontSize: "80px" }} />
           <div className="filter-text-container">
             <span className="filter-text">แสกนแล้ว</span>
-            <span className="filter-number">{scannedCount}</span> {/* Dynamic total count for scanned tickets */}
+            <span className="filter-number">{scannedCount}</span>{" "}
+            {/* Dynamic total count for scanned tickets */}
           </div>
         </div>
         <div className="filter-item">
           <QrCodeScannerIcon style={{ color: "black", fontSize: "80px" }} />
           <div className="filter-text-container">
             <span className="filter-text">ปริ้นแล้ว</span>
-            <span className="filter-number">{printedCount}</span> {/* Dynamic total count for printed tickets */}
+            <span className="filter-number">{printedCount}</span>{" "}
+            {/* Dynamic total count for printed tickets */}
           </div>
         </div>
       </div>
-      <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
+      <div
+        className="filters"
+        style={{
+          padding: "20px",
+          backgroundColor: "#f5f5f5",
+          borderRadius: "5px",
+          marginBottom: "20px",
+        }}
+      >
         <Stack direction="row" spacing={2}>
           <TextField
             variant="outlined"
@@ -147,15 +187,15 @@ const AllSeatContent: React.FC = () => {
             placeholder="ค้นหาโดย เลขที่นั่ง หรือ รหัสบัตร"
             style={{ minWidth: 300, paddingTop: "10px" }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "transparent", // Remove the border
                 },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
+                "&:hover fieldset": {
+                  borderColor: "transparent", // Remove the border on hover
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                "&.Mui-focused fieldset": {
+                  borderColor: "transparent", // Remove the border when focused
                 },
               },
             }}
@@ -169,8 +209,10 @@ const AllSeatContent: React.FC = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="all">ทุกงาน</MenuItem>
-              {uniqueEventNames.map(eventName => (
-                <MenuItem key={eventName} value={eventName}>{eventName}</MenuItem>
+              {uniqueEventNames.map((eventName) => (
+                <MenuItem key={eventName} value={eventName}>
+                  {eventName}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -236,11 +278,14 @@ const AllSeatContent: React.FC = () => {
                 <TableCell>
                   <div
                     style={{
-                      backgroundColor: ticket.PrintStatus_Name === 'ยังไม่ปริ้น' ? 'orange' : 'blue',
-                      color: 'white',
-                      padding: '4px',
-                      borderRadius: '4px',
-                      textAlign: 'center',
+                      backgroundColor:
+                        ticket.PrintStatus_Name === "ยังไม่ปริ้น"
+                          ? "orange"
+                          : "blue",
+                      color: "white",
+                      padding: "4px",
+                      borderRadius: "4px",
+                      textAlign: "center",
                     }}
                   >
                     {ticket.PrintStatus_Name}
@@ -249,11 +294,12 @@ const AllSeatContent: React.FC = () => {
                 <TableCell>
                   <div
                     style={{
-                      backgroundColor: ticket.check_in_status === 0 ? 'grey' : 'blue',
-                      color: 'white', // Ensure text is readable
-                      padding: '4px',
-                      borderRadius: '4px',
-                      textAlign: 'center',
+                      backgroundColor:
+                        ticket.check_in_status === 0 ? "grey" : "blue",
+                      color: "white", // Ensure text is readable
+                      padding: "4px",
+                      borderRadius: "4px",
+                      textAlign: "center",
                     }}
                   >
                     {ticket.check_in_status === 0 ? "ยังไม่แสกน" : "แสกนแล้ว"}
@@ -276,7 +322,9 @@ const AllSeatContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
         <Pagination
           count={totalPages}
           page={currentPage}

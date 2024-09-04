@@ -3,6 +3,8 @@ import { addHours } from "../lib/util";
 
 const HOURS_DIFF = 7;
 
+// ============ CREATE ============
+
 export async function createLogEventPrice({
   Created_By,
   Created_Date,
@@ -25,7 +27,7 @@ export async function createLogEventPrice({
   try {
     const response = await authAxiosClient.post("/log-event-price", {
       Created_By,
-      Created_Date : addHours(new Date(Created_Date), HOURS_DIFF).toISOString(),
+      Created_Date: addHours(new Date(Created_Date), HOURS_DIFF).toISOString(),
       End_Datetime: addHours(new Date(End_Datetime), HOURS_DIFF).toISOString(),
       Event_Id,
       PlanGroup_Id,
@@ -39,6 +41,44 @@ export async function createLogEventPrice({
 
     if (response.status !== 200) throw new Error();
   } catch (error: any) {
-    throw "ล้มเหลวระหว่างการสร้าง ราคาของ อีเว็นท์";
+    throw new Error("ล้มเหลวระหว่างการสร้าง ราคาของ อีเวนท์");
+  }
+}
+
+// ============ UPDATE ============
+export async function updateLogEventPrice({
+  logId,
+  startDateTime,
+  endDateTime,
+  updateBy,
+  planPrice,
+}: {
+  logId: number;
+  startDateTime: string;
+  endDateTime: string;
+  updateBy: string;
+  planPrice: number;
+}) {
+  try {
+    const response = await authAxiosClient.patch(`/log-event-price/${logId}`, {
+      startDateTime,
+      endDateTime,
+      updateBy,
+      planPrice,
+    });
+
+    if (response.status !== 200) throw new Error();
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+// ============ DELETE ============
+export async function deleteLogEventPrice(logId: number) {
+  try {
+    const response = await authAxiosClient.delete(`/log-event-price/${logId}`);
+    if (response.status !== 200) throw new Error();
+  } catch (error: any) {
+    throw new Error("ล้มเหลวระหว่างการลบ ราคาของ อีเวนท์");
   }
 }

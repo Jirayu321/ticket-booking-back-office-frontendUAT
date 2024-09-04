@@ -13,6 +13,7 @@ export function useUser() {
         return null;
       }
     },
+    refetchOnWindowFocus: false,
   });
   return query;
 }
