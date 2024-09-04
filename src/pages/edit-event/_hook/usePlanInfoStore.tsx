@@ -16,11 +16,16 @@ export const PlanInfoProvider: FC<Props> = ({ children, initialPlanInfo }) => {
     createStore((set) => ({
       ...initialPlanInfo,
       deletedLogEventPriceIds: [],
+      createdLogEventPriceIds: [],
       onUpdatePlanInfo: (newPlanInfo: any) => set((_: any) => newPlanInfo),
       onAddLogEventPrice: (newLogEventPrice: any) =>
         set((state: any) => ({
           ...state,
           logEventPrices: [...state.logEventPrices, newLogEventPrice],
+          createdLogEventPriceIds: [
+            ...state.createdLogEventPriceIds,
+            newLogEventPrice.id,
+          ],
         })),
       onUpdateLogEventPrice: (newLogEventPrice: any) =>
         set((state: any) => {

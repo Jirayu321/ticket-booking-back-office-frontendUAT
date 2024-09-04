@@ -1,12 +1,15 @@
 import { Button } from "@mui/material";
 import { FC } from "react";
 import toast from "react-hot-toast";
-import styles from "./plan.module.css";
 import { useParams } from "react-router-dom";
+import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import { updateEventStock } from "../../../services/event-stock.service";
+import {
+  createLogEventPrice,
+  deleteLogEventPrice,
+} from "../../../services/log-event-price.service";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
-import { deleteLogEventPrice } from "../../../services/log-event-price.service";
-import { SwalSuccess } from "../../../lib/sweetalert";
+import styles from "./plan.module.css";
 
 type SaveButtonProps = {
   planGroupId: number;
@@ -25,6 +28,8 @@ const SaveButton: FC<SaveButtonProps> = ({
     ticketQtyPerPlan,
     seatQtyPerticket,
     deletedLogEventPriceIds,
+    createdLogEventPriceIds,
+    logEventPrices,
   } = state;
   const { eventId } = useParams();
 
@@ -43,6 +48,7 @@ const SaveButton: FC<SaveButtonProps> = ({
         },
       });
 
+      // ลบ log event prices
       const deleteLogEventPricePromises = Promise.all(
         deletedLogEventPriceIds.map((id: number) => {
           return deleteLogEventPrice(id);
@@ -51,6 +57,31 @@ const SaveButton: FC<SaveButtonProps> = ({
 
       await deleteLogEventPricePromises;
 
+      // เพิ่ม log event prices
+      const createLogEventPrices = Promise.all(
+        createdLogEventPriceIds.map((id: number) => {
+          const logEventPriceInfo = logEventPrices.find(
+            (lep: any) => lep.id === id
+          );
+
+          if (!logEventPriceInfo)
+            throw new Error("ไม่พบข้อมูล log event price");
+
+          return createLogEventPrice({
+            Created_By: "admin",
+            Created_Date: new Date().toISOString(),
+            End_Datetime: logEventPriceInfo.End_Datetime,
+            Event_Id: Number(eventId),
+            PlanGroup_Id: planGroupId,
+            Plan_Id: planId,
+            Plan_Price: logEventPriceInfo.Plan_Price,
+            Start_Datetime: logEventPriceInfo.Start_Datetime,
+          });
+        })
+      );
+
+      await createLogEventPrices;
+
       toast.dismiss();
 
       SwalSuccess("บันทึกข้อมูลสำเร็จ");
@@ -58,7 +89,7 @@ const SaveButton: FC<SaveButtonProps> = ({
       refreshViewEventStocks();
     } catch (error: any) {
       toast.dismiss();
-      toast.error(error.message);
+      SwalError(error.message);
     }
   }
 

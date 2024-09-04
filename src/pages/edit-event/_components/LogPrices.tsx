@@ -20,7 +20,6 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
     logEventPrices,
     onUpdatePrice,
     onDeleteLogEventPrice,
-    deletedLogEventPriceIds,
   } = state;
 
   function handleAddLogEventPrice() {
@@ -136,7 +135,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
             value={Number(params.value)}
             onChange={(e) => {
               e.preventDefault();
-              handleUpdatePrice(Number(e.target.value), params.row.Log_Id);
+              handleUpdatePrice(Number(e.target.value), params.row.id);
             }}
             style={{ width: "90%", color: "black", backgroundColor: "white" }}
           />
