@@ -1,8 +1,10 @@
 import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import { STATUS_MAP } from "../../../config/constants";
+import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
 import { convertLocalTimeToISO } from "../../../lib/util";
 import { createEvent } from "../../../services/event-list.service";
 import Header from "../../common/header";
@@ -10,12 +12,9 @@ import { useEventStore } from "../form-store"; // Import the Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
-import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
-import Swal from 'sweetalert2';
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
-
   const {
     title,
     title2,
@@ -84,7 +83,7 @@ const CreateEventForm = () => {
   async function handleCreateEvent() {
     try {
       toast.loading("กำลังสร้าง event ใหม่");
-      
+
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
