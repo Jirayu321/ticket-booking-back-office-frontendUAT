@@ -7,6 +7,7 @@ import { updateEventStock } from "../../../services/event-stock.service";
 import {
   createLogEventPrice,
   deleteLogEventPrice,
+  updateLogEventPrice,
 } from "../../../services/log-event-price.service";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import styles from "./plan.module.css";
@@ -27,7 +28,7 @@ const SaveButton: FC<SaveButtonProps> = ({
     ticketTypeId,
     ticketQtyPerPlan,
     seatQtyPerticket,
-    deletedLogEventPriceIds,
+    deletedLogEventPrices,
     createdLogEventPriceIds,
     logEventPrices,
   } = state;
@@ -50,37 +51,55 @@ const SaveButton: FC<SaveButtonProps> = ({
 
       // ลบ log event prices
       const deleteLogEventPricePromises = Promise.all(
-        deletedLogEventPriceIds.map((id: number) => {
-          return deleteLogEventPrice(id);
+        deletedLogEventPrices.map((lep: any) => {
+          const isLogEventFromDB = Object.keys(lep).includes("Log_Id");
+          return isLogEventFromDB ? deleteLogEventPrice(lep.Log_Id) : null;
         })
       );
 
       await deleteLogEventPricePromises;
 
-      // เพิ่ม log event prices
-      const createLogEventPrices = Promise.all(
-        createdLogEventPriceIds.map((id: number) => {
-          const logEventPriceInfo = logEventPrices.find(
-            (lep: any) => lep.id === id
-          );
+      // // เพิ่ม log event prices
+      // const createLogEventPricePromises = Promise.all(
+      //   createdLogEventPriceIds.map((id: number) => {
+      //     const logEventPriceInfo = logEventPrices.find(
+      //       (lep: any) => lep.id === id
+      //     );
 
-          if (!logEventPriceInfo)
-            throw new Error("ไม่พบข้อมูล log event price");
+      //     if (!logEventPriceInfo)
+      //       throw new Error("ไม่พบข้อมูล log event price");
 
-          return createLogEventPrice({
-            Created_By: "admin",
-            Created_Date: new Date().toISOString(),
-            End_Datetime: logEventPriceInfo.End_Datetime,
-            Event_Id: Number(eventId),
-            PlanGroup_Id: planGroupId,
-            Plan_Id: planId,
-            Plan_Price: logEventPriceInfo.Plan_Price,
-            Start_Datetime: logEventPriceInfo.Start_Datetime,
-          });
-        })
-      );
+      //     return createLogEventPrice({
+      //       Created_By: "admin",
+      //       Created_Date: new Date().toISOString(),
+      //       End_Datetime: logEventPriceInfo.End_Datetime,
+      //       Event_Id: Number(eventId),
+      //       PlanGroup_Id: planGroupId,
+      //       Plan_Id: planId,
+      //       Plan_Price: logEventPriceInfo.Plan_Price,
+      //       Start_Datetime: logEventPriceInfo.Start_Datetime,
+      //     });
+      //   })
+      // );
 
-      await createLogEventPrices;
+      // await createLogEventPricePromises;
+
+      // // อัพเดท log event prices
+      // const updateLogEventPricePromises = Promise.all(
+      //   logEventPrices
+      //     .filter((lep: any) => !createdLogEventPriceIds.includes(lep.id))
+      //     .map((lep: any) => {
+      //       return updateLogEventPrice({
+      //         logId: lep.Log_Id,
+      //         startDateTime: lep.Start_Datetime,
+      //         endDateTime: lep.End_Datetime,
+      //         updateBy: "admin",
+      //         planPrice: lep.Plan_Price,
+      //       });
+      //     })
+      // );
+
+      // await updateLogEventPricePromises;
 
       toast.dismiss();
 

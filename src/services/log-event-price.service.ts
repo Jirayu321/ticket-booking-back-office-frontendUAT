@@ -45,6 +45,34 @@ export async function createLogEventPrice({
   }
 }
 
+// ============ UPDATE ============
+export async function updateLogEventPrice({
+  logId,
+  startDateTime,
+  endDateTime,
+  updateBy,
+  planPrice,
+}: {
+  logId: number;
+  startDateTime: string;
+  endDateTime: string;
+  updateBy: string;
+  planPrice: number;
+}) {
+  try {
+    const response = await authAxiosClient.patch(`/log-event-price/${logId}`, {
+      startDateTime,
+      endDateTime,
+      updateBy,
+      planPrice,
+    });
+
+    if (response.status !== 200) throw new Error();
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
 // ============ DELETE ============
 export async function deleteLogEventPrice(logId: number) {
   try {
