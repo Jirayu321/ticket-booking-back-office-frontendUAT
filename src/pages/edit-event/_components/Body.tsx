@@ -98,10 +98,16 @@ const Body: FC<BodyProps> = ({
     <Collapse in={expandedZones[planId]} timeout="auto" unmountOnExit>
       <div className="zone-content">
         <div className="ticket-layout">
-          <img src={Plan_Pic} />
-          {/* <div className="empty-image">
-            <span>Image Placeholder</span>
-          </div> */}
+          <div className="empty-image">
+            <a href={Plan_Pic} target="_blank" rel="noopener noreferrer">
+              <img
+                src={Plan_Pic}
+                alt="Plan Pic"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </a>
+          </div>
+
           <div className="ticket-details">
             <div className="ticket-type">
               <label>TICKET TYPE*</label>
