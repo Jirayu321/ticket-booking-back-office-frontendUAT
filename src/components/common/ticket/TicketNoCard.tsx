@@ -1,5 +1,6 @@
 import { ChangeEvent, FC } from "react";
 import styles from "./ticket-no-card.module.css";
+import { SwalError } from "../../../lib/sweetalert";
 
 type Props = {
   ticketNo: string;
@@ -21,13 +22,19 @@ const TicketNoCard: FC<Props> = ({
       <input
         disabled={disabled}
         min={0}
+        onBlur={() => {
+          const doesValueDuplicate =
+            ticketNumbers.filter((tn) => tn === ticketNo && Boolean(ticketNo))
+              .length > 1;
+
+          if (doesValueDuplicate) {
+            SwalError("ตัวเลขตั๋วซ้ำกัน");
+            onChange("", index);
+            return;
+          }
+        }}
         onFocus={(e) => e.target.select()}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const doesTheTicketNoExist = ticketNumbers.some(
-            (tn) => tn === e.target.value
-          );
-
-          if (doesTheTicketNoExist) return;
           onChange(e.target.value as string, index);
         }}
         value={ticketNo}
