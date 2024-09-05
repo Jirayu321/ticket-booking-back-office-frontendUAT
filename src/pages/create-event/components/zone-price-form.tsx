@@ -9,6 +9,7 @@ import FilteredZones from "./FilteredZones";
 import "./zone-price-form.css";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import ZoneSelectForm from "./ZoneSelectForm";
+import { SwalError } from "../../../lib/sweetalert";
 
 const ZonePriceForm = () => {
   const {
@@ -113,11 +114,10 @@ const ZonePriceForm = () => {
       if (!isValid) throw new Error(message);
 
       const eventId = await handleCreateEvent();
-      console.log("eventId", eventId);
+
       if (!eventId) {
         toast.dismiss();
-        toast.error("ไม่สามารถสร้าง Event ได้");
-        return;
+        throw new Error("ล้มเหลวระหว่างสร้าง event");
       }
 
       await handleSaveEventStock(eventId);
@@ -133,7 +133,7 @@ const ZonePriceForm = () => {
       navigate("/all-events");
     } catch (error: any) {
       toast.dismiss();
-      toast.error(error.message);
+      SwalError(error.message);
     }
   }
 

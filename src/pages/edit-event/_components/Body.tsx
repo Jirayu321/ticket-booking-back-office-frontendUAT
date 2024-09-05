@@ -31,7 +31,7 @@ const Body: FC<BodyProps> = ({
   plan,
 }) => {
   const state = usePlanInfoStore((state: any) => state);
-  const { Plan_Id, Plan_GroupId, Plan_Pic } = plan;
+  const { Plan_Id, PlanGroup_Id, Plan_Pic } = plan;
   const {
     planId,
     ticketTypeId,
@@ -193,7 +193,7 @@ const Body: FC<BodyProps> = ({
         {expandedZones[Plan_Id] ? (
           <SaveButton
             planId={Plan_Id}
-            planGroupId={Plan_GroupId}
+            planGroupId={PlanGroup_Id}
             refreshViewEventStocks={refreshViewEventStocks}
             ticketNumbers={tempTicketNumbers}
             ticketNoOption={ticketNoOption}

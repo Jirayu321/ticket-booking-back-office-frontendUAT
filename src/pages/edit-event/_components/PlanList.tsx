@@ -38,15 +38,17 @@ const PlanList: FC<PlanListProps> = ({ plans }) => {
       }}
       gap={1}
     >
-      {plans.map((plan) => (
-        <Plan
-          key={plan.Plan_id}
-          plans={plans}
-          plan={plan}
-          onExpand={handleExpandZone}
-          expandedZones={expandedZones}
-        />
-      ))}
+      {plans.map((plan) =>
+        Boolean(plan) ? (
+          <Plan
+            key={plan.Plan_id}
+            plans={plans}
+            plan={plan}
+            onExpand={handleExpandZone}
+            expandedZones={expandedZones}
+          />
+        ) : null
+      )}
     </Stack>
   );
 };
