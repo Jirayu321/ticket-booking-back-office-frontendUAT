@@ -23,13 +23,15 @@ export function useZonePriceForm() {
     }
   
     try {
+      console.log('Hello World')
       const { images } = useEventStore.getState(); // Fetch images from Zustand store
-  
+      console.log('images', images)
       // Ensure at least one image is provided (optional validation)
       if (!images[0]) {
         toast.error("กรุณาอัปโหลดภาพก่อนสร้าง event");
         return;
       }
+
   
       const eventData = {
         Event_Name: title,
@@ -55,6 +57,7 @@ export function useZonePriceForm() {
       return eventId;
       
     } catch (error) {
+      console.error(error);
       throw new Error(`ล้มเหลวระหว่างสร้าง event: ${error.message}`);
     }
   };

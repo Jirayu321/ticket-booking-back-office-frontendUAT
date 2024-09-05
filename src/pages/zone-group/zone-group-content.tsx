@@ -215,7 +215,7 @@ const ZoneGroupContent: React.FC = () => {
         if (isUsedInEventStock) {
           Swal.fire({
             icon: "error",
-            title: "ไม่สามารถลบผังร้านที่ถูกใช้ในการจัดการสินค้า",
+            title: "ไม่สามารถลบผังร้านที่ถูกใช้งานแล้วได้",
           });
           return;
         }

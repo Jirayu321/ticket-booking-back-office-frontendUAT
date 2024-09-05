@@ -113,7 +113,7 @@ const ZonePriceForm = () => {
       if (!isValid) throw new Error(message);
 
       const eventId = await handleCreateEvent();
-
+      console.log("eventId", eventId);
       if (!eventId) {
         toast.dismiss();
         toast.error("ไม่สามารถสร้าง Event ได้");

@@ -160,6 +160,7 @@ const AllOrderContent: React.FC = () => {
   const totalNetPrice = orderHData.reduce((sum, order) => sum + (order.Net_Price || 0), 0);
   const totalPaySum = orderHData.reduce((sum, order) => sum + (order.Total_Pay || 0), 0);
   const navigate = useNavigate();
+  
   const handleViewHistoryClick = (orderId: string) => {
     navigate(`/order-detail/${orderId}?tabIndex=2`);
   };

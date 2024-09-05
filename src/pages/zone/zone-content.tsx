@@ -187,7 +187,7 @@ const ZoneContent: React.FC = () => {
       });
       Swal.fire({
         icon: "success",
-        title: "สร้างแผนสำเร็จ",
+        title: "สร้างโซนสำเร็จ",
       });
       setNewPlan({ name: "", desc: "", pic: "", active: "", planGroupId: "" });
       setOpen(false);
@@ -196,7 +196,7 @@ const ZoneContent: React.FC = () => {
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "ล้มเหลวในการสร้างแผน",
+        title: "ล้มเหลวในการสร้างโซน",
       });
     }
   };
@@ -214,7 +214,7 @@ const ZoneContent: React.FC = () => {
     if (isDuplicatePlanName(editPlan.Plan_Name, groupId, filteredPlans)) {
       Swal.fire({
         icon: "error",
-        title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
+        title: "มีโซนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
       });
       return;
     }
@@ -230,7 +230,7 @@ const ZoneContent: React.FC = () => {
       });
       Swal.fire({
         icon: "success",
-        title: "อัปเดตแผนสำเร็จ",
+        title: "อัปเดตโซนสำเร็จ",
       });
       handleEditClose();
       const data = await getAllPlans();
@@ -238,7 +238,7 @@ const ZoneContent: React.FC = () => {
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "ล้มเหลวในการอัปเดตแผน",
+        title: "ล้มเหลวในการอัปเดตโซน",
       });
     }
   };
@@ -251,7 +251,7 @@ const ZoneContent: React.FC = () => {
       if (isPlanInUse) {
         Swal.fire({
           icon: "error",
-          title: "ไม่สามารถลบโซนที่กำลังใช้งานอยู่",
+          title: "ไม่สามารถลบโซนที่ถูกใช้งานอยู่",
         });
         return;
       }

@@ -74,6 +74,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
 
   const handleUpdateTicketQuantity = (planId: number) => {
     handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
+    console.log("ticketQuantityPerPlan", ticketQuantityPerPlan);
   };
 
   const columns: GridColDef[] = [

@@ -208,7 +208,7 @@ const handleDelete = async (id: number) => {
   if (isUsedInEventStock) {
     Swal.fire({
           icon: "error",
-          title: "ไม่สามารถลบประเภทบัตรที่ถูกใช้ในสต๊อกงาน",
+          title: "ไม่สามารถลบประเภทบัตรที่ถูกใช้งานแล้วได้",
         });
     return;
   }
