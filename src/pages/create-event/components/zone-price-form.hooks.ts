@@ -1,38 +1,38 @@
-import toast from "react-hot-toast";
-import { createEvent } from "../../../services/event-list.service";
-import { useEventStore, useZoneStore } from "../form-store";
-import { createEventStock } from "../../../services/event-stock.service";
-import { createLogEventPrice } from "../../../services/log-event-price.service";
-import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
 import {
   convertLocalTimeToISO,
   doesSomeItemDuplicateInMultipleArrays,
 } from "../../../lib/util";
+import { createEvent } from "../../../services/event-list.service";
+import { createEventStock } from "../../../services/event-stock.service";
+import { createLogEventPrice } from "../../../services/log-event-price.service";
+import { createTicketNoPerPlan } from "../../../services/ticket-no-per-plan.service";
+import { useEventStore, useZoneStore } from "../form-store";
 
 const DEFAULT_INPUT_METHOD = 1;
 const DEFAULT_ACTIONER = "admin";
+const MINIMUM_EVENT_IMAGES = 1;
 
 export function useZonePriceForm() {
   const { title, title2, description, eventDateTime, status } = useEventStore();
+
   const { selectedZoneGroup, zones } = useZoneStore();
 
   const handleCreateEvent = async () => {
     if (!eventDateTime) {
-      toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
-      return;
+      throw new Error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
     }
-  
+
     try {
-      console.log('Hello World')
-      const { images } = useEventStore.getState(); // Fetch images from Zustand store
-      console.log('images', images)
-      // Ensure at least one image is provided (optional validation)
-      if (!images[0]) {
-        toast.error("กรุณาอัปโหลดภาพก่อนสร้าง event");
-        return;
+      const { images } = useEventStore.getState();
+
+      if (
+        images.filter((image) => image !== null).length < MINIMUM_EVENT_IMAGES
+      ) {
+        throw new Error(
+          `กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`
+        );
       }
 
-  
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
@@ -41,115 +41,93 @@ export function useZonePriceForm() {
         Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
         Event_Public: "N",
-        Event_Pic_1: images[0] || null, // Add images to the payload
+        Event_Pic_1: images[0] || null,
         Event_Pic_2: images[1] || null,
         Event_Pic_3: images[2] || null,
         Event_Pic_4: images[3] || null,
       };
-  
-      // Log eventData to verify images are included
-      console.log(eventData);
-      console.log('Hello')
-      
+
       const { eventId } = await createEvent(eventData);
-      console.log('eventID', eventId)
 
       return eventId;
-      
-    } catch (error) {
-      console.error(error);
-      throw new Error(`ล้มเหลวระหว่างสร้าง event: ${error.message}`);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 
   const handleSaveEventStock = async (event_id: number) => {
-    const zoneDataArray = Object.entries(zones)
-      .filter(([zoneId, zoneData]) => {
-        if (!zoneData.ticketType || zoneData.ticketType === "") {
-          console.error(
-            `Validation Error: ticketType is required for zone ${zoneId}`
-          );
-          return false;
-        }
-        if (zoneData.seatCount <= 0) {
-          console.error(
-            `Validation Error: seatCount must be greater than 0 for zone ${zoneId}`
-          );
-          return false;
-        }
-      
-        if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
-          console.log('zone',zoneData)
-          console.error(
-            `Validation Error: seatPerTicket is required and must be greater than 0 for zone ${zoneId}`
-          );
-          return false;
-        }
-        return true;
-      })
-      .map(([zoneId, zoneData]) => ({
-        Event_Id: event_id,
-        PlanGroup_Id: selectedZoneGroup!,
-        Plan_Id: parseInt(zoneId),
-        Ticket_Type_Id: Number(zoneData.ticketType),
-        Ticket_Qty: Number(zoneData.seatCount),
-        Ticket_Qty_Per: Number(zoneData.seatPerTicket),
-        STC_Total: Number(zoneData.seatCount * zoneData.seatPerTicket),
-        Ticket_Qty_Buy: 0,
-        Ticket_Qty_Balance: Number(zoneData.seatCount),
-        STC_Total_Balance: Number(zoneData.seatCount * zoneData.seatPerTicket),
-        Created_By: DEFAULT_ACTIONER,
-      }));
-
-    if (zoneDataArray.length === 0) {
-      throw new Error(
-        "ข้อผิดพลาดในการตรวจสอบ: ข้อมูลโซนที่ขาดหายไปหรือไม่ถูกต้อง"
-      );
-    }
-
     try {
+      const zoneDataArray = Object.entries(zones)
+        .filter(([zoneId, zoneData]) => {
+          if (!zoneData.ticketType || zoneData.ticketType === "") {
+            return false;
+          }
+          if (zoneData.seatCount <= 0) {
+            return false;
+          }
+
+          if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
+            return false;
+          }
+          return true;
+        })
+        .map(([zoneId, zoneData]) => ({
+          Event_Id: event_id,
+          PlanGroup_Id: selectedZoneGroup!,
+          Plan_Id: parseInt(zoneId),
+          Ticket_Type_Id: Number(zoneData.ticketType),
+          Ticket_Qty: Number(zoneData.seatCount),
+          Ticket_Qty_Per: Number(zoneData.seatPerTicket),
+          STC_Total: Number(zoneData.seatCount * zoneData.seatPerTicket),
+          Ticket_Qty_Buy: 0,
+          Ticket_Qty_Balance: Number(zoneData.seatCount),
+          STC_Total_Balance: Number(
+            zoneData.seatCount * zoneData.seatPerTicket
+          ),
+          Created_By: DEFAULT_ACTIONER,
+        }));
+
+      if (zoneDataArray.length === 0) {
+        throw new Error(
+          "ข้อผิดพลาดในการตรวจสอบ: ข้อมูลโซนที่ขาดหายไปหรือไม่ถูกต้อง"
+        );
+      }
+
       await Promise.all(zoneDataArray.map((data) => createEventStock(data)));
-      console.log("Event stock saved successfully!");
-    } catch (error) {
-      throw new Error("ล้มเหลวระหว่างสร้าง stock ของ event");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 
   const handleSaveLogEventPrice = async (event_id: number) => {
-    const logPrices = Object.entries(zones)
-      .map(([zoneId, zoneData]) => {
-        if (!zoneData.prices || zoneData.prices.length === 0) {
-          console.error(
-            `Validation Error: Prices are required for zone ${zoneId}`
-          );
-          return null;
-        }
-
-        return zoneData.prices.map((price) => ({
-          Event_Id: event_id,
-          PlanGroup_Id: selectedZoneGroup!,
-          Plan_Id: parseInt(zoneId),
-          Plan_Price: Number(price.price),
-          Start_Datetime: price.startDate!,
-          End_Datetime: price.endDate!,
-          Created_Date: new Date().toISOString(),
-          Created_By: DEFAULT_ACTIONER,
-        }));
-      })
-      .filter((plan) => plan !== null)
-      .flat();
-
-    if (logPrices.length === 0) {
-      console.error("Validation Error: No valid price data to save.");
-      throw new Error("กรุณาเลือกราคาสำหรับ Event");
-    }
-
     try {
+      const logPrices = Object.entries(zones)
+        .map(([zoneId, zoneData]) => {
+          return (
+            zoneData?.prices?.map((price) => ({
+              Event_Id: event_id,
+              PlanGroup_Id: selectedZoneGroup!,
+              Plan_Id: parseInt(zoneId),
+              Plan_Price: Number(price.price),
+              Start_Datetime: price.startDate!,
+              End_Datetime: price.endDate!,
+              Created_Date: new Date().toISOString(),
+              Created_By: DEFAULT_ACTIONER,
+            })) ?? null
+          );
+        })
+        .filter((plan) => plan !== null)
+        .flat();
+
+      if (logPrices.length === 0) {
+        throw new Error("กรุณาเลือกราคาสำหรับ Event");
+      }
+
       await Promise.all(
         logPrices.map((logPrice) => createLogEventPrice(logPrice))
       );
-    } catch (error) {
-      throw new Error("ล้มเหลวระหว่างสร้าง ราคา event");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 
@@ -207,7 +185,52 @@ export function useZonePriceForm() {
       .flat();
 
     if (doesSomeItemDuplicateInMultipleArrays<string>(allTableValues)) {
-      throw new Error("ข้อผิดพลาดในการตรวจสอบ: มีเลขตั๋วซ้ำกันในโซนต่างๆ");
+      throw new Error("มีเลขตั๋วซ้ำกันในโซนต่างๆ");
+    }
+
+    const isSomeTicketNumberEmpty = Object.entries(zones).some(
+      ([_, zoneData]) => {
+        return (
+          (zoneData.tableValues?.some((value) => value === "") &&
+            zoneData.tableInputMethod !== "5") ??
+          false
+        );
+      }
+    );
+
+    if (isSomeTicketNumberEmpty) {
+      throw new Error("กรุณากรอกเลขตั๋วสำหรับโซนทั้งหมด");
+    }
+
+    const isTicketTypeEmpty = Object.entries(zones).some(
+      ([_, zoneData]) => !zoneData.ticketType || zoneData.ticketType === ""
+    );
+
+    const isSeatCountInvalid = Object.entries(zones).some(([_, zoneData]) => {
+      return (
+        zoneData.seatCount <= 0 && Object.keys(zoneData).includes("tableValues")
+      );
+    });
+
+    const isSeatPerTicketInvalid = Object.entries(zones).some(
+      ([_, zoneData]) => {
+        return (
+          (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) &&
+          Object.keys(zoneData).includes("tableValues")
+        );
+      }
+    );
+
+    if (isTicketTypeEmpty) {
+      throw new Error("ต้องระบุประเภทตั๋วสำหรับโซนทั้งหมด");
+    }
+
+    if (isSeatCountInvalid) {
+      throw new Error("จำนวนที่นั่งต้องมากกว่า 0 สำหรับโซนทั้งหมด");
+    }
+
+    if (isSeatPerTicketInvalid) {
+      throw new Error("จำนวนที่นั่งต่อตั๋วต้องมากกว่า 0 สำหรับโซนทั้งหมด");
     }
 
     const zoneDataArray = Object.entries(zones).filter(([_, zoneData]) => {
@@ -232,43 +255,47 @@ export function useZonePriceForm() {
     }
 
     const logPrices = Object.entries(zones)
-      .filter(([_, zoneData]) => {
-        return Object.keys(zoneData).includes("tableValues");
-      })
-      .map(([zoneId, zoneData]) => {
-        if (!zoneData.prices || zoneData.prices.length === 0) {
-          return {
-            isValid: false,
-            message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุราคาสำหรับโซน ${zoneId}`,
-          };
-        }
-
-        return zoneData.prices.map((price) => {
-          if (!price.price) {
-            return {
-              isValid: false,
-              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุราคาสำหรับโซน ${zoneId}`,
-            };
-          }
-          if (!price.startDate) {
-            return {
-              isValid: false,
-              message: `ข้อผิดพลาดในการตรวจสอบ: ต้องระบุวันเริ่มต้นสำหรับราคาสำหรับโซน ${zoneId}`,
-            };
-          }
-          if (!price.endDate) {
-            return null;
-          }
-          return { isValid: true, message: "" };
-        });
-      })
-      .filter((plan) => plan !== null)
+      .map(([_, zoneData]) => zoneData.prices)
+      .filter((value) => Boolean(value))
       .flat();
 
-    console.log(logPrices);
+    const doesNotHavePrice = logPrices.some((lp: any) => lp.price <= 0);
 
-    if (logPrices.length === 0) {
-      return { isValid: false, message: "กรุณาเลือกราคาสำหรับ Event" };
+    if (doesNotHavePrice) {
+      return {
+        isValid: false,
+        message: "ราคา ของ event ต้องมีค่ามากกว่า 0",
+      };
+    }
+
+    const doesHaveEmptyLogEventPrice = Object.entries(zones)
+      .map(([_, zoneData]) => {
+        const isRealZoneData = Object.keys(zoneData).includes("tableValues");
+
+        if (isRealZoneData) {
+          return zoneData.prices.length <= 0;
+        } else {
+          return false;
+        }
+      })
+      .some((value: any) => value === true);
+
+    if (doesHaveEmptyLogEventPrice) {
+      return {
+        isValid: false,
+        message: "ควรมีช่วงราคาอย่างน้อย 1 ช่วงสำหรับแต่ละโซน",
+      };
+    }
+
+    const doesHaveEmptyStartDateOrEndDate = logPrices.some(
+      (lp: any) => !lp.startDate || !lp.endDate
+    );
+
+    if (doesHaveEmptyStartDateOrEndDate) {
+      return {
+        isValid: false,
+        message: "กรุณากรอกวันเวลาเริ่มต้นและสิ้นสุดของราคา",
+      };
     }
 
     return { isValid: true, message: "" };

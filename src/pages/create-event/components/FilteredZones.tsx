@@ -74,7 +74,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
 
   const handleUpdateTicketQuantity = (planId: number) => {
     handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
-    console.log("ticketQuantityPerPlan", ticketQuantityPerPlan);
   };
 
   const columns: GridColDef[] = [
@@ -193,8 +192,16 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
             <div className="zone-content">
               <div className="ticket-layout">
                 <div className="empty-image">
-                  <a href={zone.Plan_Pic} target="_blank" rel="noopener noreferrer">
-                    <img src={zone.Plan_Pic} alt="Plan Pic" style={{ width: '100%', height: 'auto' }} />
+                  <a
+                    href={zone.Plan_Pic}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={zone.Plan_Pic}
+                      alt="Plan Pic"
+                      style={{ width: "100%", height: "auto" }}
+                    />
                   </a>
                 </div>
                 <div className="ticket-details">
@@ -231,12 +238,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
                         style={{ backgroundColor: "white", color: "black" }}
-                        value={ticketQuantityPerPlan.ticketQty || 0}
+                        value={zones[zone.Plan_id]?.seatCount || 0}
                         onChange={(e) => {
-                          setTicketQuantityPerPlan({
-                            zone,
-                            ticketQty: Number(e.target.value),
-                          });
+                          handleInputChange(
+                            zone.Plan_id,
+                            "seatCount",
+                            Number(e.target.value)
+                          );
                         }}
                       />
                     </div>

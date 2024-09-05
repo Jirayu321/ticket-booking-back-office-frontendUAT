@@ -54,10 +54,8 @@ export async function createEvent({
       Event_Pic_4,
     });
 
-    console.log('hello',response);
-    if (response.status !== 201) throw "";
-    console.log('response',response);
-    
+    if (!(response.status === 201 || response.status === 200))
+      throw new Error("สร้าง event ล้มเหลว");
 
     return response.data;
   } catch (error: any) {
@@ -79,16 +77,13 @@ export async function getEventById(eventId: number) {
 
 export async function updateEventById(eventId: number, newValue: any) {
   try {
-    const response = await authAxiosClient.patch(
-      `/event-list/${eventId}`,
-      {
-        ...newValue,
-        // Event_Pic_1: newValue.Event_Pic_1 || null, // Add image fields
-        // Event_Pic_2: newValue.Event_Pic_2 || null,
-        // Event_Pic_3: newValue.Event_Pic_3 || null,
-        // Event_Pic_4: newValue.Event_Pic_4 || null,
-      }
-    );
+    const response = await authAxiosClient.patch(`/event-list/${eventId}`, {
+      ...newValue,
+      // Event_Pic_1: newValue.Event_Pic_1 || null, // Add image fields
+      // Event_Pic_2: newValue.Event_Pic_2 || null,
+      // Event_Pic_3: newValue.Event_Pic_3 || null,
+      // Event_Pic_4: newValue.Event_Pic_4 || null,
+    });
 
     if (response.status !== 200) throw "";
   } catch (error: any) {

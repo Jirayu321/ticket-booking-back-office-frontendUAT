@@ -12,6 +12,9 @@ import { useEventStore } from "../form-store"; // Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
+import { SwalError } from "../../../lib/sweetalert";
+
+const MINIMUM_EVENT_IMAGES = 1;
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
@@ -63,18 +66,9 @@ const CreateEventForm = () => {
     setImages(index, null); // Remove image from Zustand store
   };
 
-  const validateForm = () => {
-    if (!title || !title2 || !eventDateTime) {
-      toast.error("กรุณากรอกข้อมูลให้ครบทุกช่อง");
-      return false;
-    }
-    return true;
-  };
-
-  
   async function handleCreateEvent() {
     try {
-      toast.loading('กำลังสร้าง event ใหม่');
+      toast.loading("กำลังสร้าง event ใหม่");
 
       const eventData = {
         Event_Name: title,
@@ -83,7 +77,7 @@ const CreateEventForm = () => {
         Event_Date: convertLocalTimeToISO(eventDateTime),
         Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
-        Event_Public: 'N',
+        Event_Public: "N",
         Event_Pic_1: images[0], // Send images from Zustand store
         Event_Pic_2: images[1],
         Event_Pic_3: images[2],
@@ -92,14 +86,14 @@ const CreateEventForm = () => {
 
       const { eventId } = await createEvent(eventData);
 
-      if (!eventId) throw new Error('สร้าง event ล้มเหลว');
+      if (!eventId) throw new Error("สร้าง event ล้มเหลว");
 
       toast.dismiss();
       Swal.fire({
-        icon: 'success',
-        title: 'สร้าง event สำเร็จ',
+        icon: "success",
+        title: "สร้าง event สำเร็จ",
       });
-      navigate('/all-events');
+      navigate("/all-events");
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
@@ -107,11 +101,27 @@ const CreateEventForm = () => {
   }
 
   const handleNext = (e: any) => {
-    e.preventDefault(); // Prevent default form submission
-    if (validateForm()) {
-      setActiveTab("โซน & ราคา");
-      setIsDetailCompleted(true);
+    e.preventDefault();
+
+    const isDetailCompleted = Boolean(
+      title && title2 && eventDateTime && status
+    );
+
+    if (!isDetailCompleted) {
+      SwalError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
     }
+
+    const haveImagesBeenUploaded =
+      images.filter((image) => image !== null).length >= MINIMUM_EVENT_IMAGES;
+
+    if (!haveImagesBeenUploaded) {
+      SwalError(`กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`);
+      return;
+    }
+
+    setIsDetailCompleted(true);
+    setActiveTab("โซน & ราคา");
   };
 
   const handleBackClick = () => {

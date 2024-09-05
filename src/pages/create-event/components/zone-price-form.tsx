@@ -9,7 +9,7 @@ import FilteredZones from "./FilteredZones";
 import "./zone-price-form.css";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import ZoneSelectForm from "./ZoneSelectForm";
-import { SwalError } from "../../../lib/sweetalert";
+import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 
 const ZonePriceForm = () => {
   const {
@@ -128,7 +128,7 @@ const ZonePriceForm = () => {
 
       toast.dismiss();
 
-      toast.success("บันทึกข้อมูล Event สำเร็จ");
+      SwalSuccess("บันทึกข้อมูล Event สำเร็จ");
 
       navigate("/all-events");
     } catch (error: any) {
