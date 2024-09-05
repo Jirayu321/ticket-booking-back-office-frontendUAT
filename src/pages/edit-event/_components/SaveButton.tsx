@@ -157,7 +157,9 @@ const SaveButton: FC<SaveButtonProps> = ({
 
       SwalSuccess("บันทึกข้อมูลสำเร็จ");
 
-      refreshViewEventStocks();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error: any) {
       toast.dismiss();
       SwalError(error.message);
