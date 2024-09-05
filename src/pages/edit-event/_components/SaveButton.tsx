@@ -11,17 +11,18 @@ import {
 } from "../../../services/log-event-price.service";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
 import styles from "./plan.module.css";
-import { validateLogEventPrices } from "../helper";
+import { validateLogEventPrices, validateTicketNumbers } from "../helper";
 import {
   createTicketNoPerPlan,
   deleteTicketNoPerPlan,
 } from "../../../services/ticket-no-per-plan.service";
+import { TicketNoOption } from "../type";
 
 type SaveButtonProps = {
   planGroupId: number;
   planId: number;
   ticketNumbers: string[];
-  ticketNoOption: string;
+  ticketNoOption: TicketNoOption;
   refreshViewEventStocks: () => void;
 };
 
@@ -47,10 +48,22 @@ const SaveButton: FC<SaveButtonProps> = ({
     try {
       toast.loading("กำลังบันทึกข้อมูล...");
 
-      const { isValid, message } = validateLogEventPrices(logEventPrices);
+      const {
+        isValid: isLogEventPriceValid,
+        message: logEventPriceErrorMessage,
+      } = validateLogEventPrices(logEventPrices);
 
-      if (!isValid) {
-        SwalError(message);
+      const { isValid: isTicketNoValid, message: ticketNoErrorMessage } =
+        validateTicketNumbers(ticketNumbers, ticketNoOption);
+
+      if (!isLogEventPriceValid) {
+        SwalError(logEventPriceErrorMessage);
+        toast.dismiss();
+        return;
+      }
+
+      if (!isTicketNoValid) {
+        SwalError(ticketNoErrorMessage);
         toast.dismiss();
         return;
       }
@@ -63,6 +76,7 @@ const SaveButton: FC<SaveButtonProps> = ({
           Ticket_Type_Id: ticketTypeId,
           Ticket_Qty_Per: ticketQtyPerPlan,
           Ticket_Qty: seatQtyPerticket,
+          STC_Total: ticketQtyPerPlan * seatQtyPerticket,
         },
       });
 

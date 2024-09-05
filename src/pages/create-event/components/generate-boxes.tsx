@@ -25,7 +25,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       setStartNumberAndPrefix,
       zones,
     });
-  
+
   return (
     <div className="generate-boxes-container">
       <div className="header-container">
@@ -36,6 +36,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
               เริ่มจาก*:{" "}
             </label>
             <input
+              onFocus={(e) => e.target.select()}
               id="startNumber"
               type="number"
               value={startNumber ?? ""}
@@ -51,6 +52,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
               อักษร*:{" "}
             </label>
             <input
+              onFocus={(e) => e.target.select()}
               id="prefix"
               type="text"
               value={prefix}

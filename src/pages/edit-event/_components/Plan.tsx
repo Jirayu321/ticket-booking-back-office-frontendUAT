@@ -54,8 +54,11 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
     <PlanInfoProvider
       initialPlanInfo={{
         ticketTypeId: Ticket_Type_Id,
+        staticTicketQty: Ticket_Qty,
         ticketQtyPerPlan: Ticket_Qty_Per,
-        seatQtyPerticket: Ticket_Qty,
+        seatQtyPerticket: Boolean(ticketNoPerPlans.length)
+          ? ticketNoPerPlans.length
+          : Ticket_Qty,
         logEventPrices: viewLogEventPrices.map((vle: any) => ({
           id: v4(),
           ...vle,

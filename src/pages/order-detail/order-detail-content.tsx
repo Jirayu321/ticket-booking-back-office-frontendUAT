@@ -183,7 +183,11 @@ const OrderDetailContent: React.FC = () => {
           </h2>
         </div>
         <Button
+<<<<<<< HEAD
           onClick={() => handleNavigateToOrderSite(order_id)} // Wrap it in an anonymous function
+=======
+          onClick={handleNavigateToOrderSite(order_id)}
+>>>>>>> aa75f9d97c65dd03b3b6a7d5366bff23bbc26293
           variant="contained"
           style={{
             backgroundColor: "#CFB70B",

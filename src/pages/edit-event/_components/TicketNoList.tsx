@@ -16,21 +16,22 @@ const TicketNoList: FC<Props> = ({
 }) => {
   return Boolean(tempTicketNumbers) ? (
     <section className={styles.ticketNoSection}>
-      {tempTicketNumbers.map((tnp: any, index: number) => (
-        <TicketNoCard
-          key={index}
-          index={index}
-          disabled={
-            currentOption === "2" ||
-            currentOption === "3" ||
-            currentOption === "4" ||
-            currentOption === "5"
-          }
-          ticketNumbers={tempTicketNumbers.map((tn: any) => tn.Ticket_No)}
-          ticketNo={tnp.Ticket_No}
-          onChange={handleTicketNumberChange}
-        />
-      ))}
+      {tempTicketNumbers.map((tnp: any, index: number) =>
+        currentOption !== "5" ? (
+          <TicketNoCard
+            key={index}
+            index={index}
+            disabled={
+              currentOption === "2" ||
+              currentOption === "3" ||
+              currentOption === "4"
+            }
+            ticketNumbers={tempTicketNumbers.map((tn: any) => tn.Ticket_No)}
+            ticketNo={tnp.Ticket_No}
+            onChange={handleTicketNumberChange}
+          />
+        ) : null
+      )}
     </section>
   ) : (
     <>

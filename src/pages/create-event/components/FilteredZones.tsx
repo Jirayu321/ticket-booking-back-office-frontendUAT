@@ -140,6 +140,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
       disableColumnMenu: true,
       renderCell: (params: GridRenderCellParams) => (
         <input
+          onFocus={(e) => e.target.select()}
           type="number"
           min="0"
           value={params.value}
@@ -224,6 +225,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                     <div className="ticket-amount-row">
                       <label>จำนวนบัตร/โซน*</label>
                       <input
+                        onFocus={(e) => e.target.select()}
                         type="number"
                         min="0"
                         placeholder="จำนวนบัตร/โซน*"
@@ -240,6 +242,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                     <div className="ticket-amount-row">
                       <label>จำนวนที่นั่ง/บัตร</label>
                       <input
+                        onFocus={(e) => e.target.select()}
                         type="number"
                         min="0"
                         placeholder="จำนวนที่นั่ง/ตั๋ว"
@@ -302,6 +305,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         if (col.field === "price") {
                           return (
                             <input
+                              onFocus={(e) => e.target.select()}
                               type="number"
                               min="0"
                               value={params.value}
