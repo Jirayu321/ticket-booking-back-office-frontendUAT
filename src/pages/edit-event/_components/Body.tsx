@@ -10,6 +10,9 @@ import NumberAndPrefix from "./NumberAndPrefix";
 import SaveButton from "./SaveButton";
 import SelectInputMethod from "./SelectInputMethod";
 import TicketNoList from "./TicketNoList";
+import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
+
+const OPTION_5 = "5";
 
 type BodyProps = {
   zones: any;
@@ -36,15 +39,21 @@ const Body: FC<BodyProps> = ({
     seatQtyPerticket,
     ticketNumbers,
     onUpdatePlanInfo,
+    staticTicketQty,
   } = state;
 
   const [tempTicketNumbers, setTempTicketNumbers] =
     useState<any[]>(ticketNumbers);
 
+  const isTicketNoOption5ByDefault =
+    tempTicketNumbers.length === 0 && staticTicketQty > 0;
+
   const firstTicketNumber = tempTicketNumbers[0];
 
   const [ticketNoOption, setTicketNoOption] = useState<TicketNoOption>(
-    firstTicketNumber?.Ticket_No_Option ?? ""
+    isTicketNoOption5ByDefault
+      ? OPTION_5
+      : firstTicketNumber?.Ticket_No_Option ?? ""
   );
 
   const [startNumber, setStartNumber] = useState<number | null>(
@@ -74,6 +83,11 @@ const Body: FC<BodyProps> = ({
     ticketNoOption,
     setPrefix,
     setTempTicketNumbers,
+  });
+
+  useUpdateTicketNumbersBySeatQtyPerPlan({
+    seatQtyPerPlan: seatQtyPerticket,
+    setTicketNumbers: setTempTicketNumbers,
   });
 
   if (isLoadingTicketTypes) return <CircularProgress />;
@@ -162,11 +176,13 @@ const Body: FC<BodyProps> = ({
             prefix={prefix}
             setPrefix={setPrefix}
           />
-          <TicketNoList
-            tempTicketNumbers={tempTicketNumbers}
-            currentOption={ticketNoOption}
-            handleTicketNumberChange={handleTicketNumberChange}
-          />
+          {ticketNoOption !== "" ? (
+            <TicketNoList
+              tempTicketNumbers={tempTicketNumbers}
+              currentOption={ticketNoOption}
+              handleTicketNumberChange={handleTicketNumberChange}
+            />
+          ) : null}
         </div>
         {expandedZones[Plan_Id] ? (
           <SaveButton

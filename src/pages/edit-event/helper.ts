@@ -48,5 +48,45 @@ export function validateLogEventPrices(logEventPrices: any[]): {
     isValid = false;
   }
 
+  const doesHaveZeroPrice = logEventPrices.some(
+    (lep: any) => lep.Plan_Price <= 0
+  );
+
+  if (doesHaveZeroPrice) {
+    message = "ราคาของบัตรต้องมีค่ามากกว่า 0";
+    isValid = false;
+  }
+
   return { message, isValid };
+}
+
+export function validateTicketNumbers(
+  ticketNumbers: string[],
+  inputOption: TicketNoOption
+): {
+  message: string;
+  isValid: boolean;
+} {
+  const hasEmptyTicketNumber = ticketNumbers.some(
+    (tn: any) => tn.Ticket_No === ""
+  );
+
+  if (inputOption === "") {
+    return {
+      message: "กรุณาเลือกวิธีการใส่หมายเลขตั๋ว",
+      isValid: false,
+    };
+  }
+
+  if (hasEmptyTicketNumber && inputOption !== "5") {
+    return {
+      message: "กรุณากรอกหมายเลขตั๋ว",
+      isValid: false,
+    };
+  }
+
+  return {
+    message: "",
+    isValid: true,
+  };
 }
