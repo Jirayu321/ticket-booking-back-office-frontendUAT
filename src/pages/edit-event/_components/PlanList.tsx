@@ -39,7 +39,7 @@ const PlanList: FC<PlanListProps> = ({ plans }) => {
       gap={1}
     >
       {plans.map((plan) =>
-        plan ? (
+        Boolean(plan) ? (
           <Plan
             key={plan.Plan_id}
             plans={plans}
