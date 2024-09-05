@@ -11,6 +11,8 @@ import SaveButton from "./SaveButton";
 import SelectInputMethod from "./SelectInputMethod";
 import TicketNoList from "./TicketNoList";
 import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
+import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
+import { SwalError } from "../../../lib/sweetalert";
 
 const OPTION_5 = "5";
 const MAXIMUM_TICKET_QUANTITY = 1000;
@@ -127,7 +129,25 @@ const Body: FC<BodyProps> = ({
             <div className="ticket-amount">
               <div className="ticket-amount-row">
                 <label>จำนวนบัตร/โซน*</label>
-                <input
+                <ConfirmNumberInput
+                  value={seatQtyPerticket || 0}
+                  max={MAXIMUM_TICKET_QUANTITY}
+                  setter={(value: number) => {
+                    if (value > MAXIMUM_TICKET_QUANTITY) {
+                      SwalError(
+                        `จำนวนบัตรต่อโซนต้องไม่เกิน ${MAXIMUM_TICKET_QUANTITY}`
+                      );
+
+                      return;
+                    }
+                    onUpdatePlanInfo({
+                      ...state,
+                      seatQtyPerticket: value,
+                    });
+                  }}
+                  placeholder="จำนวนบัตร/โซน*"
+                />
+                {/* <input
                   type="number"
                   min="0"
                   placeholder="จำนวนบัตร/โซน*"
@@ -143,7 +163,7 @@ const Body: FC<BodyProps> = ({
                       seatQtyPerticket: Number(e.target.value),
                     });
                   }}
-                />
+                /> */}
               </div>
               <div className="ticket-amount-row">
                 <label>จำนวนที่นั่ง/บัตร</label>
