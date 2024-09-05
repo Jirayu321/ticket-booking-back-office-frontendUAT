@@ -8,6 +8,7 @@ import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
+import { SwalConfirmAction } from "../../../lib/sweetalert";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -340,9 +341,15 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                               src={deleteOnIcon}
                               alt="delete-on"
                               style={{ cursor: "pointer" }}
-                              onClick={() =>
-                                removeZonePrice(zone.Plan_id, params.row.id)
-                              }
+                              onClick={async () => {
+                                const isConfirmed = await SwalConfirmAction(
+                                  "คุณต้องการลบราคานี้ใช่หรือไม่?"
+                                );
+
+                                if (!isConfirmed) return;
+                                
+                                removeZonePrice(zone.Plan_id, params.row.id);
+                              }}
                             />
                           );
                         }
