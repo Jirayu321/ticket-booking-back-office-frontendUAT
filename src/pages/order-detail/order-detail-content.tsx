@@ -46,7 +46,7 @@ const OrderDetailContent: React.FC = () => {
   const handleNavigateToOrderSite = (order_id: string | number) => {
     const orderIdStr = String(order_id); // Ensure order_id is a string
     window.open(
-      `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}`,
+      `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem("token")}`,
       "_blank"
     );
   };
