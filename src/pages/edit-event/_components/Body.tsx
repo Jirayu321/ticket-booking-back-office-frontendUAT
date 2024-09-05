@@ -20,19 +20,18 @@ type BodyProps = {
   expandedZones: any;
   handleInputChange: any;
   removeZonePrice: any;
-  Plan_Id: number;
-  Plan_GroupId: number;
+  plan: any;
   refreshViewEventStocks: any;
 };
 
 const Body: FC<BodyProps> = ({
   zones,
   expandedZones,
-  Plan_Id,
-  Plan_GroupId,
   refreshViewEventStocks,
+  plan,
 }) => {
   const state = usePlanInfoStore((state: any) => state);
+  const { Plan_Id, Plan_GroupId, Plan_Pic } = plan;
   const {
     planId,
     ticketTypeId,
@@ -97,9 +96,10 @@ const Body: FC<BodyProps> = ({
     <Collapse in={expandedZones[planId]} timeout="auto" unmountOnExit>
       <div className="zone-content">
         <div className="ticket-layout">
-          <div className="empty-image">
+          <img src={Plan_Pic} />
+          {/* <div className="empty-image">
             <span>Image Placeholder</span>
-          </div>
+          </div> */}
           <div className="ticket-details">
             <div className="ticket-type">
               <label>TICKET TYPE*</label>

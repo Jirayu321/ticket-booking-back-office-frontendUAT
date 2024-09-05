@@ -76,11 +76,10 @@ const Plan: FC<PlanProps> = ({ plan, onExpand, plans, expandedZones }) => {
         />
         <Body
           zones={plans}
+          plan={plan}
           expandedZones={expandedZones}
           handleInputChange={() => {}}
           removeZonePrice={() => {}}
-          Plan_Id={Number(Plan_Id)}
-          Plan_GroupId={PlanGroup_Id}
           refreshViewEventStocks={refreshViewEventStocks}
         />
       </div>
