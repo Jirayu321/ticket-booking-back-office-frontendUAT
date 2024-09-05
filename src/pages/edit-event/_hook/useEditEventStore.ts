@@ -19,6 +19,9 @@ type EditEventStore = {
   setRefreshEventInfo: (refreshEventInfo: () => void) => void;
   isDetailCompleted: boolean;
   setIsDetailCompleted: (isDetailCompleted: boolean) => void;
+  images: Array<string | null>; // Array to store base64 encoded images
+  setImages: (index: number, image: string | null) => void;
+  removeImage: (index: number) => void;
 };
 
 const useEditEventStore = create<EditEventStore>((set) => ({
@@ -40,6 +43,19 @@ const useEditEventStore = create<EditEventStore>((set) => ({
   setRefreshEventInfo: (refreshEventInfo) => set({ refreshEventInfo }),
   isDetailCompleted: false,
   setIsDetailCompleted: (isDetailCompleted) => set({ isDetailCompleted }),
+  
+  // Image handling
+  images: [null, null, null, null], // 4 image slots initially set to null
+  setImages: (index, image) => set((state) => {
+    const updatedImages = [...state.images];
+    updatedImages[index] = image;
+    return { images: updatedImages };
+  }),
+  removeImage: (index) => set((state) => {
+    const updatedImages = [...state.images];
+    updatedImages[index] = null;
+    return { images: updatedImages };
+  }),
 }));
 
 export default useEditEventStore;

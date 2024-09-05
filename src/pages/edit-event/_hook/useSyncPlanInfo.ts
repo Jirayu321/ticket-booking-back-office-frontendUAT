@@ -7,6 +7,7 @@ export function useSyncPlanInfo({
   logEventPrices,
   ticketNumbers,
   planId,
+  Plan_Pic,  // Added Plan_Pic
   setPlanInfo,
 }: {
   ticketTypeId: number | null;
@@ -15,7 +16,8 @@ export function useSyncPlanInfo({
   logEventPrices: any[];
   ticketNumbers: string[];
   planId: number;
-  setPlanInfo: any;
+  Plan_Pic: string | null;  // Plan_Pic is a string URL or null
+  setPlanInfo: (info: any) => void;
 }) {
   useEffect(() => {
     setPlanInfo({
@@ -25,6 +27,7 @@ export function useSyncPlanInfo({
       logEventPrices,
       ticketNumbers,
       planId,
+      Plan_Pic,  // Add Plan_Pic to the state
     });
   }, [
     ticketTypeId,
@@ -32,5 +35,6 @@ export function useSyncPlanInfo({
     seatQtyPerticket,
     logEventPrices,
     ticketNumbers,
+    Plan_Pic,  // Include Plan_Pic in the dependencies array
   ]);
 }
