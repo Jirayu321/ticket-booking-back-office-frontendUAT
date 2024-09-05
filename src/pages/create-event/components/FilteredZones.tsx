@@ -191,7 +191,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
             <div className="zone-content">
               <div className="ticket-layout">
                 <div className="empty-image">
-                  <span>Image Placeholder</span>
+                  <a href={zone.Plan_Pic} target="_blank" rel="noopener noreferrer">
+                    <img src={zone.Plan_Pic} alt="Plan Pic" style={{ width: '100%', height: 'auto' }} />
+                  </a>
                 </div>
                 <div className="ticket-details">
                   <div className="ticket-type">

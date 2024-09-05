@@ -41,12 +41,12 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
   }
 
   return (
-    <label>
-      <p className="toggle-text">
+    <label style={{ display: 'flex', alignItems: 'center' }}>
+      <p style={{ marginRight: '20px' }}>
         {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
       </p>
       <input
-        className="slider"
+        style={{ marginRight: '10px' }}
         type="checkbox"
         checked={event.Event_Public === "Y"}
         onChange={(_) => {

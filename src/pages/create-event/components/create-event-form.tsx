@@ -8,7 +8,7 @@ import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
 import { convertLocalTimeToISO } from "../../../lib/util";
 import { createEvent } from "../../../services/event-list.service";
 import Header from "../../common/header";
-import { useEventStore } from "../form-store"; // Import the Zustand store
+import { useEventStore } from "../form-store"; // Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
@@ -21,24 +21,19 @@ const CreateEventForm = () => {
     description,
     eventDateTime,
     status,
+    images, // Fetch images from Zustand store
     setTitle,
     setTitle2,
     setDescription,
     setEventDateTime,
     setStatus,
+    setImages, // Zustand action to set images
   } = useEventStore();
 
   useWarnChangePage();
 
   const [publish, setPublish] = useState(false);
-
   const isPublishAvailable = false;
-  const [images, setImages] = useState<Array<string | null>>([
-    null,
-    null,
-    null,
-    null,
-  ]);
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [isDetailCompleted, setIsDetailCompleted] = useState(false);
 
@@ -58,18 +53,14 @@ const CreateEventForm = () => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Image = reader.result as string;
-          const newImages = [...images];
-          newImages[index] = base64Image;
-          setImages(newImages);
+          setImages(index, base64Image); // Set image in Zustand store
         };
         reader.readAsDataURL(file);
       }
     };
 
   const handleImageRemove = (index: number) => () => {
-    const newImages = [...images];
-    newImages[index] = null;
-    setImages(newImages);
+    setImages(index, null); // Remove image from Zustand store
   };
 
   const validateForm = () => {
@@ -80,9 +71,10 @@ const CreateEventForm = () => {
     return true;
   };
 
+  
   async function handleCreateEvent() {
     try {
-      toast.loading("กำลังสร้าง event ใหม่");
+      toast.loading('กำลังสร้าง event ใหม่');
 
       const eventData = {
         Event_Name: title,
@@ -91,24 +83,29 @@ const CreateEventForm = () => {
         Event_Date: convertLocalTimeToISO(eventDateTime),
         Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
-        Event_Public: "N",
+        Event_Public: 'N',
+        Event_Pic_1: images[0], // Send images from Zustand store
+        Event_Pic_2: images[1],
+        Event_Pic_3: images[2],
+        Event_Pic_4: images[3],
       };
 
       const { eventId } = await createEvent(eventData);
 
-      if (!eventId) throw new Error("สร้าง event ล้มเหลว");
+      if (!eventId) throw new Error('สร้าง event ล้มเหลว');
 
       toast.dismiss();
       Swal.fire({
-        icon: "success",
-        title: "สร้าง event สำเร็จ",
+        icon: 'success',
+        title: 'สร้าง event สำเร็จ',
       });
-      navigate("/all-events");
+      navigate('/all-events');
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
     }
   }
+
   const handleNext = (e: any) => {
     e.preventDefault(); // Prevent default form submission
     if (validateForm()) {
@@ -130,9 +127,9 @@ const CreateEventForm = () => {
     }
   };
 
-  const handleCancle = () => {
+  const handleCancel = () => {
     const userConfirmed = window.confirm(
-      "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมดโปรดบันทึกข้อมูลไว้ก่อน"
+      "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด โปรดบันทึกข้อมูลไว้ก่อน"
     );
     if (userConfirmed) {
       navigate("/all-events");
@@ -148,23 +145,7 @@ const CreateEventForm = () => {
         </button>
         <h2 className="title">สร้างงานใหม่</h2>
         <div className="toggle-container">
-          {/* <label>
-            <input
-              onChange={(e) => {
-                if (!isPublishAvailable)
-                  return toast.error("กรุณากรอกข้อมูลให้ครบก่อนทำการแผยเพร่");
-                setPublish(e.target.checked);
-              }}
-              className="slider"
-              type="checkbox"
-              checked={publish}
-            />
-            <span className="slider" />
-          </label>
-          <span className="toggle-text">
-            {publish ? "เผยแพร่" : "ไม่เผยแพร่"}
-          </span> */}
-          <button className="btn-cancel" onClick={handleCancle}>
+          <button className="btn-cancel" onClick={handleCancel}>
             ยกเลิก
           </button>
           <button className="btn-save" onClick={handleCreateEvent}>
@@ -230,7 +211,7 @@ const CreateEventForm = () => {
             <select
               className="large-select"
               value={status.toString()} // Convert to string for select element
-              onChange={handleStatusChange} // Use the new handler
+              onChange={handleStatusChange}
             >
               {Object.entries(STATUS_MAP).map(([value, label]) => (
                 <option key={value} value={value}>

@@ -21,7 +21,16 @@ export function useZonePriceForm() {
       toast.error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
       return;
     }
+  
     try {
+      const { images } = useEventStore.getState(); // Fetch images from Zustand store
+  
+      // Ensure at least one image is provided (optional validation)
+      if (!images[0]) {
+        toast.error("กรุณาอัปโหลดภาพก่อนสร้าง event");
+        return;
+      }
+  
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
@@ -30,13 +39,23 @@ export function useZonePriceForm() {
         Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
         Event_Public: "N",
+        Event_Pic_1: images[0] || null, // Add images to the payload
+        Event_Pic_2: images[1] || null,
+        Event_Pic_3: images[2] || null,
+        Event_Pic_4: images[3] || null,
       };
-
+  
+      // Log eventData to verify images are included
+      console.log(eventData);
+      console.log('Hello')
+      
       const { eventId } = await createEvent(eventData);
+      console.log('eventID', eventId)
 
       return eventId;
+      
     } catch (error) {
-      throw new Error("ล้มเหลวระหว่างสร้าง event");
+      throw new Error(`ล้มเหลวระหว่างสร้าง event: ${error.message}`);
     }
   };
 
@@ -55,7 +74,9 @@ export function useZonePriceForm() {
           );
           return false;
         }
+      
         if (!zoneData.seatPerTicket || zoneData.seatPerTicket <= 0) {
+          console.log('zone',zoneData)
           console.error(
             `Validation Error: seatPerTicket is required and must be greater than 0 for zone ${zoneId}`
           );

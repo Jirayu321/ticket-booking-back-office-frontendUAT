@@ -22,16 +22,20 @@ export const handleSave = async () => {
 };
 
 const handleSaveEvent = async () => {
-  const { title, title2, description, eventDateTime, status } = useEventStore.getState();
+  const { title, title2, description, eventDateTime, status, images } = useEventStore.getState();
 
   const eventData = {
     Event_Name: title,
     Event_Addr: title2,
     Event_Desc: description,
-    Event_Date: eventDateTime.format('YYYY-MM-DD'),
-    Event_Time: eventDateTime.format('HH:mm:ss'),
+    Event_Date: eventDateTime,
+    Event_Time: eventDateTime, // Assuming the same value is used for date and time
     Event_Status: status,
-    Event_Public: 'N', // Default to 'N' as in your request
+    Event_Public: 'N', // Default to 'N'
+    Event_Pic_1: images[0], // Sending images from the store
+    Event_Pic_2: images[1],
+    Event_Pic_3: images[2],
+    Event_Pic_4: images[3],
   };
 
   try {
@@ -146,3 +150,5 @@ const handleSaveTicketNumbers = async () => {
     console.error("Failed to save ticket numbers:", error);
   }
 };
+
+

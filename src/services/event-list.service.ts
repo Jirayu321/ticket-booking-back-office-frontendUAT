@@ -22,6 +22,10 @@ export async function createEvent({
   Event_Time,
   Event_Status,
   Event_Public,
+  Event_Pic_1,
+  Event_Pic_2,
+  Event_Pic_3,
+  Event_Pic_4,
 }: {
   Event_Name: string;
   Event_Addr: string;
@@ -30,6 +34,10 @@ export async function createEvent({
   Event_Time: string;
   Event_Status: number;
   Event_Public: string;
+  Event_Pic_1: string | null; // Expect base64 or file URL
+  Event_Pic_2?: string | null; // Optional images
+  Event_Pic_3?: string | null;
+  Event_Pic_4?: string | null;
 }) {
   try {
     const response = await authAxiosClient.post("/event-list", {
@@ -40,9 +48,16 @@ export async function createEvent({
       Event_Time,
       Event_Status,
       Event_Public,
+      Event_Pic_1, // Include image fields
+      Event_Pic_2,
+      Event_Pic_3,
+      Event_Pic_4,
     });
 
-    if (response.status !== 200) throw "";
+    console.log('hello',response);
+    if (response.status !== 201) throw "";
+    console.log('response',response);
+    
 
     return response.data;
   } catch (error: any) {
@@ -66,7 +81,13 @@ export async function updateEventById(eventId: number, newValue: any) {
   try {
     const response = await authAxiosClient.patch(
       `/event-list/${eventId}`,
-      newValue
+      {
+        ...newValue,
+        // Event_Pic_1: newValue.Event_Pic_1 || null, // Add image fields
+        // Event_Pic_2: newValue.Event_Pic_2 || null,
+        // Event_Pic_3: newValue.Event_Pic_3 || null,
+        // Event_Pic_4: newValue.Event_Pic_4 || null,
+      }
     );
 
     if (response.status !== 200) throw "";

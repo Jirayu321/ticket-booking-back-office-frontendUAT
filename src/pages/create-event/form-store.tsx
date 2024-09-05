@@ -6,25 +6,33 @@ interface EventState {
   title2: string;
   description: string;
   eventDateTime: string;
-  status: number; // Store status as an integer
+  status: number;
+  images: Array<string | null>; // Store images as an array
   setTitle: (title: string) => void;
   setTitle2: (title2: string) => void;
   setDescription: (description: string) => void;
   setEventDateTime: (eventDateTime: string) => void;
   setStatus: (status: number) => void;
+  setImages: (index: number, image: string | null) => void; // Action to set images
 }
 
 export const useEventStore = create<EventState>((set) => ({
-  title: "",
-  title2: "",
-  description: "",
+  title: '',
+  title2: '',
+  description: '',
   eventDateTime: new Date().toISOString(),
-  status: 1, // Default status: "รอเริ่มงาน" (1)
+  status: 1,
+  images: [null, null, null, null], // Initialize with 4 image placeholders
   setTitle: (title) => set({ title }),
   setTitle2: (title2) => set({ title2 }),
   setDescription: (description) => set({ description }),
   setEventDateTime: (eventDateTime) => set({ eventDateTime }),
   setStatus: (status) => set({ status }),
+  setImages: (index, image) => set((state) => {
+    const updatedImages = [...state.images];
+    updatedImages[index] = image;
+    return { images: updatedImages };
+  }),
 }));
 
 // Zone store interface and Zustand implementation
