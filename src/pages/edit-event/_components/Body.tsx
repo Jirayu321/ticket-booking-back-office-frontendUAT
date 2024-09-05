@@ -147,23 +147,6 @@ const Body: FC<BodyProps> = ({
                   }}
                   placeholder="จำนวนบัตร/โซน*"
                 />
-                {/* <input
-                  type="number"
-                  min="0"
-                  placeholder="จำนวนบัตร/โซน*"
-                  style={{ backgroundColor: "white", color: "black" }}
-                  value={seatQtyPerticket || 0}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => {
-                    if (Number(e.target.value) > MAXIMUM_TICKET_QUANTITY) {
-                      return;
-                    }
-                    onUpdatePlanInfo({
-                      ...state,
-                      seatQtyPerticket: Number(e.target.value),
-                    });
-                  }}
-                /> */}
               </div>
               <div className="ticket-amount-row">
                 <label>จำนวนที่นั่ง/บัตร</label>
