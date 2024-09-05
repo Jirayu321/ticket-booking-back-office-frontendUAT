@@ -9,6 +9,7 @@ import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
 import { SwalConfirmAction } from "../../../lib/sweetalert";
+import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -233,20 +234,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                   <div className="ticket-amount">
                     <div className="ticket-amount-row">
                       <label>จำนวนบัตร/โซน*</label>
-                      <input
-                        onFocus={(e) => e.target.select()}
-                        type="number"
-                        min="0"
-                        placeholder="จำนวนบัตร/โซน*"
-                        style={{ backgroundColor: "white", color: "black" }}
+                      <ConfirmNumberInput
+                        setter={(value) =>
+                          handleInputChange(zone.Plan_id, "seatCount", value)
+                        }
                         value={zones[zone.Plan_id]?.seatCount || 0}
-                        onChange={(e) => {
-                          handleInputChange(
-                            zone.Plan_id,
-                            "seatCount",
-                            Number(e.target.value)
-                          );
-                        }}
+                        min={0}
+                        placeholder="จำนวนบัตร/โซน*"
                       />
                     </div>
                     <div className="ticket-amount-row">
@@ -268,19 +262,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                       />
                     </div>
                   </div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    onClick={() => handleUpdateTicketQuantity(zone.Plan_id)}
-                    sx={{
-                      height: 45,
-                      marginTop: 2,
-                      width: 150,
-                      marginX: "auto",
-                    }}
-                  >
-                    <p>ยืนยันจำนวนโต๊ะ</p>
-                  </Button>
                 </div>
               </div>
               <div className="price-section">
@@ -347,7 +328,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                                 );
 
                                 if (!isConfirmed) return;
-                                
+
                                 removeZonePrice(zone.Plan_id, params.row.id);
                               }}
                             />
