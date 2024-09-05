@@ -275,21 +275,21 @@ const PayByContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ลำดับ</TableCell>
-              <TableCell>ชื่อ</TableCell>
-              <TableCell>คำอธิบาย</TableCell>
-              <TableCell>สถานะ</TableCell>
-              <TableCell>จัดการ</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"50px", color:"black",fontSize:"18px",fontWeight:"bold"}} >ลำดับ</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((payOption, index) => (
                 <TableRow key={payOption.Pay_By_Id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{payOption.Pay_By_Name}</TableCell>
-                  <TableCell>{payOption.Pay_By_Desc || "-"}</TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_By_Name}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_By_Desc || "-"}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Switch
                       checked={payOption.Pay_By_Active === "Y"}
                       onChange={() => toggleActiveStatus(payOption)}
@@ -298,7 +298,7 @@ const PayByContent: React.FC = () => {
                     />
                     {payOption.Pay_By_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -349,14 +349,9 @@ const PayByContent: React.FC = () => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -371,14 +366,9 @@ const PayByContent: React.FC = () => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -408,18 +398,13 @@ const PayByContent: React.FC = () => {
               value={editPayOption.Pay_By_Name}
               onChange={handleEditChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
-                  },
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
-              }}
+              },
+            }}
             />
             <TextField
               margin="dense"
@@ -430,18 +415,13 @@ const PayByContent: React.FC = () => {
               value={editPayOption.Pay_By_Desc}
               onChange={handleEditChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
-                  },
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
-              }}
+              },
+            }}
             />
           </DialogContent>
           <DialogActions>

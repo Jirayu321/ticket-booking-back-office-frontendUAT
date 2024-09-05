@@ -27,15 +27,10 @@ const StartEndDatePickers: React.FC<{
             }}
             renderInput={(params) => <TextField {...params} />}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "transparent", // Remove the border
-                },
-                "&:hover fieldset": {
-                  borderColor: "transparent", // Remove the border on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "transparent", // Remove the border when focused
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -48,15 +43,10 @@ const StartEndDatePickers: React.FC<{
             }}
             renderInput={(params) => <TextField {...params} />}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "transparent", // Remove the border
-                },
-                "&:hover fieldset": {
-                  borderColor: "transparent", // Remove the border on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "transparent", // Remove the border when focused
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}

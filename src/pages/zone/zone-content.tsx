@@ -386,20 +386,15 @@ const ZoneContent: React.FC = () => {
             placeholder="ค้นหาโซน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px", marginTop: "10px" }}
+            style={{ marginRight: "10px", height: "50px" }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "transparent",
-                },
-                "&:hover fieldset": {
-                  borderColor: "transparent",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "transparent",
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -425,37 +420,37 @@ const ZoneContent: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"100px"}}
               >
                 ลำดับ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px" }}
               >
-                ชื่อผัง
+                ชื่อผังร้าน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
                 ชื่อโซน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center",width:"300px"}}
               >
                 คำอธิบาย
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center" ,width:"100px"}}
               >
                 รูปภาพ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center"}}
               >
                 สถานะ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center"}}
               >
                 จัดการ
               </TableCell>
@@ -465,11 +460,11 @@ const ZoneContent: React.FC = () => {
             {currentItems.length > 0 ? (
               currentItems.map((plan, index) => (
                 <TableRow key={plan.Plan_id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{plan.PlanGroup_Name}</TableCell>
-                  <TableCell>{plan.Plan_Name}</TableCell>
-                  <TableCell>{plan.Plan_Desc}</TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{plan.PlanGroup_Name}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{plan.Plan_Name}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{plan.Plan_Desc}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <div
                       style={{
                         position: "relative",
@@ -490,7 +485,7 @@ const ZoneContent: React.FC = () => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <Switch
                       checked={plan.Plan_Active === "Y"}
                       onChange={() => toggleActiveStatus(plan)}
@@ -500,7 +495,7 @@ const ZoneContent: React.FC = () => {
                       {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -571,15 +566,10 @@ const ZoneContent: React.FC = () => {
             value={newPlan.name}
             onChange={handleChange}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "transparent",
-                },
-                "&:hover fieldset": {
-                  borderColor: "transparent",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "transparent",
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -593,15 +583,10 @@ const ZoneContent: React.FC = () => {
             value={newPlan.desc}
             onChange={handleChange}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "transparent",
-                },
-                "&:hover fieldset": {
-                  borderColor: "transparent",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "transparent",
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -681,19 +666,14 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Name}
               onChange={handleEditChange}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "transparent",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "transparent",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "transparent",
-                  },
+             sx={{
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
-              }}
+              },
+            }}
             />
             <TextField
               margin="dense"
@@ -703,19 +683,14 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Desc}
               onChange={handleEditChange}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "transparent",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "transparent",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "transparent",
-                  },
+             sx={{
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
-              }}
+              },
+            }}
             />
             <div style={{ margin: "dense" }}>
               <label

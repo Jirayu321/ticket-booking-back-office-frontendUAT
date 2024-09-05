@@ -147,17 +147,15 @@ const AllTicketContent: React.FC = () => {
             value={filters.search}
             onChange={handleSearchChange}
             placeholder="ค้นหาโดย ชื่องาน หรือ ประเภทบัตร"
-            style={{ minWidth: 300 ,paddingTop: "10px"}}
+            style={{ marginRight: "10px", height: "50px",width:"300px" }}
+            InputLabelProps={{
+              shrink: true,
+            }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}

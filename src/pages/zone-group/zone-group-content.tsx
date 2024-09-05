@@ -311,20 +311,15 @@ const ZoneGroupContent: React.FC = () => {
             placeholder="ชื่อผังร้าน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px" }}
+            style={{ marginRight: "10px", height: "50px" }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -350,32 +345,27 @@ const ZoneGroupContent: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"50px"}}
               >
                 ลำดับ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
-              >
-                รหัสผัง
-              </TableCell>
-              <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
                 ชื่อผังร้าน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
                 จำนวนโซน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
                 สถานะ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontWeight: "bold", fontSize: "18px" }}
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"300px"}}
               >
                 จัดการ
               </TableCell>
@@ -385,19 +375,17 @@ const ZoneGroupContent: React.FC = () => {
             {currentItems.length > 0 ? (
               currentItems.map((planGroup, index) => (
                 <TableRow key={planGroup.PlanGroup_id}>
-                  <TableCell style={{ color: "black", fontSize: "14px" }}>
+                  <TableCell style={{ color: "black", fontSize: "14px" ,textAlign:"center"}}>
                     {indexOfFirstItem + index + 1}
                   </TableCell>
-                  <TableCell style={{ color: "black", fontSize: "14px" }}>
-                    {planGroup.PlanGroup_id}
-                  </TableCell>
-                  <TableCell style={{ color: "black", fontSize: "14px" }}>
+
+                  <TableCell style={{ color: "black", fontSize: "14px" ,textAlign:"center"}}>
                     {planGroup.PlanGroup_Name}
                   </TableCell>
-                  <TableCell align="left" style={{ paddingLeft: "50px" }}>
+                  <TableCell style={{textAlign:"center"}}>
                     {calculatePlanCount(planGroup.PlanGroup_id)}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell style={{textAlign:"center"}}>
                     <Switch
                       checked={planGroup.PlanGroup_Active === "Y"}
                       onChange={() => toggleActiveStatus(planGroup)}
@@ -407,7 +395,7 @@ const ZoneGroupContent: React.FC = () => {
                       ? "เผยแพร่"
                       : "ไม่เผยแพร่"}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -463,14 +451,9 @@ const ZoneGroupContent: React.FC = () => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -514,14 +497,9 @@ const ZoneGroupContent: React.FC = () => {
               onChange={handleEditChange}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
+                  '& input': {
+                    border: 'none', // Remove the inner border
+                    transform: 'translateY(5px)',
                   },
                 },
               }}

@@ -271,22 +271,22 @@ const handleDelete = async (id: number) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อประเภทบัตร</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>หน่วย</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>การคำนวณ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"50px"}}>ลำดับ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"200px"}}>ชื่อประเภทบัตร</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"100px"}}>หน่วย</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"100px"}}>การคำนวณ</TableCell>
+              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"200px"}}>จัดการ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((ticketType, index) => (
                 <TableRow key={ticketType.Ticket_Type_Id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{ticketType.Ticket_Type_Name}</TableCell>
-                  <TableCell>{ticketType.Ticket_Type_Unit}</TableCell>
-                  <TableCell>{ticketType.Ticket_Type_Cal}</TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Name}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Unit}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Cal}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -336,14 +336,9 @@ const handleDelete = async (id: number) => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -358,14 +353,9 @@ const handleDelete = async (id: number) => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -408,14 +398,9 @@ const handleDelete = async (id: number) => {
               onChange={handleEditChange}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
+                  '& input': {
+                    border: 'none', // Remove the inner border
+                    transform: 'translateY(5px)',
                   },
                 },
               }}
@@ -430,14 +415,9 @@ const handleDelete = async (id: number) => {
                 onChange={handleEditChange}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'transparent', // Remove the border
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'transparent', // Remove the border on hover
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'transparent', // Remove the border when focused
+                    '& input': {
+                      border: 'none', // Remove the inner border
+                      transform: 'translateY(5px)',
                     },
                   },
                 }}

@@ -18,7 +18,6 @@ import {
   TextField
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
 import {
   createPayOption,
   deletePayOption,
@@ -283,21 +282,21 @@ const handleDelete = async (id: number) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell style={{textAlign:"center" ,width:"60px", color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
+              <TableCell style={{textAlign:"center",width:"100px",color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
+              <TableCell style={{textAlign:"center",width:"300px",color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
+              <TableCell style={{textAlign:"center",width:"150px",color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
+              <TableCell style={{textAlign:"center",width:"300px",color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((payOption, index) => (
                 <TableRow key={payOption.Pay_Opt_Id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{payOption.Pay_Opt_Name_Int}</TableCell>
-                  <TableCell>{payOption.Pay_Opt_Desc || "-"}</TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_Opt_Name_Int}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_Opt_Desc || "-"}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Switch
                       checked={payOption.Pay_Opt_Active === "Y"}
                       onChange={() => toggleActiveStatus(payOption)}
@@ -308,7 +307,7 @@ const handleDelete = async (id: number) => {
                       {payOption.Pay_Opt_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -359,14 +358,9 @@ const handleDelete = async (id: number) => {
             onChange={handleChange}
             sx={{
               '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'transparent', // Remove the border
-                },
-                '&:hover fieldset': {
-                  borderColor: 'transparent', // Remove the border on hover
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'transparent', // Remove the border when focused
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
                 },
               },
             }}
@@ -381,14 +375,9 @@ const handleDelete = async (id: number) => {
               onChange={handleChange}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'transparent', // Remove the border
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent', // Remove the border on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent', // Remove the border when focused
+                  '& input': {
+                    border: 'none', // Remove the inner border
+                    transform: 'translateY(5px)',
                   },
                 },
               }}
@@ -419,18 +408,13 @@ const handleDelete = async (id: number) => {
                 value={editPayOption.Pay_Opt_Name}
                 onChange={handleEditChange}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'transparent', // Remove the border
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'transparent', // Remove the border on hover
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'transparent', // Remove the border when focused
-                    },
-                  },
-                }}
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
+                },
+              },
+            }}
               />
               <TextField
                 margin="dense"
@@ -441,18 +425,13 @@ const handleDelete = async (id: number) => {
                 value={editPayOption.Pay_Opt_Desc}
                 onChange={handleEditChange}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'transparent', // Remove the border
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'transparent', // Remove the border on hover
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'transparent', // Remove the border when focused
-                    },
-                  },
-                }}
+              '& .MuiOutlinedInput-root': {
+                '& input': {
+                  border: 'none', // Remove the inner border
+                  transform: 'translateY(5px)',
+                },
+              },
+            }}
               />
             </DialogContent>
             <DialogActions>
