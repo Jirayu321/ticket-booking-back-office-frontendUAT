@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
+import { SwalError } from "../lib/sweetalert";
 
 export function useGenerateBoxes(options: {
   method: string;
@@ -102,13 +103,17 @@ export function useGenerateBoxes(options: {
           onFocus={(e) => e.target.select()}
           type="text"
           value={value}
-          placeholder={method === "1" ? "โปรดระบุ" : ""}
-          onChange={(e) => {
-            const doesValueDuplicate = inputValues.includes(e.target.value);
+          onBlur={() => {
+            const doesValueDuplicate =
+              inputValues.filter((v) => v === value && Boolean(v)).length > 1;
 
             if (doesValueDuplicate) {
-              return;
+              SwalError("มีเลขซ้ำกันในโต๊ะ");
+              handleInputChange(index, "");
             }
+          }}
+          placeholder={method === "1" ? "โปรดระบุ" : ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             handleInputChange(index, e.target.value);
           }}
           className="table-input-box"
