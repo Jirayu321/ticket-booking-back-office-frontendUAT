@@ -21,6 +21,7 @@ const TicketNoCard: FC<Props> = ({
       <input
         disabled={disabled}
         min={0}
+        onFocus={(e) => e.target.select()}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const doesTheTicketNoExist = ticketNumbers.some(
             (tn) => tn === e.target.value

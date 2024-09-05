@@ -13,6 +13,7 @@ import TicketNoList from "./TicketNoList";
 import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
 
 const OPTION_5 = "5";
+const MAXIMUM_TICKET_QUANTITY = 1000;
 
 type BodyProps = {
   zones: any;
@@ -132,17 +133,22 @@ const Body: FC<BodyProps> = ({
                   placeholder="จำนวนบัตร/โซน*"
                   style={{ backgroundColor: "white", color: "black" }}
                   value={seatQtyPerticket || 0}
-                  onChange={(e) =>
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    if (Number(e.target.value) > MAXIMUM_TICKET_QUANTITY) {
+                      return;
+                    }
                     onUpdatePlanInfo({
                       ...state,
                       seatQtyPerticket: Number(e.target.value),
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
               <div className="ticket-amount-row">
                 <label>จำนวนที่นั่ง/บัตร</label>
                 <input
+                  onFocus={(e) => e.target.select()}
                   type="number"
                   min="0"
                   placeholder="จำนวนที่นั่ง/ตั๋ว"

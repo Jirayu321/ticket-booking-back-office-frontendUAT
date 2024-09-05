@@ -99,6 +99,7 @@ export function useGenerateBoxes(options: {
       return (
         <input
           key={index}
+          onFocus={(e) => e.target.select()}
           type="text"
           value={value}
           placeholder={method === "1" ? "โปรดระบุ" : ""}

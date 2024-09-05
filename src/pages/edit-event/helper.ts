@@ -57,6 +57,15 @@ export function validateLogEventPrices(logEventPrices: any[]): {
     isValid = false;
   }
 
+  const doesHaveSameStartAndEndTime = logEventPrices.some(
+    (lep: any) => new Date(lep.Start_Datetime) === new Date(lep.End_Datetime)
+  );
+
+  if (doesHaveSameStartAndEndTime) {
+    message = "ระยะเวลาเริ่มต้นและสิ้นสุดต้องไม่เท่ากัน";
+    isValid = false;
+  }
+
   return { message, isValid };
 }
 

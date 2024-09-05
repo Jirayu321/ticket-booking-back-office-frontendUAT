@@ -196,12 +196,14 @@ const CreateEventForm = () => {
           <div className="form-section">
             <label>ชื่องาน*</label>
             <input
+              onFocus={(e) => e.target.select()}
               type="text"
               value={title}
               onChange={handleInputChange(setTitle)}
               placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
             />
             <input
+              onFocus={(e) => e.target.select()}
               type="text"
               value={title2}
               onChange={handleInputChange(setTitle2)}
@@ -212,6 +214,7 @@ const CreateEventForm = () => {
           <div className="form-section">
             <label>ข้อมูลงาน (ถ้ามี)</label>
             <input
+              onFocus={(e) => e.target.select()}
               type="text"
               value={description}
               onChange={handleInputChange(setDescription)}

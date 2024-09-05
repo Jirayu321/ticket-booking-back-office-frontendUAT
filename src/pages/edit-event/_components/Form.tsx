@@ -47,19 +47,21 @@ const Form = () => {
       setIsDetailCompleted(true);
     }
   };
-  
+
   return (
     <form onSubmit={handleSave}>
       <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
       <div className="form-section">
         <label>ชื่องาน*</label>
         <input
+          onFocus={(e) => e.target.select()}
           type="text"
           value={title}
           onChange={handleInputChange(setTitle)}
           placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
         />
         <input
+          onFocus={(e) => e.target.select()}
           type="text"
           value={title2}
           onChange={handleInputChange(setTitle2)}
@@ -70,6 +72,7 @@ const Form = () => {
       <div className="form-section">
         <label>ข้อมูลงาน (ถ้ามี)</label>
         <input
+          onFocus={(e) => e.target.select()}
           type="text"
           value={description}
           onChange={handleInputChange(setDescription)}

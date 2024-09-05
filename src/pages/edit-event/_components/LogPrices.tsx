@@ -130,6 +130,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
       renderCell: (params: GridRenderCellParams) => {
         return (
           <input
+            onFocus={(e) => e.target.select()}
             type="number"
             min="0"
             value={Number(params.value)}
@@ -156,7 +157,7 @@ const LogPrices: FC<LogPricesProps> = ({ zones, planId }) => {
           style={{ cursor: "pointer" }}
           onClick={async () => {
             const isConfirmed = await SwalConfirmAction(
-              "คุณต้องการลบราคาโซนนี้ใช้หรือไม่?"
+              "คุณต้องการลบราคาโซนนี้ใช่หรือไม่?"
             );
             if (!isConfirmed) return;
             handleDeleteLogEventPrice(params.row);
