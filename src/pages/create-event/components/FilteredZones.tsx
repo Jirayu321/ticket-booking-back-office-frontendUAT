@@ -1,16 +1,16 @@
-import { Button, CircularProgress, Collapse } from "@mui/material";
+import { CircularProgress, Collapse } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
+import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
+import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
+import { SwalConfirmAction } from "../../../lib/sweetalert";
 import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
-import { SwalConfirmAction } from "../../../lib/sweetalert";
-import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
-import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -280,11 +280,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           return (
                             <DatePicker
                               label=""
-                              dateTimeValue={
-                                params.value
-                                  ? params.value
-                                  : new Date().toISOString()
-                              }
+                              dateTimeValue={params.value ? params.value : null}
                               setter={(date: string) => {
                                 handlePriceChange(
                                   zone.Plan_id,

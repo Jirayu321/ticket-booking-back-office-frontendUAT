@@ -1,5 +1,5 @@
 import create from "zustand";
-import { addHours, formatISOToLocalTime } from "../../lib/util";
+import { addHours } from "../../lib/util";
 
 // Event store interface and Zustand implementation
 interface EventState {
@@ -109,8 +109,8 @@ export const useZoneStore = create<ZoneStoreState>((set) => ({
             ...state.zones[zoneId].prices,
             {
               id: state.zones[zoneId].prices.length + 1,
-              startDate: null,
-              endDate: null,
+              startDate: addHours(new Date(), 7).toISOString(),
+              endDate: addHours(new Date(), 7).toISOString(),
               price: "",
             },
           ],
