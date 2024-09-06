@@ -52,7 +52,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
     return <p>No order details available</p>;
   }
 
-  const totalPrice = groupedTickets.reduce((total, ticket) => total + ticket.Total_Price, 0);
+  const totalPrice = groupedTickets.reduce((total, ticket) => total + ticket.Plan_Price, 0);
 
   return (
     <TableContainer>
@@ -74,7 +74,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
               <TableCell>{index + 1}</TableCell>
               <TableCell>{ticket.Plan_Name} [{ticket.ticket_no}]</TableCell>
               <TableCell>
-                {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(ticket.Total_Price)}
+                {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(ticket.Plan_Price)}
               </TableCell>
             </TableRow>
           ))}

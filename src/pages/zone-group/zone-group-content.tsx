@@ -144,10 +144,7 @@ const ZoneGroupContent: React.FC = () => {
   
   const handleCreate = async () => {
       if (isDuplicateName(newPlanGroup.name)) {
-        Swal.fire({
-          icon: "error",
-          title: "ชื่อผังร้านซ้ำกัน",
-        });
+        window.alert("ชื่อผังร้านซ้ำกัน");
         return;
       }
   
@@ -166,10 +163,7 @@ const ZoneGroupContent: React.FC = () => {
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
       } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวในการสร้างผังร้าน",
-        });
+        window.alert("ล้มเหลวในการสร้างผังร้าน");
       }
     };
   
@@ -177,10 +171,7 @@ const ZoneGroupContent: React.FC = () => {
       if (!editPlanGroup) return;
   
       if (isDuplicateName(editPlanGroup.PlanGroup_Name, editPlanGroup.PlanGroup_id)) {
-        Swal.fire({
-          icon: "error",
-          title: "ชื่อผังร้านซ้ำกัน",
-        });
+        window.alert("ชื่อผังร้านซ้ำกัน");
         return;
       }
   

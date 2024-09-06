@@ -154,26 +154,14 @@ const ZoneContent: React.FC = () => {
 
   const handleCreate = async () => {
     if (!newPlan.planGroupId) {
-      Swal.fire({
-        icon: "error",
-        title: "กรุณาเลือกผังร้าน",
-        customClass: {
-          popup: 'swal2-custom-zindex'
-        },
-      });
+      window.alert("กรุณาเลือกผังร้าน");
       return;
     }
 
     const groupId = parseInt(newPlan.planGroupId, 10);
 
     if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
-      Swal.fire({
-        icon: "error",
-        title: "มีแผนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
-        customClass: {
-          popup: 'swal2-top-zindex'
-        },
-      });
+      window.alert("มีโซนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
       return;
     }
 
@@ -194,10 +182,7 @@ const ZoneContent: React.FC = () => {
       const data = await getAllPlans();
       setPlans(data.plans);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "ล้มเหลวในการสร้างโซน",
-      });
+      window.alert("ล้มเหลวในการสร้างโซน");
     }
   };
 
@@ -212,10 +197,7 @@ const ZoneContent: React.FC = () => {
     );
 
     if (isDuplicatePlanName(editPlan.Plan_Name, groupId, filteredPlans)) {
-      Swal.fire({
-        icon: "error",
-        title: "มีโซนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
-      });
+      window.alert("มีโซนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว");
       return;
     }
 

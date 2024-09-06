@@ -119,10 +119,7 @@ const PayOptionContent: React.FC = () => {
     // Fetch the latest payment options to ensure accurate duplicate check
     const latestPayOptions = await getPayOption();
     if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
-      Swal.fire({
-        icon: "error",
-        title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
-      });
+      window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
       return;
     }
 
@@ -140,10 +137,7 @@ const PayOptionContent: React.FC = () => {
     });
   } catch (error) {
     console.error("Failed to create pay option:", error);
-    Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวระหว่างสร้างตัวเลือกการจ่ายเงิน",
-        });
+    window.alert("ล้มเหลวระหว่างสร้างตัวเลือกการจ่ายเงิน");
   }
 };
 
@@ -158,10 +152,7 @@ const handleSaveEdit = async () => {
         editPayOption.Pay_Opt_Id
       )
     ) {
-      Swal.fire({
-          icon: "error",
-          title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
-        });
+      window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
       return;
     }
 
@@ -179,10 +170,7 @@ const handleSaveEdit = async () => {
     fetchPayOptions(); // Refresh data after updating
   } catch (error) {
     console.error("Failed to update pay option:", error);
-    Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน",
-        });
+    window.alert("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
   }
 };
 

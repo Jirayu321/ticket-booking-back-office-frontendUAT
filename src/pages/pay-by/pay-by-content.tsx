@@ -47,10 +47,7 @@ const PayByContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      Swal.fire({
-        icon: "error",
-        title: "ไม่สามารถดึงข้อมูลวิธีการจ่ายเงินได้",
-      });
+      window.alert("ไม่สามารถดึงข้อมูลวิธีการจ่ายเงินได้");
     }
   };
 
@@ -102,10 +99,7 @@ const PayByContent: React.FC = () => {
   const handleCreate = async () => {
     // Ensure duplicate check before proceeding
     if (isDuplicatePayByName(newPayOption.name, payOptions)) {
-      Swal.fire({
-        icon: "error",
-        title: "มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว",
-      });
+      window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
       return;
     }
 
@@ -126,10 +120,7 @@ const PayByContent: React.FC = () => {
       fetchPayOptions(); // Refresh the list after creation
     } catch (error) {
       console.error("Failed to create pay option:", error);
-      Swal.fire({
-        icon: "error",
-        title: "ล้มเหลวในการสร้างตัวเลือกการจ่ายเงิน",
-      });
+      window.alert("ล้มเหลวในการสร้างวิธีการจ่ายเงิน");
     }
   };
   
@@ -167,10 +158,7 @@ const PayByContent: React.FC = () => {
       fetchPayOptions(); // Refresh data after updating
     } catch (error) {
       console.error("Failed to update pay option:", error);
-      Swal.fire({
-        icon: "error",
-        title: "ล้มเหลวในการอัปเดตตัวเลือกการจ่ายเงิน",
-      });
+      window.alert("ล้มเหลวในการอัปเดตวิธีการจ่ายเงิน");
     }
   };
 

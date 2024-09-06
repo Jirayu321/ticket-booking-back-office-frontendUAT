@@ -116,10 +116,7 @@ const TicketTypeContent: React.FC = () => {
   
   const handleCreate = async () => {
   if (isDuplicateTicketTypeName(newTicketType.name, ticketTypes)) {
-    Swal.fire({
-      icon: "error",
-      title: "มีประเภทบัตรที่มีชื่อเดียวกันแล้ว",
-    });
+    window.alert("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
     return;
   }
 
@@ -141,10 +138,7 @@ const TicketTypeContent: React.FC = () => {
     handleClose();
     fetchTicketTypes(); // Refresh data after creating
   } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "ล้มเหลวระหว่างสร้างประเภทบัตร",
-    });
+    window.alert("ล้มเหลวในการสร้างประเภทบัตร");
   }
 };
 
@@ -172,10 +166,7 @@ const handleSaveEdit = async () => {
     // Assuming you have a function to check for duplicates, which can be implemented similarly to what was previously discussed.
     const isDuplicate = isDuplicateTicketTypeName(editTicketType.Ticket_Type_Name, ticketTypes, editTicketType.Ticket_Type_Id);
     if (isDuplicate) {
-      Swal.fire({
-        icon: "error",
-        title: "มีประเภทบัตรที่มีชื่อเดียวกันแล้ว",
-      });
+      window.alert("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
       return;
     }
 
