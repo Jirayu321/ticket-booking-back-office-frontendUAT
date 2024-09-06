@@ -21,7 +21,7 @@ import { formatThaiDate } from "../../lib/util";
 import Header from "../common/header";
 import "./all-event-content.css";
 
-const MAX_ITEMS_PER_PAGE = 10;
+const MAX_ITEMS_PER_PAGE = 50;
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -25,7 +25,7 @@ import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import StartEndDatePickers from "../../components/common/input/date-picker/date"; // Import the date picker component
 
-const MAX_ITEMS_PER_PAGE = 10;
+const MAX_ITEMS_PER_PAGE = 50;
 
 const AllSeatContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

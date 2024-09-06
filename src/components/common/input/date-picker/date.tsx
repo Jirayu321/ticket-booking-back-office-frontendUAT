@@ -3,7 +3,7 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Stack, TextField, Button } from '@mui/material';
+import { Stack, TextField } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 
 const StartEndDatePickers: React.FC<{
@@ -12,9 +12,6 @@ const StartEndDatePickers: React.FC<{
   onStartDateChange: (date: Dayjs | null) => void;
   onEndDateChange: (date: Dayjs | null) => void;
 }> = ({ startDate, endDate, onStartDateChange, onEndDateChange }) => {
-
- 
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DemoContainer components={['DatePicker']}>
@@ -25,6 +22,7 @@ const StartEndDatePickers: React.FC<{
             onChange={(newValue) => {
               onStartDateChange(newValue);
             }}
+            format="DD/MM/YY"
             renderInput={(params) => <TextField {...params} />}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -41,6 +39,7 @@ const StartEndDatePickers: React.FC<{
             onChange={(newValue) => {
               onEndDateChange(newValue);
             }}
+            format="DD/MM/YY"
             renderInput={(params) => <TextField {...params} />}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -57,4 +56,4 @@ const StartEndDatePickers: React.FC<{
   );
 };
 
-export default StartEndDatePickers
+export default StartEndDatePickers;

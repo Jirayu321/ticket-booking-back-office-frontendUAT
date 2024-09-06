@@ -24,7 +24,7 @@ import { getOrderD } from "../../services/order-d.service";
 import { Link, useNavigate } from "react-router-dom";
 import StartEndDatePickers from "../../components/common/input/date-picker/date";
 
-const MAX_ITEMS_PER_PAGE = 10;
+const MAX_ITEMS_PER_PAGE = 50;
 
 const AllOrderContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

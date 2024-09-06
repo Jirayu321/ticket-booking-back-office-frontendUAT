@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 import Header from "../common/header"; // Assuming you have a Header component
 import InventoryIcon from '@mui/icons-material/Inventory';
 
-const MAX_ITEMS_PER_PAGE = 10;
+const MAX_ITEMS_PER_PAGE = 50;
 
 const AllStockContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

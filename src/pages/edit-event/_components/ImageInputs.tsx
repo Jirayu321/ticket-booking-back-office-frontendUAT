@@ -1,4 +1,5 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
+import useEditEventStore from "../_hook/useEditEventStore";
 
 const LABELS = [
   "ภาพปก*",
@@ -8,12 +9,7 @@ const LABELS = [
 ];
 
 const ImageInputs = () => {
-  const [images, setImages] = useState<Array<string | null>>([
-    null,
-    null,
-    null,
-    null,
-  ]);
+  const { images, setImages, removeImage } = useEditEventStore();
 
   const handleImageUpload =
     (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,19 +18,16 @@ const ImageInputs = () => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Image = reader.result as string;
-          const newImages = [...images];
-          newImages[index] = base64Image;
-          setImages(newImages);
+          setImages(index, base64Image); // Use Zustand to update the image
         };
         reader.readAsDataURL(file);
       }
     };
 
   const handleImageRemove = (index: number) => () => {
-    const newImages = [...images];
-    newImages[index] = null;
-    setImages(newImages);
+    removeImage(index); // Use Zustand to remove the image
   };
+
   return (
     <div className="form-section">
       <label>ภาพประกอบ</label>
@@ -44,7 +37,7 @@ const ImageInputs = () => {
             <span className="image-upload-title">{title}</span>
             <div className="image-upload-box">
               {images[index] && (
-                <img src={images[index]} alt={`Upload ${index}`} />
+                <img src={images[index] as string} alt={`Upload ${index}`} />
               )}
             </div>
             <div className="upload-link-container">
