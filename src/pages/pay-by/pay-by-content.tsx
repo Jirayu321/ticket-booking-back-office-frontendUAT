@@ -47,7 +47,6 @@ const PayByContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      window.alert("ไม่สามารถดึงข้อมูลวิธีการจ่ายเงินได้");
     }
   };
 

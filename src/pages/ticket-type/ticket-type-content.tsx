@@ -55,10 +55,7 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch ticket types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed to fetch ticket types"+error,
-      });
+      
     }
   };
 
@@ -71,10 +68,7 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch event stock:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed to fetch event stock"+error,
-      });
+      
     }
   };
 

@@ -64,10 +64,7 @@ const ZoneContent: React.FC = () => {
         const data = await getAllPlans();
         setPlans(data.plans || []);
       } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาดในการดึงข้อมูล",
-        });
+        console.error("Failed to fetch plans:", error);
       }
     };
 

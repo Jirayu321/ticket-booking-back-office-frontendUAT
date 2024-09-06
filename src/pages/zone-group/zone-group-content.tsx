@@ -67,10 +67,7 @@ const ZoneGroupContent: React.FC = () => {
           setPlans([]);
         }
       } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาดในการดึงข้อมูล",
-        });
+        console.error("Failed to fetch plan groups and plans", error);
       }
     };
 

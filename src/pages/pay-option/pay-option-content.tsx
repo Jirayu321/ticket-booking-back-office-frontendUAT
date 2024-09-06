@@ -50,10 +50,7 @@ const PayOptionContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      Swal.fire({
-        icon: "error",
-        title: "ไม่สามารถดึงข้อมูลตัวเลือกการจ่ายเงินได้"+error,
-      });
+      
     }
   };
 
@@ -115,31 +112,31 @@ const PayOptionContent: React.FC = () => {
   };
 
   const handleCreate = async () => {
-  try {
-    // Fetch the latest payment options to ensure accurate duplicate check
-    const latestPayOptions = await getPayOption();
-    if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
-      window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
-      return;
+    try {
+      // Fetch the latest payment options to ensure accurate duplicate check
+      const latestPayOptions = await getPayOption();
+      if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
+        window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+        return;
+      }
+  
+      await createPayOption({
+        Pay_Opt_Name: newPayOption.name,
+        Pay_Opt_Desc: newPayOption.desc,
+        Pay_Opt_Active: "Y", // Default to inactive; user can toggle after creation
+        Created_By: "Admin", // Replace with actual creator
+      });
+      setOpen(false);
+      fetchPayOptions(); // Refresh the list after creation
+      Swal.fire({
+        icon: "success",
+        title: "สร้างตัวเลือกการจ่ายเงินสำเร็จ",
+      });
+    } catch (error) {
+      console.error("Failed to create pay option:", error);
+      window.alert("ล้มเหลวระหว่างสร้างตัวเลือกการจ่ายเงิน");
     }
-
-    await createPayOption({
-      Pay_Opt_Name: newPayOption.name,
-      Pay_Opt_Desc: newPayOption.desc,
-      Pay_Opt_Active: "Y", // Default to inactive; user can toggle after creation
-      Created_By: "Admin", // Replace with actual creator
-    });
-    setOpen(false);
-    fetchPayOptions(); // Refresh the list after creation
-    Swal.fire({
-      icon: "success",
-      title: "ลบตัวเลือกการจ่ายเงินสำเร็จ",
-    });
-  } catch (error) {
-    console.error("Failed to create pay option:", error);
-    window.alert("ล้มเหลวระหว่างสร้างตัวเลือกการจ่ายเงิน");
-  }
-};
+  };
 
 const handleSaveEdit = async () => {
   try {

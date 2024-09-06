@@ -5,12 +5,12 @@ export async function getPayOption() {
     const response = await authAxiosClient.get("/set-pay-option");
 
     if (response.status !== 200) {
-      throw "ล้มเหลวระหว่างดึงรายการ plan group ทั้งหมด";
+      console.error("Failed to fetch payment options");
     }
 
     return response.data;
   } catch (error: any) {
-    throw "ล้มเหลวระหว่างดึงรายการ plan group ทั้งหมด";
+  
   }
 }
 
