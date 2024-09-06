@@ -70,7 +70,7 @@ const AllEventContent: React.FC = () => {
       endDate,
     }));
   };
-
+  
   const handleClearFilters = () => {
     // Reset all filters to their default values
     setFilters({
@@ -84,7 +84,7 @@ const AllEventContent: React.FC = () => {
     });
   };
 
-  // Ensuring inclusive filtering for dates
+  // Filtering events
   const filteredEvents = events
     ?.filter((event) => {
       // Filter by search
@@ -111,9 +111,8 @@ const AllEventContent: React.FC = () => {
           filters.dateFilterType === "publish-date"
             ? new Date(event.Event_Public_Date).getTime()
             : new Date(event.Event_Time).getTime();
-
-        const startDate = new Date(filters.startDate).setHours(0, 0, 0, 0); // Start of the day
-        const endDate = new Date(filters.endDate).setHours(23, 59, 59, 999); // End of the day
+        const startDate = new Date(filters.startDate).getTime();
+        const endDate = new Date(filters.endDate).getTime();
 
         if (eventDate < startDate || eventDate > endDate) {
           return false;
@@ -123,7 +122,7 @@ const AllEventContent: React.FC = () => {
       return true;
     })
     .slice(indexOfFirstItem, indexOfLastItem);
-
+  
   if (isLoadingEventList) return <CircularProgress />;
 
   return (
@@ -167,7 +166,7 @@ const AllEventContent: React.FC = () => {
         </div>
 
         {/* Date range and other filters */}
-        <div className="additional-filters" style={{ display: "flex", flexDirection: "column", gap: "15px", padding: "10px",marginBottom:"10px" }}>
+        <div className="additional-filters" style={{ display: "flex", flexDirection: "column", gap: "15px", padding: "10px" }}>
           {/* Row 1: Search by event name, publish status, and event status */}
           <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
             {/* Search Box */}
@@ -179,12 +178,12 @@ const AllEventContent: React.FC = () => {
                 type="text"
                 placeholder="ค้นจากชื่องาน"
                 className="search-box"
-                style={{ height: "32px", width: "100%" }}
+                style={{ height: "35px", width: "100%" }}
               />
             </div>
 
             {/* Publish Status */}
-            <div className="filter-group" style={{paddingLeft:"60px",paddingRight:"60px",paddingTop:"0px",height:"100px"}}>
+            <div className="filter-group" style={{paddingLeft:"60px",paddingRight:"60px",paddingTop:"3px",height:"100px"}}>
               <label htmlFor="publish-status" style={{ color: "black", marginRight: "5px" }}>สถานะเผยแพร่</label>
               <select
                 id="publish-status"
@@ -201,7 +200,7 @@ const AllEventContent: React.FC = () => {
             </div>
 
             {/* Event Status */}
-            <div className="filter-group" style={{paddingTop:"0px",height:"100px"}}>
+            <div className="filter-group" style={{paddingTop:"3px",height:"100px"}}>
               <label htmlFor="status" style={{ color: "black", marginRight: "5px" }}>สถานะ Event</label>
               <select
                 id="status"
@@ -220,57 +219,57 @@ const AllEventContent: React.FC = () => {
             </div>
           </div>
 
-            {/* Row 2: Date Filter */}
-            <div style={{ display: "flex", marginLeft: "30px", marginBottom: "12px" }}>
-              {/* Date Filter Type */}
-              <div className="filter-group">
-                <label htmlFor="date-filter-type" style={{ color: "black", marginRight: "5px" }}>ตัวกรองวันที่</label>
-                  <select
-                  id="date-filter-type"
-                  name="dateFilterType"
-                  className="filter-select"
-                  value={filters.dateFilterType}
-                  onChange={handleUpdateFilters}
-                  style={{ height: "50px" }}
-                  >
-                    <option value="publish-date">วันที่เผยแพร่</option>
-                    <option value="event-date">วันจัดงาน</option>
-                  </select>
-              </div>
-
-              {/* Date Range */}
-              <div className="date-picker-container" style={{ paddingTop: "33px", display: "flex", gap: "10px", alignItems: "center" }}>
-                <input
-                  type="date"
-                  className="date-picker"
-                  value={filters.startDate ?? ""}
-                  onChange={(e) => handleDateRangeChange(e.target.value, filters.endDate)}
-                  style={{ height: "32px", width: "140px" }}
-                />
-                <span style={{ color: "black", paddingRight: "10px" }}>-</span>
-                <input
-                  type="date"
-                  className="date-picker"
-                  value={filters.endDate ?? ""}
-                  onChange={(e) => handleDateRangeChange(filters.startDate, e.target.value)}
-                  style={{ height: "32px", width: "140px" }}
-                />
-              </div>
+          {/* Row 2: Date Filter */}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "10px",paddingLeft:"25px",paddingRight:"150px" }}>
+            {/* Date Filter Type */}
+            <div className="filter-group">
+              <label htmlFor="date-filter-type" style={{ color: "black", marginRight: "5px" }}>ตัวกรองวันที่</label>
+              <select
+                id="date-filter-type"
+                name="dateFilterType"
+                className="filter-select"
+                value={filters.dateFilterType}
+                onChange={handleUpdateFilters}
+                style={{ height: "50px" }}
+              >
+                <option value="publish-date">วันที่เผยแพร่</option>
+                <option value="event-date">วันจัดงาน</option>
+              </select>
             </div>
 
-            {/* Clear All Filters Button */}
-            <div style={{ marginTop: "-80px", display: "flex", paddingLeft: "850px", paddingBottom: "30px" }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleClearFilters}
-                style={{ height: "40px", marginLeft: "20px" }}
-              >
-                ล้างการค้นหาทั้งหมด
-              </Button>
+            {/* Date Range */}
+            <div className="date-picker-container" style={{ display: "flex", paddingTop: "30px", gap: "5px", marginLeft: "-150px" }}>
+              <input
+                type="date"
+                className="date-picker"
+                value={filters.startDate ?? ""}
+                onChange={(e) => handleDateRangeChange(e.target.value, filters.endDate)}
+                style={{ height: "40px", width: "140px" }}
+              />
+              <span style={{ color: "black", paddingRight: "10px" }}>-</span>
+              <input
+                type="date"
+                className="date-picker"
+                value={filters.endDate ?? ""}
+                onChange={(e) => handleDateRangeChange(filters.startDate, e.target.value)}
+                style={{ height: "40px", width: "140px" }}
+              />
             </div>
           </div>
+
+          {/* Clear All Filters Button */}
+          <div style={{ marginTop: "-10px", marginBottom: "0px",marginLeft:"25px" }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleClearFilters}
+              style={{ height: "40px" }}
+            >
+              ล้างการค้นหาทั้งหมด
+            </Button>
+          </div>
         </div>
+      </div>
 
       {/* Table Component */}
       <TableContainer component={Paper}>
