@@ -175,7 +175,7 @@ const AllOrderContent: React.FC = () => {
   const navigate = useNavigate();
   
   const handleViewHistoryClick = (orderId: string) => {
-    navigate(`/order-detail/${orderId}?tabIndex=2`);
+    navigate(`/order-detail/${orderId}?tabIndex=1`);
   };
 
   if (isLoading) return <CircularProgress />;
@@ -409,7 +409,7 @@ const AllOrderContent: React.FC = () => {
                   </TableCell>
                   <TableCell style={{textAlign:"center"}}>{order.Cust_name}</TableCell>
                   <TableCell style={{textAlign:"center"}}>{order.Cust_tel}</TableCell>
-                  <TableCell> style={{textAlign:"center"}}{order.Event_Name}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{order.Event_Name}</TableCell>
                   <TableCell style={{textAlign:"center"}}>
                     <div
                       style={{
@@ -475,7 +475,7 @@ const AllOrderContent: React.FC = () => {
                   <TableCell style={{textAlign:"right"}}>
                     {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(order.Net_Price)}
                   </TableCell>
-                  <TableCell style={{textAlign:"right"}}>
+                  <TableCell style={{textAlign:"center"}}>
                     {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(order.Order_datetime))}
                   </TableCell>
                   <TableCell style={{textAlign:"center"}}>

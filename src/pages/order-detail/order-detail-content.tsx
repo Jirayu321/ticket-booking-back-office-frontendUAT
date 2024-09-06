@@ -19,7 +19,6 @@ import OrderItems from "./details/OrderItems";
 import PaymentHistory from "./details/PaymentHistory";
 import { useFetchPaymentHistories } from "../../hooks/fetch-data/useFetchPaymentHistories";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
-import { SwalError } from "../../lib/sweetalert";
 
 const OrderDetailContent: React.FC = () => {
   const { order_id } = useParams<{ order_id: string }>();
@@ -27,7 +26,7 @@ const OrderDetailContent: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
   const queryParams = new URLSearchParams(location.search);
-  const initialTabIndex = parseInt(queryParams.get("tabIndex") || "0", 10);
+  const initialTabIndex = parseInt(queryParams.get('tabIndex') || '0', 10);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const navigate = useNavigate();
@@ -45,10 +44,7 @@ const OrderDetailContent: React.FC = () => {
 
   const handleNavigateToOrderSite = (order_id: string | number) => {
     const orderIdStr = String(order_id); // Ensure order_id is a string
-    window.open(
-      `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem("token")}`,
-      "_blank"
-    );
+    window.open(`https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}`, "_blank");
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -132,6 +128,8 @@ const OrderDetailContent: React.FC = () => {
 
   if (isPaymentHistoriesLoading) return <CircularProgress />;
 
+  
+
   return (
     <div className="create-new-event">
       <Header title="รายละเอียดคำสั่งซื้อ" />
@@ -185,13 +183,7 @@ const OrderDetailContent: React.FC = () => {
           </h2>
         </div>
         <Button
-          onClick={() => {
-            if (!order_id) {
-              SwalError("ไม่พบ order id");
-              return;
-            }
-            handleNavigateToOrderSite(order_id);
-          }}
+          onClick={() => handleNavigateToOrderSite(order_id)} // Wrap it in an anonymous function
           variant="contained"
           style={{
             backgroundColor: "#CFB70B",
@@ -199,6 +191,7 @@ const OrderDetailContent: React.FC = () => {
             fontWeight: "bold",
             fontSize: "16px",
             height: "50px",
+            
           }}
           startIcon={
             isOrderPaid ? (
@@ -214,9 +207,8 @@ const OrderDetailContent: React.FC = () => {
       <Container maxWidth={false} sx={{ mt: 4, mb: 4 }}>
         <Box style={{ width: "100%" }}>
           <Tabs value={tabIndex} onChange={handleTabChange} centered>
-            <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "33.33%" }} />
-            <Tab label="คำสั่งซื้อ" sx={{ width: "33.33%" }} />
-            <Tab label="ประวัติการชำระ" sx={{ width: "33.33%" }} />
+            <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "50%" }} />
+            <Tab label="ประวัติการชำระ" sx={{ width: "50%" }} />
           </Tabs>
         </Box>
         <Paper
@@ -228,9 +220,13 @@ const OrderDetailContent: React.FC = () => {
             marginTop: "20px",
           }}
         >
-          {tabIndex === 0 && <BuyerInfo buyer={orderDetail} />}
-          {tabIndex === 1 && <OrderItems order_id={order_id} />}
-          {tabIndex === 2 && <PaymentHistory dtOrderId={order_id} />}
+          {tabIndex === 0 && (
+            <>
+              <BuyerInfo buyer={orderDetail} />
+              <OrderItems order_id={order_id} />
+            </>
+          )}
+          {tabIndex === 1 && <PaymentHistory dtOrderId={order_id} />}
         </Paper>
       </Container>
     </div>
