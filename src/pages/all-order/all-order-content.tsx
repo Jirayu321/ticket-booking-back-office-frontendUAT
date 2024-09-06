@@ -83,6 +83,19 @@ const AllOrderContent: React.FC = () => {
       endDate: null,
     }));
   };
+  const handleClearFilters = () => {
+    setFilters({
+      startDate: null,
+      endDate: null,
+      orderNo: "",
+      eventName: "",
+      customerName: "",
+      customerPhone: "",
+      status: "all",
+      paymentStatus: "all",
+      ticketType: "all",
+    });
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({
@@ -197,14 +210,14 @@ const AllOrderContent: React.FC = () => {
           <img src="/money.svg" alt="ยอดขาย icon" className="filter-icon" />
           <div className="filter-text-container">
             <span className="filter-text" style={{ marginLeft: "-50px" }}>ยอดขาย</span>
-            <span className="filter-number" style={{ fontSize: "20px", marginLeft: "-50px" }}>
+            <span className="filter-number" style={{ fontSize: "18px", marginLeft: "-50px" }}>
               {`${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalPaySum)} / 
                 ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalNetPrice)}`}
             </span> {/* Net Price / Total Balance formatted in Thai Baht */}
           </div>
         </div>
       </div>
-      <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
+      <div className="filters" style={{ padding: "18px", backgroundColor: "white", borderRadius: "5px", marginBottom: "18px" }}>
         <Stack direction="row" spacing={2}>
           <StartEndDatePickers
             startDate={filters.startDate}
@@ -215,7 +228,7 @@ const AllOrderContent: React.FC = () => {
           <Button
             variant="outlined"
             color="primary"
-            onClick={handleClearDates}
+            onClick={handleClearFilters}
             style={{ marginTop: "8px" }}
           >
             Clear
@@ -295,7 +308,7 @@ const AllOrderContent: React.FC = () => {
               },
             }}
           />
-          <FormControl variant="outlined" style={{ minWidth: 120 }}>
+          <FormControl variant="outlined" style={{ minWidth: 118 }}>
             <InputLabel>สถานะคำสั่งซื้อ</InputLabel>
             <Select
               label="สถานะ"
@@ -334,18 +347,18 @@ const AllOrderContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ลำดับ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>เลขคำสั่งซื้อ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ชื่อลูกค้า</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>เบอร์โทร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ชื่องาน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>จำนวนบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>จำนวนที่</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>สถานะคำสั่งซื้อ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px", paddingLeft: "40px" }}>สถานะการจ่ายเงิน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ราคาสุทธิ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>วันที่สั่งซื้อ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>ประวัติการชำระเงิน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>ลำดับ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>เลขคำสั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>ชื่อลูกค้า</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>เบอร์โทร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>ชื่องาน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>จำนวนบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>จำนวนที่</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center"}}>สถานะคำสั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>สถานะการจ่ายเงิน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>ราคาสุทธิ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>วันที่สั่งซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>ประวัติการชำระเงิน</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -388,16 +401,16 @@ const AllOrderContent: React.FC = () => {
 
               return (
                 <TableRow key={order.Order_id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Link to={`/order-detail/${order.Order_id}`} style={{ textDecoration: "none", color: "inherit" }}>
                       {order.Order_no}
                     </Link>
                   </TableCell>
-                  <TableCell>{order.Cust_name}</TableCell>
-                  <TableCell>{order.Cust_tel}</TableCell>
-                  <TableCell>{order.Event_Name}</TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>{order.Cust_name}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>{order.Cust_tel}</TableCell>
+                  <TableCell> style={{textAlign:"center"}}{order.Event_Name}</TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <div
                       style={{
                         border: "1px solid #ccc",
@@ -412,7 +425,7 @@ const AllOrderContent: React.FC = () => {
                       {order.totalQtyBuy} {/* จำนวนบัตร */}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <div
                       style={{
                         border: "1px solid #ccc",
@@ -427,12 +440,12 @@ const AllOrderContent: React.FC = () => {
                       {order.totalStc} {/* จำนวนที่ */}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <div
                       style={{
                         border: "1px solid #ccc",
                         padding: "8px",
-                        borderRadius: "20px",
+                        borderRadius: "18px",
                         textAlign: "center",
                         display: "inline-block",
                         width: "100px",
@@ -443,12 +456,12 @@ const AllOrderContent: React.FC = () => {
                       {statusLabel}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <div
                       style={{
                         border: "1px solid #ccc",
                         padding: "8px",
-                        borderRadius: "20px",
+                        borderRadius: "18px",
                         textAlign: "center",
                         display: "inline-block",
                         width: "100px",
@@ -459,13 +472,13 @@ const AllOrderContent: React.FC = () => {
                       {paymentStatusLabel}
                     </div>
                   </TableCell>
-                  <TableCell style={{ paddingLeft: "40px" }}>
+                  <TableCell style={{textAlign:"right"}}>
                     {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(order.Net_Price)}
                   </TableCell>
-                  <TableCell style={{ paddingLeft: "40px" }}>
+                  <TableCell style={{textAlign:"right"}}>
                     {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(order.Order_datetime))}
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -481,7 +494,7 @@ const AllOrderContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div style={{ marginTop: "18px", display: "flex", justifyContent: "center" }}>
         <Pagination count={totalPages} page={currentPage} onChange={(_, page) => handleClick(page)} color="primary" />
       </div>
     </div>

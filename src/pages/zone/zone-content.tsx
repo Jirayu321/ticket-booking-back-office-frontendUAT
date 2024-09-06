@@ -425,11 +425,6 @@ const ZoneContent: React.FC = () => {
                 ลำดับ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px" }}
-              >
-                ชื่อผังร้าน
-              </TableCell>
-              <TableCell
                 style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
                 ชื่อโซน
@@ -461,7 +456,6 @@ const ZoneContent: React.FC = () => {
               currentItems.map((plan, index) => (
                 <TableRow key={plan.Plan_id}>
                   <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{plan.PlanGroup_Name}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>{plan.Plan_Name}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>{plan.Plan_Desc}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>

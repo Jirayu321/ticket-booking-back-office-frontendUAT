@@ -23,13 +23,14 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 
 const MAX_ITEMS_PER_PAGE = 10;
 
-const AllTicketContent: React.FC = () => {
+const AllStockContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventStockData, setEventStockData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
     search: "",
     event: "all",
+    status: "*",
   });
   const [uniqueEvents, setUniqueEvents] = useState<string[]>([]);
   const [totalTickets, setTotalTickets] = useState<number>(0); // State for total tickets
@@ -94,9 +95,10 @@ const AllTicketContent: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
   const filteredStocks = eventStockData.filter((stock) => {
-    const matchesSearch = (stock.Event_Name || "").includes(filters.search) || (stock.Ticket_Type_Name || "").includes(filters.search);
+    const matchesSearch = (stock.Event_Name || "").includes(filters.search) ||  (stock.Plan_Name || "").includes(filters.search);
     const matchesEvent = filters.event === "all" || (stock.Event_Name || "") === filters.event;
-    return matchesSearch && matchesEvent;
+    const matchesStatus = filters.status === "*" || (stock.EventStatus_Name || "") === filters.status;
+    return matchesSearch && matchesEvent && matchesStatus;
   });
 
   const stocksInCurrentPage = filteredStocks.slice(indexOfFirstItem, indexOfLastItem);
@@ -107,7 +109,7 @@ const AllTicketContent: React.FC = () => {
 
   return (
     <div className="all-orders-content">
-      <Header title="บัตรทั้งหมด" />
+      <Header title="สต๊อกทั้งหมด" />
       <div className="filter-options">
         <div className="filter-item">
           <img
@@ -139,14 +141,14 @@ const AllTicketContent: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="filters" style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "5px", marginBottom: "20px" }}>
+      <div className="filters" style={{ padding: "20px", backgroundColor: "white", borderRadius: "5px", marginBottom: "20px" }}>
         <Stack direction="row" spacing={2}>
           <TextField
             variant="outlined"
             label="ค้นหา"
             value={filters.search}
             onChange={handleSearchChange}
-            placeholder="ค้นหาโดย ชื่องาน หรือ ประเภทบัตร"
+            placeholder="ค้นหาโดย ชื่องาน หรือ ชื่อโซน"
             style={{ marginRight: "10px", height: "50px",width:"300px" }}
             InputLabelProps={{
               shrink: true,
@@ -161,19 +163,18 @@ const AllTicketContent: React.FC = () => {
             }}
           />
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>งาน</InputLabel>
+            <InputLabel>สถานะ</InputLabel>
             <Select
-              label="งาน"
-              name="event"
-              value={filters.event}
+              label="สถานะ"
+              name="status"
+              value={filters.status}
               onChange={handleFilterChange}
             >
-              <MenuItem value="all">ทุกงาน</MenuItem>
-              {uniqueEvents.map((event) => (
-                <MenuItem key={event} value={event}>
-                  {event}
-                </MenuItem>
-              ))}
+              <MenuItem value="*">ทั้งหมด</MenuItem>
+              <MenuItem value="รอเริ่มงาน">รอเริ่มงาน</MenuItem>
+              <MenuItem value="เริ่มงาน">เริ่มงาน</MenuItem>
+              <MenuItem value="ปิดงาน">ปิดงาน</MenuItem>
+              <MenuItem value="ยกเลิก">ยกเลิก</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -183,29 +184,43 @@ const AllTicketContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ลำดับ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อผังร้าน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ชื่อโซน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>ประเภทบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนที่/บัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรทั้งหมด</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรที่ซื้อ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>จำนวนบัตรคงเหลือ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px" }}>งาน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>ลำดับ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>ชื่องาน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>ชื่อโซน</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>ประเภทบัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>จำนวนบัตรทั้งหมด</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>จำนวนที่/บัตร</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px",textAlign:"center" }}>จำนวนบัตรที่ถูกซื้อ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>จำนวนบัตรคงเหลือ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>จำนวนที่นั่งคงเหลือ</TableCell>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>สถานะ Event</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {stocksInCurrentPage.map((stock, index) => (
               <TableRow key={stock.Event_STC_Id}>
-                <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell>{stock.PlanGroup_Name}</TableCell>
-                <TableCell>{stock.Plan_Name}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Event_Name}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Plan_Name}</TableCell>
                 <TableCell style={{textAlign:"center"}} >{stock.Ticket_Type_Name}</TableCell>
-                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Per}</TableCell>
                 <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Per}</TableCell>
                 <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Buy}</TableCell>
                 <TableCell style={{textAlign:"center"}}>{stock.Ticket_Qty_Balance}</TableCell>
-                <TableCell>{stock.Event_Name}</TableCell>
+                <TableCell style={{textAlign:"center"}}>{stock.STC_Total_Balance}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      backgroundColor: stock.Eventsetcolour,
+                      color: "white", // or choose any text color that contrasts well with the background
+                      padding: "4px",
+                      borderRadius: "4px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {stock.EventStatus_Name}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -224,4 +239,4 @@ const AllTicketContent: React.FC = () => {
   );
 };
 
-export default AllTicketContent;
+export default AllStockContent;

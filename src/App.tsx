@@ -14,7 +14,7 @@ import { Buffer } from "buffer";
 import EditEventPage from "./pages/edit-event/EditEventPage";
 import AllOrder from "./pages/all-order/all-order";
 import OrderDetailPage from "./pages/order-detail/order-detail";
-import AllTicketPage from "./pages/all-ticket/all-ticket";
+import AllStockPage from "./pages/all-stock/all-stock";
 import AllSeatPage from "./pages/all-seat/all-seat";
 import LoginPage from "./pages/login/LoginPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -88,7 +88,7 @@ function App() {
         <Route path="/pay-by" element={<PayByPage />} />
         <Route path="/all-orders" element={<AllOrder />} />
         <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
-        <Route path="/all-tickets" element={<AllTicketPage />} />
+        <Route path="/all-stocks" element={<AllStockPage />} />
         <Route path="/all-seats" element={<AllSeatPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>

@@ -1,5 +1,6 @@
 import {
   Button,
+  Box,
   CircularProgress,
   Pagination,
   Paper,
@@ -183,31 +184,31 @@ const AllEventContent: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 ลำดับ
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 ชื่องาน
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 สถานที่
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 วันที่เผยแพร่
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 วันจัดงาน
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 เผยแพร่
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 สถานะ
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 Link
               </TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "20px" }}>
+              <TableCell style={{ fontWeight: "bold", fontSize: "18px" ,textAlign:"center"}}>
                 รายละเอียด
               </TableCell>
             </TableRow>
@@ -225,10 +226,10 @@ const AllEventContent: React.FC = () => {
               } = event;
               return (
                 <TableRow key={Event_Id}>
-                  <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>{Event_Name}</TableCell>
-                  <TableCell>{Event_Addr}</TableCell>
-                  <TableCell>
+                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{Event_Name}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{Event_Addr}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     {Event_Public_Date
                       ? formatThaiDate({
                           date: Event_Public_Date,
@@ -236,7 +237,7 @@ const AllEventContent: React.FC = () => {
                         })
                       : "ยังไม่ระบุ"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     {Event_Time
                       ? formatThaiDate({
                           date: Event_Time,
@@ -244,38 +245,52 @@ const AllEventContent: React.FC = () => {
                         })
                       : "ยังไม่ระบุ"}
                   </TableCell>
-                  <TableCell
-                    style={{ color: "black" }}
-                    className={Event_Public === "Y" ? "publish" : "unpublish"}
-                  >
-                    {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                  <TableCell style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 8px",
+                        border: "1px solid black",
+                        borderRadius: "4px",
+                      }}
+                      className={Event_Public === "Y" ? "publish" : "unpublish"}
+                    >
+                      {Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                    </div>
                   </TableCell>
-                  <TableCell
-                    style={{ color: "white" }}
-                    className={
-                      Event_Status === 1
-                        ? "pending"
+                  <TableCell style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 8px",
+                        border: "1px solid black",
+                        borderRadius: "4px",
+                      }}
+                      className={
+                        Event_Status === 1
+                          ? "pending"
+                          : Event_Status === 2
+                          ? "active"
+                          : Event_Status === 3
+                          ? "closed"
+                          : "cancelled"
+                      }
+                    >
+                      {Event_Status === 1
+                        ? "รอเริ่มงาน"
                         : Event_Status === 2
-                        ? "active"
+                        ? "เริ่มงาน"
                         : Event_Status === 3
-                        ? "closed"
-                        : "cancelled"
-                    }
-                  >
-                    {Event_Status === 1
-                      ? "รอเริ่มงาน"
-                      : Event_Status === 2
-                      ? "เริ่มงาน"
-                      : Event_Status === 3
-                      ? "ปิดงาน"
-                      : Event_Status === 13
-                      ? "ยกเลิก"
-                      : ""}
+                        ? "ปิดงาน"
+                        : Event_Status === 13
+                        ? "ยกเลิก"
+                        : ""}
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <FaCopy onClick={() => handleCopyEventLink(Event_Id)} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell  style={{textAlign:"center"}}>
                     <Button
                       variant="contained"
                       color="primary"

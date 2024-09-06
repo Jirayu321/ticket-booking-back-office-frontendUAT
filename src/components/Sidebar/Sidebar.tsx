@@ -75,12 +75,12 @@ const Sidebar: React.FC = () => {
           </li>
           <li
             className={`menu-item ${
-              activePath === "/all-tickets" ? "active" : ""
+              activePath === "/all-stocks" ? "active" : ""
             }`}
           >
-            <Link to="/all-tickets">
+            <Link to="/all-stocks">
               <ConfirmationNumberIcon style={{ paddingRight: "10px" }} />
-              จำนวนบัตรทั้งหมด
+              สต๊อกทั้งหมด
             </Link>
           </li>
           <li

@@ -23,6 +23,7 @@ import Header from "../common/header";
 import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
 import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import StartEndDatePickers from "../../components/common/input/date-picker/date"; // Import the date picker component
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -40,6 +41,8 @@ const AllSeatContent: React.FC = () => {
     printStatus: "all",
     printStatusName: "all", // Filter for PrintStatus_Name
     scanStatus: "all", // New filter for Scan Status
+    startDate: null, // Add startDate filter
+    endDate: null,   // Add endDate filter
   });
 
   useEffect(() => {
@@ -92,13 +95,34 @@ const AllSeatContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  // Handle date range change
+  const handleDateRangeChange = (startDate, endDate) => {
+    setFilters((prev) => ({
+      ...prev,
+      startDate,
+      endDate,
+    }));
+  };
+
+  // Clear date range filter
+  const handleClearDates = () => {
+    setFilters((prev) => ({
+      ...prev,
+      startDate: null,
+      endDate: null,
+    }));
+  };
+
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
   const filteredTickets = ticketData.filter((ticket) => {
+    const searchValue = filters.search.toLowerCase();
     const matchesSearch =
-      ticket.ticket_running.includes(filters.search) ||
-      ticket.Order_no.includes(filters.search);
+      ticket.ticket_running?.toLowerCase().includes(searchValue) ||
+      ticket.Order_no?.toLowerCase().includes(searchValue) ||
+      ticket.ticket_no?.toLowerCase().includes(searchValue) ||
+      ticket.Event_Name?.toLowerCase().includes(searchValue);
     const matchesStatus =
       filters.status === "all" || ticket.status === filters.status;
     const matchesEvent =
@@ -116,6 +140,15 @@ const AllSeatContent: React.FC = () => {
       filters.scanStatus === "all" ||
       (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) ||
       (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
+
+    // Date range filtering logic
+    const eventDate = new Date(ticket.Event_Public_Date);
+    const startDate = filters.startDate ? new Date(filters.startDate).setHours(0, 0, 0, 0) : null;
+    const endDate = filters.endDate ? new Date(filters.endDate).setHours(23, 59, 59, 999) : null;
+    const matchesDateRange =
+      (!startDate || eventDate >= startDate) &&
+      (!endDate || eventDate <= endDate);
+
     return (
       matchesSearch &&
       matchesStatus &&
@@ -123,7 +156,8 @@ const AllSeatContent: React.FC = () => {
       matchesTicketType &&
       matchesPrintStatus &&
       matchesPrintStatusName &&
-      matchesScanStatus
+      matchesScanStatus &&
+      matchesDateRange // Apply date range filter
     );
   });
 
@@ -133,12 +167,16 @@ const AllSeatContent: React.FC = () => {
   );
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
-  const uniqueEventNames = Array.from(
-    new Set(ticketData.map((ticket) => ticket.Event_Name))
-  );
-  // const uniquePrintStatusNames = Array.from(new Set(ticketData.map(ticket => ticket.PrintStatus_Name)));
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
 
-  // Calculate the number of tickets with specific statuses
   const scannedCount = ticketData.filter(
     (ticket) => ticket.check_in_status === 1
   ).length;
@@ -173,7 +211,7 @@ const AllSeatContent: React.FC = () => {
         className="filters"
         style={{
           padding: "20px",
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "white",
           borderRadius: "5px",
           marginBottom: "20px",
         }}
@@ -184,36 +222,20 @@ const AllSeatContent: React.FC = () => {
             label="ค้นหา"
             value={filters.search}
             onChange={handleSearchChange}
-            placeholder="ค้นหาโดย เลขที่นั่ง หรือ รหัสบัตร"
-            style={{ marginRight: "10px", height: "50px",width:"300px" }}
+            placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง, หรือ เลขคำสั่งซื้อ"
+            style={{ marginRight: "10px", height: "50px", width: "300px" }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 '& input': {
-                  border: 'none', // Remove the inner border
+                  border: 'none',
                   transform: 'translateY(5px)',
                 },
               },
             }}
           />
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>งาน</InputLabel>
-            <Select
-              label="งาน"
-              name="event"
-              value={filters.event}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">ทุกงาน</MenuItem>
-              {uniqueEventNames.map((eventName) => (
-                <MenuItem key={eventName} value={eventName}>
-                  {eventName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>สถานะการพิมพ์</InputLabel>
             <Select
@@ -241,39 +263,57 @@ const AllSeatContent: React.FC = () => {
             </Select>
           </FormControl>
         </Stack>
+
+        {/* Date Picker Filter */}
+        <Stack direction="row" spacing={2} marginTop={2}>
+          <StartEndDatePickers
+            startDate={filters.startDate}
+            endDate={filters.endDate}
+            onStartDateChange={(date) => handleDateRangeChange(date, filters.endDate)}
+            onEndDateChange={(date) => handleDateRangeChange(filters.startDate, date)}
+          />
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleClearDates}
+            style={{ marginTop: "8px" }}
+          >
+            Clear Dates
+          </Button>
+        </Stack>
       </div>
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ลำดับ</TableCell>
-              <TableCell>งาน</TableCell>
-              <TableCell>รหัสที่นั่ง</TableCell>
-              <TableCell>ชื่อโซน</TableCell>
-              <TableCell>ประเภทบัตร</TableCell>
-              <TableCell>เลขโต๊ะ</TableCell>
-              <TableCell>ชื่อที่นั่ง</TableCell>
-              <TableCell>รหัสบัตร</TableCell>
-              <TableCell>สถานะการพิมพ์</TableCell>
-              <TableCell>สถานะการแสกน</TableCell>
-              <TableCell>เวลาแสกน</TableCell>
-              <TableCell>ครั้งที่พิมพ์</TableCell>
-              <TableCell>QR CODE</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "10px" }}>ลำดับ</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "150px" }}>ชื่องาน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>วันจัดงาน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>รหัสที่นั่ง</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขโต๊ะ</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขที่นั่ง</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "80px" }}>เลขคำสั่งซื้อ</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>สถานะการพิมพ์</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>สถานะการเช็คอิน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เวลาเช็คอิน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "20px" }}>ครั้งที่พิมพ์</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>QR CODE</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {ticketsInCurrentPage.map((ticket, index) => (
               <TableRow key={ticket.DT_order_id}>
-                <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell>{ticket.Event_Name}</TableCell>
-                <TableCell>{ticket.ticket_running}</TableCell>
-                <TableCell>{ticket.Plan_Name}</TableCell>
-                <TableCell>{ticket.Ticket_Type_Name}</TableCell>
-                <TableCell>{ticket.ticket_no}</TableCell>
-                <TableCell>ที่นั่ง {ticket.ticket_line}</TableCell>
-                <TableCell>{ticket.Order_no}</TableCell>
-                <TableCell>
+                <TableCell style={{ textAlign: "center" }}>{indexOfFirstItem + index + 1}</TableCell>
+                <TableCell style={{ textAlign: "left" }}>{ticket.Event_Name}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  {ticket.Event_Public_Date ? formatDate(ticket.Event_Public_Date) : 'ยังไม่ระบุ'}
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.ticket_running}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.ticket_no}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>ที่นั่ง {ticket.ticket_line}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.Order_no}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>
                   <div
                     style={{
                       backgroundColor:
@@ -289,23 +329,23 @@ const AllSeatContent: React.FC = () => {
                     {ticket.PrintStatus_Name}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell style={{ textAlign: "center" }}>
                   <div
                     style={{
                       backgroundColor:
                         ticket.check_in_status === 0 ? "grey" : "blue",
-                      color: "white", // Ensure text is readable
+                      color: "white",
                       padding: "4px",
                       borderRadius: "4px",
                       textAlign: "center",
                     }}
                   >
-                    {ticket.check_in_status === 0 ? "ยังไม่แสกน" : "แสกนแล้ว"}
+                    {ticket.check_in_status === 0 ? "ยังไม่เช็คอิน" : "เช็คอินแล้ว"}
                   </div>
                 </TableCell>
-                <TableCell>{ticket.Print_Datetime}</TableCell>
-                <TableCell>{ticket.print_count}</TableCell>
-                <TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.Check_In_Datetime}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.print_count}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>
                   <Button
                     onClick={() => handleOpenModal(ticket)}
                     variant="contained"
