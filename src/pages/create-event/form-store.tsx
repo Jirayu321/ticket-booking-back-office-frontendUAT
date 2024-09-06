@@ -1,4 +1,5 @@
 import create from "zustand";
+import { addHours, formatISOToLocalTime } from "../../lib/util";
 
 // Event store interface and Zustand implementation
 interface EventState {
@@ -17,10 +18,10 @@ interface EventState {
 }
 
 export const useEventStore = create<EventState>((set) => ({
-  title: '',
-  title2: '',
-  description: '',
-  eventDateTime: new Date().toISOString(),
+  title: "",
+  title2: "",
+  description: "",
+  eventDateTime: addHours(new Date(), 7).toISOString(),
   status: 1,
   images: [null, null, null, null], // Initialize with 4 image placeholders
   setTitle: (title) => set({ title }),
@@ -28,11 +29,12 @@ export const useEventStore = create<EventState>((set) => ({
   setDescription: (description) => set({ description }),
   setEventDateTime: (eventDateTime) => set({ eventDateTime }),
   setStatus: (status) => set({ status }),
-  setImages: (index, image) => set((state) => {
-    const updatedImages = [...state.images];
-    updatedImages[index] = image;
-    return { images: updatedImages };
-  }),
+  setImages: (index, image) =>
+    set((state) => {
+      const updatedImages = [...state.images];
+      updatedImages[index] = image;
+      return { images: updatedImages };
+    }),
 }));
 
 // Zone store interface and Zustand implementation
