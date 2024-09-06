@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import useEditEventStore from "../_hook/useEditEventStore";
+import useEditEventStore from "../_hook/useEditEventStore"; // Import the Zustand store
 
 const LABELS = [
   "ภาพปก*",
@@ -9,7 +9,7 @@ const LABELS = [
 ];
 
 const ImageInputs = () => {
-  const { images, setImages, removeImage } = useEditEventStore();
+  const { images, setImages, removeImage } = useEditEventStore(); // Get Zustand functions and state
 
   const handleImageUpload =
     (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -18,14 +18,14 @@ const ImageInputs = () => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Image = reader.result as string;
-          setImages(index, base64Image); // Use Zustand to update the image
+          setImages(index, base64Image); // Update Zustand with the new base64 image
         };
         reader.readAsDataURL(file);
       }
     };
 
   const handleImageRemove = (index: number) => () => {
-    removeImage(index); // Use Zustand to remove the image
+    removeImage(index); // Remove the image using Zustand
   };
 
   return (
@@ -36,8 +36,10 @@ const ImageInputs = () => {
           <div key={index} className="image-upload-container">
             <span className="image-upload-title">{title}</span>
             <div className="image-upload-box">
-              {images[index] && (
-                <img src={images[index] as string} alt={`Upload ${index}`} />
+              {images[index] ? (
+                <img src={images[index]} alt={`Upload ${index}`} />
+              ) : (
+                <span>No image uploaded</span>
               )}
             </div>
             <div className="upload-link-container">

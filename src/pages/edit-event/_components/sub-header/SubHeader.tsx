@@ -22,6 +22,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
     description,
     status,
     refreshEventInfo,
+    images, // Getting images from Zustand store
   } = useEditEventStore();
 
   async function handleUpdateEvent() {
@@ -31,12 +32,17 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
 
       if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
 
+      // Make sure images are passed to the API call
       await updateEventById(Number(event.Event_Id), {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
         Event_Time: convertLocalTimeToISO(eventDateTime),
         Event_Status: status,
+        Event_Pic_1: images[0], // First image
+        Event_Pic_2: images[1], // Second image
+        Event_Pic_3: images[2], // Third image
+        Event_Pic_4: images[3], // Fourth image
       });
 
       toast.dismiss();

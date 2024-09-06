@@ -5,7 +5,7 @@ type EditEventStore = {
   title2: string;
   description: string;
   eventDateTime: string;
-  status: number; // Default status: "รอเริ่มงาน" (1)
+  status: number;
   setTitle: (title: string) => void;
   setTitle2: (title2: string) => void;
   setDescription: (description: string) => void;
@@ -22,10 +22,6 @@ type EditEventStore = {
   images: Array<string | null>; // Array to store base64 encoded images
   setImages: (index: number, image: string | null) => void;
   removeImage: (index: number) => void;
-  Event_Pic_1: string | null;
-  Event_Pic_2: string | null;
-  Event_Pic_3: string | null;
-  Event_Pic_4: string | null;
 };
 
 const useEditEventStore = create<EditEventStore>((set) => ({
@@ -62,29 +58,6 @@ const useEditEventStore = create<EditEventStore>((set) => ({
       updatedImages[index] = null;
       return { images: updatedImages };
     }),
-
-  // Event_Pic properties
-  Event_Pic_1: null, // Mapping first image to Event_Pic_1
-  Event_Pic_2: null, // Mapping second image to Event_Pic_2
-  Event_Pic_3: null, // Mapping third image to Event_Pic_3
-  Event_Pic_4: null, // Mapping fourth image to Event_Pic_4
 }));
-
-// Sync Event_Pic with images
-useEditEventStore.subscribe(
-  (state) => ({
-    Event_Pic_1: state.images[0],
-    Event_Pic_2: state.images[1],
-    Event_Pic_3: state.images[2],
-    Event_Pic_4: state.images[3],
-  }),
-  (images) =>
-    set(() => ({
-      Event_Pic_1: images[0],
-      Event_Pic_2: images[1],
-      Event_Pic_3: images[2],
-      Event_Pic_4: images[3],
-    }))
-);
 
 export default useEditEventStore;
