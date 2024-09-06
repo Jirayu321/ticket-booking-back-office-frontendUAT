@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { formatISOToLocalTime } from "../../../../lib/util";
 import styles from "./date-picker.module.css";
+import { convertISOToBuddhistDate } from "../../../../lib/utils/date.util";
 
 const TIME_DIFFERENCE = 7 * 60 * 60 * 1000; // 7 hours
 
@@ -24,7 +25,6 @@ const DatePicker: FC<DatePickerProps> = ({
         type="datetime-local"
         value={formatISOToLocalTime(dateTimeValue)}
         onInputCapture={(e: any) => {
-
           if (!allowPast && new Date(e.target.value).getTime() <= Date.now()) {
             return;
           }
@@ -37,7 +37,7 @@ const DatePicker: FC<DatePickerProps> = ({
             .toISOString()
             .slice(0, 16);
 
-          setter(localTime);
+          setter(convertISOToBuddhistDate(localTime));
         }}
       />
     </div>

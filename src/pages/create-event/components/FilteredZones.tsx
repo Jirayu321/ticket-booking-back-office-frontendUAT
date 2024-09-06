@@ -8,6 +8,9 @@ import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
+import { SwalConfirmAction } from "../../../lib/sweetalert";
+import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
+import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 
 type FilteredZonesProps = {
   filteredZones: any[];
@@ -74,7 +77,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
 
   const handleUpdateTicketQuantity = (planId: number) => {
     handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
-    console.log("ticketQuantityPerPlan", ticketQuantityPerPlan);
   };
 
   const columns: GridColDef[] = [
@@ -193,8 +195,16 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
             <div className="zone-content">
               <div className="ticket-layout">
                 <div className="empty-image">
-                  <a href={zone.Plan_Pic} target="_blank" rel="noopener noreferrer">
-                    <img src={zone.Plan_Pic} alt="Plan Pic" style={{ width: '100%', height: 'auto' }} />
+                  <a
+                    href={zone.Plan_Pic}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={zone.Plan_Pic}
+                      alt="Plan Pic"
+                      style={{ width: "100%", height: "auto" }}
+                    />
                   </a>
                 </div>
                 <div className="ticket-details">
@@ -225,19 +235,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                   <div className="ticket-amount">
                     <div className="ticket-amount-row">
                       <label>จำนวนบัตร/โซน*</label>
-                      <input
-                        onFocus={(e) => e.target.select()}
-                        type="number"
-                        min="0"
+                      <ConfirmNumberInput
+                        setter={(value) =>
+                          handleInputChange(zone.Plan_id, "seatCount", value)
+                        }
+                        value={zones[zone.Plan_id]?.seatCount || 0}
+                        min={0}
                         placeholder="จำนวนบัตร/โซน*"
-                        style={{ backgroundColor: "white", color: "black" }}
-                        value={ticketQuantityPerPlan.ticketQty || 0}
-                        onChange={(e) => {
-                          setTicketQuantityPerPlan({
-                            zone,
-                            ticketQty: Number(e.target.value),
-                          });
-                        }}
                       />
                     </div>
                     <div className="ticket-amount-row">
@@ -259,19 +263,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                       />
                     </div>
                   </div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    onClick={() => handleUpdateTicketQuantity(zone.Plan_id)}
-                    sx={{
-                      height: 45,
-                      marginTop: 2,
-                      width: 150,
-                      marginX: "auto",
-                    }}
-                  >
-                    <p>ยืนยันจำนวนโต๊ะ</p>
-                  </Button>
                 </div>
               </div>
               <div className="price-section">
@@ -287,20 +278,36 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           col.field === "endDate"
                         ) {
                           return (
-                            <DateTimePickerComponent
-                              controlledValue={
-                                params.value ? dayjs(params.value) : dayjs(null)
+                            <DatePicker
+                              label=""
+                              dateTimeValue={
+                                params.value
+                                  ? params.value
+                                  : new Date().toISOString()
                               }
-                              onChange={(date) =>
+                              setter={(date: string) => {
                                 handlePriceChange(
                                   zone.Plan_id,
                                   params.row.id,
                                   col.field,
-                                  date ? date.toISOString() : ""
-                                )
-                              }
-                              label={col.headerName}
+                                  date ? new Date(date).toISOString() : ""
+                                );
+                              }}
                             />
+                            // <DateTimePickerComponent
+                            //   controlledValue={
+                            //     params.value ? dayjs(params.value) : dayjs(null)
+                            //   }
+                            //   onChange={(date) =>
+                            //     handlePriceChange(
+                            //       zone.Plan_id,
+                            //       params.row.id,
+                            //       col.field,
+                            //       date ? date.toISOString() : ""
+                            //     )
+                            //   }
+                            //   label={col.headerName}
+                            // />
                           );
                         }
                         if (col.field === "price") {
@@ -332,9 +339,15 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                               src={deleteOnIcon}
                               alt="delete-on"
                               style={{ cursor: "pointer" }}
-                              onClick={() =>
-                                removeZonePrice(zone.Plan_id, params.row.id)
-                              }
+                              onClick={async () => {
+                                const isConfirmed = await SwalConfirmAction(
+                                  "คุณต้องการลบราคานี้ใช่หรือไม่?"
+                                );
+
+                                if (!isConfirmed) return;
+
+                                removeZonePrice(zone.Plan_id, params.row.id);
+                              }}
                             />
                           );
                         }

@@ -11,6 +11,8 @@ import SaveButton from "./SaveButton";
 import SelectInputMethod from "./SelectInputMethod";
 import TicketNoList from "./TicketNoList";
 import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
+import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
+import { SwalError } from "../../../lib/sweetalert";
 
 const OPTION_5 = "5";
 const MAXIMUM_TICKET_QUANTITY = 1000;
@@ -96,10 +98,16 @@ const Body: FC<BodyProps> = ({
     <Collapse in={expandedZones[planId]} timeout="auto" unmountOnExit>
       <div className="zone-content">
         <div className="ticket-layout">
-          <img src={Plan_Pic} />
-          {/* <div className="empty-image">
-            <span>Image Placeholder</span>
-          </div> */}
+          <div className="empty-image">
+            <a href={Plan_Pic} target="_blank" rel="noopener noreferrer">
+              <img
+                src={Plan_Pic}
+                alt="Plan Pic"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </a>
+          </div>
+
           <div className="ticket-details">
             <div className="ticket-type">
               <label>TICKET TYPE*</label>
@@ -127,22 +135,23 @@ const Body: FC<BodyProps> = ({
             <div className="ticket-amount">
               <div className="ticket-amount-row">
                 <label>จำนวนบัตร/โซน*</label>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="จำนวนบัตร/โซน*"
-                  style={{ backgroundColor: "white", color: "black" }}
+                <ConfirmNumberInput
                   value={seatQtyPerticket || 0}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => {
-                    if (Number(e.target.value) > MAXIMUM_TICKET_QUANTITY) {
+                  max={MAXIMUM_TICKET_QUANTITY}
+                  setter={(value: number) => {
+                    if (value > MAXIMUM_TICKET_QUANTITY) {
+                      SwalError(
+                        `จำนวนบัตรต่อโซนต้องไม่เกิน ${MAXIMUM_TICKET_QUANTITY}`
+                      );
+
                       return;
                     }
                     onUpdatePlanInfo({
                       ...state,
-                      seatQtyPerticket: Number(e.target.value),
+                      seatQtyPerticket: value,
                     });
                   }}
+                  placeholder="จำนวนบัตร/โซน*"
                 />
               </div>
               <div className="ticket-amount-row">
