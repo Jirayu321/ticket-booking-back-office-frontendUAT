@@ -169,11 +169,14 @@ const AllSeatContent: React.FC = () => {
 
   function formatDate(dateString) {
     const date = new Date(dateString);
+    date.setHours(date.getHours() - 7); // Subtract 7 hours from the event time
+  
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
     const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
+    
     return `${day}/${month}/${year} ${hours}:${minutes}`;
   }
 
@@ -250,7 +253,7 @@ const AllSeatContent: React.FC = () => {
             </Select>
           </FormControl>
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะการแสกน</InputLabel>
+            <InputLabel>สถานะการเช็คอิน	</InputLabel>
             <Select
               label="สถานะการแสกน"
               name="scanStatus"
@@ -288,8 +291,8 @@ const AllSeatContent: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "10px" }}>ลำดับ</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "150px" }}>ชื่องาน</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>วันจัดงาน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>ชื่องาน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>วันจัดงาน</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>รหัสที่นั่ง</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขโต๊ะ</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขที่นั่ง</TableCell>
@@ -307,7 +310,7 @@ const AllSeatContent: React.FC = () => {
                 <TableCell style={{ textAlign: "center" }}>{indexOfFirstItem + index + 1}</TableCell>
                 <TableCell style={{ textAlign: "left" }}>{ticket.Event_Name}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>
-                  {ticket.Event_Public_Date ? formatDate(ticket.Event_Public_Date) : 'ยังไม่ระบุ'}
+                  {ticket.Event_Public_Date ? formatDate(ticket.Event_Time) : 'ยังไม่ระบุ'}
                 </TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_running}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_no}</TableCell>

@@ -475,8 +475,8 @@ const AllOrderContent: React.FC = () => {
                   <TableCell style={{textAlign:"right"}}>
                     {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(order.Net_Price)}
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
-                    {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(order.Order_datetime))}
+                  <TableCell style={{ textAlign: "center" }}>
+                    {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(new Date(order.Order_datetime).setHours(new Date(order.Order_datetime).getHours() - 7)))}
                   </TableCell>
                   <TableCell style={{textAlign:"center"}}>
                     <Button

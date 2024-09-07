@@ -18,9 +18,26 @@ import { useNavigate } from "react-router-dom";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import { formatThaiDate } from "../../lib/util";
 import Header from "../common/header";
+import StartEndDatePickers from "../../components/common/input/date-picker/date";
+import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import "./all-event-content.css";
 
+// Extend dayjs with timezone and utc plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const MAX_ITEMS_PER_PAGE = 50;
+
+// Helper function to format date in Bangkok timezone (UTC+7) and subtract 7 hours
+const formatAndSubtract7Hours = (date: string): string => {
+  return dayjs(date).subtract(7, "hour").tz("Asia/Bangkok").format("YYYY-MM-DD");
+};
+
+const formatDateStringInBangkok = (date: Dayjs | null): string | null => {
+  return date ? date.tz("Asia/Bangkok").format("YYYY-MM-DD") : null;
+};
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,8 +46,8 @@ const AllEventContent: React.FC = () => {
     publishStatus: "all",
     status: "all",
     search: "",
-    startDate: null,
-    endDate: null,
+    startDate: null as string | null,
+    endDate: null as string | null,
     dateFilterType: "publish-date", // Default to publish date
   });
 
@@ -63,16 +80,15 @@ const AllEventContent: React.FC = () => {
     }));
   };
 
-  const handleDateRangeChange = (startDate: string | null, endDate: string | null) => {
+  const handleDateRangeChange = (startDate: Dayjs | null, endDate: Dayjs | null) => {
     setFilters((prev) => ({
       ...prev,
-      startDate,
-      endDate,
+      startDate: formatDateStringInBangkok(startDate),
+      endDate: formatDateStringInBangkok(endDate),
     }));
   };
-  
+
   const handleClearFilters = () => {
-    // Reset all filters to their default values
     setFilters({
       sortBy: "publish-date",
       publishStatus: "all",
@@ -84,7 +100,6 @@ const AllEventContent: React.FC = () => {
     });
   };
 
-  // Filtering events
   const filteredEvents = events
     ?.filter((event) => {
       // Filter by search
@@ -105,16 +120,18 @@ const AllEventContent: React.FC = () => {
         return false;
       }
 
+      // Subtract 7 hours from event dates before comparing
+      const publishDate = formatAndSubtract7Hours(event.Event_Public_Date);
+      const eventDate = formatAndSubtract7Hours(event.Event_Time);
+
       // Filter by date range based on selected date filter type (Publish Date or Event Date)
       if (filters.startDate && filters.endDate) {
-        const eventDate =
+        const eventDateToCompare =
           filters.dateFilterType === "publish-date"
-            ? new Date(event.Event_Public_Date).getTime()
-            : new Date(event.Event_Time).getTime();
-        const startDate = new Date(filters.startDate).getTime();
-        const endDate = new Date(filters.endDate).getTime();
+            ? publishDate
+            : eventDate;
 
-        if (eventDate < startDate || eventDate > endDate) {
+        if (eventDateToCompare < filters.startDate || eventDateToCompare > filters.endDate) {
           return false;
         }
       }
@@ -122,7 +139,7 @@ const AllEventContent: React.FC = () => {
       return true;
     })
     .slice(indexOfFirstItem, indexOfLastItem);
-  
+
   if (isLoadingEventList) return <CircularProgress />;
 
   return (
@@ -183,7 +200,7 @@ const AllEventContent: React.FC = () => {
             </div>
 
             {/* Publish Status */}
-            <div className="filter-group" style={{paddingLeft:"60px",paddingRight:"60px",paddingTop:"3px",height:"100px"}}>
+            <div className="filter-group" style={{ paddingLeft: "60px", paddingRight: "60px", paddingTop: "3px", height: "100px" }}>
               <label htmlFor="publish-status" style={{ color: "black", marginRight: "5px" }}>สถานะเผยแพร่</label>
               <select
                 id="publish-status"
@@ -200,7 +217,7 @@ const AllEventContent: React.FC = () => {
             </div>
 
             {/* Event Status */}
-            <div className="filter-group" style={{paddingTop:"3px",height:"100px"}}>
+            <div className="filter-group" style={{ paddingTop: "3px", height: "100px" }}>
               <label htmlFor="status" style={{ color: "black", marginRight: "5px" }}>สถานะ Event</label>
               <select
                 id="status"
@@ -220,8 +237,7 @@ const AllEventContent: React.FC = () => {
           </div>
 
           {/* Row 2: Date Filter */}
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "10px",paddingLeft:"25px",paddingRight:"150px" }}>
-            {/* Date Filter Type */}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "10px", paddingLeft: "25px", paddingRight: "150px" }}>
             <div className="filter-group">
               <label htmlFor="date-filter-type" style={{ color: "black", marginRight: "5px" }}>ตัวกรองวันที่</label>
               <select
@@ -237,28 +253,20 @@ const AllEventContent: React.FC = () => {
               </select>
             </div>
 
-            {/* Date Range */}
-            <div className="date-picker-container" style={{ display: "flex", paddingTop: "30px", gap: "5px", marginLeft: "-150px" }}>
-              <input
-                type="date"
-                className="date-picker"
-                value={filters.startDate ?? ""}
-                onChange={(e) => handleDateRangeChange(e.target.value, filters.endDate)}
-                style={{ height: "40px", width: "140px" }}
-              />
-              <span style={{ color: "black", paddingRight: "10px" }}>-</span>
-              <input
-                type="date"
-                className="date-picker"
-                value={filters.endDate ?? ""}
-                onChange={(e) => handleDateRangeChange(filters.startDate, e.target.value)}
-                style={{ height: "40px", width: "140px" }}
-              />
+            {/* Date Picker */}
+            <div style={{paddingTop:"25px"}}>
+            <StartEndDatePickers
+              startDate={filters.startDate ? dayjs(filters.startDate) : null}
+              endDate={filters.endDate ? dayjs(filters.endDate) : null}
+              onStartDateChange={(newValue) => handleDateRangeChange(newValue, filters.endDate ? dayjs(filters.endDate) : null)}
+              onEndDateChange={(newValue) => handleDateRangeChange(filters.startDate ? dayjs(filters.startDate) : null, newValue)}
+            />
             </div>
+  
           </div>
 
           {/* Clear All Filters Button */}
-          <div style={{ marginTop: "-10px", marginBottom: "0px",marginLeft:"25px" }}>
+          <div style={{ marginTop: "-10px", marginBottom: "0px", marginLeft: "25px" }}>
             <Button
               variant="outlined"
               color="primary"

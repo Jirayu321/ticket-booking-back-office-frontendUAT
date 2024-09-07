@@ -12,6 +12,15 @@ interface BuyerInfoProps {
 }
 
 const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
+  // Subtract 7 hours from the given Order_datetime
+  const subtract7Hours = (datetime: string) => {
+    const date = new Date(datetime);
+    date.setHours(date.getHours() - 7); // Subtract 7 hours
+    return date;
+  };
+
+  const adjustedDate = subtract7Hours(buyer.Order_datetime);
+
   return (
     <Stack
       spacing={2}
@@ -24,18 +33,19 @@ const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
     >
       {/* Row for Order Number and Order Date */}
       <Box display="flex" justifyContent="space-between">
-        <Typography variant="body1" sx={{paddingLeft:"500px",fontWeight:"bold"}}>
+        <Typography variant="body1" sx={{ paddingLeft: "500px", fontWeight: "bold" }}>
           <strong>เลขคำสั่งซื้อ:</strong> {buyer.Order_no}
         </Typography>
-        <Typography variant="body1" sx={{paddingRight:"500px",fontWeight:"bold"}}>
-          <strong>วันที่สั่งซื้อ:</strong> {new Date(buyer.Order_datetime).toLocaleDateString('th-TH', {
+        <Typography variant="body1" sx={{ paddingRight: "500px", fontWeight: "bold" }}>
+          <strong>วันที่สั่งซื้อ:</strong>{" "}
+          {adjustedDate.toLocaleString('th-TH', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false
+            hour12: false,
           })}
         </Typography>
       </Box>
