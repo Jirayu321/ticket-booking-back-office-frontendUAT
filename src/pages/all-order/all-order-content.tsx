@@ -23,6 +23,10 @@ import { getOrderH } from "../../services/order-h.service";
 import { getOrderD } from "../../services/order-d.service";
 import { Link, useNavigate } from "react-router-dom";
 import StartEndDatePickers from "../../components/common/input/date-picker/date";
+import dayjs from 'dayjs';
+import buddhistEra from 'dayjs/plugin/buddhistEra';
+
+dayjs.extend(buddhistEra);
 
 const MAX_ITEMS_PER_PAGE = 50;
 
@@ -363,6 +367,10 @@ const AllOrderContent: React.FC = () => {
           </TableHead>
           <TableBody>
             {ordersInCurrentPage.map((order: any, index: number) => {
+              const formattedEventTime = dayjs(order.Order_datetime)
+              .subtract(7, 'hour')
+              .locale('th')
+              .format('D/M/BBBB HH:mm');
               // Order status and background color based on OrderStatus_Name and OrderSetColour
               const statusLabel = order.OrderStatus_Name;
               const bgColor = order.OrderSetColour;
@@ -476,7 +484,7 @@ const AllOrderContent: React.FC = () => {
                     {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(order.Net_Price)}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
-                    {new Intl.DateTimeFormat("th-TH", { dateStyle: "short" }).format(new Date(new Date(order.Order_datetime).setHours(new Date(order.Order_datetime).getHours() - 7)))}
+                    {formattedEventTime}
                   </TableCell>
                   <TableCell style={{textAlign:"center"}}>
                     <Button

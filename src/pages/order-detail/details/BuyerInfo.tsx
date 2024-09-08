@@ -1,5 +1,11 @@
 import React from 'react';
 import { Typography, Stack, Box } from '@mui/material';
+import dayjs from 'dayjs';
+import buddhistEra from 'dayjs/plugin/buddhistEra';
+import 'dayjs/locale/th'; // Import Thai locale
+
+dayjs.extend(buddhistEra);
+dayjs.locale('th'); // Set locale globally to Thai
 
 interface BuyerInfoProps {
   buyer: {
@@ -12,14 +18,10 @@ interface BuyerInfoProps {
 }
 
 const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
-  // Subtract 7 hours from the given Order_datetime
-  const subtract7Hours = (datetime: string) => {
-    const date = new Date(datetime);
-    date.setHours(date.getHours() - 7); // Subtract 7 hours
-    return date;
-  };
-
-  const adjustedDate = subtract7Hours(buyer.Order_datetime);
+  // Subtract 7 hours and format with Buddhist Era
+  const adjustedDate = dayjs(buyer.Order_datetime)
+    .subtract(7, 'hour')
+    .format('D MMMM BBBB HH:mm');
 
   return (
     <Stack
@@ -31,26 +33,15 @@ const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
         borderRadius: "8px",
       }}
     >
-      {/* Row for Order Number and Order Date */}
       <Box display="flex" justifyContent="space-between">
         <Typography variant="body1" sx={{ paddingLeft: "500px", fontWeight: "bold" }}>
           <strong>เลขคำสั่งซื้อ:</strong> {buyer.Order_no}
         </Typography>
         <Typography variant="body1" sx={{ paddingRight: "500px", fontWeight: "bold" }}>
-          <strong>วันที่สั่งซื้อ:</strong>{" "}
-          {adjustedDate.toLocaleString('th-TH', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-          })}
+          <strong>วันที่สั่งซื้อ:</strong> {adjustedDate}
         </Typography>
       </Box>
 
-      {/* Individual rows for other customer details */}
       <Typography variant="body1">
         <strong>ชื่อ:</strong> {buyer.Cust_name}
       </Typography>

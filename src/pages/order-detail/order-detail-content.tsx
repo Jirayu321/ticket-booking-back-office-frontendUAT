@@ -131,18 +131,20 @@ const OrderDetailContent: React.FC = () => {
   
 
   return (
-    <div className="create-new-event">
+    <div >
       <Header title="รายละเอียดคำสั่งซื้อ" />
 
       <div
         style={{
           backgroundColor: "#000",
           width: "100%",
+          maxWidth: "1690px", // Fixed maximum width for the black header
           height: "100px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 20px",
+          margin: "0 auto", // Center the header
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -191,7 +193,6 @@ const OrderDetailContent: React.FC = () => {
             fontWeight: "bold",
             fontSize: "16px",
             height: "50px",
-            
           }}
           startIcon={
             isOrderPaid ? (

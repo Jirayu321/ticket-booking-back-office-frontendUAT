@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Button,
   CircularProgress,
@@ -11,44 +12,38 @@ import {
   TableRow,
   Stack,
 } from "@mui/material";
-import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FaCopy } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
-import { formatThaiDate } from "../../lib/util";
 import Header from "../common/header";
 import StartEndDatePickers from "../../components/common/input/date-picker/date";
-import dayjs, { Dayjs } from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import dayjs from "dayjs";
+import buddhistEra from 'dayjs/plugin/buddhistEra';
 import "./all-event-content.css";
 
-// Extend dayjs with timezone and utc plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(buddhistEra);
 
 const MAX_ITEMS_PER_PAGE = 50;
 
-// Helper function to format date in Bangkok timezone (UTC+7) and subtract 7 hours
-const formatAndSubtract7Hours = (date: string): string => {
-  return dayjs(date).subtract(7, "hour").tz("Asia/Bangkok").format("YYYY-MM-DD");
-};
-
-const formatDateStringInBangkok = (date: Dayjs | null): string | null => {
-  return date ? date.tz("Asia/Bangkok").format("YYYY-MM-DD") : null;
+const formatEventTime = (dateTime: string | null) => {
+  if (!dateTime) return "ยังไม่ระบุ";
+  return dayjs(dateTime)
+    .subtract(7, 'hour')
+    .locale('th')
+    .format('D/M/BBBB HH:mm');
 };
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    sortBy: "publish-date", // Default filter by publish date
+    sortBy: "publish-date",
     publishStatus: "all",
     status: "all",
     search: "",
     startDate: null as string | null,
     endDate: null as string | null,
-    dateFilterType: "publish-date", // Default to publish date
+    dateFilterType: "publish-date",
   });
 
   const { data: events, isPending: isLoadingEventList } = useFetchEventList({
@@ -80,11 +75,11 @@ const AllEventContent: React.FC = () => {
     }));
   };
 
-  const handleDateRangeChange = (startDate: Dayjs | null, endDate: Dayjs | null) => {
+  const handleDateRangeChange = (startDate: dayjs.Dayjs | null, endDate: dayjs.Dayjs | null) => {
     setFilters((prev) => ({
       ...prev,
-      startDate: formatDateStringInBangkok(startDate),
-      endDate: formatDateStringInBangkok(endDate),
+      startDate: startDate ? startDate.format("YYYY-MM-DD") : null,
+      endDate: endDate ? endDate.format("YYYY-MM-DD") : null,
     }));
   };
 
@@ -96,18 +91,16 @@ const AllEventContent: React.FC = () => {
       search: "",
       startDate: null,
       endDate: null,
-      dateFilterType: "publish-date", // Reset to default filter type
+      dateFilterType: "publish-date",
     });
   };
 
   const filteredEvents = events
     ?.filter((event) => {
-      // Filter by search
       if (filters.search && !event.Event_Name.toLowerCase().includes(filters.search.toLowerCase())) {
         return false;
       }
 
-      // Filter by publish status
       if (filters.publishStatus !== "all") {
         const isPublished = filters.publishStatus === "published" ? "Y" : "N";
         if (event.Event_Public !== isPublished) {
@@ -115,21 +108,22 @@ const AllEventContent: React.FC = () => {
         }
       }
 
-      // Filter by event status
       if (filters.status !== "all" && event.Event_Status !== parseInt(filters.status)) {
         return false;
       }
 
-      // Subtract 7 hours from event dates before comparing
-      const publishDate = formatAndSubtract7Hours(event.Event_Public_Date);
-      const eventDate = formatAndSubtract7Hours(event.Event_Time);
+      const publishDate = dayjs(event.Event_Public_Date)
+        .subtract(7, 'hour')
+        .locale('th')
+        .format('D/M/BBBB HH:mm');
+      const eventDate = dayjs(event.Event_Time)
+        .subtract(7, 'hour')
+        .locale('th')
+        .format('D/M/BBBB HH:mm');
 
-      // Filter by date range based on selected date filter type (Publish Date or Event Date)
       if (filters.startDate && filters.endDate) {
         const eventDateToCompare =
-          filters.dateFilterType === "publish-date"
-            ? publishDate
-            : eventDate;
+          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
 
         if (eventDateToCompare < filters.startDate || eventDateToCompare > filters.endDate) {
           return false;
@@ -151,7 +145,6 @@ const AllEventContent: React.FC = () => {
         </a>
 
         <div className="filter-options">
-          {/* Filter icons */}
           <div className="filter-item">
             <img src="/รอจัดงาน.svg" alt="รอจัดงาน icon" className="filter-icon" />
             <div className="filter-text-container">
@@ -184,9 +177,7 @@ const AllEventContent: React.FC = () => {
 
         {/* Date range and other filters */}
         <div className="additional-filters" style={{ display: "flex", flexDirection: "column", gap: "15px", padding: "10px" }}>
-          {/* Row 1: Search by event name, publish status, and event status */}
           <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
-            {/* Search Box */}
             <div style={{ width: "250px" }}>
               <input
                 name="search"
@@ -199,7 +190,6 @@ const AllEventContent: React.FC = () => {
               />
             </div>
 
-            {/* Publish Status */}
             <div className="filter-group" style={{ paddingLeft: "60px", paddingRight: "60px", paddingTop: "3px", height: "100px" }}>
               <label htmlFor="publish-status" style={{ color: "black", marginRight: "5px" }}>สถานะเผยแพร่</label>
               <select
@@ -216,7 +206,6 @@ const AllEventContent: React.FC = () => {
               </select>
             </div>
 
-            {/* Event Status */}
             <div className="filter-group" style={{ paddingTop: "3px", height: "100px" }}>
               <label htmlFor="status" style={{ color: "black", marginRight: "5px" }}>สถานะ Event</label>
               <select
@@ -236,7 +225,6 @@ const AllEventContent: React.FC = () => {
             </div>
           </div>
 
-          {/* Row 2: Date Filter */}
           <div style={{ display: "flex", justifyContent: "space-between", gap: "10px", paddingLeft: "25px", paddingRight: "150px" }}>
             <div className="filter-group">
               <label htmlFor="date-filter-type" style={{ color: "black", marginRight: "5px" }}>ตัวกรองวันที่</label>
@@ -253,19 +241,16 @@ const AllEventContent: React.FC = () => {
               </select>
             </div>
 
-            {/* Date Picker */}
             <div style={{paddingTop:"25px"}}>
-            <StartEndDatePickers
-              startDate={filters.startDate ? dayjs(filters.startDate) : null}
-              endDate={filters.endDate ? dayjs(filters.endDate) : null}
-              onStartDateChange={(newValue) => handleDateRangeChange(newValue, filters.endDate ? dayjs(filters.endDate) : null)}
-              onEndDateChange={(newValue) => handleDateRangeChange(filters.startDate ? dayjs(filters.startDate) : null, newValue)}
-            />
+              <StartEndDatePickers
+                startDate={filters.startDate ? dayjs(filters.startDate) : null}
+                endDate={filters.endDate ? dayjs(filters.endDate) : null}
+                onStartDateChange={(newValue) => handleDateRangeChange(newValue, filters.endDate ? dayjs(filters.endDate) : null)}
+                onEndDateChange={(newValue) => handleDateRangeChange(filters.startDate ? dayjs(filters.startDate) : null, newValue)}
+              />
             </div>
-  
           </div>
 
-          {/* Clear All Filters Button */}
           <div style={{ marginTop: "-10px", marginBottom: "0px", marginLeft: "25px" }}>
             <Button
               variant="outlined"
@@ -313,12 +298,12 @@ const AllEventContent: React.FC = () => {
                   <TableCell style={{ textAlign: "center" }}>{Event_Addr}</TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {Event_Public_Date
-                      ? formatThaiDate({ date: Event_Public_Date, option: "datetime" })
+                      ? formatEventTime(Event_Public_Date)
                       : "ยังไม่ระบุ"}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {Event_Time
-                      ? formatThaiDate({ date: Event_Time, option: "datetime" })
+                      ? formatEventTime(Event_Time)
                       : "ยังไม่ระบุ"}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>

@@ -24,6 +24,10 @@ import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
 import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import StartEndDatePickers from "../../components/common/input/date-picker/date"; // Import the date picker component
+import dayjs from 'dayjs';
+import buddhistEra from 'dayjs/plugin/buddhistEra';
+
+dayjs.extend(buddhistEra);
 
 const MAX_ITEMS_PER_PAGE = 50;
 
@@ -167,18 +171,7 @@ const AllSeatContent: React.FC = () => {
   );
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    date.setHours(date.getHours() - 7); // Subtract 7 hours from the event time
   
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  }
 
   const scannedCount = ticketData.filter(
     (ticket) => ticket.check_in_status === 1
@@ -226,7 +219,7 @@ const AllSeatContent: React.FC = () => {
             value={filters.search}
             onChange={handleSearchChange}
             placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง, หรือ เลขคำสั่งซื้อ"
-            style={{ marginRight: "10px", height: "50px", width: "300px" }}
+            style={{ marginRight: "10px", height: "50px", width: "350px" }}
             InputLabelProps={{
               shrink: true,
             }}
@@ -305,12 +298,17 @@ const AllSeatContent: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {ticketsInCurrentPage.map((ticket, index) => (
+          {ticketsInCurrentPage.map((ticket, index) => {
+            const formattedEventTime = dayjs(ticket.Event_Time)
+              .subtract(7, 'hour')
+              .locale('th')
+              .format('D/M/BBBB HH:mm');
+            return (
               <TableRow key={ticket.DT_order_id}>
                 <TableCell style={{ textAlign: "center" }}>{indexOfFirstItem + index + 1}</TableCell>
                 <TableCell style={{ textAlign: "left" }}>{ticket.Event_Name}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>
-                  {ticket.Event_Public_Date ? formatDate(ticket.Event_Time) : 'ยังไม่ระบุ'}
+                  {formattedEventTime}
                 </TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_running}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_no}</TableCell>
@@ -358,7 +356,8 @@ const AllSeatContent: React.FC = () => {
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+            );
+        })}
           </TableBody>
         </Table>
       </TableContainer>
