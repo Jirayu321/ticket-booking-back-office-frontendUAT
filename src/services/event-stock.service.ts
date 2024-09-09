@@ -57,9 +57,10 @@ export async function getEventStock() {
       throw new Error("Failed to fetch event stock");
     }
 
-    return response.data.eventStocks;
+    return response.data.eventStocks || [];
   } catch (error) {
-    throw new Error("ล้มเหลวระหว่างดึงข้อมูล event stock");
+    console.error("Error fetching event stock:", error);
+    return [];
   }
 }
 

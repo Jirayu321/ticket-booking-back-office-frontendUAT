@@ -28,12 +28,15 @@ const useEditEventStore = create<EditEventStore>((set) => ({
   title: "",
   title2: "",
   description: "",
-  eventDateTime: new Date().toISOString(),
+  eventDateTime: new Date().toISOString(), // Default to current ISO date
   status: 1,
   setTitle: (title) => set({ title }),
   setTitle2: (title2) => set({ title2 }),
   setDescription: (description) => set({ description }),
+  
+  // Ensure `eventDateTime` is properly set with ISO format
   setEventDateTime: (eventDateTime) => set({ eventDateTime }),
+
   setStatus: (status) => set({ status }),
   isPublic: false,
   setIsPublic: (isPublic) => set({ isPublic }),

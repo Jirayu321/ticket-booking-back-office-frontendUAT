@@ -196,10 +196,23 @@ const ZoneGroupContent: React.FC = () => {
     const handleDelete = async (id: number) => {
       try {
         const eventStocks = await getEventStock();
+    
+        // Check if eventStocks is empty or undefined
+        if (!eventStocks || eventStocks.length === 0) {
+          await deletePlanGroup(id);
+          Swal.fire({
+            icon: "success",
+            title: "ลบผังร้านสำเร็จ",
+          });
+          const data = await getAllPlanGroups();
+          setPlanGroups(data.planGroups);
+          return;
+        }
+    
         const isUsedInEventStock = eventStocks.some(
           (stock) => stock.PlanGroup_Id === id
         );
-  
+    
         if (isUsedInEventStock) {
           Swal.fire({
             icon: "error",
@@ -207,7 +220,7 @@ const ZoneGroupContent: React.FC = () => {
           });
           return;
         }
-  
+    
         await deletePlanGroup(id);
         Swal.fire({
           icon: "success",

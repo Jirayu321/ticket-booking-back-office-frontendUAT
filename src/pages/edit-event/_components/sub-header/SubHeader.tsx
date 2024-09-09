@@ -1,6 +1,7 @@
 import { FC } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import dayjs from 'dayjs';
 import { convertLocalTimeToISO } from "../../../../lib/util";
 import { updateEventById } from "../../../../services/event-list.service";
 import useEditEventStore from "../../_hook/useEditEventStore";
@@ -32,12 +33,16 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
 
       if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
 
+      // Add 7 hours to the eventDateTime before converting to ISO
+      const adjustedEventDateTime = dayjs(eventDateTime).add(7, 'hour').toISOString();
+
       // Make sure images are passed to the API call
       await updateEventById(Number(event.Event_Id), {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
-        Event_Time: convertLocalTimeToISO(eventDateTime),
+        Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
+        Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
         Event_Status: status,
         Event_Pic_1: images[0], // First image
         Event_Pic_2: images[1], // Second image

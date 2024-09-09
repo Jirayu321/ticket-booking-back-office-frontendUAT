@@ -17,6 +17,8 @@ import {
   deleteTicketNoPerPlan,
 } from "../../../services/ticket-no-per-plan.service";
 import { TicketNoOption } from "../type";
+import dayjs from 'dayjs';
+
 
 type SaveButtonProps = {
   planGroupId: number;
@@ -103,12 +105,12 @@ const SaveButton: FC<SaveButtonProps> = ({
           return createLogEventPrice({
             Created_By: "admin",
             Created_Date: new Date().toISOString(),
-            End_Datetime: logEventPriceInfo.End_Datetime,
+            End_Datetime: dayjs(logEventPriceInfo.End_Datetime).add(7, 'hour').toISOString(),
             Event_Id: Number(eventId),
             PlanGroup_Id: planGroupId,
             Plan_Id: planId,
             Plan_Price: logEventPriceInfo.Plan_Price,
-            Start_Datetime: logEventPriceInfo.Start_Datetime,
+            Start_Datetime: dayjs(logEventPriceInfo.Start_Datetime).add(7, 'hour').toISOString(),
           });
         })
       );
@@ -122,8 +124,8 @@ const SaveButton: FC<SaveButtonProps> = ({
           .map((lep: any) => {
             return updateLogEventPrice({
               logId: lep.Log_Id,
-              startDateTime: lep.Start_Datetime,
-              endDateTime: lep.End_Datetime,
+              startDateTime: dayjs(lep.Start_Datetime).add(7, 'hour').toISOString(),
+              endDateTime: dayjs(lep.End_Datetime).add(7, 'hour').toISOString(),
               updateBy: "admin",
               planPrice: lep.Plan_Price,
             });

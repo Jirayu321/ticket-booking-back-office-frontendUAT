@@ -62,6 +62,7 @@ const ZoneContent: React.FC = () => {
     const fetchPlans = async () => {
       try {
         const data = await getAllPlans();
+        
         setPlans(data.plans || []);
       } catch (error) {
         console.error("Failed to fetch plans:", error);
@@ -71,7 +72,10 @@ const ZoneContent: React.FC = () => {
     const fetchPlanGroups = async () => {
       try {
         const data = await getAllPlanGroups();
-        setPlanGroups(data.planGroups || []);
+        const activePlanGroups = data.planGroups.filter(
+          (group) => group.PlanGroup_Active === 'Y'
+        );
+        setPlanGroups(activePlanGroups || []);
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -406,6 +410,11 @@ const ZoneContent: React.FC = () => {
               <TableCell
                 style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
               >
+                ชื่อผังร้าน
+              </TableCell>
+              <TableCell
+                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+              >
                 ชื่อโซน
               </TableCell>
               <TableCell
@@ -435,6 +444,7 @@ const ZoneContent: React.FC = () => {
               currentItems.map((plan, index) => (
                 <TableRow key={plan.Plan_id}>
                   <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell  style={{textAlign:"center"}}>{plan.PlanGroup_Name}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>{plan.Plan_Name}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>{plan.Plan_Desc}</TableCell>
                   <TableCell  style={{textAlign:"center"}}>

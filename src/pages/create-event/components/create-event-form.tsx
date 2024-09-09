@@ -13,6 +13,8 @@ import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import BackIcon from "/back.svg";
 import { SwalError } from "../../../lib/sweetalert";
+import dayjs from 'dayjs';
+
 
 const MINIMUM_EVENT_IMAGES = 1;
 
@@ -36,7 +38,6 @@ const CreateEventForm = () => {
   useWarnChangePage();
 
   const [publish, setPublish] = useState(false);
-  const isPublishAvailable = false;
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [isDetailCompleted, setIsDetailCompleted] = useState(false);
 
@@ -69,13 +70,14 @@ const CreateEventForm = () => {
   async function handleCreateEvent() {
     try {
       toast.loading("กำลังสร้าง event ใหม่");
-
+      // Add 7 hours to the eventDateTime before converting to ISO
+      const adjustedEventDateTime = dayjs(eventDateTime).add(7, 'hour').toISOString();
       const eventData = {
         Event_Name: title,
         Event_Addr: title2,
         Event_Desc: description,
-        Event_Date: convertLocalTimeToISO(eventDateTime),
-        Event_Time: convertLocalTimeToISO(eventDateTime),
+        Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
+        Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
         Event_Status: status,
         Event_Public: "N",
         Event_Pic_1: images[0], // Send images from Zustand store
@@ -213,10 +215,10 @@ const CreateEventForm = () => {
           </div>
           <hr className="custom-hr" />
           <div className="form-section">
-            <DatePicker
+          <DatePicker
               label="วันและเวลาจัดงาน*"
-              dateTimeValue={eventDateTime}
-              setter={setEventDateTime}
+              dateTimeValue={eventDateTime} // Ensure Dayjs object
+              setter={setEventDateTime}     // Pass setter function for Dayjs object
             />
           </div>
           <div className="form-section">

@@ -76,10 +76,14 @@ const AllEventContent: React.FC = () => {
   };
 
   const handleDateRangeChange = (startDate: dayjs.Dayjs | null, endDate: dayjs.Dayjs | null) => {
+    // Set startDate to 00:01 and endDate to 23:59
+    const adjustedStartDate = startDate ? startDate.hour(0).minute(1).second(0) : null;
+    const adjustedEndDate = endDate ? endDate.hour(23).minute(59).second(59) : null;
+  
     setFilters((prev) => ({
       ...prev,
-      startDate: startDate ? startDate.format("YYYY-MM-DD") : null,
-      endDate: endDate ? endDate.format("YYYY-MM-DD") : null,
+      startDate: adjustedStartDate ? adjustedStartDate.format("YYYY-MM-DD HH:mm:ss") : null,
+      endDate: adjustedEndDate ? adjustedEndDate.format("YYYY-MM-DD HH:mm:ss") : null,
     }));
   };
 
@@ -96,43 +100,42 @@ const AllEventContent: React.FC = () => {
   };
 
   const filteredEvents = events
-    ?.filter((event) => {
-      if (filters.search && !event.Event_Name.toLowerCase().includes(filters.search.toLowerCase())) {
+  ?.filter((event) => {
+    if (filters.search && !event.Event_Name.toLowerCase().includes(filters.search.toLowerCase())) {
+      return false;
+    }
+
+    if (filters.publishStatus !== "all") {
+      const isPublished = filters.publishStatus === "published" ? "Y" : "N";
+      if (event.Event_Public !== isPublished) {
         return false;
       }
+    }
 
-      if (filters.publishStatus !== "all") {
-        const isPublished = filters.publishStatus === "published" ? "Y" : "N";
-        if (event.Event_Public !== isPublished) {
-          return false;
-        }
-      }
+    if (filters.status !== "all" && event.Event_Status !== parseInt(filters.status)) {
+      return false;
+    }
 
-      if (filters.status !== "all" && event.Event_Status !== parseInt(filters.status)) {
+    const publishDate = dayjs(event.Event_Public_Date).subtract(7, 'hour');
+    const eventDate = dayjs(event.Event_Time).subtract(7, 'hour');
+
+    // Compare using dayjs objects
+    if (filters.startDate && filters.endDate) {
+      const startDate = dayjs(filters.startDate);
+      const endDate = dayjs(filters.endDate);
+      
+      const dateToCompare =
+        filters.dateFilterType === "publish-date" ? publishDate : eventDate;
+
+      // Check if the event date is within the selected range
+      if (!dateToCompare.isBetween(startDate, endDate, null, '[]')) {
         return false;
       }
+    }
 
-      const publishDate = dayjs(event.Event_Public_Date)
-        .subtract(7, 'hour')
-        .locale('th')
-        .format('D/M/BBBB HH:mm');
-      const eventDate = dayjs(event.Event_Time)
-        .subtract(7, 'hour')
-        .locale('th')
-        .format('D/M/BBBB HH:mm');
-
-      if (filters.startDate && filters.endDate) {
-        const eventDateToCompare =
-          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-        if (eventDateToCompare < filters.startDate || eventDateToCompare > filters.endDate) {
-          return false;
-        }
-      }
-
-      return true;
-    })
-    .slice(indexOfFirstItem, indexOfLastItem);
+    return true;
+  })
+  .slice(indexOfFirstItem, indexOfLastItem);
 
   if (isLoadingEventList) return <CircularProgress />;
 
@@ -242,12 +245,12 @@ const AllEventContent: React.FC = () => {
             </div>
 
             <div style={{paddingTop:"25px"}}>
-              <StartEndDatePickers
-                startDate={filters.startDate ? dayjs(filters.startDate) : null}
-                endDate={filters.endDate ? dayjs(filters.endDate) : null}
-                onStartDateChange={(newValue) => handleDateRangeChange(newValue, filters.endDate ? dayjs(filters.endDate) : null)}
-                onEndDateChange={(newValue) => handleDateRangeChange(filters.startDate ? dayjs(filters.startDate) : null, newValue)}
-              />
+            <StartEndDatePickers
+              startDate={filters.startDate ? dayjs(filters.startDate) : null}
+              endDate={filters.endDate ? dayjs(filters.endDate) : null}
+              onStartDateChange={(newValue) => handleDateRangeChange(newValue, filters.endDate ? dayjs(filters.endDate) : null)}
+              onEndDateChange={(newValue) => handleDateRangeChange(filters.startDate ? dayjs(filters.startDate) : null, newValue)}
+            />
             </div>
           </div>
 

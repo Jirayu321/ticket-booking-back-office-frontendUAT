@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import dayjs from 'dayjs';
 import useEditEventStore from "./useEditEventStore";
 
 export function useSyncEventInfo(event: any) {
@@ -17,7 +18,9 @@ export function useSyncEventInfo(event: any) {
       setTitle(event.Event_Name);
       setTitle2(event.Event_Addr);
       setDescription(event.Event_Desc);
-      setEventDateTime(event.Event_Time);
+      // Decrease 7 hours from the Event_Time before setting it
+      const adjustedEventTime = dayjs(event.Event_Time).subtract(7, 'hour').toISOString();
+      setEventDateTime(adjustedEventTime);
       setStatus(Number(event.Event_Status));
       setIsPublic(event.Event_Public === "Y");
 
