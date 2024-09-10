@@ -126,7 +126,10 @@ const AllSeatContent: React.FC = () => {
       ticket.ticket_running?.toLowerCase().includes(searchValue) ||
       ticket.Order_no?.toLowerCase().includes(searchValue) ||
       ticket.ticket_no?.toLowerCase().includes(searchValue) ||
-      ticket.Event_Name?.toLowerCase().includes(searchValue);
+      ticket.Event_Name?.toLowerCase().includes(searchValue) ||
+      ticket.Cust_name?.toLowerCase().includes(searchValue) || // Added search for Cust_name
+      ticket.Cust_tel?.toLowerCase().includes(searchValue); // Added search for Cust_tel
+  
     const matchesStatus =
       filters.status === "all" || ticket.status === filters.status;
     const matchesEvent =
@@ -144,7 +147,7 @@ const AllSeatContent: React.FC = () => {
       filters.scanStatus === "all" ||
       (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) ||
       (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
-
+  
     // Date range filtering logic
     const eventDate = new Date(ticket.Event_Public_Date);
     const startDate = filters.startDate ? new Date(filters.startDate).setHours(0, 0, 0, 0) : null;
@@ -152,7 +155,7 @@ const AllSeatContent: React.FC = () => {
     const matchesDateRange =
       (!startDate || eventDate >= startDate) &&
       (!endDate || eventDate <= endDate);
-
+  
     return (
       matchesSearch &&
       matchesStatus &&
@@ -161,7 +164,7 @@ const AllSeatContent: React.FC = () => {
       matchesPrintStatus &&
       matchesPrintStatusName &&
       matchesScanStatus &&
-      matchesDateRange // Apply date range filter
+      matchesDateRange
     );
   });
 
@@ -218,8 +221,8 @@ const AllSeatContent: React.FC = () => {
             label="ค้นหา"
             value={filters.search}
             onChange={handleSearchChange}
-            placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง, หรือ เลขคำสั่งซื้อ"
-            style={{ marginRight: "10px", height: "50px", width: "350px" }}
+            placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
+            style={{ marginRight: "10px", height: "50px", width: "450px" }}
             InputLabelProps={{
               shrink: true,
             }}
@@ -286,6 +289,8 @@ const AllSeatContent: React.FC = () => {
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "10px" }}>ลำดับ</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>ชื่องาน</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>วันจัดงาน</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>ชื่อลูกค้า</TableCell>
+              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>เบอร์โทร</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>รหัสที่นั่ง</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขโต๊ะ</TableCell>
               <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขที่นั่ง</TableCell>
@@ -310,6 +315,8 @@ const AllSeatContent: React.FC = () => {
                 <TableCell style={{ textAlign: "center" }}>
                   {formattedEventTime}
                 </TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.Cust_name}</TableCell>
+                <TableCell style={{ textAlign: "center" }}>{ticket.Cust_tel}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_running}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>{ticket.ticket_no}</TableCell>
                 <TableCell style={{ textAlign: "center" }}>ที่นั่ง {ticket.ticket_line}</TableCell>

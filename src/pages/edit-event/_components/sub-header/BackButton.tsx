@@ -22,10 +22,10 @@ const BackButton = () => {
   };
   return (
     <div className={styles.backButtonContainer}>
-      <button onClick={handleBackClick}>
+      <button onClick={handleBackClick} style={{height:"60px",marginTop:"8px"}}>
         <FaChevronLeft />
       </button>
-      <h2 className={styles.title}>แก้ไขข้อมูลงาน</h2>
+      <h2 className={styles.title} style={{paddingLeft:"20px"}}>แก้ไขข้อมูลงาน</h2>
     </div>
   );
 };

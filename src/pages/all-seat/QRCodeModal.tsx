@@ -4,8 +4,9 @@ import { Box, Button, Modal, Typography } from "@mui/material";
 import QRCode from "qrcode.react";
 import Swal from "sweetalert2";
 import "../../index.css";
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import { SwalError } from "../../lib/sweetalert";
+import { getViewTicketList } from "../../services/view-tikcet-list.service"; // Import the service
 
 type QRCodeModalProps = {
   open: boolean;
@@ -35,10 +36,43 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     Event_Time,
     Plan_Name,
     ticket_line,
-    Web_Qty_Buy,
     ticket_no,
     print_count,
   } = ticketData;
+
+  const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] = useState<number>(0);
+
+  // Log the ticket number to the console
+  // console.log("Ticket Number:", ticket_no);
+
+  // Fetch the tickets and count how many have the same ticket_no
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const data = await getViewTicketList(); // Fetch ticket list
+        console.log("Fetched Data:", data); // Log the fetched data
+
+        if (data && Array.isArray(data.ticketList)) {
+          const matchingTickets = data.ticketList.filter(
+            (ticket) => ticket.ticket_no === ticket_no
+          );
+          // console.log("Filtered Tickets:", matchingTickets); // Log the filtered tickets
+          setTotalTicketsWithSameNo(matchingTickets.length);
+        } else {
+          // console.log("Data is not an array:", data); // Log if data is not an array
+          setTotalTicketsWithSameNo(0); // Set 0 if no data found
+        }
+      } catch (error) {
+        console.error("Error fetching ticket data:", error); // Log the error
+        SwalError("Failed to fetch ticket data.");
+        setTotalTicketsWithSameNo(0);
+      }
+    };
+
+    if (open) {
+      fetchTickets();
+    }
+  }, [open, ticket_no]);
 
   function handlePrintQr() {
     const canvas = document.getElementById(
@@ -122,19 +156,20 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
               marginRight: "4px",
             }}
           />
-          {new Date(Event_Time).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
+          {new Date(new Date(Event_Time).getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
           })}
         </Typography>
         <Typography variant="body2" align="center" style={{ color: "black" }}>
-          {Plan_Name} - {ticket_line}/{Web_Qty_Buy} ({ticket_no})
+          {Plan_Name} - ที่นั่ง {ticket_line}/{totalTicketsWithSameNo} (เบอร์โต๊ะ {ticket_no})
         </Typography>
         <Button
           variant="contained"
           color="secondary"
-          onClick={handlePrintQr} // Implement actual print functionality as needed
+          onClick={handlePrintQr}
           sx={{ marginTop: "16px", width: "100%" }}
         >
           พิมพ์บัตรที่นั่ง

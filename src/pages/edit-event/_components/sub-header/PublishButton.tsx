@@ -42,7 +42,7 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
 
   return (
     <label style={{ display: 'flex', alignItems: 'center' }}>
-      <p style={{ marginRight: '20px' }}>
+      <p style={{ marginRight: '10px',marginLeft:'-90px' }}>
         {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
       </p>
       <input

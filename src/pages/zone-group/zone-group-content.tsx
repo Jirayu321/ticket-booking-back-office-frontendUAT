@@ -195,9 +195,17 @@ const ZoneGroupContent: React.FC = () => {
 
     const handleDelete = async (id: number) => {
       try {
-        const eventStocks = await getEventStock();
+        const planCount = calculatePlanCount(id); // Check how many zones are in this plan group
+        if (planCount > 0) {
+          Swal.fire({
+            icon: "error",
+            title: "ลบผังร้านไม่ได้",
+            text: "ผังร้านนี้ถูกใช้ในโซนแล้ว",
+          });
+          return; // Don't proceed with the deletion
+        }
     
-        // Check if eventStocks is empty or undefined
+        const eventStocks = await getEventStock();
         if (!eventStocks || eventStocks.length === 0) {
           await deletePlanGroup(id);
           Swal.fire({

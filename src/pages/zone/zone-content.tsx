@@ -291,11 +291,16 @@ const ZoneContent: React.FC = () => {
   };
 
   const filteredPlans = plans.filter((plan) => {
+    const nameMatch = plan.Plan_Name.toLowerCase().includes(searchQuery.toLowerCase());
+    const groupNameMatch = plan.PlanGroup_Name.toLowerCase().includes(searchQuery.toLowerCase());
+  
     return (
       (statusFilter === "ทั้งหมด" || plan.Plan_Active === statusFilter) &&
-      plan.Plan_Name.toLowerCase().includes(searchQuery.toLowerCase())
+      (nameMatch || groupNameMatch) // Match either Plan_Name or PlanGroup_Name
     );
   });
+
+  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -366,7 +371,7 @@ const ZoneContent: React.FC = () => {
           </FormControl>
           <TextField
             variant="outlined"
-            placeholder="ค้นหาโซน"
+            placeholder="ค้นหาชื่อผังร้านและโซน"
             value={searchQuery}
             onChange={handleSearchChange}
             style={{ marginRight: "10px", height: "50px" }}

@@ -87,6 +87,7 @@ const AllOrderContent: React.FC = () => {
       endDate: null,
     }));
   };
+
   const handleClearFilters = () => {
     setFilters({
       startDate: null,
@@ -128,56 +129,61 @@ const AllOrderContent: React.FC = () => {
     };
   });
 
+  // Mapping for Order_Status to text
+  const statusMap = {
+    1: "สำเร็จ",
+    2: "มีแก้ไข",
+    13: "ขอคืนเงิน",
+    3: "ไม่สำเร็จเพราะติด R",
+    4: "ไม่สำเร็จจาก Omise",
+  };
+
   const filteredOrders = combinedOrders.filter((order) => {
     const matchesSearch =
       order.Event_Name.includes(filters.eventName) &&
       order.Order_no.includes(filters.orderNo) &&
       order.Cust_name.includes(filters.customerName) &&
       order.Cust_tel.includes(filters.customerPhone);
-  
+
+    const mappedStatus = statusMap[order.Order_Status] || "ไม่ระบุ"; // Get status label from the map
+
     const matchesStatus =
-      filters.status === "all" || order.OrderStatus_Name === filters.status;
-  
+      filters.status === "all" || mappedStatus === filters.status;
+
+    // Payment status logic based on Order_Status and Total_Balance
     let paymentStatusLabel;
     if (order.Order_Status === 1) {
       paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
-    } else if (
-      order.Order_Status === 2 ||
-      order.Order_Status === 13 ||
-      order.Order_Status === 3 ||
-      order.Order_Status === 4
-    ) {
+    } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
       paymentStatusLabel = "ไม่สำเร็จ";
     } else {
       paymentStatusLabel = "ไม่ระบุ";
     }
-  
+
     const matchesPaymentStatus =
       filters.paymentStatus === "all" || paymentStatusLabel === filters.paymentStatus;
-  
+
     const orderDate = new Date(order.Order_datetime);
     const startDate = filters.startDate ? new Date(filters.startDate).setHours(0, 0, 0, 0) : null;
     const endDate = filters.endDate ? new Date(filters.endDate).setHours(23, 59, 59, 999) : null;
-  
+
     const matchesDateRange =
       (!startDate || orderDate >= startDate) &&
       (!endDate || orderDate <= endDate);
-  
+
     return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange;
   });
 
   const ordersInCurrentPage = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / MAX_ITEMS_PER_PAGE);
 
-  // Calculate the number of orders with a balance and total orders
   const totalOrders = orderHData.length;
   const ordersWithBalance = orderHData.filter((order) => order.Total_Balance > 0).length;
 
-  // Calculate the total net price and total balance for the overall sales data
   const totalNetPrice = orderHData.reduce((sum, order) => sum + (order.Net_Price || 0), 0);
   const totalPaySum = orderHData.reduce((sum, order) => sum + (order.Total_Pay || 0), 0);
   const navigate = useNavigate();
-  
+
   const handleViewHistoryClick = (orderId: string) => {
     navigate(`/order-detail/${orderId}?tabIndex=1`);
   };
@@ -189,22 +195,14 @@ const AllOrderContent: React.FC = () => {
       <Header title="คำสั่งซื้อทั้งหมด" />
       <div className="filter-options">
         <div className="filter-item">
-          <img
-            src="/cart.svg"
-            alt="คำสั่งซื้อทั้งหมด icon"
-            className="filter-icon"
-          />
+          <img src="/cart.svg" alt="คำสั่งซื้อทั้งหมด icon" className="filter-icon" />
           <div className="filter-text-container">
             <span className="filter-text">คำสั่งซื้อทั้งหมด</span>
             <span className="filter-number">{totalOrders}</span> {/* Dynamic total order count */}
           </div>
         </div>
         <div className="filter-item">
-          <img
-            src="/not-pay.svg"
-            alt="ค้างชำระ icon"
-            className="filter-icon"
-          />
+          <img src="/not-pay.svg" alt="ค้างชำระ icon" className="filter-icon" />
           <div className="filter-text-container">
             <span className="filter-text">ค้างชำระ</span>
             <span className="filter-number">{`${ordersWithBalance}/${totalOrders}`}</span> {/* Number of orders with balance / total orders */}
@@ -217,10 +215,11 @@ const AllOrderContent: React.FC = () => {
             <span className="filter-number" style={{ fontSize: "18px", marginLeft: "-50px" }}>
               {`${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalPaySum)} / 
                 ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalNetPrice)}`}
-            </span> {/* Net Price / Total Balance formatted in Thai Baht */}
+            </span>
           </div>
         </div>
       </div>
+
       <div className="filters" style={{ padding: "18px", backgroundColor: "white", borderRadius: "5px", marginBottom: "18px" }}>
         <Stack direction="row" spacing={2}>
           <StartEndDatePickers
@@ -229,12 +228,7 @@ const AllOrderContent: React.FC = () => {
             onStartDateChange={(date) => handleDateRangeChange(date, filters.endDate)}
             onEndDateChange={(date) => handleDateRangeChange(filters.startDate, date)}
           />
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleClearFilters}
-            style={{ marginTop: "8px" }}
-          >
+          <Button variant="outlined" color="primary" onClick={handleClearFilters} style={{ marginTop: "8px" }}>
             Clear
           </Button>
         </Stack>
@@ -371,11 +365,8 @@ const AllOrderContent: React.FC = () => {
               .subtract(7, 'hour')
               .locale('th')
               .format('D/M/BBBB HH:mm');
-              // Order status and background color based on OrderStatus_Name and OrderSetColour
-              const statusLabel = order.OrderStatus_Name;
-              const bgColor = order.OrderSetColour;
+              const statusLabel = statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
 
-              // Payment status logic based on Order_Status and Total_Balance
               let paymentStatusLabel;
               let paymentStatusBgColor;
 
@@ -390,18 +381,9 @@ const AllOrderContent: React.FC = () => {
                   paymentStatusLabel = "ไม่สำเร็จ";
                   paymentStatusBgColor = "#dc3545"; // Red for failure
                 }
-              } else if (order.Order_Status === 2) {
+              } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
                 paymentStatusLabel = "ไม่สำเร็จ";
-                paymentStatusBgColor = "#343a40"; // Blue for modifications
-              } else if (order.Order_Status === 13) {
-                paymentStatusLabel = "ไม่สำเร็จ";
-                paymentStatusBgColor = "#343a40"; // Red for refund
-              } else if (order.Order_Status === 3) {
-                paymentStatusLabel = "ไม่สำเร็จ";
-                paymentStatusBgColor = "#343a40"; // Dark gray for failure due to R
-              } else if (order.Order_Status === 4) {
-                paymentStatusLabel = "ไม่สำเร็จ";
-                paymentStatusBgColor = "#343a40"; // Gray for Omise failure
+                paymentStatusBgColor = "#343a40"; // Gray for failure
               } else {
                 paymentStatusLabel = "ไม่ระบุ";
                 paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
@@ -457,7 +439,7 @@ const AllOrderContent: React.FC = () => {
                         textAlign: "center",
                         display: "inline-block",
                         width: "100px",
-                        backgroundColor: bgColor,
+                        backgroundColor: "#007bff",
                         color: "#fff",
                       }}
                     >
