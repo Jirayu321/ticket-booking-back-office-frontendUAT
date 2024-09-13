@@ -105,7 +105,7 @@ const Body: FC<BodyProps> = ({
               <img
                 src={Plan_Pic}
                 alt="Plan Pic"
-                style={{ width: "100%", height: "auto" }}
+                style={{  width: "500px", height: "250px" }}
               />
             </a>
           </div>

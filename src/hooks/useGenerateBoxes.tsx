@@ -12,6 +12,7 @@ export function useGenerateBoxes(options: {
     prefix: string
   ) => void;
   zones: Record<number, any>;
+  selectedTicketType: string; // Add selectedTicketType to the options
 }) {
   const {
     method,
@@ -20,8 +21,10 @@ export function useGenerateBoxes(options: {
     setTableValues,
     setStartNumberAndPrefix,
     zones,
+    selectedTicketType, // Destructure selectedTicketType
   } = options;
-
+  console.log("zones", zones);
+  
   const [startNumber, setStartNumber] = useState<number | null>(
     zones[zoneId]?.startNumber || null
   );
@@ -81,7 +84,7 @@ export function useGenerateBoxes(options: {
       for (let i = 0; i < totalSeats; i++) {
         const boxValue =
           method === "3"
-            ? `โต๊ะ ${startNumber + i}`
+            ? `${selectedTicketType} ${startNumber + i}`
             : method === "4"
             ? `${prefix}${startNumber + i}`
             : `${startNumber + i}`;
@@ -122,6 +125,7 @@ export function useGenerateBoxes(options: {
       );
     });
   };
+
   return {
     startNumber,
     prefix,
