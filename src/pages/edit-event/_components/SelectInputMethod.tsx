@@ -5,12 +5,14 @@ type Props = {
   currentPlan: any;
   setTicketOption: (option: TicketNoOption) => void;
   currentOption: TicketNoOption;
+  selectedTicketType: string; // Add the selectedTicketType prop
 };
 
 const SelectInputMethod: FC<Props> = ({
   currentPlan,
   currentOption,
   setTicketOption,
+  selectedTicketType,
 }) => {
   return (
     <>
@@ -26,8 +28,8 @@ const SelectInputMethod: FC<Props> = ({
         <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
         <option value="2">2.รันจาก 1 ถึง {currentPlan?.seatCount || 0}</option>
         <option value="3">
-          3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง {currentPlan?.seatCount || 0} -
-          (โต๊ะ 1- โต๊ะ {currentPlan?.seatCount || 0})
+          3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก x ถึง {currentPlan?.seatCount || 0} -
+          ({selectedTicketType} 1- {selectedTicketType} {currentPlan?.seatCount || 0})
         </option>
         <option value="4">
           4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง {currentPlan?.seatCount || 0}{" "}

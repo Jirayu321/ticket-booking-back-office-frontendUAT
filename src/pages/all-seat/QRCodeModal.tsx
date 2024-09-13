@@ -21,6 +21,7 @@ type QRCodeModalProps = {
     Web_Qty_Buy: number;
     ticket_no: string;
     print_count: number;
+    order_id: number; // Add order_id to the ticketData type
   };
 };
 
@@ -38,14 +39,12 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     ticket_line,
     ticket_no,
     print_count,
+    order_id, // Destructure order_id from ticketData
   } = ticketData;
 
   const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] = useState<number>(0);
 
-  // Log the ticket number to the console
-  // console.log("Ticket Number:", ticket_no);
-
-  // Fetch the tickets and count how many have the same ticket_no
+  // Fetch the tickets and count how many have the same ticket_no and order_id
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -54,12 +53,12 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
 
         if (data && Array.isArray(data.ticketList)) {
           const matchingTickets = data.ticketList.filter(
-            (ticket) => ticket.ticket_no === ticket_no
+            (ticket) => ticket.ticket_no === ticket_no && ticket.order_id === order_id
           );
-          // console.log("Filtered Tickets:", matchingTickets); // Log the filtered tickets
+          console.log("Filtered Tickets:", matchingTickets); // Log the filtered tickets
           setTotalTicketsWithSameNo(matchingTickets.length);
         } else {
-          // console.log("Data is not an array:", data); // Log if data is not an array
+          console.log("Data is not an array:", data); // Log if data is not an array
           setTotalTicketsWithSameNo(0); // Set 0 if no data found
         }
       } catch (error) {
@@ -72,7 +71,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     if (open) {
       fetchTickets();
     }
-  }, [open, ticket_no]);
+  }, [open, ticket_no, order_id]);
 
   function handlePrintQr() {
     const canvas = document.getElementById(

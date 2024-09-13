@@ -370,11 +370,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                 <select
                   value={zones[zone.Plan_id]?.tableInputMethod || ""}
                   onChange={(e) =>
-                    handleInputChange(
-                      zone.Plan_id,
-                      "tableInputMethod",
-                      e.target.value
-                    )
+                    handleInputChange(zone.Plan_id, "tableInputMethod", e.target.value)
                   }
                   className="table-input-method-select"
                 >
@@ -384,14 +380,26 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                     2.รันจาก 1 ถึง {zones[zone.Plan_id]?.seatCount || 0}
                   </option>
                   <option value="3">
-                    3.นำหน้าด้วย โต๊ะ ต่อด้วย รันจาก 1 ถึง{" "}
-                    {zones[zone.Plan_id]?.seatCount || 0} - (โต๊ะ 1- โต๊ะ{" "}
-                    {zones[zone.Plan_id]?.seatCount || 0})
+                    {`3.นำหน้าด้วย ${
+                      ticketTypes?.find(
+                        (type) => type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
+                      )?.Ticket_Type_Name || "ประเภทบัตร"
+                    } ต่อด้วย รันจาก 1 ถึง ${
+                      zones[zone.Plan_id]?.seatCount || 0
+                    } - (${
+                      ticketTypes?.find(
+                        (type) => type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
+                      )?.Ticket_Type_Name || "ประเภทบัตร"
+                    } 1-${zones[zone.Plan_id]?.seatCount || 0})`}
                   </option>
                   <option value="4">
-                    4.ใส่อักษรนำหน้า ต่อด้วย รันจาก 1 ถึง{" "}
-                    {zones[zone.Plan_id]?.seatCount || 0} ([?] 1- [?]{" "}
-                    {zones[zone.Plan_id]?.seatCount || 0})
+                    {`4.ใส่อักษรนำหน้า ต่อด้วย ${
+                      ticketTypes?.find(
+                        (type) => type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
+                      )?.Ticket_Type_Name || "ประเภทบัตร"
+                    } จาก 1 ถึง ${zones[zone.Plan_id]?.seatCount || 0} ([?] 1-[?] ${
+                      zones[zone.Plan_id]?.seatCount || 0
+                    })`}
                   </option>
                   <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
                 </select>
