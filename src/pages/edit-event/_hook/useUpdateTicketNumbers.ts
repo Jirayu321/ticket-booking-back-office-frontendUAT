@@ -5,8 +5,8 @@ export function useUpdateTicketNumbers({
   prefix,
   ticketNoOption,
   setPrefix,
-  setTempTicketNumbers,
   selectedTicketType,
+  setTempTicketNumbers,
 }: {
   startNumber: number | null;
   prefix: string;
@@ -15,8 +15,6 @@ export function useUpdateTicketNumbers({
   setTempTicketNumbers: (value: any) => void;
   selectedTicketType: string;
 }) {
-  console.log(selectedTicketType);
-  
   useEffect(() => {
     switch (ticketNoOption) {
       case "1":
@@ -66,5 +64,5 @@ export function useUpdateTicketNumbers({
       default:
         break;
     }
-  }, [startNumber, prefix, ticketNoOption]);
+  }, [startNumber, prefix, ticketNoOption, selectedTicketType]);
 }

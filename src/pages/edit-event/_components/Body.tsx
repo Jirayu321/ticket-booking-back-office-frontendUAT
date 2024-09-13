@@ -87,8 +87,7 @@ const Body: FC<BodyProps> = ({
     setTempTicketNumbers,
     selectedTicketType: ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? "",
   });
-  console.log(ticketTypes);
-  console.log(ticketTypeId);
+  
   useUpdateTicketNumbersBySeatQtyPerPlan({
     seatQtyPerPlan: seatQtyPerticket,
     setTicketNumbers: setTempTicketNumbers,
