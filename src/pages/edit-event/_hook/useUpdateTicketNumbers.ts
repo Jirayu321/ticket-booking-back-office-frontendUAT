@@ -16,7 +16,7 @@ export function useUpdateTicketNumbers({
   selectedTicketType: string;
 }) {
   useEffect(() => {
-    switch (ticketNoOption) {
+    switch (String(ticketNoOption)) {
       case "1":
         break;
       case "2":
