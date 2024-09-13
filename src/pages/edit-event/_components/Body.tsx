@@ -83,16 +83,15 @@ const Body: FC<BodyProps> = ({
     startNumber,
     prefix,
     ticketNoOption,
-    setPrefix,
-    setTempTicketNumbers,
     selectedTicketType: ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? "",
+    setPrefix,
+    setTempTicketNumbers, 
   });
   
   useUpdateTicketNumbersBySeatQtyPerPlan({
     seatQtyPerPlan: seatQtyPerticket,
     setTicketNumbers: setTempTicketNumbers,
   });
-  console.log(tempTicketNumbers);
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
