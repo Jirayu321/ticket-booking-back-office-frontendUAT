@@ -85,12 +85,15 @@ const Body: FC<BodyProps> = ({
     ticketNoOption,
     setPrefix,
     setTempTicketNumbers,
+    selectedTicketType: ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? "",
   });
-
+  console.log(ticketTypes);
+  console.log(ticketTypeId);
   useUpdateTicketNumbersBySeatQtyPerPlan({
     seatQtyPerPlan: seatQtyPerticket,
     setTicketNumbers: setTempTicketNumbers,
   });
+  console.log(tempTicketNumbers);
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -177,6 +180,7 @@ const Body: FC<BodyProps> = ({
         <LogPrices planId={planId} zones={zones} />
         <div className="table-input-method-section">
           <SelectInputMethod
+            selectedTicketType={ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? ""}
             currentPlan={
               zones.filter((zone: any) => zone.Plan_Id === planId)[0]
             }
