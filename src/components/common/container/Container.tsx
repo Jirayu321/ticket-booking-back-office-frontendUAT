@@ -1,6 +1,7 @@
 import { FC, ReactNode } from "react";
-import Sidebar from "../../Sidebar/Sidebar";
+// import Sidebar from "../../Sidebar/Sidebar";
 import styles from "./container.module.css";
+import Sidebars from "../../Sidebar/Sidebars";
 
 type ContainerProp = {
   children: ReactNode;
@@ -9,7 +10,8 @@ type ContainerProp = {
 const Container: FC<ContainerProp> = ({ children }) => {
   return (
     <div className={styles.container}>
-      <Sidebar />
+      {/* <Sidebar /> */}
+      <Sidebars />
       <div className={styles.content}>{children}</div>
     </div>
   );

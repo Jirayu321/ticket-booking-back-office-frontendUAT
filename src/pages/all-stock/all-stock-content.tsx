@@ -15,11 +15,17 @@ import {
   Select,
   MenuItem,
   TextField,
+  Container,
+  Grid,
+  Box,
+  Avatar,
+  Typography,
 } from "@mui/material";
 import { getEventStock } from "../../services/event-stock.service"; // Import the correct service
 import toast from "react-hot-toast";
 import Header from "../common/header"; // Assuming you have a Header component
 import InventoryIcon from "@mui/icons-material/Inventory";
+import AddCardIcon from '@mui/icons-material/AddCard';
 
 const MAX_ITEMS_PER_PAGE = 50;
 
@@ -134,7 +140,8 @@ const AllStockContent: React.FC = () => {
       filters.eventStatus === "*" || stock.Event_Status == filters.eventStatus;
 
     const matchesPublicStatus =
-      filters.publicStatus === "*" || stock.Event_Public === filters.publicStatus;
+      filters.publicStatus === "*" ||
+      stock.Event_Public === filters.publicStatus;
 
     return matchesSearch && matchesEventStatus && matchesPublicStatus;
   });
@@ -151,139 +158,367 @@ const AllStockContent: React.FC = () => {
   return (
     <div className="all-orders-content">
       <Header title="สต๊อกทั้งหมด" />
-      <div className="filter-options">
-        {/* Total tickets, bought tickets, and balance display */}
-        <div className="filter-item">
-          <img
-            src="/cart.svg"
-            alt="คำสั่งซื้อทั้งหมด icon"
-            className="filter-icon"
-          />
-          <div className="filter-text-container">
-            <span className="filter-text">บัตรทั้งหมด</span>
-            <span className="filter-number">
-              {numberFormatter.format(totalTickets)}
-            </span>
-          </div>
-        </div>
-        <div className="filter-item">
-          <img
-            src="/not-pay.svg"
-            alt="บัตรที่ขายไปแล้ว icon"
-            className="filter-icon"
-          />
-          <div className="filter-text-container">
-            <span className="filter-text">บัตรที่ขายไปแล้ว</span>
-            <span className="filter-number">
-              {numberFormatter.format(totalTicketsBuy)}
-            </span>
-          </div>
-        </div>
-        <div className="filter-item">
-          <InventoryIcon style={{ fontSize: 80 }} />
-          <div className="filter-text-container">
-            <span className="filter-text">บัตรคงเหลือทั้งหมด</span>
-            <span className="filter-number">
-              {numberFormatter.format(totalTicketsBalance)}
-            </span>
-          </div>
-        </div>
-      </div>
+      <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+
+              <AddCardIcon sx={{
+                fontSize: 70
+              }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>บัตรทั้งหมด</Typography>
+                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                    {numberFormatter.format(totalTickets)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <Avatar
+                src="/not-pay.svg"
+                alt="บัตรคงเหลือทั้งหมด"
+                className="filter-icon"
+                sx={{ width: 70, height: 70 }}
+              />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>
+                    บัตรคงเหลือทั้งหมด
+                  </Typography>
+                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                    {numberFormatter.format(totalTicketsBuy)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <InventoryIcon style={{ fontSize: 70 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>
+                    บัตรที่ขายไปแล้ว
+                  </Typography>
+                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                    {numberFormatter.format(totalTicketsBalance)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
+
       <div
-        className="filters"
         style={{
-          padding: "20px",
-          backgroundColor: "white",
-          borderRadius: "5px",
-          marginBottom: "20px",
+          backgroundColor: "#f7f7f7",
         }}
       >
-        <Stack direction="row" spacing={2}>
-          <TextField
-            variant="outlined"
-            label="ค้นหา"
-            value={filters.search}
-            onChange={handleSearchChange}
-            placeholder="ค้นหาโดย ชื่องาน หรือ ชื่อโซน"
-            style={{ marginRight: "10px", height: "50px", width: "300px" }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& input": {
-                  border: "none", // Remove the inner border
-                  transform: "translateY(5px)",
+        <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              variant="outlined"
+              label="ค้นหา"
+              value={filters.search}
+              onChange={handleSearchChange}
+              placeholder="ค้นหาโดย ชื่องาน หรือ ชื่อโซน"
+              style={{ marginRight: "10px", height: "50px", width: "300px" }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
-          />
-          {/* Filter by Event Status */}
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะ Event</InputLabel>
-            <Select
-              label="สถานะ Event"
-              name="eventStatus"
-              value={filters.eventStatus}
-              onChange={handleFilterChange}
+              }}
+            />
+            {/* Filter by Event Status */}
+            <FormControl
+              variant="outlined"
+              style={{ minWidth: 150, backgroundColor: "white" }}
             >
-              <MenuItem value="*">ทั้งหมด</MenuItem>
-              <MenuItem value="1">รอเริ่มงาน</MenuItem>
-              <MenuItem value="2">เริ่มงาน</MenuItem>
-              <MenuItem value="3">ปิดงาน</MenuItem>
-              <MenuItem value="13">ยกเลิก</MenuItem>
-            </Select>
-          </FormControl>
-          {/* Filter by Public Status */}
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะเผยแพร่</InputLabel>
-            <Select
-              label="สถานะเผยแพร่"
-              name="publicStatus"
-              value={filters.publicStatus}
-              onChange={handleFilterChange}
+              <InputLabel>สถานะ Event</InputLabel>
+              <Select
+                label="สถานะ Event"
+                name="eventStatus"
+                value={filters.eventStatus}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="*">ทั้งหมด</MenuItem>
+                <MenuItem value="1">รอเริ่มงาน</MenuItem>
+                <MenuItem value="2">เริ่มงาน</MenuItem>
+                <MenuItem value="3">ปิดงาน</MenuItem>
+                <MenuItem value="13">ยกเลิก</MenuItem>
+              </Select>
+            </FormControl>
+            {/* Filter by Public Status */}
+            <FormControl
+              variant="outlined"
+              style={{ minWidth: 150, backgroundColor: "white" }}
             >
-              <MenuItem value="*">ทั้งหมด</MenuItem>
-              <MenuItem value="Y">เผยแพร่</MenuItem>
-              <MenuItem value="N">ไม่เผยแพร่</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
+              <InputLabel>สถานะเผยแพร่</InputLabel>
+              <Select
+                label="สถานะเผยแพร่"
+                name="publicStatus"
+                value={filters.publicStatus}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="*">ทั้งหมด</MenuItem>
+                <MenuItem value="Y">เผยแพร่</MenuItem>
+                <MenuItem value="N">ไม่เผยแพร่</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </Container>
       </div>
-
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>ลำดับ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>ชื่องาน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>ชื่อโซน</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>ประเภทบัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>จำนวนบัตรทั้งหมด</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>จำนวนที่/บัตร</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>จำนวนบัตรที่ถูกซื้อ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>จำนวนบัตรคงเหลือ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>จำนวนที่นั่งคงเหลือ</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>สถานะ Event</TableCell>
-              <TableCell style={{ fontWeight: "bold", fontSize: "18px", textAlign: "center" }}>สถานะเผยแพร่</TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                ชื่องาน
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                ชื่อโซน
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                ประเภทบัตร
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                จำนวนบัตรทั้งหมด
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                จำนวนที่/บัตร
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                จำนวนบัตรที่ถูกซื้อ
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                จำนวนบัตรคงเหลือ
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                จำนวนที่นั่งคงเหลือ
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                สถานะ Event
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                สถานะเผยแพร่
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {stocksInCurrentPage.map((stock, index) => {
-              const { label, backgroundColor } = getStatusDetails(stock.Event_Status);
-              const { label: publicLabel, backgroundColor: publicBgColor } = getPublicStatusDetails(stock.Event_Public);
+              const { label, backgroundColor } = getStatusDetails(
+                stock.Event_Status
+              );
+              const { label: publicLabel, backgroundColor: publicBgColor } =
+                getPublicStatusDetails(stock.Event_Public);
 
               return (
                 <TableRow key={stock.Event_STC_Id}>
-                  <TableCell style={{ textAlign: "center" }}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Event_Name}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Plan_Name}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Ticket_Type_Name}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Ticket_Qty}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Ticket_Qty_Per}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Ticket_Qty_Buy}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.Ticket_Qty_Balance}</TableCell>
-                  <TableCell style={{ textAlign: "center" }}>{stock.STC_Total_Balance}</TableCell>
+                  <TableCell style={{ textAlign: "center" , fontWeight: 'bold' }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Event_Name}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Plan_Name}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Ticket_Type_Name}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Ticket_Qty}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Ticket_Qty_Per}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Ticket_Qty_Buy}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.Ticket_Qty_Balance}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {stock.STC_Total_Balance}
+                  </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     <div
                       style={{
@@ -317,7 +552,9 @@ const AllStockContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
         <Pagination
           count={totalPages}
           page={currentPage}

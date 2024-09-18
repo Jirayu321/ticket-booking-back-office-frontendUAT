@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,7 +18,12 @@ import {
   Pagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getPayBy, createPayBy, updatePayBy, deletePayBy } from "../../services/pay-by.service";
+import {
+  getPayBy,
+  createPayBy,
+  updatePayBy,
+  deletePayBy,
+} from "../../services/pay-by.service";
 import { getHispayment } from "../../services/his-payment.service";
 import Header from "../common/header";
 import toast from "react-hot-toast";
@@ -73,21 +77,33 @@ const PayByContent: React.FC = () => {
     setEditPayOption(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     setNewPayOption({
       ...newPayOption,
       [event.target.name as string]: event.target.value,
     });
   };
 
-  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleEditChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
+  ) => {
     setEditPayOption({
       ...editPayOption,
       [event.target.name as string]: event.target.value,
     });
   };
 
-  const isDuplicatePayByName = (name: string, options: any[], currentId?: number): boolean => {
+  const isDuplicatePayByName = (
+    name: string,
+    options: any[],
+    currentId?: number
+  ): boolean => {
     return options.some(
       (option) =>
         option.Pay_By_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
@@ -109,7 +125,7 @@ const PayByContent: React.FC = () => {
         Pay_By_Active: "Y", // Default to "ไม่เผยแพร่" (Inactive)
         Created_By: "Admin", // Replace with actual creator
       });
-  
+
       toast.dismiss();
       Swal.fire({
         icon: "success",
@@ -122,7 +138,7 @@ const PayByContent: React.FC = () => {
       window.alert("ล้มเหลวในการสร้างวิธีการจ่ายเงิน");
     }
   };
-  
+
   const handleSaveEdit = async () => {
     // Ensure duplicate check before proceeding
     if (
@@ -165,12 +181,12 @@ const PayByContent: React.FC = () => {
     try {
       // Fetch the payment history data to check if the Pay_By_Id is being used
       const paymentHistory = await getHispayment();
-  
+
       // Check if the Pay_By_Id is used in any payment history record
       const isUsedInPaymentHistory = paymentHistory.some(
         (history) => history.Pay_By_Id === id
       );
-  
+
       if (isUsedInPaymentHistory) {
         Swal.fire({
           icon: "error",
@@ -178,7 +194,7 @@ const PayByContent: React.FC = () => {
         });
         return;
       }
-  
+
       // Proceed with deletion if not used
       await deletePayBy(id);
       toast.dismiss();
@@ -230,15 +246,22 @@ const PayByContent: React.FC = () => {
   const totalPages = Math.ceil(payOptions.length / itemsPerPage);
 
   return (
-    <div style={{  fontFamily: "Arial, sans-serif" }}>
+    <div
+      style={{
+        backgroundColor: "#f7f7f7",
+        height: "100vh",
+      }}
+    >
       <Header title="วิธีการจ่ายเงิน" />
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
-          justifyContent: "space-between",
-          paddingTop: 20,
-          paddingLeft: 20,
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "25px",
+          marginLeft: "20px",
+          marginRight: "20px",
         }}
       >
         <Button
@@ -246,37 +269,92 @@ const PayByContent: React.FC = () => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            padding: "10px 20px",
+            marginLeft: "auto%",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
-            alignSelf: "flex-end",
           }}
         >
-          เพิ่มรายการ +
+          + เพิ่มรายการ
         </Button>
       </div>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
-              <TableCell style={{textAlign:"center" ,width:"50px", color:"black",fontSize:"18px",fontWeight:"bold"}} >ลำดับ</TableCell>
-              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
-              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
-              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
-              <TableCell style={{textAlign:"center" ,width:"200px", color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "50px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "200px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                ชื่อ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "200px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                คำอธิบาย
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "200px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                สถานะ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "200px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                จัดการ
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((payOption, index) => (
                 <TableRow key={payOption.Pay_By_Id}>
-                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_By_Name}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_By_Desc || "-"}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" , fontWeight: 'bold' }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {payOption.Pay_By_Name}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {payOption.Pay_By_Desc || "-"}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Switch
                       checked={payOption.Pay_By_Active === "Y"}
                       onChange={() => toggleActiveStatus(payOption)}
@@ -285,17 +363,22 @@ const PayByContent: React.FC = () => {
                     />
                     {payOption.Pay_By_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell style={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleEditOpen(payOption)}
+                      sx={{ marginRight: "5px" }}
                     >
                       รายละเอียด
                     </Button>
                     <IconButton
                       onClick={() => handleDelete(payOption.Pay_By_Id)}
-                      style={{ color: "red" }}
+                      style={{
+                        color: "gray",
+                        border: "1px solid gray",
+                        borderRadius: "5px",
+                      }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -313,7 +396,9 @@ const PayByContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
         <Pagination
           count={totalPages}
           page={currentPage}
@@ -335,10 +420,10 @@ const PayByContent: React.FC = () => {
             value={newPayOption.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -352,10 +437,10 @@ const PayByContent: React.FC = () => {
             value={newPayOption.desc}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -363,10 +448,10 @@ const PayByContent: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
-            Cancel
+            ปิด
           </Button>
           <Button onClick={handleCreate} color="primary">
-            Create
+            บันทึก
           </Button>
         </DialogActions>
       </Dialog>
@@ -385,13 +470,13 @@ const PayByContent: React.FC = () => {
               value={editPayOption.Pay_By_Name}
               onChange={handleEditChange}
               sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
+              }}
             />
             <TextField
               margin="dense"
@@ -402,21 +487,21 @@ const PayByContent: React.FC = () => {
               value={editPayOption.Pay_By_Desc}
               onChange={handleEditChange}
               sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
+              }}
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleEditClose} color="secondary">
-              Cancel
+              ปิด
             </Button>
             <Button onClick={handleSaveEdit} color="primary">
-              Save
+              บันทึก
             </Button>
           </DialogActions>
         </Dialog>
@@ -426,4 +511,3 @@ const PayByContent: React.FC = () => {
 };
 
 export default PayByContent;
-

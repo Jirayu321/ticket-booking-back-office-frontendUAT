@@ -129,7 +129,7 @@ const Sidebar: React.FC = () => {
             </Link>
           </li>
           <li
-            className={`menu-item ${
+            className={`menu-item  ${
               activePath === "/pay-option" ? "active" : ""
             }`}
           >

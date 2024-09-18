@@ -38,7 +38,7 @@ function LoginPage() {
   }
   return (
     <div className={styles.container}>
-      <Card className={styles.card}>
+      <Card className={styles.card} >
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           <Stack
             className="w-full h-full"
@@ -48,7 +48,15 @@ function LoginPage() {
           >
             <h1 className={styles.title}>Deedclub</h1>
             <FormControl fullWidth>
-              <TextField label="username" {...register("username")} />
+              <TextField label="username" {...register("username")}  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& input": {
+                        border: "none", 
+                        transform: "translateY(5px)",
+                   
+                      },
+                    },
+                  }} />
               {errors.username && (
                 <p className={styles.errorMessage}>{errors.username.message}</p>
               )}

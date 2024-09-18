@@ -15,7 +15,7 @@ import {
   TableRow,
   Paper,
   Pagination,
-  TextField
+  TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import {
@@ -50,7 +50,6 @@ const PayOptionContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch pay options:", error);
-      
     }
   };
 
@@ -106,8 +105,8 @@ const PayOptionContent: React.FC = () => {
   ): boolean => {
     return existingOptions.some(
       (option) =>
-        option.Pay_Opt_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
-        option.Pay_Opt_Id !== currentId
+        option.Pay_Opt_Name.trim().toLowerCase() ===
+          name.trim().toLowerCase() && option.Pay_Opt_Id !== currentId
     );
   };
 
@@ -115,11 +114,13 @@ const PayOptionContent: React.FC = () => {
     try {
       // Fetch the latest payment options to ensure accurate duplicate check
       const latestPayOptions = await getPayOption();
-      if (isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)) {
+      if (
+        isDuplicatePayOptionName(newPayOption.name, latestPayOptions.payOptions)
+      ) {
         window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
         return;
       }
-  
+
       await createPayOption({
         Pay_Opt_Name: newPayOption.name,
         Pay_Opt_Desc: newPayOption.desc,
@@ -138,72 +139,72 @@ const PayOptionContent: React.FC = () => {
     }
   };
 
-const handleSaveEdit = async () => {
-  try {
-    // Fetch the latest payment options to ensure accurate duplicate check
-    const latestPayOptions = await getPayOption();
-    if (
-      isDuplicatePayOptionName(
-        editPayOption.Pay_Opt_Name,
-        latestPayOptions.payOptions,
-        editPayOption.Pay_Opt_Id
-      )
-    ) {
-      window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
-      return;
-    }
+  const handleSaveEdit = async () => {
+    try {
+      // Fetch the latest payment options to ensure accurate duplicate check
+      const latestPayOptions = await getPayOption();
+      if (
+        isDuplicatePayOptionName(
+          editPayOption.Pay_Opt_Name,
+          latestPayOptions.payOptions,
+          editPayOption.Pay_Opt_Id
+        )
+      ) {
+        window.alert("มีตัวเลือกการจ่ายเงินที่มีชื่อเดียวกันแล้ว");
+        return;
+      }
 
-    await updatePayOption({
-      Pay_Opt_Id: editPayOption.Pay_Opt_Id,
-      Pay_Opt_Name: editPayOption.Pay_Opt_Name,
-      Pay_Opt_Desc: editPayOption.Pay_Opt_Desc,
-      Pay_Opt_Active: editPayOption.Pay_Opt_Active,
-    });
-    Swal.fire({
-      icon: "success",
-      title: "อัปเดตตัวเลือกการจ่ายเงินสำเร็จ",
-    });
-    handleEditClose();
-    fetchPayOptions(); // Refresh data after updating
-  } catch (error) {
-    console.error("Failed to update pay option:", error);
-    window.alert("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
-  }
-};
-
-const handleDelete = async (id: number) => {
-  try {
-    // Fetch the payment history data to check if the Pay_Opt_Id is being used
-    const paymentHistory = await getHispayment();
-
-    // Check if the Pay_Opt_Id is used in any payment history record
-    const isUsedInPaymentHistory = paymentHistory.some(
-      (history) => history.Pay_Opt_Id === id
-    );
-
-    if (isUsedInPaymentHistory) {
+      await updatePayOption({
+        Pay_Opt_Id: editPayOption.Pay_Opt_Id,
+        Pay_Opt_Name: editPayOption.Pay_Opt_Name,
+        Pay_Opt_Desc: editPayOption.Pay_Opt_Desc,
+        Pay_Opt_Active: editPayOption.Pay_Opt_Active,
+      });
       Swal.fire({
+        icon: "success",
+        title: "อัปเดตตัวเลือกการจ่ายเงินสำเร็จ",
+      });
+      handleEditClose();
+      fetchPayOptions(); // Refresh data after updating
+    } catch (error) {
+      console.error("Failed to update pay option:", error);
+      window.alert("ล้มเหลวระหว่างอัปเดตตัวเลือกการจ่ายเงิน");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      // Fetch the payment history data to check if the Pay_Opt_Id is being used
+      const paymentHistory = await getHispayment();
+
+      // Check if the Pay_Opt_Id is used in any payment history record
+      const isUsedInPaymentHistory = paymentHistory.some(
+        (history) => history.Pay_Opt_Id === id
+      );
+
+      if (isUsedInPaymentHistory) {
+        Swal.fire({
           icon: "error",
           title: "ไม่สามารถลบตัวเลือกการจ่ายเงินที่ใช้งานอยู่",
         });
-      return;
-    }
+        return;
+      }
 
-    // Proceed with deletion if not used
-    await deletePayOption(id);
-    Swal.fire({
-      icon: "success",
-      title: "ลบตัวเลือกการจ่ายเงินสำเร็จ",
-    });
-    fetchPayOptions(); // Refresh data after deletion
-  } catch (error) {
-    console.error("Failed to delete pay option:", error);
-    Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน",
-        });
-  }
-};
+      // Proceed with deletion if not used
+      await deletePayOption(id);
+      Swal.fire({
+        icon: "success",
+        title: "ลบตัวเลือกการจ่ายเงินสำเร็จ",
+      });
+      fetchPayOptions(); // Refresh data after deletion
+    } catch (error) {
+      console.error("Failed to delete pay option:", error);
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวระหว่างลบตัวเลือกการจ่ายเงิน",
+      });
+    }
+  };
 
   const toggleActiveStatus = async (payOption: any) => {
     try {
@@ -221,13 +222,16 @@ const handleDelete = async (id: number) => {
     } catch (error) {
       console.error("Failed to update active status:", error);
       Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวระหว่างอัปเดตสถานะการใช้งาน",
-        });
+        icon: "error",
+        title: "ล้มเหลวระหว่างอัปเดตสถานะการใช้งาน",
+      });
     }
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
     setCurrentPage(value);
   };
 
@@ -236,15 +240,22 @@ const handleDelete = async (id: number) => {
   const currentItems = payOptions.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div>
+    <div
+      style={{
+        backgroundColor: "#f7f7f7",
+        height: "100vh",
+      }}
+    >
       <Header title="ตัวเลือกการจ่ายเงิน" />
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
-          justifyContent: "space-between",
-          paddingTop: 20,
-          paddingLeft: 20,
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "25px",
+          marginLeft: "20px",
+          marginRight: "20px",
         }}
       >
         <Button
@@ -252,36 +263,91 @@ const handleDelete = async (id: number) => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            padding: "10px 20px",
+            marginLeft: "auto%",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
-            alignSelf: "flex-end",
           }}
         >
-          เพิ่มรายการ +
+          + เพิ่มรายการ
         </Button>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
-              <TableCell style={{textAlign:"center" ,width:"60px", color:"black",fontSize:"18px",fontWeight:"bold"}}>ลำดับ</TableCell>
-              <TableCell style={{textAlign:"center",width:"100px",color:"black",fontSize:"18px",fontWeight:"bold"}}>ชื่อ</TableCell>
-              <TableCell style={{textAlign:"center",width:"300px",color:"black",fontSize:"18px",fontWeight:"bold"}}>คำอธิบาย</TableCell>
-              <TableCell style={{textAlign:"center",width:"150px",color:"black",fontSize:"18px",fontWeight:"bold"}}>สถานะ</TableCell>
-              <TableCell style={{textAlign:"center",width:"300px",color:"black",fontSize:"18px",fontWeight:"bold"}}>จัดการ</TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "60px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "100px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                ชื่อ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "300px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                คำอธิบาย
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "150px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                สถานะ
+              </TableCell>
+              <TableCell
+                style={{
+                  textAlign: "center",
+                  width: "300px",
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                }}
+              >
+                จัดการ
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((payOption, index) => (
                 <TableRow key={payOption.Pay_Opt_Id}>
-                  <TableCell style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_Opt_Name_Int}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>{payOption.Pay_Opt_Desc || "-"}</TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {payOption.Pay_Opt_Name_Int}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {payOption.Pay_Opt_Desc || "-"}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Switch
                       checked={payOption.Pay_Opt_Active === "Y"}
                       onChange={() => toggleActiveStatus(payOption)}
@@ -289,21 +355,27 @@ const handleDelete = async (id: number) => {
                       color="primary"
                     />
                     <span>
-                      {payOption.Pay_Opt_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                      {payOption.Pay_Opt_Active === "Y"
+                        ? "เผยแพร่"
+                        : "ไม่เผยแพร่"}
                     </span>
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell style={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleEditOpen(payOption)}
-                      style={{ marginRight: "10px" }}
+                      sx={{ marginRight: "5px" }}
                     >
                       รายละเอียด
                     </Button>
                     <IconButton
                       onClick={() => handleDelete(payOption.Pay_Opt_Id)}
-                      style={{ color: "red" }}
+                      style={{
+                        color: "gray",
+                        border: "1px solid gray",
+                        borderRadius: "5px",
+                      }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -320,7 +392,9 @@ const handleDelete = async (id: number) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
         <Pagination
           count={Math.ceil(payOptions.length / itemsPerPage)}
           page={currentPage}
@@ -342,96 +416,95 @@ const handleDelete = async (id: number) => {
             value={newPayOption.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
+          />
+          <TextField
+            margin="dense"
+            name="desc"
+            label="Description"
+            type="text"
+            fullWidth
+            value={newPayOption.desc}
+            onChange={handleChange}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
+                },
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      {editPayOption && (
+        <Dialog open={editOpen} onClose={handleEditClose}>
+          <DialogTitle>แก้ไขตัวเลือกการจ่ายเงิน</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Pay_Opt_Name"
+              label="Pay Option Name"
+              type="text"
+              fullWidth
+              value={editPayOption.Pay_Opt_Name}
+              onChange={handleEditChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
+                },
+              }}
             />
             <TextField
               margin="dense"
-              name="desc"
+              name="Pay_Opt_Desc"
               label="Description"
               type="text"
               fullWidth
-              value={newPayOption.desc}
-              onChange={handleChange}
+              value={editPayOption.Pay_Opt_Desc}
+              onChange={handleEditChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& input': {
-                    border: 'none', // Remove the inner border
-                    transform: 'translateY(5px)',
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
                   },
                 },
               }}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="secondary">
-              Cancel
+            <Button onClick={handleEditClose} color="primary">
+            ปิด
             </Button>
-            <Button onClick={handleCreate} color="primary">
-              Create
+            <Button onClick={handleSaveEdit} color="primary">
+            บันทึก
             </Button>
           </DialogActions>
         </Dialog>
-  
-        {/* Edit Dialog */}
-        {editPayOption && (
-          <Dialog open={editOpen} onClose={handleEditClose}>
-            <DialogTitle>แก้ไขตัวเลือกการจ่ายเงิน</DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                name="Pay_Opt_Name"
-                label="Pay Option Name"
-                type="text"
-                fullWidth
-                value={editPayOption.Pay_Opt_Name}
-                onChange={handleEditChange}
-                sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
-                },
-              },
-            }}
-              />
-              <TextField
-                margin="dense"
-                name="Pay_Opt_Desc"
-                label="Description"
-                type="text"
-                fullWidth
-                value={editPayOption.Pay_Opt_Desc}
-                onChange={handleEditChange}
-                sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
-                },
-              },
-            }}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleEditClose} color="secondary">
-                Cancel
-              </Button>
-              <Button onClick={handleSaveEdit} color="primary">
-                Save
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
-      </div>
-    );
-  };
-  
-  export default PayOptionContent;
-  
+      )}
+    </div>
+  );
+};
+
+export default PayOptionContent;

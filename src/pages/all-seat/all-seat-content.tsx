@@ -16,6 +16,11 @@ import {
   Select,
   MenuItem,
   TextField,
+  Container,
+  Grid,
+  Avatar,
+  Box,
+  Typography,
 } from "@mui/material";
 import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import toast from "react-hot-toast";
@@ -24,8 +29,9 @@ import QRCodeModal from "./QRCodeModal"; // Adjust the path as necessary
 import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import StartEndDatePickers from "../../components/common/input/date-picker/date"; // Import the date picker component
-import dayjs from 'dayjs';
-import buddhistEra from 'dayjs/plugin/buddhistEra';
+import dayjs from "dayjs";
+import buddhistEra from "dayjs/plugin/buddhistEra";
+import { DatePicker } from "@mui/x-date-pickers";
 
 dayjs.extend(buddhistEra);
 
@@ -45,9 +51,9 @@ const AllSeatContent: React.FC = () => {
     printStatus: "all",
     printStatusName: "all", // Filter for PrintStatus_Name
     scanStatus: "all", // New filter for Scan Status
-    startDate: null, // Add startDate filter
-    endDate: null,   // Add endDate filter
   });
+  const [startDate, setStartDate] = useState(dayjs().startOf("month"));
+  const [endDate, setEndDate] = useState(dayjs().endOf("month"));
 
   useEffect(() => {
     async function fetchTicketData() {
@@ -99,22 +105,14 @@ const AllSeatContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  // Handle date range change
   const handleDateRangeChange = (startDate, endDate) => {
-    setFilters((prev) => ({
-      ...prev,
-      startDate,
-      endDate,
-    }));
+    setStartDate(startDate);
+    setEndDate(endDate);
   };
 
-  // Clear date range filter
   const handleClearDates = () => {
-    setFilters((prev) => ({
-      ...prev,
-      startDate: null,
-      endDate: null,
-    }));
+    setStartDate(null);
+    setEndDate(null);
   };
 
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
@@ -129,7 +127,7 @@ const AllSeatContent: React.FC = () => {
       ticket.Event_Name?.toLowerCase().includes(searchValue) ||
       ticket.Cust_name?.toLowerCase().includes(searchValue) || // Added search for Cust_name
       ticket.Cust_tel?.toLowerCase().includes(searchValue); // Added search for Cust_tel
-  
+
     const matchesStatus =
       filters.status === "all" || ticket.status === filters.status;
     const matchesEvent =
@@ -147,15 +145,19 @@ const AllSeatContent: React.FC = () => {
       filters.scanStatus === "all" ||
       (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) ||
       (filters.scanStatus === "ยังไม่แสกน" && ticket.check_in_status === 0);
-  
+
     // Date range filtering logic
     const eventDate = new Date(ticket.Event_Public_Date);
-    const startDate = filters.startDate ? new Date(filters.startDate).setHours(0, 0, 0, 0) : null;
-    const endDate = filters.endDate ? new Date(filters.endDate).setHours(23, 59, 59, 999) : null;
+    const startDateFilter = startDate
+      ? new Date(startDate).setHours(0, 0, 0, 0)
+      : null;
+    const endDateFilter = endDate
+      ? new Date(endDate).setHours(23, 59, 59, 999)
+      : null;
     const matchesDateRange =
-      (!startDate || eventDate >= startDate) &&
-      (!endDate || eventDate <= endDate);
-  
+      (!startDateFilter || eventDate >= startDateFilter) &&
+      (!endDateFilter || eventDate <= endDateFilter);
+
     return (
       matchesSearch &&
       matchesStatus &&
@@ -174,8 +176,6 @@ const AllSeatContent: React.FC = () => {
   );
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
-  
-
   const scannedCount = ticketData.filter(
     (ticket) => ticket.check_in_status === 1
   ).length;
@@ -184,187 +184,474 @@ const AllSeatContent: React.FC = () => {
   ).length;
 
   if (isLoading) return <CircularProgress />;
-
+  // if (isLoading) {
+  //   return (
+  //     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  //       <CircularProgress />
+  //     </div>
+  //   );
+  // }
   return (
     <div className="all-seats-content">
       <Header title="ที่นั่งทั้งหมด" />
-      <div className="filter-options">
-        <div className="filter-item">
-          <LocalPrintshopIcon style={{ color: "black", fontSize: "80px" }} />
-          <div className="filter-text-container">
-            <span className="filter-text">แสกนแล้ว</span>
-            <span className="filter-number">{scannedCount}</span>{" "}
-            {/* Dynamic total count for scanned tickets */}
-          </div>
-        </div>
-        <div className="filter-item">
-          <QrCodeScannerIcon style={{ color: "black", fontSize: "80px" }} />
-          <div className="filter-text-container">
-            <span className="filter-text">ปริ้นแล้ว</span>
-            <span className="filter-number">{printedCount}</span>{" "}
-            {/* Dynamic total count for printed tickets */}
-          </div>
-        </div>
-      </div>
+      <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <LocalPrintshopIcon
+                style={{ color: "black", fontSize: "70px" }}
+              />
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>แสกนแล้ว</Typography>
+                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                    {scannedCount}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <QrCodeScannerIcon style={{ color: "black", fontSize: "70px" }} />
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>ปริ้นแล้ว</Typography>
+                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                    {printedCount}{" "}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
       <div
-        className="filters"
         style={{
-          padding: "20px",
-          backgroundColor: "white",
-          borderRadius: "5px",
-          marginBottom: "20px",
+          backgroundColor: "#f7f7f7",
         }}
       >
-        <Stack direction="row" spacing={2}>
-          <TextField
-            variant="outlined"
-            label="ค้นหา"
-            value={filters.search}
-            onChange={handleSearchChange}
-            placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
-            style={{ marginRight: "10px", height: "50px", width: "450px" }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none',
-                  transform: 'translateY(5px)',
+        <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              variant="outlined"
+              label="ค้นหา"
+              value={filters.search}
+              onChange={handleSearchChange}
+              placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
+              style={{ marginRight: "10px", height: "50px", width: "450px" }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none",
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
-          />
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะการพิมพ์</InputLabel>
-            <Select
-              label="สถานะการพิมพ์"
-              name="printStatus"
-              value={filters.printStatus}
-              onChange={handleFilterChange}
+              }}
+            />
+            <FormControl variant="outlined" style={{ minWidth: 150 }}>
+              <InputLabel>สถานะการพิมพ์</InputLabel>
+              <Select
+                label="สถานะการพิมพ์"
+                name="printStatus"
+                value={filters.printStatus}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="all">ทั้งหมด</MenuItem>
+                <MenuItem value="ยังไม่ปริ้น">ยังไม่ปริ้น</MenuItem>
+                <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl variant="outlined" style={{ minWidth: 150 }}>
+              <InputLabel>สถานะการเช็คอิน </InputLabel>
+              <Select
+                label="สถานะการแสกน"
+                name="scanStatus"
+                value={filters.scanStatus}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="all">ทั้งหมด</MenuItem>
+                <MenuItem value="แสกนแล้ว">แสกนแล้ว</MenuItem>
+                <MenuItem value="ยังไม่แสกน">ยังไม่แสกน</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ backgroundColor: "white" }}>
+              <DatePicker
+                label="วันที่เริ่มต้น"
+                value={startDate}
+                onChange={(date) => setStartDate(date)}
+                format="DD/MM/YYYY"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& input": {
+                      border: "none",
+                      transform: "translateY(5px)",
+                      backgroundColor: "white",
+                      width: "90px",
+                    },
+                  },
+                }}
+              />
+            </FormControl>
+            <FormControl sx={{ backgroundColor: "white" }}>
+              <DatePicker
+                label="วันที่สิ้นสุด"
+                value={endDate}
+                onChange={(date) => setEndDate(date)}
+                format="DD/MM/YYYY"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& input": {
+                      border: "none",
+                      transform: "translateY(5px)",
+                      backgroundColor: "white",
+                      width: "90px",
+                    },
+                  },
+                }}
+              />
+            </FormControl>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                justifyContent: "flex-end", // Align items to the right
+                flexGrow: 1, // Take up remaining space
+              }}
             >
-              <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="ยังไม่ปริ้น">ยังไม่ปริ้น</MenuItem>
-              <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl variant="outlined" style={{ minWidth: 150 }}>
-            <InputLabel>สถานะการเช็คอิน	</InputLabel>
-            <Select
-              label="สถานะการแสกน"
-              name="scanStatus"
-              value={filters.scanStatus}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">ทั้งหมด</MenuItem>
-              <MenuItem value="แสกนแล้ว">แสกนแล้ว</MenuItem>
-              <MenuItem value="ยังไม่แสกน">ยังไม่แสกน</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-
-        {/* Date Picker Filter */}
-        <Stack direction="row" spacing={2} marginTop={2}>
-          <StartEndDatePickers
-            startDate={filters.startDate}
-            endDate={filters.endDate}
-            onStartDateChange={(date) => handleDateRangeChange(date, filters.endDate)}
-            onEndDateChange={(date) => handleDateRangeChange(filters.startDate, date)}
-          />
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleClearDates}
-            style={{ marginTop: "8px" }}
-          >
-            Clear Dates
-          </Button>
-        </Stack>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleClearDates}
+                sx={{
+                  backgroundColor: "#CFB70B",
+                  width: "160px",
+                  height: "45px",
+                  color: "black",
+                  fontSize: "15px",
+                  "&:hover": {
+                    backgroundColor: "#CFB70B",
+                  },
+                  flexShrink: 0, // Prevent the button from shrinking
+                }}
+              >
+                ล้างค่าการค้นหา
+              </Button>
+            </Box>
+          </Stack>
+        </Container>
       </div>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "10px" }}>ลำดับ</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>ชื่องาน</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>วันจัดงาน</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>ชื่อลูกค้า</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>เบอร์โทร</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>รหัสที่นั่ง</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขโต๊ะ</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เลขที่นั่ง</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "80px" }}>เลขคำสั่งซื้อ</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>สถานะการพิมพ์</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "100px" }}>สถานะการเช็คอิน</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>เวลาเช็คอิน</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "20px" }}>ครั้งที่พิมพ์</TableCell>
-              <TableCell style={{ color: "black", fontSize: "18px", fontWeight: "bold", textAlign: "center", width: "50px" }}>QR CODE</TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "10px",
+                }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                ชื่องาน
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                วันจัดงาน
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                ชื่อลูกค้า
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                เบอร์โทร
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                รหัสที่นั่ง
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                เลขโต๊ะ
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                เลขที่นั่ง
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "80px",
+                }}
+              >
+                เลขคำสั่งซื้อ
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                สถานะการพิมพ์
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                สถานะการเช็คอิน
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                เวลาเช็คอิน
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "20px",
+                }}
+              >
+                ครั้งที่พิมพ์
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                QR CODE
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-          {ticketsInCurrentPage.map((ticket, index) => {
-            const formattedEventTime = dayjs(ticket.Event_Time)
-              .subtract(7, 'hour')
-              .locale('th')
-              .format('D/M/BBBB HH:mm');
-            return (
-              <TableRow key={ticket.DT_order_id}>
-                <TableCell style={{ textAlign: "center" }}>{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell style={{ textAlign: "left" }}>{ticket.Event_Name}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>
-                  {formattedEventTime}
-                </TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.Cust_name}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.Cust_tel}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.ticket_running}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.ticket_no}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>ที่นั่ง {ticket.ticket_line}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.Order_no}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      backgroundColor:
-                        ticket.PrintStatus_Name === "ยังไม่ปริ้น"
-                          ? "orange"
-                          : "blue",
-                      color: "white",
-                      padding: "4px",
-                      borderRadius: "4px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {ticket.PrintStatus_Name}
-                  </div>
-                </TableCell>
-                <TableCell style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      backgroundColor:
-                        ticket.check_in_status === 0 ? "grey" : "blue",
-                      color: "white",
-                      padding: "4px",
-                      borderRadius: "4px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {ticket.check_in_status === 0 ? "ยังไม่เช็คอิน" : "เช็คอินแล้ว"}
-                  </div>
-                </TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.Check_In_Datetime}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>{ticket.print_count}</TableCell>
-                <TableCell style={{ textAlign: "center" }}>
-                  <Button
-                    onClick={() => handleOpenModal(ticket)}
-                    variant="contained"
-                    color="secondary"
-                  >
-                    ดูบัตร
-                  </Button>
-                </TableCell>
-              </TableRow>
-            );
-        })}
+            {ticketsInCurrentPage.map((ticket, index) => {
+              const formattedEventTime = dayjs(ticket.Event_Time)
+                .subtract(7, "hour")
+                .locale("th")
+                .format("D/M/BBBB HH:mm");
+              return (
+                <TableRow key={ticket.DT_order_id}>
+                  <TableCell style={{ textAlign: "center", fontWeight: 'bold'}}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "left" }}>
+                    {ticket.Event_Name}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {formattedEventTime}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.Cust_name}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.Cust_tel}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.ticket_running}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.ticket_no}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    ที่นั่ง {ticket.ticket_line}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.Order_no}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        backgroundColor:
+                          ticket.PrintStatus_Name === "ยังไม่ปริ้น"
+                            ? "orange"
+                            : "blue",
+                        color: "white",
+                        padding: "4px",
+                        borderRadius: "4px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {ticket.PrintStatus_Name}
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        backgroundColor:
+                          ticket.check_in_status === 0 ? "grey" : "blue",
+                        color: "white",
+                        padding: "4px",
+                        borderRadius: "4px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {ticket.check_in_status === 0
+                        ? "ยังไม่เช็คอิน"
+                        : "เช็คอินแล้ว"}
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.Check_In_Datetime}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    {ticket.print_count}
+                  </TableCell>
+                  <TableCell style={{ textAlign: "center" }}>
+                    <Button
+                      onClick={() => handleOpenModal(ticket)}
+                      variant="contained"
+                      color="secondary"
+                    >
+                      ดูบัตร
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

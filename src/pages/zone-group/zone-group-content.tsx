@@ -31,7 +31,6 @@ import {
 import { getPlansList } from "../../services/plan-list.service";
 import { getEventStock } from "../../services/event-stock.service";
 import Header from "../common/header";
-import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 const ZoneGroupContent: React.FC = () => {
@@ -134,101 +133,81 @@ const ZoneGroupContent: React.FC = () => {
   const isDuplicateName = (name: string, id?: number) => {
     return planGroups.some(
       (group) =>
-        group.PlanGroup_Name.trim().toLowerCase() === name.trim().toLowerCase() &&
-        group.PlanGroup_id !== id
+        group.PlanGroup_Name.trim().toLowerCase() ===
+          name.trim().toLowerCase() && group.PlanGroup_id !== id
     );
   };
-  
+
   const handleCreate = async () => {
-      if (isDuplicateName(newPlanGroup.name)) {
-        window.alert("ชื่อผังร้านซ้ำกัน");
-        return;
-      }
-  
-      try {
-        await createPlanGroup({
-          PlanGroup_Name: newPlanGroup.name.trim(),
-          PlanGroup_Active: newPlanGroup.active,
-          Created_By: "Admin",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "สร้างผังร้านสำเร็จ",
-        });
-        setNewPlanGroup({ name: "", active: "Y" });
-        setOpen(false);
-        const data = await getAllPlanGroups();
-        setPlanGroups(data.planGroups);
-      } catch (error) {
-        window.alert("ล้มเหลวในการสร้างผังร้าน");
-      }
-    };
-  
+    if (isDuplicateName(newPlanGroup.name)) {
+      window.alert("ชื่อผังร้านซ้ำกัน");
+      return;
+    }
+
+    try {
+      await createPlanGroup({
+        PlanGroup_Name: newPlanGroup.name.trim(),
+        PlanGroup_Active: newPlanGroup.active,
+        Created_By: "Admin",
+      });
+      Swal.fire({
+        icon: "success",
+        title: "สร้างผังร้านสำเร็จ",
+      });
+      setNewPlanGroup({ name: "", active: "Y" });
+      setOpen(false);
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      window.alert("ล้มเหลวในการสร้างผังร้าน");
+    }
+  };
+
   const handleSaveEdit = async () => {
-      if (!editPlanGroup) return;
-  
-      if (isDuplicateName(editPlanGroup.PlanGroup_Name, editPlanGroup.PlanGroup_id)) {
-        window.alert("ชื่อผังร้านซ้ำกัน");
-        return;
-      }
-  
-      try {
-        await updatePlanGroup({
-          PlanGroup_id: editPlanGroup.PlanGroup_id,
-          PlanGroup_Name: editPlanGroup.PlanGroup_Name.trim(),
-          PlanGroup_Active: editPlanGroup.PlanGroup_Active,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "อัปเดตผังร้านสำเร็จ",
-        });
-        handleEditClose();
-        const data = await getAllPlanGroups();
-        setPlanGroups(data.planGroups);
-      } catch (error) {
+    if (!editPlanGroup) return;
+
+    if (
+      isDuplicateName(editPlanGroup.PlanGroup_Name, editPlanGroup.PlanGroup_id)
+    ) {
+      window.alert("ชื่อผังร้านซ้ำกัน");
+      return;
+    }
+
+    try {
+      await updatePlanGroup({
+        PlanGroup_id: editPlanGroup.PlanGroup_id,
+        PlanGroup_Name: editPlanGroup.PlanGroup_Name.trim(),
+        PlanGroup_Active: editPlanGroup.PlanGroup_Active,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดตผังร้านสำเร็จ",
+      });
+      handleEditClose();
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการอัปเดตผังร้าน",
+      });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const planCount = calculatePlanCount(id); // Check how many zones are in this plan group
+      if (planCount > 0) {
         Swal.fire({
           icon: "error",
-          title: "ล้มเหลวในการอัปเดตผังร้าน",
+          title: "ลบผังร้านไม่ได้",
+          text: "ผังร้านนี้ถูกใช้ในโซนแล้ว",
         });
+        return; // Don't proceed with the deletion
       }
-    };
 
-    const handleDelete = async (id: number) => {
-      try {
-        const planCount = calculatePlanCount(id); // Check how many zones are in this plan group
-        if (planCount > 0) {
-          Swal.fire({
-            icon: "error",
-            title: "ลบผังร้านไม่ได้",
-            text: "ผังร้านนี้ถูกใช้ในโซนแล้ว",
-          });
-          return; // Don't proceed with the deletion
-        }
-    
-        const eventStocks = await getEventStock();
-        if (!eventStocks || eventStocks.length === 0) {
-          await deletePlanGroup(id);
-          Swal.fire({
-            icon: "success",
-            title: "ลบผังร้านสำเร็จ",
-          });
-          const data = await getAllPlanGroups();
-          setPlanGroups(data.planGroups);
-          return;
-        }
-    
-        const isUsedInEventStock = eventStocks.some(
-          (stock) => stock.PlanGroup_Id === id
-        );
-    
-        if (isUsedInEventStock) {
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถลบผังร้านที่ถูกใช้งานแล้วได้",
-          });
-          return;
-        }
-    
+      const eventStocks = await getEventStock();
+      if (!eventStocks || eventStocks.length === 0) {
         await deletePlanGroup(id);
         Swal.fire({
           icon: "success",
@@ -236,13 +215,35 @@ const ZoneGroupContent: React.FC = () => {
         });
         const data = await getAllPlanGroups();
         setPlanGroups(data.planGroups);
-      } catch (error) {
+        return;
+      }
+
+      const isUsedInEventStock = eventStocks.some(
+        (stock) => stock.PlanGroup_Id === id
+      );
+
+      if (isUsedInEventStock) {
         Swal.fire({
           icon: "error",
-          title: "ล้มเหลวในการลบผังร้าน",
+          title: "ไม่สามารถลบผังร้านที่ถูกใช้งานแล้วได้",
         });
+        return;
       }
-    };
+
+      await deletePlanGroup(id);
+      Swal.fire({
+        icon: "success",
+        title: "ลบผังร้านสำเร็จ",
+      });
+      const data = await getAllPlanGroups();
+      setPlanGroups(data.planGroups);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการลบผังร้าน",
+      });
+    }
+  };
 
   const toggleActiveStatus = async (planGroup: any) => {
     try {
@@ -286,16 +287,23 @@ const ZoneGroupContent: React.FC = () => {
   const totalPages = Math.ceil(filteredPlanGroups.length / itemsPerPage);
 
   return (
-    <div>
+    <div
+      style={{
+        backgroundColor: "#f7f7f7",
+        height: "100vh",
+      }}
+    >
       <Header title="ผังร้าน" />
+
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "20px",
-          marginTop: "30px",
+          marginTop: "25px",
           marginLeft: "20px",
+          marginRight: "20px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -309,6 +317,7 @@ const ZoneGroupContent: React.FC = () => {
               value={statusFilter}
               onChange={handleStatusFilterChange}
               label="สถานะ"
+              style={{ backgroundColor: "white" }}
             >
               <MenuItem value="ทั้งหมด">ทั้งหมด</MenuItem>
               <MenuItem value="Y">เผยแพร่</MenuItem>
@@ -320,15 +329,19 @@ const ZoneGroupContent: React.FC = () => {
             placeholder="ชื่อผังร้าน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px", height: "50px" }}
+            style={{
+              marginRight: "10px",
+              height: "50px",
+              backgroundColor: "white",
+            }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -339,42 +352,73 @@ const ZoneGroupContent: React.FC = () => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            marginRight: "1220px",
+            marginLeft: "auto%",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
           }}
         >
-          เพิ่มผังร้าน +
+          + เพิ่มผังร้าน
         </Button>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
+            {" "}
             <TableRow>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"50px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
               >
                 ลำดับ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
               >
                 ชื่อผังร้าน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
               >
                 จำนวนโซน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
               >
                 สถานะ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"300px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "300px",
+                }}
               >
                 จัดการ
               </TableCell>
@@ -384,17 +428,17 @@ const ZoneGroupContent: React.FC = () => {
             {currentItems.length > 0 ? (
               currentItems.map((planGroup, index) => (
                 <TableRow key={planGroup.PlanGroup_id}>
-                  <TableCell style={{ color: "black", fontSize: "14px" ,textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center", color: "black", fontWeight: 'bold' }}>
                     {indexOfFirstItem + index + 1}
                   </TableCell>
 
-                  <TableCell style={{ color: "black", fontSize: "14px" ,textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {planGroup.PlanGroup_Name}
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" }}>
                     {calculatePlanCount(planGroup.PlanGroup_id)}
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Switch
                       checked={planGroup.PlanGroup_Active === "Y"}
                       onChange={() => toggleActiveStatus(planGroup)}
@@ -404,17 +448,22 @@ const ZoneGroupContent: React.FC = () => {
                       ? "เผยแพร่"
                       : "ไม่เผยแพร่"}
                   </TableCell>
-                  <TableCell style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleEditOpen(planGroup)}
+                      sx={{ marginRight: "5px" }}
                     >
                       รายละเอียด
                     </Button>
                     <IconButton
                       onClick={() => handleDelete(planGroup.PlanGroup_id)}
-                      style={{ color: "red" }}
+                      style={{
+                        color: "gray",
+                        border: "1px solid gray",
+                        borderRadius: "5px",
+                      }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -459,10 +508,10 @@ const ZoneGroupContent: React.FC = () => {
             value={newPlanGroup.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -482,11 +531,11 @@ const ZoneGroupContent: React.FC = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
+          <Button onClick={handleClose} color="primary">
+            ปิด
           </Button>
           <Button onClick={handleCreate} color="primary">
-            Create
+            บันทึก
           </Button>
         </DialogActions>
       </Dialog>
@@ -505,21 +554,21 @@ const ZoneGroupContent: React.FC = () => {
               value={editPlanGroup.PlanGroup_Name}
               onChange={handleEditChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& input': {
-                    border: 'none', // Remove the inner border
-                    transform: 'translateY(5px)',
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
                   },
                 },
               }}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleEditClose} color="secondary">
-              Cancel
+            <Button onClick={handleEditClose} color="primary">
+              ปิด
             </Button>
             <Button onClick={handleSaveEdit} color="primary">
-              Save
+              บันทึก
             </Button>
           </DialogActions>
         </Dialog>

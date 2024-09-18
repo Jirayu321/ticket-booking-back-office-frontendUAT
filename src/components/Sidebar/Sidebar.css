@@ -1,115 +1,43 @@
-.sidebar {
-  width: 10%;
-  height: 100vh;
-  background-color: #1a1a1a;
+.app {
+  display: flex;
+  position: relative;
+}
+
+
+.menu-bars {
+  text-decoration: none;
   color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  overflow-y: fixed;
 }
 
-.sidebar * {
-  color: #ffffff; /* Ensure all text inside sidebar is white */
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-  color: #ffd700;
+.menu-bars.active {
+  background-color: #ffd700;
   width: 100%;
-}
-
-.menu {
-  flex-grow: 1;
-}
-
-.menu ul {
-  list-style: none;
-  padding: 0;
-}
-
-.menu-item {
-  font-size: 14px;
-  width: 90%;
-  padding: 10px 15px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s; /* Added color transition */
-}
-
-.menu-item:hover {
-  background-color: #ffd700; /* Ensure background color is applied */
-  color: black; /* Ensure text color is applied */
-  width: 82%;
-}
-
-.menu-item.active {
-  background-color: #ffd700; /* Ensure background color is applied */
-  width: 100%;
-  height: 40px;
-  color: black !important;
+  color: black;
+  font-size: 16px;
+  font-weight: 700;
   border-radius: 0;
+  
+}
+.menu-bars.active * {
+  color: black;
 }
 
-.menu-item.active * {
-  color: black !important; /* Ensure text color is applied to all child elements */
-}
+.ps-menu-button:hover {
+  /* background-color: #ffd700 !important; */
+  background-color: transparent !important;
+  /* color: #ffd700 !important; */
+  color: #cfcece !important;
 
-.icon {
-  margin-right: 10px;
-}
-
-.logout {
-  margin-top: auto;
-  padding: 20px 0;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.sidebarTitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-left: 18px;
 }
 
 .ticketIcon {
-  width: 24px; /* Adjust size as needed */
-  height: 24px; /* Adjust size as needed */
-  background-image: url("/ticket 1.svg"); /* Ensure the path is correct */
+  width: 24px;
+  height: 24px;
+  background-image: url("/ticket 1.svg");
   background-size: contain;
   background-repeat: no-repeat;
-  margin-right: 10px; /* Adjust spacing as needed */
-  margin-left: -20px; /* Adjust spacing as needed */
+  transition: filter 0.3s ease;
+
 }
 
-.logout button {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background 0.3s;
-  width: 128px;
-  height: 33px;
-  margin-top: -50px;
-  border-radius: 0 0px 0 0; /* Top-right corner with 20px radius */
-  border-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  background-color: #1a1a1a;
-}
 
-.logoutIcon {
-  width: 20px; /* Adjust size as needed */
-  height: 20px; /* Adjust size as needed */
-  background-image: url("/logout.svg"); /* Ensure the path is correct */
-  background-size: contain;
-  background-repeat: no-repeat;
-  margin-left: 10px; /* Adjust spacing as needed */
-}

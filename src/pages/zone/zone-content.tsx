@@ -62,7 +62,7 @@ const ZoneContent: React.FC = () => {
     const fetchPlans = async () => {
       try {
         const data = await getAllPlans();
-        
+
         setPlans(data.plans || []);
       } catch (error) {
         console.error("Failed to fetch plans:", error);
@@ -73,7 +73,7 @@ const ZoneContent: React.FC = () => {
       try {
         const data = await getAllPlanGroups();
         const activePlanGroups = data.planGroups.filter(
-          (group) => group.PlanGroup_Active === 'Y'
+          (group) => group.PlanGroup_Active === "Y"
         );
         setPlanGroups(activePlanGroups || []);
       } catch (error) {
@@ -291,16 +291,18 @@ const ZoneContent: React.FC = () => {
   };
 
   const filteredPlans = plans.filter((plan) => {
-    const nameMatch = plan.Plan_Name.toLowerCase().includes(searchQuery.toLowerCase());
-    const groupNameMatch = plan.PlanGroup_Name.toLowerCase().includes(searchQuery.toLowerCase());
-  
+    const nameMatch = plan.Plan_Name.toLowerCase().includes(
+      searchQuery.toLowerCase()
+    );
+    const groupNameMatch = plan.PlanGroup_Name.toLowerCase().includes(
+      searchQuery.toLowerCase()
+    );
+
     return (
       (statusFilter === "ทั้งหมด" || plan.Plan_Active === statusFilter) &&
       (nameMatch || groupNameMatch) // Match either Plan_Name or PlanGroup_Name
     );
   });
-
-  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -311,7 +313,7 @@ const ZoneContent: React.FC = () => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-  
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setNewPlan((prev) => ({
@@ -322,12 +324,13 @@ const ZoneContent: React.FC = () => {
       reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
     }
   };
-  
 
-  const handleEditImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-  
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditPlan((prev) => ({
@@ -340,7 +343,12 @@ const ZoneContent: React.FC = () => {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        backgroundColor: "#f7f7f7",
+        height: "100vh",
+      }}
+    >
       <Header title="โซน" />
       <div
         style={{
@@ -348,8 +356,9 @@ const ZoneContent: React.FC = () => {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "20px",
-          marginTop: "30px",
+          marginTop: "25px",
           marginLeft: "20px",
+          marginRight: "20px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -363,10 +372,17 @@ const ZoneContent: React.FC = () => {
               value={statusFilter}
               onChange={handleStatusFilterChange}
               label="สถานะ"
+              style={{ backgroundColor: "white" }}
             >
-              <MenuItem value="ทั้งหมด">ทั้งหมด</MenuItem>
-              <MenuItem value="Y">เผยแพร่</MenuItem>
-              <MenuItem value="N">ไม่เผยแพร่</MenuItem>
+              <MenuItem value="ทั้งหมด" sx={{ fontSize: "16px" }}>
+                ทั้งหมด
+              </MenuItem>
+              <MenuItem value="Y" sx={{ fontSize: "16px" }}>
+                เผยแพร่
+              </MenuItem>
+              <MenuItem value="N" sx={{ fontSize: "16px" }}>
+                ไม่เผยแพร่
+              </MenuItem>
             </Select>
           </FormControl>
           <TextField
@@ -374,15 +390,19 @@ const ZoneContent: React.FC = () => {
             placeholder="ค้นหาชื่อผังร้านและโซน"
             value={searchQuery}
             onChange={handleSearchChange}
-            style={{ marginRight: "10px", height: "50px" }}
+            style={{
+              marginRight: "10px",
+              height: "50px",
+              backgroundColor: "white",
+            }}
             InputLabelProps={{
               shrink: true,
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -393,52 +413,92 @@ const ZoneContent: React.FC = () => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            marginRight: "1220px",
+            marginLeft: "auto%",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
           }}
         >
-          เพิ่มรายการ +
+          + เพิ่มรายการ
         </Button>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"100px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
               >
                 ลำดับ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
               >
                 ชื่อผังร้าน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold",textAlign:"center",width:"200px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
               >
                 ชื่อโซน
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center",width:"300px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "300px",
+                }}
               >
                 คำอธิบาย
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center" ,width:"100px"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
               >
                 รูปภาพ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
               >
                 สถานะ
               </TableCell>
               <TableCell
-                style={{ color: "black", fontSize: "18px", fontWeight: "bold" ,textAlign:"center"}}
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
               >
                 จัดการ
               </TableCell>
@@ -448,11 +508,19 @@ const ZoneContent: React.FC = () => {
             {currentItems.length > 0 ? (
               currentItems.map((plan, index) => (
                 <TableRow key={plan.Plan_id}>
-                  <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{plan.PlanGroup_Name}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{plan.Plan_Name}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{plan.Plan_Desc}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {plan.PlanGroup_Name}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {plan.Plan_Name}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {plan.Plan_Desc}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <div
                       style={{
                         position: "relative",
@@ -473,7 +541,7 @@ const ZoneContent: React.FC = () => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell  style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Switch
                       checked={plan.Plan_Active === "Y"}
                       onChange={() => toggleActiveStatus(plan)}
@@ -483,17 +551,22 @@ const ZoneContent: React.FC = () => {
                       {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
                     </span>
                   </TableCell>
-                  <TableCell  style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleEditOpen(plan)}
+                      sx={{ marginRight: "5px" }}
                     >
                       รายละเอียด
                     </Button>
                     <IconButton
                       onClick={() => handleDelete(plan.Plan_id)}
-                      style={{ color: "red" }}
+                      style={{
+                        color: "gray",
+                        border: "1px solid gray",
+                        borderRadius: "5px",
+                      }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -521,10 +594,7 @@ const ZoneContent: React.FC = () => {
         />
       </div>
 
-      <Dialog
-        open={open}
-        onClose={handleClose}
-      >
+      <Dialog open={open} onClose={handleClose}>
         <DialogTitle>สร้างโซนใหม่</DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="dense">
@@ -554,10 +624,10 @@ const ZoneContent: React.FC = () => {
             value={newPlan.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -571,10 +641,10 @@ const ZoneContent: React.FC = () => {
             value={newPlan.desc}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -613,20 +683,17 @@ const ZoneContent: React.FC = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
+          <Button onClick={handleClose} color="primary">
+            ปิด
           </Button>
           <Button onClick={handleCreate} color="primary">
-            Create
+            บันทึก
           </Button>
         </DialogActions>
       </Dialog>
 
       {editPlan && (
-        <Dialog
-          open={editOpen}
-          onClose={handleEditClose}
-        >
+        <Dialog open={editOpen} onClose={handleEditClose}>
           <DialogTitle>แก้ไขโซน</DialogTitle>
           <DialogContent>
             <FormControl fullWidth margin="dense">
@@ -654,14 +721,14 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Name}
               onChange={handleEditChange}
-             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
+              }}
             />
             <TextField
               margin="dense"
@@ -671,14 +738,14 @@ const ZoneContent: React.FC = () => {
               fullWidth
               value={editPlan.Plan_Desc}
               onChange={handleEditChange}
-             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
                 },
-              },
-            }}
+              }}
             />
             <div style={{ margin: "dense" }}>
               <label
@@ -709,11 +776,11 @@ const ZoneContent: React.FC = () => {
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleEditClose} color="secondary">
-              Cancel
+            <Button onClick={handleEditClose} color="primary">
+              ปิด
             </Button>
             <Button onClick={handleSaveEdit} color="primary">
-              Save
+              บันทึก
             </Button>
           </DialogActions>
         </Dialog>

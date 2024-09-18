@@ -26,7 +26,6 @@ import {
 } from "../../services/ticket-type.service";
 import { getEventStock } from "../../services/event-stock.service"; // Import the getEventStock function
 import Header from "../common/header";
-import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 const TicketTypeContent: React.FC = () => {
@@ -55,12 +54,11 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch ticket types:", error);
-      
     }
   };
 
-   // Function to fetch and set the event stock data
-   const fetchEventStock = async () => {
+  // Function to fetch and set the event stock data
+  const fetchEventStock = async () => {
     try {
       const data = await getEventStock();
       if (data) {
@@ -68,7 +66,6 @@ const TicketTypeContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch event stock:", error);
-      
     }
   };
 
@@ -102,117 +99,122 @@ const TicketTypeContent: React.FC = () => {
     existingTicketTypes: any[],
     currentTicketTypeId?: number
   ): boolean => {
-    return existingTicketTypes.some(ticketType =>
-      ticketType.Ticket_Type_Name === name &&
-      ticketType.Ticket_Type_Id !== currentTicketTypeId // Ignore the current ticket type being edited
+    return existingTicketTypes.some(
+      (ticketType) =>
+        ticketType.Ticket_Type_Name === name &&
+        ticketType.Ticket_Type_Id !== currentTicketTypeId // Ignore the current ticket type being edited
     );
   };
-  
+
   const handleCreate = async () => {
-  if (isDuplicateTicketTypeName(newTicketType.name, ticketTypes)) {
-    window.alert("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
-    return;
-  }
-
-  try {
-    await createTicketType({
-      Ticket_Type_Name: newTicketType.name,
-      Ticket_Type_Unit: newTicketType.unit,
-      Ticket_Type_Cal: newTicketType.cal,
-    });
-    Swal.fire({
-      icon: "success",
-      title: "สร้างประเภทบัตรสำเร็จ",
-    });
-    setNewTicketType({
-      name: "",
-      unit: "",
-      cal: "",
-    }); // Reset the form state
-    handleClose();
-    fetchTicketTypes(); // Refresh data after creating
-  } catch (error) {
-    window.alert("ล้มเหลวในการสร้างประเภทบัตร");
-  }
-};
-
-const handleEditOpen = (ticketType: any) => {
-  setEditTicketType(ticketType);
-  setEditOpen(true);
-};
-
-const handleEditClose = () => {
-  setEditOpen(false);
-  setEditTicketType(null);
-};
-
-const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setEditTicketType({
-    ...editTicketType,
-    [event.target.name]: event.target.value,
-  });
-};
-
-const handleSaveEdit = async () => {
-  if (!editTicketType) return;
-
-  try {
-    // Assuming you have a function to check for duplicates, which can be implemented similarly to what was previously discussed.
-    const isDuplicate = isDuplicateTicketTypeName(editTicketType.Ticket_Type_Name, ticketTypes, editTicketType.Ticket_Type_Id);
-    if (isDuplicate) {
+    if (isDuplicateTicketTypeName(newTicketType.name, ticketTypes)) {
       window.alert("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
       return;
     }
 
-    await updateTicketType({
-      Ticket_Type_Id: editTicketType.Ticket_Type_Id,
-      Ticket_Type_Name: editTicketType.Ticket_Type_Name,
-      Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
-      Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
-    });
-    Swal.fire({
-      icon: "success",
-      title: "อัปเดตประเภทบัตรสำเร็จ",
-    });
-    handleEditClose();
-    fetchTicketTypes(); // Refresh data after updating
-  } catch (error) {
-    Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวระหว่างอัปเดตประเภทบัตร",
-        });
-  }
-};
+    try {
+      await createTicketType({
+        Ticket_Type_Name: newTicketType.name,
+        Ticket_Type_Unit: newTicketType.unit,
+        Ticket_Type_Cal: newTicketType.cal,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "สร้างประเภทบัตรสำเร็จ",
+      });
+      setNewTicketType({
+        name: "",
+        unit: "",
+        cal: "",
+      }); // Reset the form state
+      handleClose();
+      fetchTicketTypes(); // Refresh data after creating
+    } catch (error) {
+      window.alert("ล้มเหลวในการสร้างประเภทบัตร");
+    }
+  };
 
-const handleDelete = async (id: number) => {
-  // Check if the ticket type is used in any event stock
-  const isUsedInEventStock = eventStocks.some(
-    (stock) => stock.Ticket_Type_Id === id
-  );
+  const handleEditOpen = (ticketType: any) => {
+    setEditTicketType(ticketType);
+    setEditOpen(true);
+  };
 
-  if (isUsedInEventStock) {
-    Swal.fire({
-          icon: "error",
-          title: "ไม่สามารถลบประเภทบัตรที่ถูกใช้งานแล้วได้",
-        });
-    return;
-  }
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditTicketType(null);
+  };
 
-  try {
-    await deleteTicketType(id);
-    Swal.fire({
-      icon: "success",
-      title: "ลบประเภทบัตรสำเร็จ",
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEditTicketType({
+      ...editTicketType,
+      [event.target.name]: event.target.value,
     });
-    fetchTicketTypes(); // Refresh data after deletion
-  } catch (error) {
-    console.error("Failed to delete ticket type:", error);
-    Swal.fire({
-          icon: "error",
-          title: "ล้มเหลวในการลบประเภทบัตร",
-        });
-  }
-};
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTicketType) return;
+
+    try {
+      // Assuming you have a function to check for duplicates, which can be implemented similarly to what was previously discussed.
+      const isDuplicate = isDuplicateTicketTypeName(
+        editTicketType.Ticket_Type_Name,
+        ticketTypes,
+        editTicketType.Ticket_Type_Id
+      );
+      if (isDuplicate) {
+        window.alert("มีประเภทบัตรที่มีชื่อเดียวกันแล้ว");
+        return;
+      }
+
+      await updateTicketType({
+        Ticket_Type_Id: editTicketType.Ticket_Type_Id,
+        Ticket_Type_Name: editTicketType.Ticket_Type_Name,
+        Ticket_Type_Unit: editTicketType.Ticket_Type_Unit,
+        Ticket_Type_Cal: editTicketType.Ticket_Type_Cal,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "อัปเดตประเภทบัตรสำเร็จ",
+      });
+      handleEditClose();
+      fetchTicketTypes(); // Refresh data after updating
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวระหว่างอัปเดตประเภทบัตร",
+      });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    // Check if the ticket type is used in any event stock
+    const isUsedInEventStock = eventStocks.some(
+      (stock) => stock.Ticket_Type_Id === id
+    );
+
+    if (isUsedInEventStock) {
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สามารถลบประเภทบัตรที่ถูกใช้งานแล้วได้",
+      });
+      return;
+    }
+
+    try {
+      await deleteTicketType(id);
+      Swal.fire({
+        icon: "success",
+        title: "ลบประเภทบัตรสำเร็จ",
+      });
+      fetchTicketTypes(); // Refresh data after deletion
+    } catch (error) {
+      console.error("Failed to delete ticket type:", error);
+      Swal.fire({
+        icon: "error",
+        title: "ล้มเหลวในการลบประเภทบัตร",
+      });
+    }
+  };
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -225,15 +227,22 @@ const handleDelete = async (id: number) => {
   const totalPages = Math.ceil(ticketTypes.length / itemsPerPage);
 
   return (
-    <div>
+    <div
+      style={{
+        backgroundColor: "#f7f7f7",
+        height: "100vh",
+      }}
+    >
       <Header title="ประเภทบัตร" />
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
-          justifyContent: "space-between",
-          paddingTop: 20,
-          paddingLeft: 20,
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "25px",
+          marginLeft: "20px",
+          marginRight: "20px",
         }}
       >
         <Button
@@ -241,47 +250,109 @@ const handleDelete = async (id: number) => {
           style={{
             backgroundColor: "#0B8600",
             color: "white",
-            padding: "10px 20px",
+            marginLeft: "auto%",
             border: "none",
             borderRadius: "4px",
             fontSize: "16px",
             cursor: "pointer",
-            alignSelf: "flex-end",
           }}
         >
-          เพิ่มรายการ +
+          + เพิ่มรายการ
         </Button>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"50px"}}>ลำดับ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"200px"}}>ชื่อประเภทบัตร</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"100px"}}>หน่วย</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"100px"}}>การคำนวณ</TableCell>
-              <TableCell style={{color:"black",fontSize:"18px",fontWeight:"bold",textAlign:"center",width:"200px"}}>จัดการ</TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "50px",
+                }}
+              >
+                ลำดับ
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
+              >
+                ชื่อประเภทบัตร
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                หน่วย
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100px",
+                }}
+              >
+                การคำนวณ
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "white",
+                  fontSize: "17px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "200px",
+                }}
+              >
+                จัดการ
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentItems.length > 0 ? (
               currentItems.map((ticketType, index) => (
                 <TableRow key={ticketType.Ticket_Type_Id}>
-                  <TableCell  style={{textAlign:"center"}}>{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Name}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Unit}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>{ticketType.Ticket_Type_Cal}</TableCell>
-                  <TableCell  style={{textAlign:"center"}}>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>
+                    {indexOfFirstItem + index + 1}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {ticketType.Ticket_Type_Name}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {ticketType.Ticket_Type_Unit}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {ticketType.Ticket_Type_Cal}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleEditOpen(ticketType)}
+                      sx={{ marginRight: "5px" }}
                     >
                       รายละเอียด
                     </Button>
                     <IconButton
                       onClick={() => handleDelete(ticketType.Ticket_Type_Id)}
-                      style={{ color: "red" }} // Delete button in red
+                      style={{
+                        color: "gray",
+                        border: "1px solid gray",
+                        borderRadius: "5px",
+                      }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -298,7 +369,9 @@ const handleDelete = async (id: number) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div
+        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+      >
         <Pagination
           count={totalPages}
           page={currentPage}
@@ -320,10 +393,10 @@ const handleDelete = async (id: number) => {
             value={newTicketType.name}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -337,10 +410,10 @@ const handleDelete = async (id: number) => {
             value={newTicketType.unit}
             onChange={handleChange}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '& input': {
-                  border: 'none', // Remove the inner border
-                  transform: 'translateY(5px)',
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
                 },
               },
             }}
@@ -359,11 +432,11 @@ const handleDelete = async (id: number) => {
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
+          <Button onClick={handleClose} color="primary">
+            ปิด
           </Button>
           <Button onClick={handleCreate} color="primary">
-            Create
+            บันทึก
           </Button>
         </DialogActions>
       </Dialog>
@@ -382,58 +455,56 @@ const handleDelete = async (id: number) => {
               value={editTicketType.Ticket_Type_Name}
               onChange={handleEditChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& input': {
-                    border: 'none', // Remove the inner border
-                    transform: 'translateY(5px)',
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
                   },
                 },
               }}
-              />
-              <TextField
-                margin="dense"
-                name="Ticket_Type_Unit"
-                label="Unit"
-                type="text"
-                fullWidth
-                value={editTicketType.Ticket_Type_Unit}
-                onChange={handleEditChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& input': {
-                      border: 'none', // Remove the inner border
-                      transform: 'translateY(5px)',
-                    },
+            />
+            <TextField
+              margin="dense"
+              name="Ticket_Type_Unit"
+              label="Unit"
+              type="text"
+              fullWidth
+              value={editTicketType.Ticket_Type_Unit}
+              onChange={handleEditChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
                   },
-                }}
-              />
-              <TextField
-                select
-                margin="dense"
-                name="Ticket_Type_Cal"
-                label="Calculation (Y/N)"
-                fullWidth
-                value={editTicketType.Ticket_Type_Cal}
-                onChange={handleEditChange}
-              >
-                <MenuItem value="Y">Y</MenuItem>
-                <MenuItem value="N">N</MenuItem>
-              </TextField>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleEditClose} color="secondary">
-                Cancel
-              </Button>
-              <Button onClick={handleSaveEdit} color="primary">
-                Save
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
-      </div>
-    );
-  };
-  
-  export default TicketTypeContent;
-  
-           
+                },
+              }}
+            />
+            <TextField
+              select
+              margin="dense"
+              name="Ticket_Type_Cal"
+              label="Calculation (Y/N)"
+              fullWidth
+              value={editTicketType.Ticket_Type_Cal}
+              onChange={handleEditChange}
+            >
+              <MenuItem value="Y">Y</MenuItem>
+              <MenuItem value="N">N</MenuItem>
+            </TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} color="primary">
+              ปิด
+            </Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              บันทึก
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+    </div>
+  );
+};
+
+export default TicketTypeContent;
