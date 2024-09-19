@@ -1,20 +1,17 @@
 import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import { STATUS_MAP } from "../../../config/constants";
 import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
-import { convertLocalTimeToISO } from "../../../lib/util";
-import { createEvent } from "../../../services/event-list.service";
+import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore } from "../form-store"; // Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
+import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
-import { SwalError } from "../../../lib/sweetalert";
-import dayjs from 'dayjs';
-
+import { handleSave } from "./save-form";
 
 const MINIMUM_EVENT_IMAGES = 1;
 
@@ -35,9 +32,16 @@ const CreateEventForm = () => {
     setImages, // Zustand action to set images
   } = useEventStore();
 
+  const {
+    handleSaveEventStock,
+    handleSaveLogEventPrice,
+    handleSaveTicketNumbers,
+    handleCreateEvent,
+    isFormValid,
+  } = useZonePriceForm();
+
   useWarnChangePage();
 
-  const [publish, setPublish] = useState(false);
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [isDetailCompleted, setIsDetailCompleted] = useState(false);
 
@@ -67,40 +71,51 @@ const CreateEventForm = () => {
     setImages(index, null); // Remove image from Zustand store
   };
 
-  async function handleCreateEvent() {
-    try {
-      toast.loading("กำลังสร้าง event ใหม่");
-      // Add 7 hours to the eventDateTime before converting to ISO
-      const adjustedEventDateTime = dayjs(eventDateTime).add(7, 'hour').toISOString();
-      const eventData = {
-        Event_Name: title,
-        Event_Addr: title2,
-        Event_Desc: description,
-        Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
-        Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
-        Event_Status: status,
-        Event_Public: "N",
-        Event_Pic_1: images[0], // Send images from Zustand store
-        Event_Pic_2: images[1],
-        Event_Pic_3: images[2],
-        Event_Pic_4: images[3],
-      };
+  // async function handleCreateEvent() {
+  //   try {s
+  //     toast.loading("กำลังสร้าง event ใหม่");
 
-      const { eventId } = await createEvent(eventData);
+  //     // Add 7 hours to the eventDateTime before converting to ISO
+  //     const adjustedEventDateTime = dayjs(eventDateTime)
+  //       .add(7, "hour")
+  //       .toISOString();
 
-      if (!eventId) throw new Error("สร้าง event ล้มเหลว");
+  //     if (images.filter((img) => Boolean(img)).length < MINIMUM_EVENT_IMAGES) {
+  //       throw new Error(
+  //         `กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`
+  //       );
+  //     }
 
-      toast.dismiss();
-      Swal.fire({
-        icon: "success",
-        title: "สร้าง event สำเร็จ",
-      });
-      navigate("/all-events");
-    } catch (error: any) {
-      toast.dismiss();
-      toast.error(error.message);
-    }
-  }
+  //     const eventData = {
+  //       Event_Name: title,
+  //       Event_Addr: title2,
+  //       Event_Desc: description,
+  //       Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
+  //       Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
+  //       Event_Status: status,
+  //       Event_Public: "N",
+  //       Event_Pic_1: images[0],
+  //       Event_Pic_2: images[1],
+  //       Event_Pic_3: images[2],
+  //       Event_Pic_4: images[3],
+  //     };
+
+  //     const { eventId } = await createEvent(eventData);
+
+  //     if (!eventId) throw new Error("สร้าง event ล้มเหลว");
+
+  //     toast.dismiss();
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "สร้าง event สำเร็จ",
+  //     });
+  //     navigate("/all-events");
+  //   } catch (error: any) {
+  //     toast.dismiss();
+  //     SwalError(error.message);
+  //   }
+  // }
 
   const handleNext = (e: any) => {
     e.preventDefault();
@@ -139,6 +154,38 @@ const CreateEventForm = () => {
     }
   };
 
+  async function handleSaveEvent() {
+    try {
+      toast.loading("กำลังบันทึกข้อมูล Event");
+
+      const { isValid, message } = isFormValid();
+
+      if (!isValid) throw new Error(message);
+
+      const eventId = await handleCreateEvent();
+
+      if (!eventId) {
+        toast.dismiss();
+        throw new Error("ล้มเหลวระหว่างสร้าง event");
+      }
+
+      await handleSaveEventStock(eventId);
+
+      await handleSaveLogEventPrice(eventId);
+
+      await handleSaveTicketNumbers(eventId);
+
+      toast.dismiss();
+
+      SwalSuccess("บันทึกข้อมูล Event สำเร็จ");
+
+      navigate("/all-events");
+    } catch (error: any) {
+      toast.dismiss();
+      SwalError(error.message);
+    }
+  }
+
   const handleCancel = () => {
     const userConfirmed = window.confirm(
       "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด โปรดบันทึกข้อมูลไว้ก่อน"
@@ -160,7 +207,11 @@ const CreateEventForm = () => {
           <button className="btn-cancel" onClick={handleCancel}>
             ยกเลิก
           </button>
-          <button className="btn-save" onClick={handleCreateEvent}>
+          <button
+            disabled={activeTab === "รายละเอียด"}
+            className="btn-save"
+            onClick={handleSaveEvent}
+          >
             บันทึก
           </button>
         </div>
@@ -215,10 +266,10 @@ const CreateEventForm = () => {
           </div>
           <hr className="custom-hr" />
           <div className="form-section">
-          <DatePicker
+            <DatePicker
               label="วันและเวลาจัดงาน*"
               dateTimeValue={eventDateTime} // Ensure Dayjs object
-              setter={setEventDateTime}     // Pass setter function for Dayjs object
+              setter={setEventDateTime} // Pass setter function for Dayjs object
             />
           </div>
           <div className="form-section">
@@ -292,7 +343,9 @@ const CreateEventForm = () => {
           </div>
         </form>
       )}
-      {activeTab === "โซน & ราคา" && <ZonePriceForm />}
+      {activeTab === "โซน & ราคา" && (
+        <ZonePriceForm onSaveEvent={handleSaveEvent} />
+      )}
     </div>
   );
 };

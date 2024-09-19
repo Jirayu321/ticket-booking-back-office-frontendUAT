@@ -1,33 +1,23 @@
 import { CircularProgress } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import React, { FC, useEffect, useState } from "react";
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import { getAllPlans } from "../../../services/plan.service";
 import { useZoneStore } from "../form-store";
 import FilteredZones from "./FilteredZones";
 import "./zone-price-form.css";
-import { useZonePriceForm } from "./zone-price-form.hooks";
 import ZoneSelectForm from "./ZoneSelectForm";
-import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 
-const ZonePriceForm = () => {
+type Props = {
+  onSaveEvent: () => void;
+};
+
+const ZonePriceForm: FC<Props> = ({ onSaveEvent }) => {
   const {
     selectedZoneGroup,
     setSelectedZoneGroup,
     setZoneData,
     resetZoneData,
   } = useZoneStore();
-
-  const {
-    handleCreateEvent,
-    handleSaveEventStock,
-    handleSaveLogEventPrice,
-    handleSaveTicketNumbers,
-    isFormValid,
-  } = useZonePriceForm();
-
-  const navigate = useNavigate();
 
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
@@ -105,38 +95,6 @@ const ZonePriceForm = () => {
     fetchData();
   }, []);
 
-  async function handleSaveEvent() {
-    try {
-      toast.loading("กำลังบันทึกข้อมูล Event");
-
-      const { isValid, message } = isFormValid();
-
-      if (!isValid) throw new Error(message);
-
-      const eventId = await handleCreateEvent();
-
-      if (!eventId) {
-        toast.dismiss();
-        throw new Error("ล้มเหลวระหว่างสร้าง event");
-      }
-
-      await handleSaveEventStock(eventId);
-
-      await handleSaveLogEventPrice(eventId);
-
-      await handleSaveTicketNumbers(eventId);
-
-      toast.dismiss();
-
-      SwalSuccess("บันทึกข้อมูล Event สำเร็จ");
-
-      navigate("/all-events");
-    } catch (error: any) {
-      toast.dismiss();
-      SwalError(error.message);
-    }
-  }
-
   if (isLoadingPlanGroups) return <CircularProgress />;
 
   return (
@@ -149,7 +107,7 @@ const ZonePriceForm = () => {
       />
       <FilteredZones filteredZones={filteredZones} />
       <div className="save-form-section">
-        <button className="buttonSave" onClick={handleSaveEvent}>
+        <button className="buttonSave" onClick={onSaveEvent}>
           บันทึก
         </button>
       </div>

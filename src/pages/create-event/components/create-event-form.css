@@ -8,7 +8,7 @@
 }
 
 .header {
-  background-color: #FFD700;
+  background-color: #ffd700;
   padding: 15px;
   height: 10px;
   display: flex;
@@ -16,7 +16,7 @@
 
 .header h1 {
   margin-top: -4px;
-  color: #1A1A1A;
+  color: #1a1a1a;
   font-size: 18px;
 }
 
@@ -26,7 +26,7 @@
   justify-content: space-between;
   background-color: #000;
   padding: 10px;
-  color: #FFD700;
+  color: #ffd700;
 }
 
 .sub-header {
@@ -91,14 +91,15 @@
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #2196f3;
 }
 
 input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-.btn-cancel, .btn-save {
+.btn-cancel,
+.btn-save {
   padding: 10px 20px;
   margin-left: 10px;
   border: none;
@@ -120,7 +121,7 @@ input:checked + .slider:before {
 }
 
 .btn-save {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   margin-right: 20px;
   border-radius: 0px;
@@ -134,13 +135,13 @@ input:checked + .slider:before {
 
 .form-section {
   margin-bottom: 13px;
-  color: #1A1A1A;
+  color: #1a1a1a;
   margin-left: 15px;
 }
 
 .form-section-date {
   margin-bottom: 13px;
-  color: #1A1A1A;
+  color: #1a1a1a;
   margin-left: 15px;
 }
 
@@ -223,7 +224,7 @@ input[type="text"] {
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: rgb(255, 255, 255,0.2);
+  background-color: rgb(255, 255, 255, 0.2);
 }
 
 .image-upload-box input[type="file"] {
@@ -284,7 +285,7 @@ input[type="text"] {
   width: 8%;
   height: 100%;
   padding: 10px 20px;
-  background-color: #0B8600;
+  background-color: #0b8600;
   color: white;
   font-size: 18px;
   font-weight: bold;
@@ -309,7 +310,8 @@ button:hover {
   height: 45px; /* Set the desired height */
 }
 
-.left-box, .right-box {
+.left-box,
+.right-box {
   height: 35px; /* Increased height */
   flex: 1;
   display: flex;
@@ -320,12 +322,13 @@ button:hover {
   /* cursor: pointer; */
   font-size: 24px;
   border-radius: 0px; /* Add rounded corners */
-  border: 1px solid #CFB70B; /* Add border line */
+  border: 1px solid #cfb70b; /* Add border line */
   margin: 0 10px; /* Separate the boxes from each other */
 }
 
-.left-box.active, .right-box.active {
-  background-color: rgb(207, 183, 11,0.1);
+.left-box.active,
+.right-box.active {
+  background-color: rgb(207, 183, 11, 0.1);
   color: black !important;
   font-weight: bold;
 }
@@ -364,13 +367,13 @@ button.active {
 
 .custom-hr {
   border: none;
-  border-top: 1px dashed rgb(0, 0, 0,0.25); /* Dashed line */
+  border-top: 1px dashed rgb(0, 0, 0, 0.25); /* Dashed line */
   margin-top: 20px;
   margin-bottom: 20px;
   width: 98%;
 }
 
-
-
-
-
+.btn-save:disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}

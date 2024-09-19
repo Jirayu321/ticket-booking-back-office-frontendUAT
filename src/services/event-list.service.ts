@@ -48,7 +48,7 @@ export async function createEvent({
       Event_Time,
       Event_Status,
       Event_Public,
-      Event_Pic_1, // Include image fields
+      Event_Pic_1,
       Event_Pic_2,
       Event_Pic_3,
       Event_Pic_4,
@@ -59,7 +59,7 @@ export async function createEvent({
 
     return response.data;
   } catch (error: any) {
-    throw "ล้มเหลวระหว่างสร้าง event";
+    throw new Error(error.message);
   }
 }
 
