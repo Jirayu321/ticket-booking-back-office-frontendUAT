@@ -7,12 +7,15 @@ interface GenerateTableProps {
   method: string;
   totalSeats: number;
   zoneId: number;
+  selectedTicketType: string;  // Add selectedTicketType here
 }
 
 const GenerateBoxes: React.FC<GenerateTableProps> = ({
   method,
   totalSeats,
   zoneId,
+  selectedTicketType,  // Destructure selectedTicketType from props
+  
 }) => {
   const { setStartNumberAndPrefix, setTableValues, zones } = useZoneStore();
 
@@ -24,6 +27,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       setTableValues,
       setStartNumberAndPrefix,
       zones,
+      selectedTicketType,  // Pass selectedTicketType to useGenerate
     });
 
   return (

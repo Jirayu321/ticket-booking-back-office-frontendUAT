@@ -57,7 +57,7 @@
 
 // export default StartEndDatePickers;
 
-import * as React from 'react';
+import React from 'react';
 import { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import buddhistEra from 'dayjs/plugin/buddhistEra';
@@ -71,50 +71,45 @@ const StartEndDatePickers: React.FC<{
   onStartDateChange: (date: Dayjs | null) => void;
   onEndDateChange: (date: Dayjs | null) => void;
 }> = ({ startDate, endDate, onStartDateChange, onEndDateChange }) => {
-  
-  // Handle the date change and convert to Dayjs
+
+  // Function to handle the input change and convert the value back to Dayjs
   const handleDateChange = (date: string, callback: (date: Dayjs | null) => void) => {
-    const newDate = date ? dayjs(date).subtract(543, 'year') : null;
-    callback(newDate);
+    if (date) {
+      const [day, month, year] = date.split('/');
+      // Convert the Buddhist year to the Gregorian year
+      const gregorianYear = (parseInt(year) - 543).toString();
+      const gregorianDate = `${gregorianYear}-${month}-${day}`;
+      callback(dayjs(gregorianDate, 'YYYY-MM-DD'));
+    } else {
+      callback(null);
+    }
   };
 
-  // Convert Gregorian date to Buddhist date for display
-  const convertToBuddhistYear = (date: Dayjs | null) => {
-    return date ? dayjs(date).add(543, 'year').format('YYYY-MM-DD') : '';
-  };
-
-  // Convert Buddhist date to display format
-  const convertToDisplayFormat = (date: string) => {
-    const [year, month, day] = date.split('-');
-    const buddhistYear = parseInt(year, 10) + 543;
-    return `${buddhistYear}-${month}-${day}`;
-  };
-
-  // Convert display format to Buddhist date
-  const convertToInputFormat = (date: string) => {
-    const [year, month, day] = date.split('-');
-    const gregorianYear = parseInt(year, 10) - 543;
-    return `${gregorianYear}-${month}-${day}`;
+  // Function to format Dayjs date to Buddhist Year
+  const formatToBuddhistYear = (date: Dayjs | null) => {
+    return date ? date.add(543, 'year').format('DD/MM/YYYY') : '';
   };
 
   return (
     <div style={{ display: 'flex', gap: '16px' }}>
       <div>
-        <label style={{color:"black"}}>วันที่เริ่มต้น</label>
+        <label style={{ color: 'black' }}>วันที่เริ่มต้น</label>
         <input
-          type="date"
-          value={startDate ? convertToDisplayFormat(convertToBuddhistYear(startDate)) : ''}
-          onChange={(e) => handleDateChange(convertToInputFormat(e.target.value), onStartDateChange)}
-          style={{ padding: '5px', fontSize: '16px' ,color:"black"}}
+          type="text"
+          value={formatToBuddhistYear(startDate)}
+          onChange={(e) => handleDateChange(e.target.value, onStartDateChange)}
+          placeholder="DD/MM/BBBB"
+          style={{ padding: '5px', fontSize: '16px', color: 'black' }}
         />
       </div>
       <div>
-        <label style={{color:"black"}}>วันที่สิ้นสุด</label>
+        <label style={{ color: 'black' }}>วันที่สิ้นสุด</label>
         <input
-          type="date"
-          value={endDate ? convertToDisplayFormat(convertToBuddhistYear(endDate)) : ''}
-          onChange={(e) => handleDateChange(convertToInputFormat(e.target.value), onEndDateChange)}
-          style={{ padding: '5px', fontSize: '16px',color:"black" }}
+          type="text"
+          value={formatToBuddhistYear(endDate)}
+          onChange={(e) => handleDateChange(e.target.value, onEndDateChange)}
+          placeholder="DD/MM/BBBB"
+          style={{ padding: '5px', fontSize: '16px', color: 'black' }}
         />
       </div>
     </div>
@@ -122,3 +117,5 @@ const StartEndDatePickers: React.FC<{
 };
 
 export default StartEndDatePickers;
+
+
