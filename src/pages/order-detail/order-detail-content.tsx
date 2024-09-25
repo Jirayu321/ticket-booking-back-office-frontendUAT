@@ -50,11 +50,7 @@ const OrderDetailContent: React.FC = () => {
   };
 
   const handleNavigateToOrderSite2 = async (order_id: string | number) => {
-    const response = await getViewTicketListbyOrderid(order_id);
-    console.log("tickets response:", response);
-    if (Array.isArray(response.ticketList)) {
-      return <></>;
-    }
+  
     const orderIdStr = String(order_id); // Ensure order_id is a string
     window.open(
       `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
