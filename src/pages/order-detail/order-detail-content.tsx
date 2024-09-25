@@ -49,25 +49,25 @@ const OrderDetailContent: React.FC = () => {
     navigate("/all-orders");
   };
 
-  // const handleNavigateToOrderSite = async (order_id: string | number) => {
-  //   const response = await getViewTicketListbyOrderid(order_id);
-  //   console.log("tickets response:", response);
-  //   if (Array.isArray(response.ticketList)) {
-  //     return <></>;
-  //   }
-  //   // const orderIdStr = String(order_id); // Ensure order_id is a string
-  //   // window.open(
-  //   //   `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
-  //   //     "token"
-  //   //   )}`,
-  //   //   "_blank"
-  //   // );
-  // };
+  const handleNavigateToOrderSite2 = async (order_id: string | number) => {
+    const response = await getViewTicketListbyOrderid(order_id);
+    console.log("tickets response:", response);
+    if (Array.isArray(response.ticketList)) {
+      return <></>;
+    }
+    const orderIdStr = String(order_id); // Ensure order_id is a string
+    window.open(
+      `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+        "token"
+      )}`,
+      "_blank"
+    );
+  };
 
   const handleNavigateToOrderSite = async (order_id: string | number) => {
     const response = await getViewTicketListbyOrderid(order_id);
     console.log("tickets response:", response);
-  
+
     if (Array.isArray(response.ticketList)) {
       let contentHtml = `
         <html>
@@ -89,10 +89,10 @@ const OrderDetailContent: React.FC = () => {
           </head>
           <body>
       `;
-  
+
       for (let ticket of response.ticketList) {
         const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
-  
+
         contentHtml += `
           <div class="ticket-container">
             <img src="${dataUrl}"/>
@@ -100,7 +100,7 @@ const OrderDetailContent: React.FC = () => {
           </div>
         `;
       }
-  
+
       contentHtml += `
           <script>
             window.onload = function() {
@@ -113,14 +113,12 @@ const OrderDetailContent: React.FC = () => {
           </body>
         </html>
       `;
-  
+
       const printWindow = window.open("", "_blank");
       printWindow?.document.write(contentHtml);
       printWindow?.document.close();
     }
   };
-  
-
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
@@ -265,7 +263,11 @@ const OrderDetailContent: React.FC = () => {
           </h2>
         </div>
         <Button
-          onClick={() => handleNavigateToOrderSite(order_id)} // Wrap it in an anonymous function
+          onClick={() => {
+            isOrderPaid
+              ? handleNavigateToOrderSite(order_id)
+              : handleNavigateToOrderSite2(order_id);
+          }} 
           variant="contained"
           style={{
             backgroundColor: "#CFB70B",
