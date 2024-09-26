@@ -114,16 +114,58 @@ export async function getEventById(eventId: number) {
 
 export async function updateEventById(eventId: number, newValue: any) {
   try {
-    const response = await authAxiosClient.patch(`/event-list/${eventId}`, {
-      ...newValue,
-      // Event_Pic_1: newValue.Event_Pic_1 || null, // Add image fields
-      // Event_Pic_2: newValue.Event_Pic_2 || null,
-      // Event_Pic_3: newValue.Event_Pic_3 || null,
-      // Event_Pic_4: newValue.Event_Pic_4 || null,
-    });
+    // Function to compress image to 200 KB or less
+    const compressImage = async (image: string | null) => {
+      if (!image) return null;
 
-    if (response.status !== 200) throw "";
+      // Convert base64 to Blob
+      const blob = await fetch(image).then(res => res.blob());
+
+      // Log original image size
+      console.log('Original Image Size:', blob.size);
+
+      // Convert Blob to File object
+      let file = new File([blob], 'image.jpg', { type: blob.type });
+
+      // Compress the image until it is 200 KB or less
+      const options = {
+        maxSizeMB: 0.2, // Target size of 200 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+
+      let compressedFile = file;
+      while (compressedFile.size > 200 * 1024) {
+        compressedFile = await imageCompression(compressedFile, options);
+        console.log('Compressed Image Size:', compressedFile.size);
+      }
+
+      // Convert compressed File back to base64
+      return await imageCompression.getDataUrlFromFile(compressedFile);
+    };
+
+    // Compress images if they exist in newValue
+    const compressedPic1 = newValue.Event_Pic_1 ? await compressImage(newValue.Event_Pic_1) : null;
+    const compressedPic2 = newValue.Event_Pic_2 ? await compressImage(newValue.Event_Pic_2) : null;
+    const compressedPic3 = newValue.Event_Pic_3 ? await compressImage(newValue.Event_Pic_3) : null;
+    const compressedPic4 = newValue.Event_Pic_4 ? await compressImage(newValue.Event_Pic_4) : null;
+
+    // Update newValue with compressed images
+    const updatedValue = {
+      ...newValue,
+      Event_Pic_1: compressedPic1,
+      Event_Pic_2: compressedPic2,
+      Event_Pic_3: compressedPic3,
+      Event_Pic_4: compressedPic4,
+    };
+
+    const response = await authAxiosClient.patch(`/event-list/${eventId}`, updatedValue);
+
+    if (response.status !== 200) throw new Error("Failed to update event");
+
+    return response.data;
   } catch (error: any) {
-    throw "ล้มเหลวระหว่างอัพเดทข้อมูล event";
+    console.error('Error updating event:', error);
+    throw new Error("ล้มเหลวระหว่างอัพเดทข้อมูล event");
   }
 }
