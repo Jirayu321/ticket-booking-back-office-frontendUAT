@@ -1,4 +1,6 @@
 import { authAxiosClient } from "../config/axios.config";
+import imageCompression from 'browser-image-compression';
+
 
 export async function getAllPlans() {
   try {
@@ -28,10 +30,43 @@ export async function createPlan({
   PlanGroup_id?: number | null;
 }) {
   try {
+    // Function to compress image to 500 KB or less
+    const compressImage = async (image: string | null) => {
+      if (!image) return null;
+
+      // Convert base64 to Blob
+      const blob = await fetch(image).then(res => res.blob());
+
+      // Log original image size
+      console.log('Original Image Size:', blob.size);
+
+      // Convert Blob to File object
+      let file = new File([blob], 'image.jpg', { type: blob.type });
+
+      // Compress the image until it is 500 KB or less
+      const options = {
+        maxSizeMB: 0.5, // Target size of 500 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+
+      let compressedFile = file;
+      while (compressedFile.size > 500 * 1024) {
+        compressedFile = await imageCompression(compressedFile, options);
+        console.log('Compressed Image Size:', compressedFile.size);
+      }
+
+      // Convert compressed File back to base64
+      return await imageCompression.getDataUrlFromFile(compressedFile);
+    };
+
+    // Compress Plan_Pic if it exists
+    const compressedPic = Plan_Pic ? await compressImage(Plan_Pic) : "";
+
     const response = await authAxiosClient.post("/plan", {
       Plan_Desc,
       Plan_Name,
-      Plan_Pic: Plan_Pic || "",
+      Plan_Pic: compressedPic,
       Plan_Active,
       PlanGroup_id,
     });
@@ -60,10 +95,43 @@ export async function patchPlan({
   PlanGroup_id?: number | null;
 }) {
   try {
+    // Function to compress image to 500 KB or less
+    const compressImage = async (image: string | null) => {
+      if (!image) return null;
+
+      // Convert base64 to Blob
+      const blob = await fetch(image).then(res => res.blob());
+
+      // Log original image size
+      console.log('Original Image Size:', blob.size);
+
+      // Convert Blob to File object
+      let file = new File([blob], 'image.jpg', { type: blob.type });
+
+      // Compress the image until it is 500 KB or less
+      const options = {
+        maxSizeMB: 0.5, // Target size of 500 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+
+      let compressedFile = file;
+      while (compressedFile.size > 500 * 1024) {
+        compressedFile = await imageCompression(compressedFile, options);
+        console.log('Compressed Image Size:', compressedFile.size);
+      }
+
+      // Convert compressed File back to base64
+      return await imageCompression.getDataUrlFromFile(compressedFile);
+    };
+
+    // Compress Plan_Pic if it exists
+    const compressedPic = Plan_Pic ? await compressImage(Plan_Pic) : "";
+
     const response = await authAxiosClient.patch(`/plan/${Plan_id}`, {
       Plan_Desc,
       Plan_Name,
-      Plan_Pic,
+      Plan_Pic: compressedPic,
       Plan_Active,
       PlanGroup_id,
     });
