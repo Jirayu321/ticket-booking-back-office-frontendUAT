@@ -1,4 +1,5 @@
 import { authAxiosClient } from "../config/axios.config";
+import imageCompression from 'browser-image-compression';
 
 export async function getAllEventList() {
   try {
@@ -40,6 +41,42 @@ export async function createEvent({
   Event_Pic_4?: string | null;
 }) {
   try {
+    // Function to compress image to 200 KB or less
+    const compressImage = async (image: string | null) => {
+      if (!image) return null;
+
+      // Convert base64 to Blob
+      const blob = await fetch(image).then(res => res.blob());
+
+      // Log original image size
+      console.log('Original Image Size:', blob.size);
+
+      // Convert Blob to File object
+      let file = new File([blob], 'image.jpg', { type: blob.type });
+
+      // Compress the image until it is 200 KB or less
+      const options = {
+        maxSizeMB: 0.2, // Target size of 200 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+
+      let compressedFile = file;
+      while (compressedFile.size > 200 * 1024) {
+        compressedFile = await imageCompression(compressedFile, options);
+        console.log('Compressed Image Size:', compressedFile.size);
+      }
+
+      // Convert compressed File back to base64
+      return await imageCompression.getDataUrlFromFile(compressedFile);
+    };
+
+    // Compress images
+    const compressedPic1 = await compressImage(Event_Pic_1);
+    const compressedPic2 = await compressImage(Event_Pic_2);
+    const compressedPic3 = await compressImage(Event_Pic_3);
+    const compressedPic4 = await compressImage(Event_Pic_4);
+
     const response = await authAxiosClient.post("/event-list", {
       Event_Name,
       Event_Addr,
@@ -48,10 +85,10 @@ export async function createEvent({
       Event_Time,
       Event_Status,
       Event_Public,
-      Event_Pic_1,
-      Event_Pic_2,
-      Event_Pic_3,
-      Event_Pic_4,
+      Event_Pic_1: compressedPic1,
+      Event_Pic_2: compressedPic2,
+      Event_Pic_3: compressedPic3,
+      Event_Pic_4: compressedPic4,
     });
 
     if (!(response.status === 201 || response.status === 200))

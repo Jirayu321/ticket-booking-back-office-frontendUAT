@@ -43,6 +43,7 @@
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.26.0",
     "react-table": "^7.8.0",
+    "sharp": "^0.33.5",
     "sweetalert2": "^11.12.4",
     "thaidatepicker-react": "^2.0.0",
     "uuid": "^10.0.0",
