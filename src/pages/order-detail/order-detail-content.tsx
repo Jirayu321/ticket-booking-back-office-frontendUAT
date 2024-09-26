@@ -13,12 +13,19 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getOrderD } from "../../services/order-d.service";
 import { getOrderH } from "../../services/order-h.service";
+import { getOrderAll } from "../../services/order-all.service";
 import Header from "../common/header";
 import BuyerInfo from "./details/BuyerInfo";
 import OrderItems from "./details/OrderItems";
 import PaymentHistory from "./details/PaymentHistory";
 import { useFetchPaymentHistories } from "../../hooks/fetch-data/useFetchPaymentHistories";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
+import {
+  // getViewTicketList,
+  getViewTicketListbyOrderid,
+} from "../../services/view-tikcet-list.service";
+
+import QRCode from "qrcode";
 
 const OrderDetailContent: React.FC = () => {
   const { order_id } = useParams<{ order_id: string }>();
@@ -26,7 +33,7 @@ const OrderDetailContent: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
   const queryParams = new URLSearchParams(location.search);
-  const initialTabIndex = parseInt(queryParams.get('tabIndex') || '0', 10);
+  const initialTabIndex = parseInt(queryParams.get("tabIndex") || "0", 10);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const navigate = useNavigate();
@@ -42,9 +49,71 @@ const OrderDetailContent: React.FC = () => {
     navigate("/all-orders");
   };
 
-  const handleNavigateToOrderSite = (order_id: string | number) => {
+  const handleNavigateToOrderSite2 = async (order_id: string | number) => {
+  
     const orderIdStr = String(order_id); // Ensure order_id is a string
-    window.open(`https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem("token")}`, "_blank");
+    window.open(
+      `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+        "token"
+      )}`,
+      "_blank"
+    );
+  };
+
+  const handleNavigateToOrderSite = async (order_id: string | number) => {
+    const response = await getViewTicketListbyOrderid(order_id);
+    console.log("tickets response:", response);
+
+    if (Array.isArray(response.ticketList)) {
+      let contentHtml = `
+        <html>
+          <head>
+            <title>Print QR Codes</title>
+            <style>
+              body { margin: 0; padding: 0; }
+              .ticket-container {
+                text-align: center;
+                margin: 20px 20px;
+              }
+              img { width: 100%; max-width: 300px; height: auto; }
+               p {
+                font-size: 40px; /* เพิ่มขนาดตัวอักษร */
+                font-weight: bold; /* ทำตัวอักษรหนา */
+                color: #333; /* เปลี่ยนสีตัวอักษรให้อ่านง่าย */
+              }
+            </style>
+          </head>
+          <body>
+      `;
+
+      for (let ticket of response.ticketList) {
+        const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
+
+        contentHtml += `
+          <div class="ticket-container">
+            <img src="${dataUrl}"/>
+            <p>${ticket.ticket_running}</p>
+          </div>
+        `;
+      }
+
+      contentHtml += `
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow?.document.write(contentHtml);
+      printWindow?.document.close();
+    }
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -57,13 +126,20 @@ const OrderDetailContent: React.FC = () => {
   useEffect(() => {
     async function fetchOrderDetail() {
       try {
-        const orderH = await getOrderH();
-        const orderD = await getOrderD();
-        const order = orderH.find((o: any) => String(o.Order_id) === order_id);
+        const OrderAll = await getOrderAll();
 
+        // const orderH = await getOrderH();
+        // const orderD = await getOrderD();
+        const order = OrderAll.hisPayment
+          .filter((o: any) => String(o.Order_id) === order_id) // Filter matching orders
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.Payment_Date7).getTime() -
+              new Date(a.Payment_Date7).getTime()
+          )[0];
         if (order) {
           setOrderDetail(order);
-          const relatedOrderItems = orderD.filter(
+          const relatedOrderItems = OrderAll.hisPayment.filter(
             (item: any) => item.Order_id === order.Order_id
           );
 
@@ -128,23 +204,21 @@ const OrderDetailContent: React.FC = () => {
 
   if (isPaymentHistoriesLoading) return <CircularProgress />;
 
-  
-
   return (
-    <div >
+    <div>
       <Header title="รายละเอียดคำสั่งซื้อ" />
 
       <div
         style={{
           backgroundColor: "#000",
           width: "100%",
-          maxWidth: "1690px", // Fixed maximum width for the black header
+          // maxWidth: "1690px", // Fixed maximum width for the black header
           height: "100px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 20px",
-          margin: "0 auto", // Center the header
+          // padding: "0 20px",
+          // margin: "0 auto", // Center the header
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -185,7 +259,11 @@ const OrderDetailContent: React.FC = () => {
           </h2>
         </div>
         <Button
-          onClick={() => handleNavigateToOrderSite(order_id)} // Wrap it in an anonymous function
+          onClick={() => {
+            isOrderPaid
+              ? handleNavigateToOrderSite(order_id)
+              : handleNavigateToOrderSite2(order_id);
+          }} 
           variant="contained"
           style={{
             backgroundColor: "#CFB70B",
@@ -193,6 +271,7 @@ const OrderDetailContent: React.FC = () => {
             fontWeight: "bold",
             fontSize: "16px",
             height: "50px",
+            marginRight: "20px",
           }}
           startIcon={
             isOrderPaid ? (
@@ -205,7 +284,8 @@ const OrderDetailContent: React.FC = () => {
           {isOrderPaid ? "Print QR" : "ชำระส่วนที่เหลือ"}
         </Button>
       </div>
-      <Container maxWidth={false} sx={{ mt: 4, mb: 4 }}>
+
+      <Container sx={{ mt: 4, mb: 4 }}>
         <Box style={{ width: "100%" }}>
           <Tabs value={tabIndex} onChange={handleTabChange} centered>
             <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "50%" }} />

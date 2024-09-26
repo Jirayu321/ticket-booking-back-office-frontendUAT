@@ -39,7 +39,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     ticket_line,
     ticket_no,
     print_count,
-    order_id, // Destructure order_id from ticketData
+    order_id,
   } = ticketData;
 
   const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] = useState<number>(0);

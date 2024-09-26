@@ -24,6 +24,7 @@ import "./App.css";
 window.Buffer = Buffer;
 
 // Set global configuration for SweetAlert2 with a higher z-index
+
 Swal.mixin({
   toast: true,
   position: "top",
