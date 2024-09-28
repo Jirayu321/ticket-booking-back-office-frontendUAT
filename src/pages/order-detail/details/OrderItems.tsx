@@ -69,6 +69,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
     (total, ticket) => total + ticket.Plan_Price,
     0
   );
+  console.log("groupedTickets", groupedTickets);
 
   return (
     <TableContainer>
@@ -79,13 +80,14 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
           alignItems: "center",
         }}
       >
-        <span>คำสั่งซื้อ:</span>
-        <span>
-          {new Intl.NumberFormat("th-TH", {
+        <span>รายละเอียดคำสั่งซื้อ</span>
+        {/* <span style={{ color: "#28a745" }}> */}
+        {/* {new Intl.NumberFormat("th-TH", {
             style: "currency",
             currency: "THB",
-          }).format(totalPrice)}
-        </span>
+          }).format(totalPrice)} */}
+        {/* {groupedTickets.at(0)?.OrderStatus_Name} */}
+        {/* </span> */}
       </h2>
       <Table>
         <TableHead>
@@ -105,6 +107,16 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
             >
               ราคาบัตร
             </TableCell>
+            <TableCell
+              style={{ fontWeight: "bold", color: "#000", fontSize: "18px" }}
+            >
+              จำนวนที่นั่ง
+            </TableCell>
+            <TableCell
+              style={{ fontWeight: "bold", color: "#000", fontSize: "18px" }}
+            >
+              สถานะคำสั่งซื้อ
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -119,6 +131,24 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
                   style: "currency",
                   currency: "THB",
                 }).format(ticket.Plan_Price)}
+              </TableCell>
+              <TableCell>
+               {ticket.Total_stc}
+              </TableCell>
+              <TableCell
+                style={{
+                  color:
+                    ticket?.OrderStatus_Name === "สำเร็จ"
+                      ? "green"
+                      : ticket?.OrderStatus_Name === "รอดำเนินการ"
+                      ? "orange"
+                      : ticket?.OrderStatus_Name === "จ่ายไม่สำเร็จ"
+                      ? "red"
+                      : "black",
+                  fontWeight: "bold",
+                }}
+              >
+                {ticket.OrderStatus_Name}
               </TableCell>
             </TableRow>
           ))}

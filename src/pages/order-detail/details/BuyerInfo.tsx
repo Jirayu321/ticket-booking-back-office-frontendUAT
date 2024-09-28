@@ -7,25 +7,16 @@ import "dayjs/locale/th"; // Import Thai locale
 dayjs.extend(buddhistEra);
 dayjs.locale("th"); // Set locale globally to Thai
 
-interface BuyerInfoProps {
-  buyer: {
-    Cust_name: string;
-    Cust_tel: string;
-    Line_id: string;
-    Order_no: string;
-    Order_datetime: string;
-  };
-}
+const BuyerInfo: React.FC<{ buyer: any }> = ({ buyer }) => {
+  console.log("buyer", buyer);
 
-const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
-  // Subtract 7 hours and format with Buddhist Era
   const adjustedDate = dayjs(buyer.Order_datetime)
     .subtract(7, "hour")
     .format("D MMMM BBBB HH:mm");
 
   return (
     <Stack
-      spacing={2}
+      spacing={3}
       sx={{
         marginTop: "20px",
         padding: "20px",
@@ -33,26 +24,30 @@ const BuyerInfo: React.FC<BuyerInfoProps> = ({ buyer }) => {
         borderRadius: "8px",
       }}
     >
-      <Box display="flex" justifyContent="space-between">
+      <Box
+        display="grid"
+        justifyContent="space-between"
+        gridTemplateColumns={"auto auto auto"}
+      >
         <Typography variant="body1" sx={{ fontWeight: "bold" }}>
           <strong>เลขคำสั่งซื้อ:</strong> {buyer.Order_no}
         </Typography>
-        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-          <strong>วันที่สั่งซื้อ:</strong> {adjustedDate}
-        </Typography>
-      </Box>
-      <Box display="flex" justifyContent="space-between">
-        <Typography >
+        <Typography>
           <strong>ชื่อ:</strong> {buyer.Cust_name}
         </Typography>
-        <Typography >
+        <Typography>
           <strong>เบอร์โทร:</strong> {buyer.Cust_tel}
         </Typography>
+        <Typography variant="body1">
+          <strong>LINE ID:</strong> {buyer.Line_id}
+        </Typography>
+        <Typography variant="body1">
+          <strong>ชื่องาน:</strong> {buyer.Event_Name}
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+          <strong>วันที่สั่งซื้อ:</strong> {adjustedDate} น.
+        </Typography>
       </Box>
-
-      <Typography variant="body1">
-        <strong>LINE ID:</strong> {buyer.Line_id}
-      </Typography>
     </Stack>
   );
 };

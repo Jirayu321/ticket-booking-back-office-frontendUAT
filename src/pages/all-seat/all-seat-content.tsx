@@ -18,7 +18,7 @@ import {
   TextField,
   Container,
   Grid,
-  Avatar,
+  // Avatar,
   Box,
   Typography,
 } from "@mui/material";
@@ -49,8 +49,9 @@ const AllSeatContent: React.FC = () => {
     event: "all",
     ticketType: "all",
     printStatus: "all",
-    printStatusName: "all", // Filter for PrintStatus_Name
-    scanStatus: "all", // New filter for Scan Status
+    printStatusName: "all",
+    scanStatus: "all",
+    ticket_Reserve: "all",
   });
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
   const [endDate, setEndDate] = useState(dayjs().endOf("month"));
@@ -68,9 +69,10 @@ const AllSeatContent: React.FC = () => {
         }
       } catch (error) {
         toast.error("Failed to fetch ticket data");
-      } finally {
-        setIsLoading(false);
       }
+      // finally {
+      // setIsLoading(false);
+      // }
     }
 
     fetchTicketData();
@@ -105,10 +107,10 @@ const AllSeatContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleDateRangeChange = (startDate, endDate) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
-  };
+  // const handleDateRangeChange = (startDate, endDate) => {
+  //   setStartDate(startDate);
+  //   setEndDate(endDate);
+  // };
 
   const handleClearDates = () => {
     setStartDate(null);
@@ -118,6 +120,7 @@ const AllSeatContent: React.FC = () => {
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
+  console.log("ticketData", ticketData, filters);
   const filteredTickets = ticketData.filter((ticket) => {
     const searchValue = filters.search.toLowerCase();
     const matchesSearch =
@@ -130,17 +133,27 @@ const AllSeatContent: React.FC = () => {
 
     const matchesStatus =
       filters.status === "all" || ticket.status === filters.status;
+
     const matchesEvent =
       filters.event === "all" || ticket.Event_Name.includes(filters.event);
+
     const matchesTicketType =
       filters.ticketType === "all" ||
       ticket.Ticket_Type_Name.includes(filters.ticketType);
+
     const matchesPrintStatus =
       filters.printStatus === "all" ||
       ticket.PrintStatus_Name === filters.printStatus;
+
+    const matchesTicket_Reserve =
+      filters.ticket_Reserve === "all" ||
+      (filters.ticket_Reserve === "ติดจอง" && ticket.ticket_Reserve === "R") ||
+      (filters.ticket_Reserve === "ซื้อแล้ว" && ticket.ticket_Reserve === "W");
+
     const matchesPrintStatusName =
       filters.printStatusName === "all" ||
       ticket.PrintStatus_Name === filters.printStatusName;
+
     const matchesScanStatus =
       filters.scanStatus === "all" ||
       (filters.scanStatus === "แสกนแล้ว" && ticket.check_in_status === 1) ||
@@ -164,6 +177,7 @@ const AllSeatContent: React.FC = () => {
       matchesEvent &&
       matchesTicketType &&
       matchesPrintStatus &&
+      matchesTicket_Reserve &&
       matchesPrintStatusName &&
       matchesScanStatus &&
       matchesDateRange
@@ -183,7 +197,7 @@ const AllSeatContent: React.FC = () => {
     (ticket) => ticket.PrintStatus_Name === "ปริ้นแล้ว"
   ).length;
 
-  if (isLoading) return <CircularProgress />;
+  // if (isLoading) return <CircularProgress />;
   // if (isLoading) {
   //   return (
   //     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -313,6 +327,20 @@ const AllSeatContent: React.FC = () => {
               }}
             />
             <FormControl variant="outlined" style={{ minWidth: 150 }}>
+              <InputLabel>สถานะตั๋ว</InputLabel>
+              <Select
+                label="สถานะตั๋ว"
+                name="ticket_Reserve"
+                value={filters.ticket_Reserve}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="all">ทั้งหมด</MenuItem>
+                <MenuItem value="ติดจอง">ติดจอง</MenuItem>
+                <MenuItem value="ซื้อแล้ว">ซื้อแล้ว</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl variant="outlined" style={{ minWidth: 150 }}>
               <InputLabel>สถานะการพิมพ์</InputLabel>
               <Select
                 label="สถานะการพิมพ์"
@@ -325,6 +353,7 @@ const AllSeatContent: React.FC = () => {
                 <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
               </Select>
             </FormControl>
+
             <FormControl variant="outlined" style={{ minWidth: 150 }}>
               <InputLabel>สถานะการเช็คอิน </InputLabel>
               <Select
@@ -338,6 +367,7 @@ const AllSeatContent: React.FC = () => {
                 <MenuItem value="ยังไม่แสกน">ยังไม่แสกน</MenuItem>
               </Select>
             </FormControl>
+
             <FormControl sx={{ backgroundColor: "white" }}>
               <DatePicker
                 label="วันที่เริ่มต้น"
@@ -356,24 +386,7 @@ const AllSeatContent: React.FC = () => {
                 }}
               />
             </FormControl>
-            <FormControl sx={{ backgroundColor: "white" }}>
-              <DatePicker
-                label="วันที่สิ้นสุด"
-                value={endDate}
-                onChange={(date) => setEndDate(date)}
-                format="DD/MM/YYYY"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& input": {
-                      border: "none",
-                      transform: "translateY(5px)",
-                      backgroundColor: "white",
-                      width: "90px",
-                    },
-                  },
-                }}
-              />
-            </FormControl>
+
             <Box
               sx={{
                 display: "flex",
@@ -575,7 +588,9 @@ const AllSeatContent: React.FC = () => {
                 .format("D/M/BBBB HH:mm");
               return (
                 <TableRow key={ticket.DT_order_id}>
-                  <TableCell style={{ textAlign: "center", fontWeight: 'bold'}}>
+                  <TableCell
+                    style={{ textAlign: "center", fontWeight: "bold" }}
+                  >
                     {indexOfFirstItem + index + 1}
                   </TableCell>
                   <TableCell style={{ textAlign: "left" }}>
@@ -641,13 +656,24 @@ const AllSeatContent: React.FC = () => {
                     {ticket.print_count}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
-                    <Button
-                      onClick={() => handleOpenModal(ticket)}
-                      variant="contained"
-                      color="secondary"
-                    >
-                      ดูบัตร
-                    </Button>
+                    {ticket.ticket_Reserve === "W" ? (
+                      <Button
+                        onClick={() => handleOpenModal(ticket)}
+                        variant="contained"
+                        color="secondary"
+                      >
+                        ดูบัตร
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleOpenModal(ticket)}
+                        variant="contained"
+                        style={{ backgroundColor: "silver", color: "black" }}
+                        disabled
+                      >
+                        ดูบัตร
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );

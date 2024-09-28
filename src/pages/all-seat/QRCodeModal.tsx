@@ -1,12 +1,13 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Box, Button, Modal, Typography, IconButton } from "@mui/material";
 import QRCode from "qrcode.react";
 import Swal from "sweetalert2";
 import "../../index.css";
 import { FC, useState, useEffect } from "react";
 import { SwalError } from "../../lib/sweetalert";
 import { getViewTicketList } from "../../services/view-tikcet-list.service"; // Import the service
+import CloseIcon from "@mui/icons-material/Close";
 
 type QRCodeModalProps = {
   open: boolean;
@@ -42,7 +43,8 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     order_id,
   } = ticketData;
 
-  const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] = useState<number>(0);
+  const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] =
+    useState<number>(0);
 
   // Fetch the tickets and count how many have the same ticket_no and order_id
   useEffect(() => {
@@ -53,7 +55,8 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
 
         if (data && Array.isArray(data.ticketList)) {
           const matchingTickets = data.ticketList.filter(
-            (ticket) => ticket.ticket_no === ticket_no && ticket.order_id === order_id
+            (ticket) =>
+              ticket.ticket_no === ticket_no && ticket.order_id === order_id
           );
           console.log("Filtered Tickets:", matchingTickets); // Log the filtered tickets
           setTotalTicketsWithSameNo(matchingTickets.length);
@@ -124,12 +127,24 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
           p: 4,
         }}
       >
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             mb: 3,
+            mt: 3,
           }}
         >
           <QRCode id="printable-content" value={ticket_id} size={256} />
@@ -155,15 +170,18 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
               marginRight: "4px",
             }}
           />
-          {new Date(new Date(Event_Time).getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
+          {new Date(
+            new Date(Event_Time).getTime() - 7 * 60 * 60 * 1000
+          ).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
           })}
         </Typography>
         <Typography variant="body2" align="center" style={{ color: "black" }}>
-          {Plan_Name} - ที่นั่ง {ticket_line}/{totalTicketsWithSameNo} (เบอร์โต๊ะ {ticket_no})
+          {Plan_Name} - ที่นั่ง {ticket_line}/{totalTicketsWithSameNo}{" "}
+          (เบอร์โต๊ะ {ticket_no})
         </Typography>
         <Button
           variant="contained"

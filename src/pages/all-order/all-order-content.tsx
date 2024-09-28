@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Button,
-  CircularProgress,
+  // CircularProgress,
   Pagination,
   Paper,
   Table,
@@ -15,7 +15,7 @@ import {
   TextField,
   FormControl,
   InputLabel,
-  Stack,
+  // Stack,
   Container,
   Grid,
   Avatar,
@@ -24,8 +24,8 @@ import {
 } from "@mui/material";
 import toast from "react-hot-toast";
 import Header from "../common/header";
-import { getOrderH } from "../../services/order-h.service";
-import { getOrderD } from "../../services/order-d.service";
+// import { getOrderH } from "../../services/order-h.service";
+// import { getOrderD } from "../../services/order-d.service";
 
 import { getOrderAll } from "../../services/order-all.service";
 
@@ -43,7 +43,11 @@ const AllOrderContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [orderHData, setOrderHData] = useState<any[]>([]);
   const [orderDData, setOrderDData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [orderDetail, setOrderDetail] = useState<any[]>([]);
+  const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
+  console.log("orderHispayDetail", orderHispayDetail);
+
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
   const [endDate, setEndDate] = useState(dayjs().endOf("month"));
   const [filters, setFilters] = useState({
@@ -74,13 +78,12 @@ const AllOrderContent: React.FC = () => {
       } catch (error) {
         toast.error("Failed to fetch order data");
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
 
     fetchOrderData();
   }, []);
-  console.log("OrderHData", orderHData);
 
   const handleFilterChange = (
     event: React.ChangeEvent<{ name?: string; value: unknown }>
@@ -123,9 +126,9 @@ const AllOrderContent: React.FC = () => {
     }));
   };
 
-  const handleClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
+  // const handleClick = (pageNumber: number) => {
+  //   setCurrentPage(pageNumber);
+  // };
 
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
@@ -154,40 +157,40 @@ const AllOrderContent: React.FC = () => {
     4: "ไม่สำเร็จจาก Omise",
   };
 
-  const filteredOrders = orderHData.filter((order) => {
-    const matchesSearch =
-      String(order.Event_Name).includes(filters.eventName) &&
-      String(order.Order_id).includes(filters.orderNo) &&
-      String(order.Cust_name).includes(filters.customerName) &&
-      String(order.Cust_tel).includes(filters.customerPhone);
-    // const mappedStatus = statusMap[order.Order_Status] || "ไม่ระบุ";
+  const filteredOrders = orderHData
+    .filter((order) => {
+      const matchesSearch =
+        String(order.Event_Name).includes(filters.eventName) &&
+        String(order.Order_id).includes(filters.orderNo) &&
+        String(order.Cust_name).includes(filters.customerName) &&
+        String(order.Cust_tel).includes(filters.customerPhone);
 
-    // const matchesStatus =
-    //   filters.status === "all" || mappedStatus === filters.status;
+      return matchesSearch;
+    })
+    .reduce((acc, current) => {
+      // Check if we already have an order with the same Order_id
+      const existingOrder = acc.find(
+        (order) => order.Order_id === current.Order_id
+      );
 
-    // Payment status logic based on Order_Status and Total_Balance
-    // let paymentStatusLabel;
-    // if (order.Order_Status === 1) {
-    //   paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
-    // } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-    //   paymentStatusLabel = "ไม่สำเร็จ";
-    // } else {
-    //   paymentStatusLabel = "ไม่ระบุ";
-    // }
+      if (existingOrder) {
+        // Compare Payment_Date7, keep the latest one
+        const existingPaymentDate = new Date(existingOrder.Payment_Date7);
+        const currentPaymentDate = new Date(current.Payment_Date7);
 
-    // const matchesPaymentStatus =
-    //   filters.paymentStatus === "all" ||
-    //   paymentStatusLabel === filters.paymentStatus;
+        if (currentPaymentDate > existingPaymentDate) {
+          // Replace with the latest order if the current one is newer
+          return acc.map((order) =>
+            order.Order_id === current.Order_id ? current : order
+          );
+        }
+      } else {
+        // If no order with the same Order_id exists, add the current order
+        acc.push(current);
+      }
 
-    // const orderDate = new Date(order.Order_datetime);
-    // const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-    // const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
-
-    // const matchesDateRange =
-    //   (!start || orderDate >= start) && (!end || orderDate <= end);
-
-    return matchesSearch;
-  });
+      return acc;
+    }, []);
 
   const filteredOrders2 = orderDData.filter((order) => {
     const matchesSearch =
@@ -250,15 +253,73 @@ const AllOrderContent: React.FC = () => {
   const navigate = useNavigate();
 
   const handleViewHistoryClick = (orderId: string) => {
-    navigate(`/order-detail/${orderId}?tabIndex=1`);
+    navigate(`/order-detail/${orderId}`);
   };
 
-  if (isLoading) return <CircularProgress />;
+  // if (isLoading) return <CircularProgress />;
 
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+
+  const handletime = (x) => {
+    const adjustedDate = dayjs(x).subtract(7, "hour");
+    const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
+    return formattedDateTime;
+  };
+
+  const handleOrderClick = (orderNo) => {
+    setSelectedOrderNo(orderNo);
+
+    const latestOrder = orderHData
+      .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
+      .reduce((acc, current) => {
+        // Check if we already have an order with the same Order_id
+        const existingOrder = acc.find(
+          (order) => order.Order_id === current.Order_id
+        );
+
+        if (existingOrder) {
+          // Compare Payment_Date7, keep the latest one
+          const existingPaymentDate = new Date(existingOrder.Payment_Date7);
+          const currentPaymentDate = new Date(current.Payment_Date7);
+
+          if (currentPaymentDate > existingPaymentDate) {
+            // Replace with the latest order if the current one is newer
+            return acc.map((order) =>
+              order.Order_id === current.Order_id ? current : order
+            );
+          } else {
+            return acc; // Keep the existing order if it's newer or the same
+          }
+        } else {
+          // If no order with the same Order_id exists, add the current order
+          acc.push(current);
+        }
+
+        return acc;
+      }, []);
+
+    console.log("latestOrder:", latestOrder);
+    setOrderDetail(latestOrder);
+
+    const h = orderDData.filter((order) => order.Order_no === orderNo);
+
+    console.log("h:", h);
+    setOrderHispayDetail(h);
+  };
+
+  function formatNumberWithCommas(number: number | string): string {
+    const bath = `${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
+    return bath;
+  }
+  // const Numberofseats = orderDetail
+  // const Plan_Name = orderDetail
+  // const Ticket_Type_Name && TicketNo_List = orderDetail
+  // const Event_Name = orderDetail
+  // const Event_Time = orderDetail
+  // const สถานะคำสั่งซื้อ = orderDetail
   return (
     <div className="all-orders-content">
       <Header title="คำสั่งซื้อทั้งหมด" />
-      {/*  */}
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -623,10 +684,23 @@ const AllOrderContent: React.FC = () => {
       </div>
 
       {/* Table Component */}
-      <div style={{ display: "grid", gridTemplateColumns: "auto 70%" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "40% auto",
+          marginLeft: 10,
+        }}
+      >
         <div>
-          <p style={{ color: "#000" }}>คำสั่งซื้อทั้งหมด</p>
-          <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
+          <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
+            คำสั่งซื้อทั้งหมด
+          </p>
+
+          <TableContainer
+            component={Paper}
+            sx={{ borderRadius: "0" }}
+            style={{ maxHeight: 800 }}
+          >
             <Table>
               <TableHead sx={{ backgroundColor: "#11131A" }}>
                 <TableRow>
@@ -670,7 +744,7 @@ const AllOrderContent: React.FC = () => {
                   >
                     เบอร์โทร
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     style={{
                       fontWeight: "bold",
                       fontSize: "17px",
@@ -679,7 +753,7 @@ const AllOrderContent: React.FC = () => {
                     }}
                   >
                     สถานะคำสั่งซื้อ
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell
                     style={{
                       fontWeight: "bold",
@@ -692,6 +766,7 @@ const AllOrderContent: React.FC = () => {
                   </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {filteredOrders.map((order: any, index: number) => {
                   // const formattedEventTime = dayjs(order.Order_datetime)
@@ -724,19 +799,32 @@ const AllOrderContent: React.FC = () => {
                   }
 
                   return (
-                    <TableRow key={order.index}>
+                    <TableRow
+                      key={order.index}
+                      style={{
+                        backgroundColor:
+                          selectedOrderNo === order.Order_no
+                            ? "lightblue"
+                            : "inherit",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleOrderClick(order.Order_no)}
+                    >
                       <TableCell
-                        style={{ textAlign: "center", fontWeight: "bold" }}
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
                       >
                         {indexOfFirstItem + index + 1}
                       </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        <Link
-                          to={`/order-detail/${order.Order_id}`}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          {order.Order_no}
-                        </Link>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                        }}
+                        // onClick={() => handleOrderClick(order.Order_no)}
+                      >
+                        {order.Order_no}
                       </TableCell>
                       <TableCell style={{ textAlign: "center" }}>
                         {order.Cust_name}
@@ -744,7 +832,7 @@ const AllOrderContent: React.FC = () => {
                       <TableCell style={{ textAlign: "center" }}>
                         {order.Cust_tel}
                       </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
+                      {/* <TableCell style={{ textAlign: "center" }}>
                         <div
                           style={{
                             border: "1px solid #ccc",
@@ -755,13 +843,14 @@ const AllOrderContent: React.FC = () => {
                             width: "100px",
                             backgroundColor: `${order.OrderSetColour}`,
                             color: "#fff",
+                            // width: "10px",
                           }}
                         >
-                          <p>
+                          <p style={{ margin: 0 }}>
                             {order.OrderSetColour === "#13A10E" ? `สำเร็จ` : ""}
                           </p>
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell style={{ textAlign: "center" }}>
                         <div
                           style={{
@@ -786,414 +875,351 @@ const AllOrderContent: React.FC = () => {
           </TableContainer>
         </div>
 
-        <div style={{ marginLeft: 10 }}>
-          <p style={{ color: "#000" }}>รายละเอียด</p>
-          <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
-            <Table>
-              <TableHead sx={{ backgroundColor: "#11131A" }}>
-                <TableRow>
-                  <TableCell
+        <div style={{ marginLeft: 30 }}>
+          <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
+            รายละเอียด
+          </p>
+          <div>
+            {orderDetail ? (
+              <div>
+                <div
+                  style={{
+                    color: "#000",
+                    border: " 1px solid ",
+                    padding: 20,
+                    width: "45vw",
+                  }}
+                >
+                  <div
                     style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
+                      display: "grid",
+                      gridTemplateColumns: "auto auto auto",
+                      marginBottom: 20,
+                      justifyItems: "flex-start",
                     }}
                   >
-                    ลำดับ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    เลขคำสั่งซื้อ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    ชื่องาน
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    จำนวนบัตร
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    จำนวนที่
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    สถานะคำสั่งซื้อ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    วันที่สั่งซื้อ
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredOrders.map((order: any, index: number) => {
-                  const formattedEventTime = dayjs(order.Payment_Date7).format(
-                    "D/M/BBBB HH:mm"
-                  );
-                  const statusLabel =
-                    statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
-
-                  let paymentStatusLabel;
-                  let paymentStatusBgColor;
-
-                  if (order.Order_Status === 1) {
-                    if (order.Total_Balance === 0) {
-                      paymentStatusLabel = "สำเร็จ";
-                      paymentStatusBgColor = "#28a745"; // Green for success
-                    } else if (order.Total_Balance > 0) {
-                      paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
-                    } else {
-                      paymentStatusLabel = "ไม่สำเร็จ";
-                      paymentStatusBgColor = "#dc3545"; // Red for failure
-                    }
-                  } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-                    paymentStatusLabel = "ไม่สำเร็จ";
-                    paymentStatusBgColor = "#343a40"; // Gray for failure
-                  } else {
-                    paymentStatusLabel = "ไม่ระบุ";
-                    paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
-                  }
-
-                  return (
-                    <TableRow key={index}>
-                      <TableCell
-                        style={{ textAlign: "center", fontWeight: "bold" }}
+                    <p>
+                      <strong>จำนวนที่นั่ง:</strong>
+                      <br />
+                      {orderDetail.at(0)?.Total_stc}
+                    </p>
+                    <p>
+                      <strong>ชื่อโซน:</strong>
+                      <br />
+                      {orderDetail.at(0)?.Plan_Name}
+                    </p>
+                    <p>
+                      <strong>
+                        ชื่อ
+                        {orderDetail.at(0)?.Ticket_Type_Name}:
+                      </strong>
+                      <br />
+                      {orderDetail.at(0)?.TicketNo_List}
+                    </p>
+                    <p>
+                      <strong>ชื่องาน:</strong>
+                      <br />
+                      {orderDetail.at(0)?.Event_Name}
+                    </p>
+                    <p>
+                      <strong>เวลาเริ่มงาน:</strong>
+                      <br />
+                      {orderDetail?.length === 0
+                        ? ``
+                        : handletime(orderDetail.at(0)?.Event_Time)}
+                    </p>
+                    <p>
+                      <strong>สถานะคำสั่งซื้อ:</strong>
+                      <br />
+                      <span
+                        style={{
+                          color:
+                            orderDetail.at(0)?.OrderStatus_Name === "สำเร็จ"
+                              ? "green"
+                              : orderDetail.at(0)?.OrderStatus_Name ===
+                                "รอดำเนินการ"
+                              ? "orange"
+                              : orderDetail.at(0)?.OrderStatus_Name ===
+                                "จ่ายไม่สำเร็จ"
+                              ? "red"
+                              : "black",
+                          fontWeight: "bold",
+                        }}
                       >
-                        {indexOfFirstItem + index + 1}
-                      </TableCell>
+                        {orderDetail.at(0)?.OrderStatus_Name}
+                      </span>
+                    </p>
+                  </div>
+                  <div 
+                  // style={{display:"flex",justifyContent:"flex-end"}}
+                  >
+                    {orderDetail.length !== 0 ? (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() =>
+                          handleViewHistoryClick(orderDetail.at(0)?.Order_id)
+                        }
+                      >
+                        ดูรายละเอียด
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
-                      <TableCell style={{ textAlign: "center" }}>
-                        <Link
-                          to={`/order-detail/${order.Order_id}`}
-                          style={{ textDecoration: "none", color: "inherit" }}
+          <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
+            ประวัติการชำระเงิน
+          </p>
+          <div
+            style={{
+              display: "inline-block",
+              maxWidth: "48vw",
+              overflowX: "auto",
+            }}
+          >
+            <TableContainer
+              component={Paper}
+              sx={{ borderRadius: "0" }}
+              style={{ maxHeight: 300, width: "max-content" }}
+            >
+              <Table>
+                <TableHead sx={{ backgroundColor: "#11131A" }}>
+                  <TableRow>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ลำดับ
+                    </TableCell>
+
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      เลขคำสั่งซื้อ
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ยอดสุทธิ
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ยอดจ่าย
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ยอดค้างจ่าย
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ประเภทการจ่าย
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      Charge_Id
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      Ref_Number1
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      วันที่เวลาจ่าย
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ธนาคาร
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      สถานะการจ่ายเงิน
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {orderHispayDetail.map((order: any, index: number) => {
+                    // const formattedEventTime = dayjs(order.Order_datetime)
+                    //   .subtract(7, "hour")
+                    //   .locale("th")
+                    //   .format("D/M/BBBB HH:mm");
+                    // const statusLabel =
+                    //   statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
+
+                    let paymentStatusLabel;
+                    let paymentStatusBgColor;
+
+                    if (order.Order_Status === 1) {
+                      if (order.Total_Balance === 0) {
+                        paymentStatusLabel = "สำเร็จ";
+                        paymentStatusBgColor = "#28a745";
+                      } else if (order.Total_Balance > 0) {
+                        paymentStatusLabel = "ค้างจ่าย";
+                        paymentStatusBgColor = "#ffc107";
+                      } else {
+                        paymentStatusLabel = "ไม่สำเร็จ";
+                        paymentStatusBgColor = "#dc3545";
+                      }
+                    } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
+                      paymentStatusLabel = "ไม่สำเร็จ";
+                      paymentStatusBgColor = "#343a40";
+                    } else {
+                      paymentStatusLabel = "ไม่ระบุ";
+                      paymentStatusBgColor = "#f8f9fa";
+                    }
+
+                    return (
+                      <TableRow
+                        key={order.index}
+                        style={{
+                          // backgroundColor:
+                          //   selectedOrderNo === order.Order_no
+                          //     ? "lightblue"
+                          //     : "inherit",
+                          cursor: "pointer",
+                        }}
+                        // onClick={() => handleOrderClick(order.Order_no)}
+                      >
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {indexOfFirstItem + index + 1}
+                        </TableCell>
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                          }}
+                          // onClick={() => handleOrderClick(order.Order_no)}
                         >
                           {order.Order_no}
-                        </Link>
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Event_Name}
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "50px",
-                            backgroundColor: "#f9f9f9",
-                          }}
-                        >
-                          {order.Ticket_Qty_Buy} {/* จำนวนบัตร */}
-                        </div>
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "50px",
-                            backgroundColor: "#f9f9f9",
-                          }}
-                        >
-                          {order.Ticket_Qty_Per} {/* จำนวนที่ */}
-                        </div>
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "18px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "100px",
-                            backgroundColor: `${order.OrderSetColour}`,
-                            color: "#fff",
-                          }}
-                        >
-                          <p>
-                            {order.OrderSetColour === "#13A10E" ? `สำเร็จ` : ""}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {formattedEventTime}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <p style={{ color: "#000" }}>ประวัติการชำระเงิน</p>
-          <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
-            <Table>
-              <TableHead sx={{ backgroundColor: "#11131A" }}>
-                <TableRow>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    ลำดับ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    เลขคำสั่งซื้อ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Pay_By_Name
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Charge_Id
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Ref_Number1
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Pay_Opt_Name
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Total_Pay
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    สถานะการจ่ายเงิน
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    วันที่จ่าย
-                  </TableCell>
-                  {/* <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    link
-                  </TableCell> */}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredOrders2.map((order: any, index: number) => {
-                  const formattedEventTime = dayjs(order.Payment_Date7).format(
-                    "D/M/BBBB HH:mm"
-                  );
-                  const statusLabel =
-                    statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
-
-                  let paymentStatusLabel;
-                  let paymentStatusBgColor;
-
-                  if (order.Order_Status === 1) {
-                    if (order.Total_Balance === 0) {
-                      paymentStatusLabel = "สำเร็จ";
-                      paymentStatusBgColor = "#28a745"; // Green for success
-                    } else if (order.Total_Balance > 0) {
-                      paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
-                    } else {
-                      paymentStatusLabel = "ไม่สำเร็จ";
-                      paymentStatusBgColor = "#dc3545"; // Red for failure
-                    }
-                  } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-                    paymentStatusLabel = "ไม่สำเร็จ";
-                    paymentStatusBgColor = "#343a40"; // Gray for failure
-                  } else {
-                    paymentStatusLabel = "ไม่ระบุ";
-                    paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
-                  }
-
-                  return (
-                    <TableRow key={index}>
-                      <TableCell
-                        style={{ textAlign: "center", fontWeight: "bold" }}
-                      >
-                        {indexOfFirstItem + index + 1}
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        <Link
-                          to={`/order-detail/${order.Order_id}`}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          {order.Order_no}
-                        </Link>
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Pay_By_Name}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Charge_Id}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Ref_Number1}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Pay_Opt_Name} %
-                      </TableCell>
-
-                      <TableCell style={{ textAlign: "right" }}>
-                        {new Intl.NumberFormat("th-TH", {
-                          style: "currency",
-                          currency: "THB",
-                        }).format(order.Total_Pay)}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "18px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "100px",
-                            backgroundColor: paymentStatusBgColor,
-                            color: "#fff",
-                          }}
-                        >
-                          {paymentStatusLabel}
-                        </div>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {formattedEventTime}
-                      </TableCell>
-                      {/* <TableCell style={{ textAlign: "center" }}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleViewHistoryClick(order.Order_id)} // Pass the appropriate order.Order_id
-                        >
-                          ดูประวัติ
-                        </Button>
-                      </TableCell> */}
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Net_Price)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Total_Pay)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Total_Balance)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Pay_By_Name}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Charge_Id}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Ref_Number1}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {handletime(order.Payment_Date7)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Pay_By_BankName}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          <div
+                            style={{
+                              border: "1px solid #ccc",
+                              padding: "8px",
+                              borderRadius: "18px",
+                              textAlign: "center",
+                              display: "inline-block",
+                              width: "100px",
+                              backgroundColor: paymentStatusBgColor,
+                              color: "#fff",
+                            }}
+                          >
+                            {paymentStatusLabel}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
         </div>
       </div>
 
       <div
         style={{ marginTop: "18px", display: "flex", justifyContent: "center" }}
       >
-        <Pagination
+        {/* <Pagination
           count={totalPages}
           page={currentPage}
           onChange={(_, page) => handleClick(page)}
           color="primary"
-        />
+        /> */}
       </div>
     </div>
   );
