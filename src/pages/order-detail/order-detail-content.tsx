@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 // import { getOrderD } from "../../services/order-d.service";
 // import { getOrderH } from "../../services/order-h.service";
-import { getOrderAll } from "../../services/order-all.service";
+import { getOrderAll, updateOrder } from "../../services/order-all.service";
 import Header from "../common/header";
 import BuyerInfo from "./details/BuyerInfo";
 import OrderItems from "./details/OrderItems";
@@ -46,6 +46,7 @@ const OrderDetailContent: React.FC = () => {
   });
 
   const handleNavigateBack = () => {
+    localStorage.setItem("orderDetail", orderDetail?.Order_no);
     navigate("/all-orders");
   };
 
@@ -61,7 +62,8 @@ const OrderDetailContent: React.FC = () => {
 
   const handleNavigateToOrderSite = async (order_id: string | number) => {
     const response = await getViewTicketListbyOrderid(order_id);
-    console.log("tickets response:", response);
+    // const print = await updateOrder(order_id);
+    console.log("tickets response:", response, order_id);
 
     if (Array.isArray(response.ticketList)) {
       let contentHtml = `
@@ -85,6 +87,10 @@ const OrderDetailContent: React.FC = () => {
                 color: #666;
                  margin:0px;
               }
+                 .divbody{
+                position: relative;
+                top: -45px;
+                 }
             </style>
           </head>
           <body>
@@ -96,10 +102,11 @@ const OrderDetailContent: React.FC = () => {
           contentHtml += `
           <div class="ticket-container">
             <img src="${dataUrl}"/>
-               <p class="details">${ticket.Event_Name}</p>
-            <p class="details">
-             (เบอร์โต๊ะ: ${ticket.ticket_no})
-             - ที่นั่ง ${ticket.ticket_line}/${ticket.ticket_line}
+          <div class="divbody">
+          <p class="details">${ticket.Event_Name}</p>
+          <p class="details">
+          (เบอร์โต๊ะ: ${ticket.ticket_no})
+          - ที่นั่ง ${ticket.ticket_line}/${ticket.ticket_line}
           </p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Date
@@ -115,6 +122,9 @@ const OrderDetailContent: React.FC = () => {
             second: "2-digit",
             hour12: false,
           })} น.</p>
+          </div>
+           
+          
           </div>
         `;
         } else {

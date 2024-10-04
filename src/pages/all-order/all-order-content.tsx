@@ -60,31 +60,6 @@ const AllOrderContent: React.FC = () => {
     ticketType: "all",
   });
 
-  useEffect(() => {
-    async function fetchOrderData() {
-      try {
-        const OrderAll = await getOrderAll();
-        console.log("hi:", OrderAll);
-        // const orderH = await getOrderH();
-        // const orderD = await getOrderD();
-
-        setOrderHData(
-          OrderAll?.orderAll.filter((order: any) => order.Net_Price !== null)
-        );
-
-        setOrderDData(
-          OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
-        );
-      } catch (error) {
-        toast.error("Failed to fetch order data");
-      } finally {
-        // setIsLoading(false);
-      }
-    }
-
-    fetchOrderData();
-  }, []);
-
   const handleFilterChange = (
     event: React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
@@ -192,47 +167,47 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  const filteredOrders2 = orderDData.filter((order) => {
-    const matchesSearch =
-      String(order.Event_Name).includes(filters.eventName) &&
-      String(order.Order_id).includes(filters.orderNo) &&
-      String(order.Cust_name).includes(filters.customerName) &&
-      String(order.Cust_tel).includes(filters.customerPhone);
-    // const mappedStatus = statusMap[order.Order_Status] || "ไม่ระบุ";
+  // const filteredOrders2 = orderDData.filter((order) => {
+  //   const matchesSearch =
+  //     String(order.Event_Name).includes(filters.eventName) &&
+  //     String(order.Order_id).includes(filters.orderNo) &&
+  //     String(order.Cust_name).includes(filters.customerName) &&
+  //     String(order.Cust_tel).includes(filters.customerPhone);
+  //   // const mappedStatus = statusMap[order.Order_Status] || "ไม่ระบุ";
 
-    // const matchesStatus =
-    //   filters.status === "all" || mappedStatus === filters.status;
+  //   // const matchesStatus =
+  //   //   filters.status === "all" || mappedStatus === filters.status;
 
-    // Payment status logic based on Order_Status and Total_Balance
-    // let paymentStatusLabel;
-    // if (order.Order_Status === 1) {
-    //   paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
-    // } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-    //   paymentStatusLabel = "ไม่สำเร็จ";
-    // } else {
-    //   paymentStatusLabel = "ไม่ระบุ";
-    // }
+  //   // Payment status logic based on Order_Status and Total_Balance
+  //   // let paymentStatusLabel;
+  //   // if (order.Order_Status === 1) {
+  //   //   paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
+  //   // } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
+  //   //   paymentStatusLabel = "ไม่สำเร็จ";
+  //   // } else {
+  //   //   paymentStatusLabel = "ไม่ระบุ";
+  //   // }
 
-    // const matchesPaymentStatus =
-    //   filters.paymentStatus === "all" ||
-    //   paymentStatusLabel === filters.paymentStatus;
+  //   // const matchesPaymentStatus =
+  //   //   filters.paymentStatus === "all" ||
+  //   //   paymentStatusLabel === filters.paymentStatus;
 
-    // const orderDate = new Date(order.Order_datetime);
-    // const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-    // const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
+  //   // const orderDate = new Date(order.Order_datetime);
+  //   // const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
+  //   // const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
-    // const matchesDateRange =
-    //   (!start || orderDate >= start) && (!end || orderDate <= end);
+  //   // const matchesDateRange =
+  //   //   (!start || orderDate >= start) && (!end || orderDate <= end);
 
-    return matchesSearch;
-  });
+  //   return matchesSearch;
+  // });
 
   // const ordersInCurrentPage = filteredOrders.slice(
   //   indexOfFirstItem,
   //   indexOfLastItem
   // );
 
-  const totalPages = Math.ceil(filteredOrders.length / MAX_ITEMS_PER_PAGE);
+  // const totalPages = Math.ceil(filteredOrders.length / MAX_ITEMS_PER_PAGE);
 
   // const totalOrders = orderHData.length;
 
@@ -301,7 +276,13 @@ const AllOrderContent: React.FC = () => {
     console.log("latestOrder:", latestOrder);
     setOrderDetail(latestOrder);
 
-    const h = orderDData.filter((order) => order.Order_no === orderNo);
+    const h = orderDData
+      .filter((order) => order.Order_no === orderNo)
+      .sort(
+        (a, b) =>
+          new Date(a.Payment_Date7).getTime() -
+          new Date(b.Payment_Date7).getTime()
+      );
 
     console.log("h:", h);
     setOrderHispayDetail(h);
@@ -317,6 +298,34 @@ const AllOrderContent: React.FC = () => {
   // const Event_Name = orderDetail
   // const Event_Time = orderDetail
   // const สถานะคำสั่งซื้อ = orderDetail
+
+  useEffect(() => {
+    async function fetchOrderData() {
+      try {
+        const OrderAll = await getOrderAll();
+        console.log("hi:", OrderAll);
+
+        setOrderHData(
+          OrderAll?.orderAll.filter((order: any) => order.Net_Price !== null)
+        );
+
+        setOrderDData(
+          OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
+        );
+      } catch (error) {
+        toast.error("Failed to fetch order data");
+      } finally {
+        const savedOrderDetail = localStorage.getItem("orderDetail");
+
+        if (savedOrderDetail) {
+          handleOrderClick(savedOrderDetail); // เรียก `handleOrderClick` ทันทีหากมีข้อมูลใน `localStorage`
+        }
+      }
+    }
+
+    fetchOrderData();
+  }, []);
+
   return (
     <div className="all-orders-content">
       <Header title="คำสั่งซื้อทั้งหมด" />
@@ -530,6 +539,7 @@ const AllOrderContent: React.FC = () => {
                   }}
                 />
               </FormControl>
+
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   variant="outlined"
@@ -699,7 +709,7 @@ const AllOrderContent: React.FC = () => {
           <TableContainer
             component={Paper}
             sx={{ borderRadius: "0" }}
-            style={{ maxHeight: 800 }}
+            style={{ maxHeight: "100vh" }}
           >
             <Table>
               <TableHead sx={{ backgroundColor: "#11131A" }}>
@@ -713,6 +723,16 @@ const AllOrderContent: React.FC = () => {
                     }}
                   >
                     ลำดับ
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                    }}
+                  >
+                    ชื่องาน
                   </TableCell>
                   <TableCell
                     style={{
@@ -781,7 +801,7 @@ const AllOrderContent: React.FC = () => {
 
                   if (order.Order_Status === 1) {
                     if (order.Total_Balance === 0) {
-                      paymentStatusLabel = "สำเร็จ";
+                      paymentStatusLabel = "ชำระครบ";
                       paymentStatusBgColor = "#28a745"; // Green for success
                     } else if (order.Total_Balance > 0) {
                       paymentStatusLabel = "ค้างจ่าย";
@@ -818,6 +838,15 @@ const AllOrderContent: React.FC = () => {
                       >
                         {indexOfFirstItem + index + 1}
                       </TableCell>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {order.Event_Name}
+                      </TableCell>
+
                       <TableCell
                         style={{
                           textAlign: "center",
@@ -950,7 +979,7 @@ const AllOrderContent: React.FC = () => {
                       </span>
                     </p>
                   </div>
-                  <div 
+                  <div
                   // style={{display:"flex",justifyContent:"flex-end"}}
                   >
                     {orderDetail.length !== 0 ? (
@@ -1116,7 +1145,7 @@ const AllOrderContent: React.FC = () => {
 
                     if (order.Order_Status === 1) {
                       if (order.Total_Balance === 0) {
-                        paymentStatusLabel = "สำเร็จ";
+                        paymentStatusLabel = "ชำระครบ";
                         paymentStatusBgColor = "#28a745";
                       } else if (order.Total_Balance > 0) {
                         paymentStatusLabel = "ค้างจ่าย";
