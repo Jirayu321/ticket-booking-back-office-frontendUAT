@@ -292,7 +292,7 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>แสกนแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {scannedCount}
+                    {/* {scannedCount} */}
                   </Typography>
                 </Box>
               </Box>
@@ -334,7 +334,7 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>ปริ้นแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {printedCount}
+                    {/* {printedCount} */}
                   </Typography>
                 </Box>
               </Box>

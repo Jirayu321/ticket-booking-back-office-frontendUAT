@@ -62,6 +62,8 @@ const OrderDetailContent: React.FC = () => {
 
   const handleNavigateToOrderSite = async (order_id: string | number) => {
     const response = await getViewTicketListbyOrderid(order_id);
+    const test = await updateOrder(order_id);
+    console.log("test", test);
     const latestTicketsMap = new Map();
 
     response.ticketList.forEach((ticket) => {

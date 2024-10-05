@@ -6,7 +6,8 @@ import Swal from "sweetalert2";
 import "../../index.css";
 import { FC, useState, useEffect } from "react";
 import { SwalError } from "../../lib/sweetalert";
-import { getViewTicketList } from "../../services/view-tikcet-list.service"; // Import the service
+import { getViewTicketList } from "../../services/view-tikcet-list.service";
+import { updateOrderbyticketid } from "../../services/order-all.service";
 import CloseIcon from "@mui/icons-material/Close";
 
 type QRCodeModalProps = {
@@ -22,7 +23,7 @@ type QRCodeModalProps = {
     Web_Qty_Buy: number;
     ticket_no: string;
     print_count: number;
-    order_id: number; // Add order_id to the ticketData type
+    order_id: number;
   };
 };
 
@@ -103,12 +104,13 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     }
   }, [open, ticket_id]);
 
-  function handlePrintQr() {
+  async function handlePrintQr() {
     if (!qrCodeUrl) {
       SwalError("ไม่สามารถพิมพ์บัตรที่นั่งได้");
       return;
     }
-
+    const dataprint = await updateOrderbyticketid(order_id, ticket_id);
+    console.log("dataprint", dataprint);
     const printWindow = window.open("", "_blank");
 
     printWindow?.document.write(`
