@@ -235,10 +235,19 @@ const AllSeatContent: React.FC = () => {
     return `${tableNumber} (${seatIndex}/${totalSeats})`;
   };
 
-  console.log(
-    "ticketsInCurrentPage",
-    ticketsInCurrentPage.filter((ticket) => ticket.ticket_no === "0")
-  );
+  // console.log(
+  //   "ticketsInCurrentPage",
+  //   ticketsInCurrentPage.filter((ticket) => ticket.ticket_no === "0")
+  // );
+
+  const handleOpenModal = (ticket) => {
+    setSelectedTicket(ticket);
+    setModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedTicket(null);
+  };
   return (
     <div className="all-seats-content">
       <Header title="ที่นั่งทั้งหมด" />
@@ -588,6 +597,11 @@ const AllSeatContent: React.FC = () => {
                 .locale("th")
                 .format("D/M/BBBB HH:mm");
 
+              const formattedEventTime2 = dayjs(ticket.Check_In_Datetime)
+                .subtract(7, "hour")
+                .locale("th")
+                .format("D/M/BBBB HH:mm:ss");
+
               if (ticket.ticket_no !== previousTableNumber) {
                 seatIndexInTable = 1; // Start counting from 1 for the new table
                 previousTableNumber = ticket.ticket_no; // Update the previous table number
@@ -636,8 +650,8 @@ const AllSeatContent: React.FC = () => {
                     <div
                       style={{
                         backgroundColor:
-                          ticket.PrintStatus_Name === "ยังไม่ปริ้น"
-                            ? "orange"
+                          ticket.PrintStatus_Name === "ยังไม่พิมพ์"
+                            ? "grey"
                             : "blue",
                         color: "white",
                         padding: "4px",
@@ -652,7 +666,7 @@ const AllSeatContent: React.FC = () => {
                     <div
                       style={{
                         backgroundColor:
-                          ticket.check_in_status === 0 ? "grey" : "blue",
+                          ticket.check_in_status === 0 ? "grey" : "#28a745",
                         color: "white",
                         padding: "4px",
                         borderRadius: "4px",
@@ -665,7 +679,7 @@ const AllSeatContent: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
-                    {ticket.Check_In_Datetime}
+                    {ticket.Check_In_Datetime ? `${formattedEventTime2}` : null}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {ticket.print_count}

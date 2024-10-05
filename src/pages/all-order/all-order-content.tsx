@@ -289,7 +289,9 @@ const AllOrderContent: React.FC = () => {
   };
 
   function formatNumberWithCommas(number: number | string): string {
-    const bath = `${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
+    const bath = `${number
+      ?.toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
     return bath;
   }
   // const Numberofseats = orderDetail
@@ -922,29 +924,25 @@ const AllOrderContent: React.FC = () => {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "auto auto auto",
+                      gridTemplateColumns: "auto auto auto auto auto  auto",
                       marginBottom: 20,
                       justifyItems: "flex-start",
+                      alignItems: "center",
                     }}
                   >
-                    <p>
-                      <strong>จำนวนที่นั่ง:</strong>
-                      <br />
-                      {orderDetail.at(0)?.Total_stc}
-                    </p>
-                    <p>
+                    {/* <p>
                       <strong>ชื่อโซน:</strong>
                       <br />
                       {orderDetail.at(0)?.Plan_Name}
-                    </p>
-                    <p>
+                    </p> */}
+                    {/* <p>
                       <strong>
                         ชื่อ
                         {orderDetail.at(0)?.Ticket_Type_Name}:
                       </strong>
                       <br />
                       {orderDetail.at(0)?.TicketNo_List}
-                    </p>
+                    </p> */}
                     <p>
                       <strong>ชื่องาน:</strong>
                       <br />
@@ -957,6 +955,17 @@ const AllOrderContent: React.FC = () => {
                         ? ``
                         : handletime(orderDetail.at(0)?.Event_Time)}
                     </p>
+                    <p style={{ textAlign: "center" }}>
+                      <strong>จำนวนที่นั่ง:</strong>
+                      <br />
+                      {orderDetail.at(0)?.Total_stc}
+                    </p>
+                    <p>
+                      <strong>ยอดสุทธิ:</strong>
+                      <br />
+                      {formatNumberWithCommas(orderDetail.at(0)?.Total_Price)}
+                    </p>
+
                     <p>
                       <strong>สถานะคำสั่งซื้อ:</strong>
                       <br />
@@ -978,21 +987,21 @@ const AllOrderContent: React.FC = () => {
                         {orderDetail.at(0)?.OrderStatus_Name}
                       </span>
                     </p>
-                  </div>
-                  <div
-                  // style={{display:"flex",justifyContent:"flex-end"}}
-                  >
-                    {orderDetail.length !== 0 ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() =>
-                          handleViewHistoryClick(orderDetail.at(0)?.Order_id)
-                        }
-                      >
-                        ดูรายละเอียด
-                      </Button>
-                    ) : null}
+                    <div
+                    // style={{display:"flex",justifyContent:"flex-end"}}
+                    >
+                      {orderDetail.length !== 0 ? (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() =>
+                            handleViewHistoryClick(orderDetail.at(0)?.Order_id)
+                          }
+                        >
+                          ดูรายละเอียด
+                        </Button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1027,7 +1036,16 @@ const AllOrderContent: React.FC = () => {
                     >
                       ลำดับ
                     </TableCell>
-
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      สถานะการจ่ายเงิน
+                    </TableCell>
                     <TableCell
                       style={{
                         fontWeight: "bold",
@@ -1046,8 +1064,19 @@ const AllOrderContent: React.FC = () => {
                         color: "#fff",
                       }}
                     >
-                      ยอดสุทธิ
+                      วันที่เวลาจ่าย
                     </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        textAlign: "center",
+                        color: "#fff",
+                      }}
+                    >
+                      ช่องทางการจ่าย
+                    </TableCell>
+
                     <TableCell
                       style={{
                         fontWeight: "bold",
@@ -1076,7 +1105,7 @@ const AllOrderContent: React.FC = () => {
                         color: "#fff",
                       }}
                     >
-                      ประเภทการจ่าย
+                      ธนาคาร
                     </TableCell>
                     <TableCell
                       style={{
@@ -1097,36 +1126,6 @@ const AllOrderContent: React.FC = () => {
                       }}
                     >
                       Ref_Number1
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "17px",
-                        textAlign: "center",
-                        color: "#fff",
-                      }}
-                    >
-                      วันที่เวลาจ่าย
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "17px",
-                        textAlign: "center",
-                        color: "#fff",
-                      }}
-                    >
-                      ธนาคาร
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "17px",
-                        textAlign: "center",
-                        color: "#fff",
-                      }}
-                    >
-                      สถานะการจ่ายเงิน
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -1182,38 +1181,6 @@ const AllOrderContent: React.FC = () => {
                         >
                           {indexOfFirstItem + index + 1}
                         </TableCell>
-                        <TableCell
-                          style={{
-                            textAlign: "center",
-                          }}
-                          // onClick={() => handleOrderClick(order.Order_no)}
-                        >
-                          {order.Order_no}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {formatNumberWithCommas(order.Net_Price)}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {formatNumberWithCommas(order.Total_Pay)}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {formatNumberWithCommas(order.Total_Balance)}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {order.Pay_By_Name}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {order.Charge_Id}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {order.Ref_Number1}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {handletime(order.Payment_Date7)}
-                        </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
-                          {order.Pay_By_BankName}
-                        </TableCell>
                         <TableCell style={{ textAlign: "center" }}>
                           <div
                             style={{
@@ -1230,6 +1197,40 @@ const AllOrderContent: React.FC = () => {
                             {paymentStatusLabel}
                           </div>
                         </TableCell>
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                          }}
+                          // onClick={() => handleOrderClick(order.Order_no)}
+                        >
+                          {order.Order_no}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {handletime(order.Payment_Date7)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Pay_By_Name}
+                        </TableCell>
+                        {/* <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Net_Price)}
+                        </TableCell> */}
+                        <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Total_Pay)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {formatNumberWithCommas(order.Total_Balance)}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Pay_By_BankName}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Charge_Id}
+                        </TableCell>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {order.Ref_Number1}
+                        </TableCell>
+                       
+                      
                       </TableRow>
                     );
                   })}

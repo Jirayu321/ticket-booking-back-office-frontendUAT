@@ -62,10 +62,24 @@ const OrderDetailContent: React.FC = () => {
 
   const handleNavigateToOrderSite = async (order_id: string | number) => {
     const response = await getViewTicketListbyOrderid(order_id);
-    // const print = await updateOrder(order_id);
-    console.log("tickets response:", response, order_id);
+    const latestTicketsMap = new Map();
 
-    if (Array.isArray(response.ticketList)) {
+    response.ticketList.forEach((ticket) => {
+      if (
+        !latestTicketsMap.has(ticket.ticket_id) ||
+        new Date(ticket.Payment_Date7) >
+          new Date(latestTicketsMap.get(ticket.ticket_id).Payment_Date7)
+      ) {
+        latestTicketsMap.set(ticket.ticket_id, ticket);
+      }
+    });
+
+    const latestTickets = Array.from(latestTicketsMap.values());
+
+    console.log("tickets response:", response, order_id);
+    console.log("latestTickets", latestTickets);
+
+    if (Array.isArray(latestTickets)) {
       let contentHtml = `
         <html>
           <head>
@@ -96,7 +110,7 @@ const OrderDetailContent: React.FC = () => {
           <body>
       `;
 
-      for (let ticket of response.ticketList) {
+      for (let ticket of latestTickets) {
         const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
         if (ticket.ticket_no === "บัตรเสริม") {
           contentHtml += `

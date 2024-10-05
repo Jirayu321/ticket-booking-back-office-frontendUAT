@@ -1,7 +1,7 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Box, Button, Modal, Typography, IconButton } from "@mui/material";
-import QRCode from "qrcode.react";
+import QRCode from "qrcode";
 import Swal from "sweetalert2";
 import "../../index.css";
 import { FC, useState, useEffect } from "react";
@@ -45,6 +45,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
 
   const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] =
     useState<number>(0);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
   // Fetch the tickets and count how many have the same ticket_no and order_id
   useEffect(() => {
@@ -76,27 +77,94 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     }
   }, [open, ticket_no, order_id]);
 
-  function handlePrintQr() {
-    const canvas = document.getElementById(
-      "printable-content"
-    ) as HTMLCanvasElement | null;
+  useEffect(() => {
+    const generateQR = async (ticket_id: string) => {
+      if (
+        !ticket_id ||
+        typeof ticket_id !== "string" ||
+        ticket_id.trim() === ""
+      ) {
+        console.error("Invalid ticket_id for QR code generation");
+        SwalError("Invalid ticket ID provided for generating QR code.");
+        return;
+      }
 
-    if (!canvas) {
+      try {
+        const url = await QRCode.toDataURL(ticket_id);
+        setQrCodeUrl(url);
+      } catch (err) {
+        console.error("Error generating QR code:", err);
+        SwalError("Failed to generate QR code.");
+      }
+    };
+
+    if (open) {
+      generateQR(ticket_id.toString()); // Ensure ticket_id is always a string
+    }
+  }, [open, ticket_id]);
+
+  function handlePrintQr() {
+    if (!qrCodeUrl) {
       SwalError("ไม่สามารถพิมพ์บัตรที่นั่งได้");
       return;
     }
-
-    const dataUrl = canvas.toDataURL("image/png");
 
     const printWindow = window.open("", "_blank");
 
     printWindow?.document.write(`
     <html>
       <head>
-        <title>Print Canvas</title>
+        <title>Print QR Codes</title>
+            <style>
+              body { margin: 0; padding: 0; }
+              .ticket-container {
+                text-align: center;
+              }
+              img { width: 90%; height: 80%; margin:0px; }
+              p {
+                font-size: 40px;
+                font-weight: bold; 
+                color: #333;
+                margin:0px;
+              }
+              .details {
+                font-size: 40px;
+                color: #666;
+                 margin:0px;
+              }
+                 .divbody{
+                position: relative;
+                top: -45px;
+                 }
+            </style>
       </head>
       <body>
-        <img src="${dataUrl}" style="width:100%; height:auto;"/>
+  <div class="ticket-container">
+            <img src="${qrCodeUrl}"/>
+          <div class="divbody">
+          <p class="details">${Event_Name}</p>
+          <p class="details">
+          (เบอร์โต๊ะ: ${ticket_no})
+          </p>
+            <p class="details">เวลา: ${new Date(Event_Date).toLocaleDateString(
+              "th-TH",
+              {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
+            )} - ${new Date(
+      new Date(Event_Time).getTime() - 7 * 60 * 60 * 1000
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })} น.</p>
+          </div>
+           
+          
+          </div>
         <script>
           window.onload = function() {
             window.print();
@@ -147,7 +215,11 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
             mt: 3,
           }}
         >
-          <QRCode id="printable-content" value={ticket_id} size={256} />
+          {qrCodeUrl ? (
+            <img src={qrCodeUrl} alt="QR Code" width={256} />
+          ) : (
+            <Typography>Loading QR Code...</Typography>
+          )}
         </Box>
         <Typography
           variant="h6"
