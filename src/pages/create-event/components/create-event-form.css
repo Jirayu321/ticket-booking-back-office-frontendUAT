@@ -68,7 +68,7 @@
 
 .slider {
   position: absolute;
-  cursor: not-allowed; /* Make the slider non-interactive */
+  /* cursor: not-allowed;  */
   top: 0;
   left: 0;
   right: 0;

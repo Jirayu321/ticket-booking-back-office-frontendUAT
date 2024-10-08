@@ -21,12 +21,29 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
     ? new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
     : false;
 
+  console.log("isEventPerformed", isEventPerformed);
+  console.log(
+    " new Date() >= new Date(formatISOToLocalTime(event.Event_Time))",
+    new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
+  );
+  console.log("!refreshEventInfo", !refreshEventInfo);
+  console.log("!isEventDetailValid", !isEventDetailValid);
+  console.log("!isEventPerformed", !isEventPerformed);
+
   async function handlePublish() {
     try {
-      if (!refreshEventInfo) return;
-      if (!isEventDetailValid) return toast.error("กรุณาเติมข้อมูลให้ครบ");
-      if (isEventPerformed)
+      if (!refreshEventInfo) {
+        console.log("refreshEventInfo is not available");
+        return;
+      }
+      if (!isEventDetailValid) {
+        console.log("Event detail is not valid");
+        return toast.error("กรุณาเติมข้อมูลให้ครบ");
+      }
+      if (isEventPerformed) {
+        console.log("Event has already been performed");
         return toast.error("ไม่สามารถเผยแพร่งานที่แสดงไปแล้วได้");
+      }
 
       await updateEventById(Number(event.Event_Id), {
         Event_Public: event.Event_Public === "Y" ? "N" : "Y",
@@ -36,20 +53,21 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
 
       refreshEventInfo();
     } catch (error: any) {
+      console.error("Error:", error.message);
       toast.error(error.message);
     }
   }
 
   return (
-    <label style={{ display: 'flex', alignItems: 'center' }}>
-      <p style={{ marginRight: '10px',marginLeft:'-90px' }}>
+    <label style={{ display: "flex", alignItems: "center" }}>
+      <p style={{ marginRight: "10px", marginLeft: "-90px" }}>
         {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
       </p>
       <input
-        style={{ marginRight: '10px' }}
+        style={{ marginRight: "10px" }}
         type="checkbox"
         checked={event.Event_Public === "Y"}
-        onChange={(_) => {
+        onChange={() => {
           handlePublish();
         }}
       />
