@@ -1,5 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { SwalError } from "../lib/sweetalert";
+import { Box, TextField } from "@mui/material";
+import { useZoneStore } from "../pages/create-event/form-store"; 
 
 export function useGenerateBoxes(options: {
   method: string;
@@ -21,17 +23,12 @@ export function useGenerateBoxes(options: {
     setTableValues,
     setStartNumberAndPrefix,
     zones,
-    selectedTicketType, // Destructure selectedTicketType
+    selectedTicketType,
   } = options;
-  console.log("zones", zones);
-  
-  const [startNumber, setStartNumber] = useState<number | null>(
-    zones[zoneId]?.startNumber || null
-  );
+
+  const { inputValues, setInputValueStore, startNumber, setStartNumber } = useZoneStore();
 
   const [prefix, setPrefix] = useState<string>(zones[zoneId]?.prefix || "");
-
-  const [inputValues, setInputValues] = useState<string[]>([]);
 
   useEffect(() => {
     const savedStartNumber = zones[zoneId]?.startNumber;
@@ -40,10 +37,7 @@ export function useGenerateBoxes(options: {
     if (savedStartNumber !== undefined) setStartNumber(savedStartNumber);
     if (savedPrefix !== undefined) setPrefix(savedPrefix);
 
-    const generatedValues = generateBoxesData();
-
-    setTableValues(zoneId, generatedValues);
-    setInputValues(generatedValues);
+    updateTableValues();
   }, [method, totalSeats, zoneId]);
 
   useEffect(() => {
@@ -51,77 +45,89 @@ export function useGenerateBoxes(options: {
   }, [startNumber, prefix, zoneId]);
 
   useEffect(() => {
-    const updatedValues = generateBoxesData();
-    setInputValues(updatedValues);
-    setTableValues(zoneId, updatedValues);
+    updateTableValues();
   }, [prefix, totalSeats, method, zoneId]);
 
   useEffect(() => {
     if (startNumber !== null) {
-      const updatedValues = generateBoxesData();
-      setInputValues(updatedValues);
-      setTableValues(zoneId, updatedValues);
+      updateTableValues();
     }
   }, [totalSeats, method, zoneId, startNumber]);
 
   const handleInputChange = (index: number, value: string) => {
     const newValues = [...inputValues];
     newValues[index] = value;
-    setInputValues(newValues);
     setTableValues(zoneId, newValues);
+    setInputValueStore(newValues);
+  };
+
+  const updateTableValues = () => {
+    const updatedValues = generateBoxesData();
+    setTableValues(zoneId, updatedValues);
+    setInputValueStore(updatedValues);
   };
 
   const generateBoxesData = () => {
-    let boxesData = [];
+    let boxesData: string[] = [];
     if (method === "1") {
-      for (let i = 0; i < totalSeats; i++) {
-        boxesData.push(inputValues[i] ? inputValues[i].trimEnd() : "");
-      }
-    } else if (
-      (method === "2" || method === "3" || method === "4") &&
-      startNumber !== null
-    ) {
+      boxesData = Array.from({ length: totalSeats }, (_, i) => inputValues[i]?.trimEnd() || "");
+    } else if (["2", "3", "4"].includes(method) && startNumber !== null) {
       for (let i = 0; i < totalSeats; i++) {
         const boxValue =
-          method === "3"
-            ? `${selectedTicketType} ${startNumber + i}`
-            : method === "4"
-            ? `${prefix}${startNumber + i}`
-            : `${startNumber + i}`;
+          method === "3" ? `${selectedTicketType} ${startNumber + i}` :
+          method === "4" ? `${prefix}${startNumber + i}` :
+          `${startNumber + i}`;
         boxesData.push(boxValue);
       }
     } else if (method === "5") {
-      for (let i = 0; i < totalSeats; i++) {
-        boxesData.push("");
-      }
+      boxesData = Array.from({ length: totalSeats }, () => "");
     }
     return boxesData;
   };
 
   const renderBoxes = () => {
     return generateBoxesData().map((value, index) => {
+      console.log('generateBoxesData value =>', value); 
       return (
-        <input
+        <Box
           key={index}
-          onFocus={(e) => e.target.select()}
-          type="text"
-          value={value}
-          onBlur={() => {
-            const doesValueDuplicate =
-              inputValues.filter((v) => v === value && Boolean(v)).length > 1;
-
-            if (doesValueDuplicate) {
-              SwalError("มีเลขซ้ำกันในโต๊ะ");
-              handleInputChange(index, "");
-            }
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
           }}
-          placeholder={method === "1" ? "โปรดระบุ" : ""}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            handleInputChange(index, e.target.value);
-          }}
-          className="table-input-box"
-          readOnly={method !== "1" && method !== "5"}
-        />
+        >
+          <TextField
+            sx={{
+              width: "70px",
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none",
+                  transform: "translateY(5px)",
+                  textAlign: "center",
+                },
+              },
+            }}
+            onFocus={(e) => e.target.select()}
+            type="text"
+            value={value}
+            onBlur={() => {
+              const doesValueDuplicate = inputValues.filter(v => v === value && Boolean(v)).length > 1;
+    
+              if (doesValueDuplicate) {
+                SwalError("มีเลขซ้ำกันในโต๊ะ");
+                handleInputChange(index, "");
+              }
+            }}
+            placeholder={method === "1" ? "โปรดระบุ" : ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              handleInputChange(index, e.target.value);
+            }}
+            InputProps={{
+              readOnly: method !== "1" && method !== "5",
+            }}
+          />
+        </Box>
       );
     });
   };

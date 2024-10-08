@@ -1,7 +1,33 @@
-import { CircularProgress, Collapse } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  IconButton,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
+  Box,
+  Modal,
+  Typography,
+  Collapse,
+  CircularProgress,
+} from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
-import { FC, useState, useEffect } from "react";
+import { FC, useState } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
@@ -11,15 +37,16 @@ import { Price, ZoneData } from "../../edit-event/type";
 import { useZoneStore } from "../form-store";
 import GenerateBoxes from "./generate-boxes";
 import deleteOnIcon from "/delete-on.svg";
-import { getAllTicketTypes, getTicketTypeNameById } from "../../../services/ticket-type.service";
 
-// Type for filtered zones
 type FilteredZonesProps = {
   filteredZones: any[];
 };
 
 const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
-  const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();  
+  console.log("filteredZones =>", filteredZones);
+
+  const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
+
   const [ticketQuantityPerPlan, setTicketQuantityPerPlan] = useState<{
     zone: any | null;
     ticketQty: number;
@@ -27,12 +54,16 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     zone: null,
     ticketQty: 0,
   });
-  const [ticketTypeNames, setTicketTypeNames] = useState<{ [key: number]: string }>({});
-  const { data: ticketTypes, isPending: isLoadingTicketTypes } = useFetchTicketTypes();
+  // console.log("ticketQuantityPerPlan =>", ticketQuantityPerPlan);
+
+  const { data: ticketTypes, isPending: isLoadingTicketTypes } =
+    useFetchTicketTypes();
+  // console.log("ticketTypes =>", ticketTypes);
 
   const [expandedZones, setExpandedZones] = useState<{
     [key: number]: boolean;
   }>({});
+  // console.log("expandedZones =>", expandedZones);
 
   const handleExpandZone = (zoneId: number, zoneName: string) => {
     setExpandedZones((prev) => ({
@@ -76,40 +107,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   };
 
   const handleUpdateTicketQuantity = (planId: number) => {
+    console.log("planId =>", planId);
     handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
   };
-
-  useEffect(() => {
-    const fetchTicketTypeNames = async () => {
-      const names: { [key: number]: string } = {};
-
-      for (const zone of filteredZones) {
-        // Get ticketTypeId from zones[zone.Plan_id]?.ticketType
-        const ticketTypeId = zones[zone.Plan_id]?.ticketType;
-
-        // Console log the ticketTypeId for debugging
-        console.log(`Ticket Type ID for zone ${zone.Plan_id}:`, ticketTypeId);
-
-        if (ticketTypeId) {
-          try {
-            // Get the ticket type name by ID
-            const name = await getTicketTypeNameById(ticketTypeId);
-            names[zone.Plan_id] = name;
-          } catch (error) {
-            console.error(`Error fetching name for ticket type ID ${ticketTypeId}:`, error);
-            names[zone.Plan_id] = "ประเภทบัตร"; // Fallback name
-          }
-        } else {
-          names[zone.Plan_id] = "ประเภทบัตร"; // Fallback for missing ticket type
-        }
-      }
-
-      // Set the ticket type names state
-      setTicketTypeNames(names);
-    };
-
-    fetchTicketTypeNames();
-  }, [filteredZones, zones]);
 
   const columns: GridColDef[] = [
     {
@@ -182,7 +182,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
           onChange={(e) =>
             handlePriceChange(params.row.id, "price", e.target.value)
           }
-          style={{ width: "90%", color: "black", backgroundColor: "white" }}
         />
       ),
     },
@@ -204,231 +203,383 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     },
   ];
 
+  const getThaiText = (id: number) => {
+    switch (id) {
+      case 33:
+        return "โซฟา";
+      case 41:
+        return "ห้อง";
+      case 40:
+        return "โต๊ะ";
+      case 37:
+        return "บัตรเสริม";
+      default:
+        return "";
+    }
+  };
+
   if (isLoadingTicketTypes) return <CircularProgress />;
 
   return (
     <>
-      {filteredZones.map((zone) => {
-        return (
-          <div key={zone.Plan_id} className="zone-section">
-            <div
-              className="zone-header"
-              onClick={() => handleExpandZone(zone.Plan_id, zone.Plan_Name)}
-            >
-              <span>
-                {zone.Plan_id}. {zone.Plan_Name}
-              </span>
-              <span>{zone.Plan_Desc}</span>
-            </div>
-            <Collapse in={expandedZones[zone.Plan_id]} timeout="auto" unmountOnExit>
-              <div className="zone-content">
-                <div className="ticket-layout">
-                  <div className="empty-image">
-                    <a
-                      href={zone.Plan_Pic}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={zone.Plan_Pic}
-                        alt="Plan Pic"
-                        style={{ width: "500px", height: "250px" }}
-                      />
-                    </a>
-                  </div>
-                  <div className="ticket-details">
-                    <div className="ticket-type">
-                      <label>TICKET TYPE*</label>
-                      <select
-                        className="ticket-type-select"
-                        value={zones[zone.Plan_id]?.ticketType || ""}
-                        onChange={(e) =>
-                          handleInputChange(zone.Plan_id, "ticketType", e.target.value)
-                        }
+      {filteredZones.map((zone) => (
+        <div key={zone.Plan_id} className="zone-section">
+          <div
+            className="zone-header"
+            onClick={() => handleExpandZone(zone.Plan_id, zone.Plan_Name)}
+          >
+            <span>
+              {zone.Plan_id}. {zone.Plan_Name}
+            </span>
+            <span>{zone.Plan_Desc}</span>
+          </div>
+          <Collapse
+            in={expandedZones[zone.Plan_id]}
+            timeout="auto"
+            unmountOnExit
+          >
+            <div className="">
+              <div className="ticket-layout">
+                <div className="empty-image">
+                  <a
+                    href={zone.Plan_Pic}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={zone.Plan_Pic}
+                      alt="Plan Pic"
+                      style={{ width: "500px", height: "250px" }}
+                    />
+                  </a>
+                </div>
+                <div className="ticket-details">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      // alignItems: "center",
+                      // justifyContent: "space-between",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      // backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    <div style={{ display: "flex", width: "100%" }}>
+                      <div
+                        className="ticket-type"
+                        // style={{ flexBasis: "50%", paddingRight: "10px" }}
                       >
-                        <option value="">เลือกประเภทตั๋ว</option>
-                        {ticketTypes?.map((type: any) => (
-                          <option key={type.Ticket_Type_Id} value={type.Ticket_Type_Id}>
-                            {type.Ticket_Type_Name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="ticket-amount">
-                      <div className="ticket-amount-row">
-                        <label>จำนวนบัตร/โซน*</label>
-                        <ConfirmNumberInput
-                          setter={(value) =>
-                            handleInputChange(zone.Plan_id, "seatCount", value)
-                          }
-                          value={zones[zone.Plan_id]?.seatCount || 0}
-                          min={0}
-                          placeholder="จำนวนบัตร/โซน*"
-                        />
-                      </div>
-                      <div className="ticket-amount-row">
-                        <label>จำนวนที่นั่ง/บัตร</label>
+                        <label
+                          style={{ fontWeight: "bold", marginBottom: "7px" }}
+                        >
+                          TICKET TYPE*
+                        </label>
+
                         <input
-                          onFocus={(e) => e.target.select()}
-                          type="number"
-                          min="0"
-                          placeholder="จำนวนที่นั่ง/ตั๋ว"
-                          style={{ backgroundColor: "white", color: "black" }}
-                          value={zones[zone.Plan_id]?.seatPerTicket || 0}
+                          style={{
+                            width: "80%",
+                            padding: "10px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            backgroundColor: "white",
+                            color: "black",
+                          }}
+                          value={getThaiText(zone.Plan_Ticket_Type_Id)}
+                          disabled={!!getThaiText(zone.Plan_Ticket_Type_Id)}
+                        />
+
+                        {/* <select
+                          className="ticket-type-select"
+                          value={zones[zone.Plan_id]?.ticketType || ""}
                           onChange={(e) =>
                             handleInputChange(
                               zone.Plan_id,
-                              "seatPerTicket",
-                              Number(e.target.value)
+                              "ticketType",
+                              e.target.value
                             )
                           }
-                        />
+                          style={{
+                            padding: "10px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                          }}
+                        >
+                          <option value="">เลือกประเภทตั๋ว</option>
+                          {ticketTypes?.map((type: any) => (
+                            <option
+                              key={type.Ticket_Type_Id}
+                              value={type.Ticket_Type_Id}
+                            >
+                              {type.Ticket_Type_Name}
+                            </option>
+                          ))}
+                        </select> */}
+                      </div>
+                      <div
+                        className="ticket-amount"
+                        style={{ flexBasis: "50%", paddingLeft: "10px" }}
+                      >
+                        <div
+                          className="ticket-amount-row"
+                          style={{ marginBottom: "15px" }}
+                        >
+                          <label
+                            style={{ fontWeight: "bold", marginBottom: "5px" }}
+                          >
+                            จำนวนบัตร/โซน*
+                          </label>
+                          <ConfirmNumberInput
+                            setter={(value) =>
+                              handleInputChange(
+                                zone.Plan_id,
+                                "seatCount",
+                                value
+                              )
+                            }
+                            value={zone.Plan_Ticket_Qty}
+                            min={0}
+                            placeholder="จำนวนบัตร/โซน*"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                            }}
+                            disabled={!!zone.Plan_Ticket_Qty}
+                          />
+                        </div>
+                        <div className="ticket-amount-row">
+                          <label
+                            style={{ fontWeight: "bold", marginBottom: "5px" }}
+                          >
+                            จำนวนที่นั่ง/บัตร
+                          </label>
+                          <input
+                            onFocus={(e) => e.target.select()}
+                            type="number"
+                            min="0"
+                            placeholder="จำนวนที่นั่ง/ตั๋ว"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                              backgroundColor: "white",
+                              color: "black",
+                            }}
+                            value={zone.Plan_Ticket_Qty_Per}
+                            onChange={(e) =>
+                              handleInputChange(
+                                zone.Plan_id,
+                                "seatPerTicket",
+                                Number(e.target.value)
+                              )
+                            }
+                            disabled={!!zone.Plan_Ticket_Qty_Per}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div className="price-section">
-                  <h3>ราคา ({zones[zone.Plan_id]?.prices?.length || 0})</h3>
-                  <div style={{ height: "auto", width: "100%" }}>
-                    <DataGrid
-                      rows={zones[zone.Plan_id]?.prices || []}
-                      columns={columns.map((col) => ({
-                        ...col,
-                        renderCell: (params: GridRenderCellParams) => {
-                          if (col.field === "startDate" || col.field === "endDate") {
-                            return (
-                              <DatePicker
-                                label=""
-                                dateTimeValue={params.value ? params.value : null}
-                                setter={(date: string) => {
-                                  handlePriceChange(
-                                    zone.Plan_id,
-                                    params.row.id,
-                                    col.field,
-                                    date ? new Date(date).toISOString() : ""
-                                  );
-                                }}
-                              />
-                            );
-                          }
-                          if (col.field === "price") {
-                            return (
-                              <input
-                                onFocus={(e) => e.target.select()}
-                                type="number"
-                                min="0"
-                                value={params.value}
-                                onChange={(e) =>
-                                  handlePriceChange(
-                                    zone.Plan_id,
-                                    params.row.id,
-                                    col.field,
-                                    e.target.value
-                                  )
-                                }
-                                style={{
-                                  width: "90%",
-                                  color: "black",
-                                  backgroundColor: "white",
-                                }}
-                              />
-                            );
-                          }
-                          if (col.field === "delete") {
-                            return (
-                              <img
-                                src={deleteOnIcon}
-                                alt="delete-on"
-                                style={{ cursor: "pointer" }}
-                                onClick={async () => {
-                                  const isConfirmed = await SwalConfirmAction(
-                                    "คุณต้องการลบราคานี้ใช่หรือไม่?"
-                                  );
-  
-                                  if (!isConfirmed) return;
-  
-                                  removeZonePrice(zone.Plan_id, params.row.id);
-                                }}
-                              />
-                            );
-                          }
-                          return null;
-                        },
-                      }))}
-                      pageSize={zones[zone.Plan_id]?.prices?.length || 0}
-                      autoHeight
-                      disableSelectionOnClick
-                      hideFooterPagination
-                    />
-                  </div>
+                    {/* .... */}
+                    <Box>
+                      <FormControl
+                        sx={{
+                          marginTop: "10px",
+                          width: "500px", // Set your desired width here
+                        }}
+                        fullWidth
+                        margin="dense"
+                      >
+                        <InputLabel
+                          id="demo-simple-select-label"
+                          style={{ color: "black" }}
+                        >
+                          ระบุเลขโต๊ะ/ที่*
+                        </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="ระบุเลขโต๊ะ/ที่*"
+                          name="selectTableModal"
+                          value={zone.ticketNoPlanList?.[0]?.Ticket_No_Option || ""}
+                          disabled
+                        >
+                          <MenuItem value="1" style={{ color: "black" }}>
+                            1.คีย์เลขโต๊ะได้เอง
+                          </MenuItem>
+                          <MenuItem
+                            value="2"
+                            style={{ color: "black" }}
+                          >{`2. รันจาก 1 ถึง ${
+                            zone.Plan_Ticket_Qty
+                              ? parseInt(zone.Plan_Ticket_Qty, 10)
+                              : 0
+                          }`}</MenuItem>
+                          <MenuItem
+                            value="3"
+                            style={{ color: "black" }}
+                          >{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
+                            zone.Plan_Ticket_Qty
+                              ? parseInt(zone.Plan_Ticket_Qty, 10)
+                              : 0
+                          } - (ประเภทบัตร 1-${
+                            zone.Plan_Ticket_Qty
+                              ? parseInt(zone.Plan_Ticket_Qty, 10)
+                              : 0
+                          })`}</MenuItem>
+                          <MenuItem
+                            value="4"
+                            style={{ color: "black" }}
+                          >{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
+                            zone.Plan_Ticket_Qty
+                              ? parseInt(zone.Plan_Ticket_Qty, 10)
+                              : 0
+                          }`}</MenuItem>
+                          <MenuItem value="5" style={{ color: "black" }}>
+                            5.ไม่ระบุเลขโต๊ะ
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
 
-                  <button
-                    type="button"
-                    className="add-price"
+                      <GenerateBoxes
+                        method={zone.selectTableModal}
+                        totalSeats={zone.Plan_Ticket_Qty}
+                        zoneId={zone.Plan_id}
+                        selectedTicketType={getThaiText(
+                          zone.Plan_Ticket_Type_Id
+                        )}
+                        line={zone.Line}
+                        ticketNo={zone.Ticket_No}
+                        ticketNoOption={zone.Ticket_No_Option}
+                      />
+                    </Box>
+                  </Box>
+                </div>
+              </div>
+              {/* ... */}
+              <div className="price-section">
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "15px",
+                    marginBottom: "15px",
+                  }}
+                >
+                  {/* <h3>ราคา ({zones[zone.Plan_id]?.prices?.length || 0})</h3> */}
+                  <h3>ราคา</h3>
+                  <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => addZonePrice(zone.Plan_id)}
                   >
                     + เพิ่มราคาบัตร
-                  </button>
-                </div>
-                <div className="table-input-method-section">
-                  <label style={{ color: "black" }}>ระบุเลขโต๊ะ/ที่*</label>
-                  <select
-                    value={zones[zone.Plan_id]?.tableInputMethod || ""}
-                    onChange={(e) =>
-                      handleInputChange(
-                        zone.Plan_id,
-                        "tableInputMethod",
-                        e.target.value
-                      )
-                    }
-                    className="table-input-method-select"
-                  >
-                    <option value="">เลือกรูปแบบการระบุ</option>
-                    <option value="1">1.คีย์เลขโต๊ะได้เอง</option>
-                    <option value="2">
-                      2.รันจาก 1 ถึง {zones[zone.Plan_id]?.seatCount || 0}
-                    </option>
-                    <option value="3">
-                      {`3.นำหน้าด้วย ${
-                        ticketTypes?.find(
-                          (type) =>
-                            type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
-                        )?.Ticket_Type_Name || "ประเภทบัตร"
-                      } ต่อด้วย รันจาก 1 ถึง ${
-                        zones[zone.Plan_id]?.seatCount || 0
-                      } - (${
-                        ticketTypes?.find(
-                          (type) =>
-                            type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
-                        )?.Ticket_Type_Name || "ประเภทบัตร"
-                      } 1-${zones[zone.Plan_id]?.seatCount || 0})`}
-                    </option>
-                    <option value="4">
-                      {`4.ใส่อักษรนำหน้า ต่อด้วย ${
-                        ticketTypes?.find(
-                          (type) =>
-                            type.Ticket_Type_Id === zones[zone.Plan_id]?.ticketType
-                        )?.Ticket_Type_Name || "ประเภทบัตร"
-                      } จาก 1 ถึง ${zones[zone.Plan_id]?.seatCount || 0} ([?] 1-[?] ${
-                        zones[zone.Plan_id]?.seatCount || 0
-                      })`}
-                    </option>
-                    <option value="5">5.ไม่ระบุเลขโต๊ะ</option>
-                  </select>
-                  
-                  <GenerateBoxes
-                    method={zones[zone.Plan_id]?.tableInputMethod || "1"}
-                    totalSeats={zones[zone.Plan_id]?.seatCount || 0}
-                    zoneId={zone.Plan_id}
-                    selectedTicketType={ticketTypeNames[zone.Plan_id] || "ประเภทบัตร"}
-                    // selectedTicketType={zones[zone.Plan_id]?.ticketType || ""}
+                  </Button>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <DataGrid
+                    rows={zones[zone.Plan_id]?.prices || 0}
+                    // rows={zones[zone.Plan_id]?.prices || []}
+                    columns={columns.map((col) => ({
+                      ...col,
+                      renderCell: (params: GridRenderCellParams) => {
+                        if (col.field === "id") {
+                          return (
+                            <div style={{ color: "black" }}>
+                              {params.row.id}
+                            </div>
+                          );
+                        }
+                        if (
+                          col.field === "startDate" ||
+                          col.field === "endDate"
+                        ) {
+                          return (
+                            <DatePicker
+                              label=""
+                              dateTimeValue={params.value ? params.value : null}
+                              setter={(date: string) => {
+                                handlePriceChange(
+                                  zone.Plan_id,
+                                  params.row.id,
+                                  col.field,
+                                  date ? new Date(date).toISOString() : ""
+                                );
+                              }}
+                            />
+                          );
+                        }
+                        if (col.field === "price") {
+                          return (
+                            <TextField
+                              onFocus={(e) => e.target.select()}
+                              type="number"
+                              inputProps={{ min: "0" }}
+                              value={params.value}
+                              onChange={(e) =>
+                                handlePriceChange(
+                                  zone.Plan_id,
+                                  params.row.id,
+                                  col.field,
+                                  e.target.value
+                                )
+                              }
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  "& input": {
+                                    border: "none",
+                                    transform: "translateY(5px)",
+                                    backgroundColor: "white",
+                                    padding: "13px",
+                                  },
+                                },
+                              }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          );
+                        }
+                        if (col.field === "delete") {
+                          return (
+                            <img
+                              src={deleteOnIcon}
+                              alt="delete-on"
+                              style={{ cursor: "pointer" }}
+                              onClick={async () => {
+                                const isConfirmed = await SwalConfirmAction(
+                                  "คุณต้องการลบราคานี้ใช่หรือไม่?"
+                                );
+
+                                if (!isConfirmed) return;
+
+                                removeZonePrice(zone.Plan_id, params.row.id);
+                              }}
+                            />
+                          );
+                        }
+                        return null;
+                      },
+                    }))}
+                    pageSize={zones[zone.Plan_id]?.prices?.length || 0}
+                    autoHeight
+                    disableSelectionOnClick
+                    hideFooterPagination
                   />
-                </div>
+                </Box>
               </div>
-            </Collapse>
-          </div>
-        );
-      })}
+            </div>
+          </Collapse>
+        </div>
+      ))}
     </>
   );
 };

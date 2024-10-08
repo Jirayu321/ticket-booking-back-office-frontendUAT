@@ -35,6 +35,10 @@ export function formatISOToLocalTime(isoString: string) {
 }
 
 export function convertLocalTimeToISO(localTimeString: string) {
+  console.log(
+    "new Date(localTimeString).toISOString()",
+    new Date(localTimeString).toISOString()
+  );
   return new Date(localTimeString).toISOString();
 }
 

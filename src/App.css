@@ -6,7 +6,8 @@
   background-color: white;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   display: flex;
@@ -70,11 +71,6 @@ a:hover {
   font-style: normal;
 }
 
-.sweet-alert-popup {
-  z-index: 999999999 !important;
-}
-
-
 .content {
   flex-grow: 1;
   padding: 20px;
@@ -100,9 +96,11 @@ a:hover {
   background: #555;
 }
 
-/* App.css */
 
-.swal-custom-zindex {
-  z-index: 9999 !important;
-  /* Adjust this value as needed */
+div:where(.swal2-container) {
+  z-index: 1500;
+}
+
+.swal2-title, .swal2-content, .swal2-confirm, .swal2-cancel {
+  font-family: 'Noto Sans Thai', sans-serif;
 }

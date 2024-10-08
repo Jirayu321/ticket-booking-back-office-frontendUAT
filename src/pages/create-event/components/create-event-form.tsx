@@ -61,61 +61,17 @@ const CreateEventForm = () => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Image = reader.result as string;
-          setImages(index, base64Image); // Set image in Zustand store
+          setImages(index, base64Image); 
         };
         reader.readAsDataURL(file);
       }
     };
 
   const handleImageRemove = (index: number) => () => {
-    setImages(index, null); // Remove image from Zustand store
+    setImages(index, null); 
   };
 
-  // async function handleCreateEvent() {
-  //   try {s
-  //     toast.loading("กำลังสร้าง event ใหม่");
-
-  //     // Add 7 hours to the eventDateTime before converting to ISO
-  //     const adjustedEventDateTime = dayjs(eventDateTime)
-  //       .add(7, "hour")
-  //       .toISOString();
-
-  //     if (images.filter((img) => Boolean(img)).length < MINIMUM_EVENT_IMAGES) {
-  //       throw new Error(
-  //         `กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`
-  //       );
-  //     }
-
-  //     const eventData = {
-  //       Event_Name: title,
-  //       Event_Addr: title2,
-  //       Event_Desc: description,
-  //       Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
-  //       Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
-  //       Event_Status: status,
-  //       Event_Public: "N",
-  //       Event_Pic_1: images[0],
-  //       Event_Pic_2: images[1],
-  //       Event_Pic_3: images[2],
-  //       Event_Pic_4: images[3],
-  //     };
-
-  //     const { eventId } = await createEvent(eventData);
-
-  //     if (!eventId) throw new Error("สร้าง event ล้มเหลว");
-
-  //     toast.dismiss();
-
-  //     Swal.fire({
-  //       icon: "success",
-  //       title: "สร้าง event สำเร็จ",
-  //     });
-  //     navigate("/all-events");
-  //   } catch (error: any) {
-  //     toast.dismiss();
-  //     SwalError(error.message);
-  //   }
-  // }
+ 
 
   const handleNext = (e: any) => {
     e.preventDefault();

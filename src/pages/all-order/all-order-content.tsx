@@ -135,15 +135,22 @@ const AllOrderContent: React.FC = () => {
   const filteredOrders = orderHData
     .filter((order) => {
       const matchesSearch =
-        String(order.Event_Name).includes(filters.eventName) &&
-        String(order.Order_id).includes(filters.orderNo) &&
-        String(order.Cust_name).includes(filters.customerName) &&
-        String(order.Cust_tel).includes(filters.customerPhone);
+        String(order.Event_Name)
+          .toLowerCase()
+          .includes(filters.eventName.toLowerCase()) &&
+        String(order.Order_id)
+          .toLowerCase()
+          .includes(filters.orderNo.toLowerCase()) &&
+        String(order.Cust_name)
+          .toLowerCase()
+          .includes(filters.customerName.toLowerCase()) &&
+        String(order.Cust_tel)
+          .toLowerCase()
+          .includes(filters.customerPhone.toLowerCase());
 
       return matchesSearch;
     })
     .reduce((acc, current) => {
-      // Check if we already have an order with the same Order_id
       const existingOrder = acc.find(
         (order) => order.Order_id === current.Order_id
       );
@@ -1229,8 +1236,6 @@ const AllOrderContent: React.FC = () => {
                         <TableCell style={{ textAlign: "center" }}>
                           {order.Ref_Number1}
                         </TableCell>
-                       
-                      
                       </TableRow>
                     );
                   })}

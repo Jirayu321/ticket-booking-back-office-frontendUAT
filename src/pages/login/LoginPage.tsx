@@ -48,7 +48,8 @@ function LoginPage() {
           >
             <h1 className={styles.title}>Deedclub</h1>
             <FormControl fullWidth>
-              <TextField label="username" {...register("username")}  sx={{
+              <TextField label="username" {...register("username")}
+                sx={{
                     "& .MuiOutlinedInput-root": {
                       "& input": {
                         border: "none", 

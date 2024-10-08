@@ -70,12 +70,15 @@ interface ZoneStoreState {
     prefix: string
   ) => void; // Action to set start number and prefix
   resetZoneData: () => void;
+  inputValues: string[];
+  startNumber: number;
 }
 
 export const useZoneStore = create<ZoneStoreState>((set) => ({
   selectedZoneGroup: null,
   zones: {},
-
+  inputValues: [],
+  startNumber: 1,
   setSelectedZoneGroup: (groupId) =>
     set((state) => ({
       selectedZoneGroup: groupId,
@@ -158,5 +161,16 @@ export const useZoneStore = create<ZoneStoreState>((set) => ({
     set({
       selectedZoneGroup: null,
       zones: {},
+    }),
+
+  setInputValueStore: (inputValuesData) =>
+    set({
+      inputValues: inputValuesData,
+    }),
+
+  setStartNumber: (number) =>
+    // console.log("setStartNumber store =>", number) ||
+    set({
+      startNumber: number,
     }),
 }));

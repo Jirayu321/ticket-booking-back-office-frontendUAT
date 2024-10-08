@@ -27,7 +27,7 @@
 
 .ticket-layout {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
   margin-top: 10px;
   margin-left: 10px;
 }
@@ -48,7 +48,7 @@
 
 .ticket-type {
   margin-bottom: 20px;
-  margin-top: 30px;
+  margin-top: 40px;
   color: black;
   font-weight: bold;
 }
@@ -60,7 +60,7 @@
 }
 
 .ticket-type-select {
-  width: 90%;
+  /* width: 90%; */
   height: 40px;
   padding: 8px;
   border: 1px solid #ccc;
@@ -69,16 +69,18 @@
 
 .ticket-amount {
   display: flex;
+  margin-top: 38px;
   flex-direction: row;
   gap: 20px;
-  align-items: center;
+  /* align-items: center; */
   color: black;
+  
 }
 
 .ticket-amount-row {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 5px;
   padding-right: 25px;
 }
@@ -91,7 +93,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 200px;
+  width: 110px;
 }
 
 /* Price section */
@@ -183,7 +185,7 @@
 }
 
 .table-input-method-select {
-  width: 90%;
+  /* width: 90%; */
   height: 40px;
   padding: 8px;
   border: 1px solid #ccc;
@@ -213,7 +215,6 @@
 
 /* Date picker adjustments */
 .react-datepicker-popper.custom-datepicker-popper {
-  z-index: 99999 !important; /* Ensure the date picker is above other elements */
   position: absolute !important; /* Keep it positioned absolutely */
   top: 0 !important; /* Reset top positioning */
   left: 0 !important; /* Align to the left of the input field */
