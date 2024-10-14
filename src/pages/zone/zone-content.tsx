@@ -83,6 +83,7 @@ const ZoneContent: React.FC = () => {
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
   // console.log("editPlan =>", editPlan);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [letter, setTetter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectTableModal, setSelectTableModal] = useState<sting>("");
@@ -181,7 +182,9 @@ const ZoneContent: React.FC = () => {
         setSelectTableModal(data[0].Ticket_No_Option);
         setTicketNoPerPlan(data);
       } else {
-        console.warn("No ticket numbers found for the given plan and plan group.");
+        console.warn(
+          "No ticket numbers found for the given plan and plan group."
+        );
       }
       return data;
     } catch (error) {
@@ -189,7 +192,7 @@ const ZoneContent: React.FC = () => {
       return [];
     }
   };
-  
+
   // ข้อมูล Plan และ PlanGroup
   useEffect(() => {
     const fetchPlans = async () => {
@@ -205,7 +208,7 @@ const ZoneContent: React.FC = () => {
         console.error("Failed to fetch plans:", error);
       }
     };
-  
+
     // ดึงข้อมูล PlanGroup ที่มีสถานะเป็น Y
     const fetchPlanGroups = async () => {
       try {
@@ -231,7 +234,7 @@ const ZoneContent: React.FC = () => {
         console.error("Failed to fetch plan groups:", error);
       }
     };
-  
+
     fetchPlans();
     fetchPlanGroups();
   }, []);
@@ -305,7 +308,6 @@ const ZoneContent: React.FC = () => {
     }));
   };
 
-
   // แก้ไขแผน
   // const handleEditChange = (
   //   event: React.ChangeEvent<
@@ -336,31 +338,33 @@ const ZoneContent: React.FC = () => {
       console.error("Event target name is undefined");
       return;
     }
-  
+
     setEditPlan((prev: any) => ({
       ...prev,
       [name]: value,
     }));
-  
+
     if (name === "selectTableModal") {
       setSelectTableModal(value);
       setStartNumber(1);
     } else if (name === "Plan_Ticket_Type_Id") {
-      const typeName = ticketTypes.find((type) => type.Ticket_Type_Id === value);
+      const typeName = ticketTypes.find(
+        (type) => type.Ticket_Type_Id === value
+      );
       setSelectedTicketTypeName(typeName?.Ticket_Type_Name || "");
     }
   };
-  
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-  
+
   const handleStatusFilterChange = (
     event: React.ChangeEvent<{ value: unknown }>
   ) => {
     setStatusFilter(event.target.value as string);
   };
-  
+
   const isDuplicatePlanName = (
     name: string,
     groupId: number,
@@ -372,16 +376,16 @@ const ZoneContent: React.FC = () => {
         plan.PlanGroup_id === groupId
     );
   };
-  
+
   const handleSaveTicketNumbers = async (
     planGroupId: number,
     planId: number
   ) => {
-    const ticketNumberData = Object.entries(zones)
-      .flatMap(([zoneId, zoneData]) => {
+    const ticketNumberData = Object.entries(zones).flatMap(
+      ([zoneId, zoneData]) => {
         const ticketValues = zoneData.tableValues;
         if (!ticketValues) return [];
-  
+
         return ticketValues.map((ticketValue, index) => ({
           PlanGroup_Id: planGroupId,
           Plan_Id: planId,
@@ -389,12 +393,14 @@ const ZoneContent: React.FC = () => {
           Ticket_No: ticketValue,
           Ticket_No_Option: selectedTable,
         }));
-      });
-  
+      }
+    );
+
     try {
       await Promise.all(
         ticketNumberData.map(async (ticket) => {
-          const { PlanGroup_Id, Plan_Id, Line, Ticket_No, Ticket_No_Option } = ticket;
+          const { PlanGroup_Id, Plan_Id, Line, Ticket_No, Ticket_No_Option } =
+            ticket;
           await createTicketNoPerPlan({
             PlanGroup_Id,
             Plan_Id,
@@ -409,6 +415,7 @@ const ZoneContent: React.FC = () => {
       throw new Error("ล้มเหลวระหว่างสร้างเลขตั๋ว");
     }
   };
+
   // const DEFAULT_ACTIONER = "admin";
 
   //
@@ -446,9 +453,10 @@ const ZoneContent: React.FC = () => {
   // };
 
   // ส่งข้อมูลไปหา API
+  
   const handleCreate = async () => {
     console.log("handleCreate:", newPlan);
-  
+
     // Check if planGroupId is selected
     if (!newPlan.planGroupId) {
       Swal.fire({
@@ -462,7 +470,7 @@ const ZoneContent: React.FC = () => {
       return;
     }
     const groupId = parseInt(newPlan.planGroupId, 10);
-  
+
     // Check for duplicate plan name
     if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
       Swal.fire({
@@ -475,7 +483,7 @@ const ZoneContent: React.FC = () => {
       });
       return;
     }
-  
+
     try {
       // Create a new plan by sending the plan data to the API
       const res = await createPlan({
@@ -488,9 +496,9 @@ const ZoneContent: React.FC = () => {
         Plan_Ticket_Qty: newPlan.zone, // Number of tickets/zones
         Plan_Ticket_Qty_Per: newPlan.seats, // Number of seats/ticket
       });
-  
+
       console.log("Response from createPlan:", res); // Log the response data
-  
+
       // Check if the response from creating the new plan has a planId
       if (typeof res.planId === "number") {
         // Save ticket numbers
@@ -500,7 +508,7 @@ const ZoneContent: React.FC = () => {
           newPlan.selectedTicketType // Ticket type
         );
       }
-  
+
       Swal.fire({
         icon: "success",
         title: "สร้างโซนสำเร็จ",
@@ -509,7 +517,7 @@ const ZoneContent: React.FC = () => {
           content: "swal2-content",
         },
       });
-  
+
       // Reset the form fields after success
       setNewPlan({
         name: "",
@@ -521,9 +529,9 @@ const ZoneContent: React.FC = () => {
         zone: "",
         seats: "",
       });
-  
+
       setOpen(false);
-  
+
       // Refresh the plans list after creation
       const data = await getAllPlans();
       setPlans(data.plans);
@@ -539,17 +547,17 @@ const ZoneContent: React.FC = () => {
       });
     }
   };
-  
+
   const handleSaveEdit = async () => {
     if (!editPlan) return;
-  
+
     const groupId = editPlan.PlanGroup_id;
-  
+
     // Exclude the plan being edited from the duplicate check
     const filteredPlans = plans.filter(
       (plan) => plan.Plan_id !== editPlan.Plan_id
     );
-  
+
     if (isDuplicatePlanName(editPlan.Plan_Name, groupId, filteredPlans)) {
       Swal.fire({
         title: "มีโซนที่มีชื่อเดียวกันในกลุ่มนี้แล้ว",
@@ -561,7 +569,7 @@ const ZoneContent: React.FC = () => {
       });
       return;
     }
-  
+
     try {
       let dataTicket = [];
       inputValues.forEach((value, i) => {
@@ -572,7 +580,7 @@ const ZoneContent: React.FC = () => {
         };
         dataTicket.push(obj);
       });
-  
+
       const payload = {
         Plan_id: editPlan.Plan_id,
         Plan_Desc: editPlan.Plan_Desc,
@@ -585,10 +593,10 @@ const ZoneContent: React.FC = () => {
         PlanGroup_id: groupId,
         dataTicketValue: dataTicket,
       };
-  
+
       console.log("payload =>", payload);
       await patchPlan(payload);
-  
+
       Swal.fire({
         icon: "success",
         title: "อัปเดตโซนสำเร็จ",
@@ -760,7 +768,10 @@ const ZoneContent: React.FC = () => {
   //     reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
   //   }
   // };
-  const handleEditImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleEditImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -774,7 +785,16 @@ const ZoneContent: React.FC = () => {
     }
   };
   
-  
+  function Letter() {
+    if (ticketNoPerPlan.length !== 0) {
+      const firstTicketNo = ticketNoPerPlan[0]?.Ticket_No;
+      const letter = firstTicketNo.match(/[A-Za-z]+/)[0];
+      setTetter(letter);
+    }
+  }
+  useEffect(() => {
+    Letter();
+  }, [ticketNoPerPlan]);
 
   return (
     <div
@@ -1248,6 +1268,7 @@ const ZoneContent: React.FC = () => {
             totalSeats={zone}
             zoneId={1}
             selectedTicketType={selectedTicketTypeName}
+            letter={letter || null}
           />
         </DialogContent>
         <DialogActions>
@@ -1459,6 +1480,7 @@ const ZoneContent: React.FC = () => {
               totalSeats={editPlan.Plan_Ticket_Qty} // เลขโต๊ะที่โชว์
               zoneId={1} // ID
               selectedTicketType={selectedTicketTypeName} // ประเภทตั๋ว
+              letter={letter || null}
               // mode="edit" // โหมดแก้ไข
               // dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
             />

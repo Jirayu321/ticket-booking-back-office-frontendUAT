@@ -6,12 +6,14 @@ import { STATUS_MAP } from "../../../config/constants";
 import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
 import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
-import { useEventStore } from "../form-store"; // Zustand store
+import { useEventStore ,useZoneStore} from "../form-store"; // Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
+import EditZonePriceForm from "../../edit-event/_components/EditZonePriceForm";
 import { handleSave } from "./save-form";
+
 
 const MINIMUM_EVENT_IMAGES = 1;
 
@@ -61,17 +63,15 @@ const CreateEventForm = () => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Image = reader.result as string;
-          setImages(index, base64Image); 
+          setImages(index, base64Image);
         };
         reader.readAsDataURL(file);
       }
     };
 
   const handleImageRemove = (index: number) => () => {
-    setImages(index, null); 
+    setImages(index, null);
   };
-
- 
 
   const handleNext = (e: any) => {
     e.preventDefault();
@@ -110,9 +110,12 @@ const CreateEventForm = () => {
     }
   };
 
+  const { zones } = useZoneStore();
   async function handleSaveEvent() {
     try {
       toast.loading("กำลังบันทึกข้อมูล Event");
+
+      console.log("handleSaveEvent 55555",zones);
 
       const { isValid, message } = isFormValid();
 
@@ -301,6 +304,7 @@ const CreateEventForm = () => {
       )}
       {activeTab === "โซน & ราคา" && (
         <ZonePriceForm onSaveEvent={handleSaveEvent} />
+        // <EditZonePriceForm eventId={Number(eventId)} />
       )}
     </div>
   );

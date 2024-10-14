@@ -217,6 +217,8 @@ const ZonePriceForm = () => {
 
   if (isLoadingPlanGroups) return <CircularProgress />;
 
+
+
   return (
     <div className="zone-price-form-container">
       {error && <div className="error-message">{error}</div>}
@@ -228,9 +230,9 @@ const ZonePriceForm = () => {
       <FilteredZones filteredZones={filteredZones} />
 
       <div className="save-form-section">
-        <button className="buttonSave" onClick={handleSaveEvent}>
+        {/* <button className="buttonSave" onClick={handleSaveEvent}>
           บันทึก
-        </button>
+        </button> */}
       </div>
     </div>
   );

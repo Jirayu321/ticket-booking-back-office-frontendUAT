@@ -102,24 +102,29 @@ export const useZoneStore = create<ZoneStoreState>((set) => ({
       },
     })),
 
-  addZonePrice: (zoneId) =>
-    set((state) => ({
-      zones: {
-        ...state.zones,
-        [zoneId]: {
-          ...state.zones[zoneId],
-          prices: [
-            ...state.zones[zoneId].prices,
-            {
-              id: state.zones[zoneId].prices.length + 1,
-              startDate: addHours(new Date(), 7).toISOString(),
-              endDate: addHours(new Date(), 7).toISOString(),
-              price: "",
-            },
-          ],
+    addZonePrice: (zoneId) => {
+      console.log("addZonePrice", zoneId); // ตรวจสอบค่า zoneId
+    
+      set((state) => ({
+        zones: {
+          ...state.zones,
+          [zoneId]: {
+            ...state.zones[zoneId],
+            prices: [
+              ...(state.zones[zoneId]?.prices || []), // ตรวจสอบว่ามี prices เป็น array หรือไม่ ถ้าไม่มีให้ใช้ array ว่าง
+              {
+                id: (state.zones[zoneId]?.prices?.length || 0) + 1, // เพิ่มลำดับ id ของราคา
+                startDate: addHours(new Date(), 7).toISOString(), // ตั้งเวลาเริ่มเป็น 7 ชั่วโมงจากปัจจุบัน
+                endDate: addHours(new Date(), 7).toISOString(), // ตั้งเวลาสิ้นสุดเป็น 7 ชั่วโมงจากปัจจุบัน
+                price: "", // ค่าเริ่มต้นของราคา
+              },
+            ],
+          },
         },
-      },
-    })),
+      }));
+    },
+    
+
 
   removeZonePrice: (zoneId, priceId) =>
     set((state) => ({

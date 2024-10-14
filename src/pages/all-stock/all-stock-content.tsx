@@ -25,8 +25,8 @@ import { getEventStock } from "../../services/event-stock.service"; // Import th
 import toast from "react-hot-toast";
 import Header from "../common/header"; // Assuming you have a Header component
 import InventoryIcon from "@mui/icons-material/Inventory";
-import AddCardIcon from '@mui/icons-material/AddCard';
-
+import AddCardIcon from "@mui/icons-material/AddCard";
+import { getAllEventList } from "../../services/event-list.service";
 const MAX_ITEMS_PER_PAGE = 50;
 
 // Map event statuses to text and style properties
@@ -63,20 +63,29 @@ const AllStockContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
     search: "",
-    eventStatus: "*", // Added filter for event status
-    publicStatus: "*", // Added filter for public status
+    eventName: "",
+    eventStatus: "*",
+    publicStatus: "*",
   });
   const [totalTickets, setTotalTickets] = useState<number>(0);
   const [totalTicketsBuy, setTotalTicketsBuy] = useState<number>(0);
   const [totalTicketsBalance, setTotalTicketsBalance] = useState<number>(0);
+  const [evntDetail, setEvntDetail] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchEventStockData() {
       try {
-        const data = await getEventStock(); // Fetch data from the event stock service
+        const data = await getEventStock();
+        const evntDetailAll = await getAllEventList();
+        console.log("evntDetailAll:", evntDetailAll);
+
+        setEvntDetail(
+          evntDetailAll?.events.filter(
+            (event: any) => event.Event_Public === "Y"
+          )
+        );
         if (data && Array.isArray(data)) {
           setEventStockData(data);
-
           const totalTicketsSum = data.reduce(
             (sum, item) => sum + (item.Ticket_Qty || 0),
             0
@@ -133,8 +142,8 @@ const AllStockContent: React.FC = () => {
 
   const filteredStocks = eventStockData.filter((stock) => {
     const matchesSearch =
-      (stock.Event_Name || "").includes(filters.search) ||
-      (stock.Plan_Name || "").includes(filters.search);
+      (stock.Event_Name || "").toLowerCase().includes(filters.search) ||
+      (stock.Plan_Name || "").toLowerCase().includes(filters.search);
 
     const matchesEventStatus =
       filters.eventStatus === "*" || stock.Event_Status == filters.eventStatus;
@@ -143,13 +152,38 @@ const AllStockContent: React.FC = () => {
       filters.publicStatus === "*" ||
       stock.Event_Public === filters.publicStatus;
 
-    return matchesSearch && matchesEventStatus && matchesPublicStatus;
+    const matchesEvent =
+      filters.eventName === "" ||
+      (filters.eventName &&
+        stock.Event_Name &&
+        stock.Event_Name.toLowerCase().includes(
+          filters.eventName.toLowerCase()
+        ));
+
+    return (
+      matchesSearch && matchesEventStatus && matchesPublicStatus && matchesEvent
+    );
   });
+
+  console.log("filteredStocks", filteredStocks);
+  const TotalTickets = filteredStocks.reduce(
+    (sum, order) => sum + order.Ticket_Qty,
+    0
+  );
+  const TotalTicketsBuy = filteredStocks.reduce(
+    (sum, order) => sum + order.Ticket_Qty_Balance,
+    0
+  );
+  const TotalTicketsBalance = filteredStocks.reduce(
+    (sum, order) => sum + order.Ticket_Qty_Buy,
+    0
+  );
 
   const stocksInCurrentPage = filteredStocks.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
+
   const totalPages = Math.ceil(filteredStocks.length / MAX_ITEMS_PER_PAGE);
   const numberFormatter = new Intl.NumberFormat("en-US");
 
@@ -179,10 +213,11 @@ const AllStockContent: React.FC = () => {
                 width: "100%",
               }}
             >
-
-              <AddCardIcon sx={{
-                fontSize: 70
-              }} />
+              <AddCardIcon
+                sx={{
+                  fontSize: 70,
+                }}
+              />
               <Box
                 sx={{
                   display: "flex",
@@ -198,9 +233,15 @@ const AllStockContent: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "23px" }}>บัตรทั้งหมด</Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {numberFormatter.format(totalTickets)}
-                  </Typography>
+                  {filters.eventName === "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(totalTickets)}
+                    </Typography>
+                  ) : (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(TotalTickets)}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -247,9 +288,15 @@ const AllStockContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>
                     บัตรคงเหลือทั้งหมด
                   </Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {numberFormatter.format(totalTicketsBuy)}
-                  </Typography>
+                  {filters.eventName === "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(totalTicketsBuy)}
+                    </Typography>
+                  ) : (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(TotalTicketsBuy)}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -291,9 +338,15 @@ const AllStockContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>
                     บัตรที่ขายไปแล้ว
                   </Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {numberFormatter.format(totalTicketsBalance)}
-                  </Typography>
+                  {filters.eventName === "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(totalTicketsBalance)}
+                    </Typography>
+                  ) : (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {numberFormatter.format(TotalTicketsBalance)}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -308,6 +361,25 @@ const AllStockContent: React.FC = () => {
       >
         <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
           <Stack direction="row" spacing={2}>
+            <FormControl
+              variant="outlined"
+              style={{ minWidth: 150, backgroundColor: "white" }}
+            >
+              <InputLabel>ชื่องาน</InputLabel>
+              <Select
+                label="ชื่องาน"
+                name="eventName"
+                value={filters.eventName}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="">ทั้งหมด</MenuItem>
+                {evntDetail.map((item, index) => (
+                  <MenuItem key={index + 1} value={item.Event_Name}>
+                    {item.Event_Name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <TextField
               variant="outlined"
               label="ค้นหา"
@@ -327,7 +399,7 @@ const AllStockContent: React.FC = () => {
                 },
               }}
             />
-            {/* Filter by Event Status */}
+
             <FormControl
               variant="outlined"
               style={{ minWidth: 150, backgroundColor: "white" }}
@@ -346,7 +418,7 @@ const AllStockContent: React.FC = () => {
                 <MenuItem value="13">ยกเลิก</MenuItem>
               </Select>
             </FormControl>
-            {/* Filter by Public Status */}
+
             <FormControl
               variant="outlined"
               style={{ minWidth: 150, backgroundColor: "white" }}
@@ -492,7 +564,9 @@ const AllStockContent: React.FC = () => {
 
               return (
                 <TableRow key={stock.Event_STC_Id}>
-                  <TableCell style={{ textAlign: "center" , fontWeight: 'bold' }}>
+                  <TableCell
+                    style={{ textAlign: "center", fontWeight: "bold" }}
+                  >
                     {indexOfFirstItem + index + 1}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>

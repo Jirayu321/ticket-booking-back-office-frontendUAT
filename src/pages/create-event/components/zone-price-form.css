@@ -1,7 +1,8 @@
 /* Container to make the page scrollable */
 .zone-price-form-container {
-  max-height: 100vh;
+  max-height: 80vh;
   padding: 20px;
+  overflow-y: auto;
 }
 
 /* Zone Section */

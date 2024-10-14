@@ -27,7 +27,7 @@ import {
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
-import { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import DateTimePickerComponent from "../../../components/common/date-time-picker";
 import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
@@ -43,8 +43,6 @@ type FilteredZonesProps = {
 };
 
 const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
-  console.log("filteredZones =>", filteredZones);
-
   const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
 
   const [ticketQuantityPerPlan, setTicketQuantityPerPlan] = useState<{
@@ -54,8 +52,10 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     zone: null,
     ticketQty: 0,
   });
-  // console.log("ticketQuantityPerPlan =>", ticketQuantityPerPlan);
 
+  const [ticketNoPerPlan, setTicketNoPerPlan] = useState<any[]>([]);
+  console.log("ticketNoPerPlan", ticketNoPerPlan);
+  const [letter, setTetter] = useState<string>("");
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
   // console.log("ticketTypes =>", ticketTypes);
@@ -65,7 +65,11 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   }>({});
   // console.log("expandedZones =>", expandedZones);
 
-  const handleExpandZone = (zoneId: number, zoneName: string) => {
+  const handleExpandZone = (
+    zoneId: number,
+    zoneName: string,
+    ticketNoPlanList: any
+  ) => {
     setExpandedZones((prev) => ({
       ...prev,
       [zoneId]: !prev[zoneId],
@@ -81,6 +85,8 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
       });
     }
     setZoneData(zoneId, { zoneName });
+    
+    setTicketNoPerPlan(ticketNoPlanList);
   };
 
   const handlePriceChange = (
@@ -106,10 +112,10 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     setZoneData(zoneId, { [field]: value });
   };
 
-  const handleUpdateTicketQuantity = (planId: number) => {
-    console.log("planId =>", planId);
-    handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
-  };
+  // const handleUpdateTicketQuantity = (planId: number) => {
+  //   console.log("planId =>", planId);
+  //   handleInputChange(planId, "seatCount", ticketQuantityPerPlan.ticketQty);
+  // };
 
   const columns: GridColDef[] = [
     {
@@ -218,6 +224,21 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     }
   };
 
+  console.log("Zones", zones);
+  console.log("ticketNoPerPlan", ticketNoPerPlan);
+
+  useEffect(() => {
+    if (ticketNoPerPlan && ticketNoPerPlan.length > 0) {
+      const firstTicketNo = ticketNoPerPlan[0]?.Ticket_No;
+      if (firstTicketNo) {
+        const letter = firstTicketNo.match(/[A-Za-z]+/);
+        if (letter && letter[0]) {
+          setTetter(letter[0]);
+        }
+      }
+    }
+  }, [ticketNoPerPlan]);
+
   if (isLoadingTicketTypes) return <CircularProgress />;
 
   return (
@@ -226,7 +247,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
         <div key={zone.Plan_id} className="zone-section">
           <div
             className="zone-header"
-            onClick={() => handleExpandZone(zone.Plan_id, zone.Plan_Name)}
+            onClick={() =>
+              handleExpandZone(
+                zone.Plan_id,
+                zone.Plan_Name,
+                zone.ticketNoPlanList
+              )
+            }
           >
             <span>
               {zone.Plan_id}. {zone.Plan_Name}
@@ -258,19 +285,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      // alignItems: "center",
-                      // justifyContent: "space-between",
+
                       padding: "10px",
                       borderRadius: "8px",
-                      // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                      // backgroundColor: "#f9f9f9",
                     }}
                   >
                     <div style={{ display: "flex", width: "100%" }}>
-                      <div
-                        className="ticket-type"
-                        // style={{ flexBasis: "50%", paddingRight: "10px" }}
-                      >
+                      <div className="ticket-type">
                         <label
                           style={{ fontWeight: "bold", marginBottom: "7px" }}
                         >
@@ -289,33 +310,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                           value={getThaiText(zone.Plan_Ticket_Type_Id)}
                           disabled={!!getThaiText(zone.Plan_Ticket_Type_Id)}
                         />
-
-                        {/* <select
-                          className="ticket-type-select"
-                          value={zones[zone.Plan_id]?.ticketType || ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              zone.Plan_id,
-                              "ticketType",
-                              e.target.value
-                            )
-                          }
-                          style={{
-                            padding: "10px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
-                        >
-                          <option value="">เลือกประเภทตั๋ว</option>
-                          {ticketTypes?.map((type: any) => (
-                            <option
-                              key={type.Ticket_Type_Id}
-                              value={type.Ticket_Type_Id}
-                            >
-                              {type.Ticket_Type_Name}
-                            </option>
-                          ))}
-                        </select> */}
                       </div>
                       <div
                         className="ticket-amount"
@@ -347,7 +341,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                               borderRadius: "4px",
                               border: "1px solid #ccc",
                             }}
-                            disabled={!!zone.Plan_Ticket_Qty}
+                            disabled={true}
                           />
                         </div>
                         <div className="ticket-amount-row">
@@ -382,79 +376,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         </div>
                       </div>
                     </div>
-                    {/* .... */}
-                    <Box>
-                      <FormControl
-                        sx={{
-                          marginTop: "10px",
-                          width: "500px", // Set your desired width here
-                        }}
-                        fullWidth
-                        margin="dense"
-                      >
-                        <InputLabel
-                          id="demo-simple-select-label"
-                          style={{ color: "black" }}
-                        >
-                          ระบุเลขโต๊ะ/ที่*
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          label="ระบุเลขโต๊ะ/ที่*"
-                          name="selectTableModal"
-                          value={zone.ticketNoPlanList?.[0]?.Ticket_No_Option || ""}
-                          disabled
-                        >
-                          <MenuItem value="1" style={{ color: "black" }}>
-                            1.คีย์เลขโต๊ะได้เอง
-                          </MenuItem>
-                          <MenuItem
-                            value="2"
-                            style={{ color: "black" }}
-                          >{`2. รันจาก 1 ถึง ${
-                            zone.Plan_Ticket_Qty
-                              ? parseInt(zone.Plan_Ticket_Qty, 10)
-                              : 0
-                          }`}</MenuItem>
-                          <MenuItem
-                            value="3"
-                            style={{ color: "black" }}
-                          >{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
-                            zone.Plan_Ticket_Qty
-                              ? parseInt(zone.Plan_Ticket_Qty, 10)
-                              : 0
-                          } - (ประเภทบัตร 1-${
-                            zone.Plan_Ticket_Qty
-                              ? parseInt(zone.Plan_Ticket_Qty, 10)
-                              : 0
-                          })`}</MenuItem>
-                          <MenuItem
-                            value="4"
-                            style={{ color: "black" }}
-                          >{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
-                            zone.Plan_Ticket_Qty
-                              ? parseInt(zone.Plan_Ticket_Qty, 10)
-                              : 0
-                          }`}</MenuItem>
-                          <MenuItem value="5" style={{ color: "black" }}>
-                            5.ไม่ระบุเลขโต๊ะ
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-
-                      <GenerateBoxes
-                        method={zone.selectTableModal}
-                        totalSeats={zone.Plan_Ticket_Qty}
-                        zoneId={zone.Plan_id}
-                        selectedTicketType={getThaiText(
-                          zone.Plan_Ticket_Type_Id
-                        )}
-                        line={zone.Line}
-                        ticketNo={zone.Ticket_No}
-                        ticketNoOption={zone.Ticket_No_Option}
-                      />
-                    </Box>
                   </Box>
                 </div>
               </div>
@@ -488,7 +409,6 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                 >
                   <DataGrid
                     rows={zones[zone.Plan_id]?.prices || 0}
-                    // rows={zones[zone.Plan_id]?.prices || []}
                     columns={columns.map((col) => ({
                       ...col,
                       renderCell: (params: GridRenderCellParams) => {
@@ -569,6 +489,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         return null;
                       },
                     }))}
+
                     pageSize={zones[zone.Plan_id]?.prices?.length || 0}
                     autoHeight
                     disableSelectionOnClick
@@ -576,6 +497,75 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                   />
                 </Box>
               </div>
+              <Box>
+                <FormControl
+                  sx={{
+                    marginTop: "10px",
+                    width: "500px", // Set your desired width here
+                  }}
+                  fullWidth
+                  margin="dense"
+                >
+                  <InputLabel
+                    id="demo-simple-select-label"
+                    style={{ color: "black" }}
+                  >
+                    ระบุเลขโต๊ะ/ที่*
+                  </InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    // id="demo-simple-select"
+                    label="ระบุเลขโต๊ะ/ที่*"
+                    name="selectTableModal"
+                    value={zone.ticketNoPlanList?.[0]?.Ticket_No_Option || ""}
+                    disabled
+                    style={{ color: "black" }}
+                  >
+                    <MenuItem value="1" style={{ color: "black" }}>
+                      1.คีย์เลขโต๊ะได้เอง
+                    </MenuItem>
+                    <MenuItem
+                      value="2"
+                      style={{ color: "black" }}
+                    >{`2. รันจาก 1 ถึง ${
+                      zone.Plan_Ticket_Qty
+                        ? parseInt(zone.Plan_Ticket_Qty, 10)
+                        : 0
+                    }`}</MenuItem>
+                    <MenuItem
+                      value="3"
+                      style={{ color: "black" }}
+                    >{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
+                      zone.Plan_Ticket_Qty
+                        ? parseInt(zone.Plan_Ticket_Qty, 10)
+                        : 0
+                    } - (ประเภทบัตร 1-${
+                      zone.Plan_Ticket_Qty
+                        ? parseInt(zone.Plan_Ticket_Qty, 10)
+                        : 0
+                    })`}</MenuItem>
+                    <MenuItem
+                      value="4"
+                      style={{ color: "black" }}
+                    >{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
+                      zone.Plan_Ticket_Qty
+                        ? parseInt(zone.Plan_Ticket_Qty, 10)
+                        : 0
+                    }`}</MenuItem>
+                    <MenuItem value="5" style={{ color: "black" }}>
+                      5.ไม่ระบุเลขโต๊ะ
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+
+                <GenerateBoxes
+                  method={zone.ticketNoPlanList?.[0]?.Ticket_No_Option.toString()}
+                  totalSeats={zone.Plan_Ticket_Qty}
+                  zoneId={zone.Plan_id}
+                  selectedTicketType={getThaiText(zone.Plan_Ticket_Type_Id)}
+                  letter={letter || null}
+                />
+              </Box>
             </div>
           </Collapse>
         </div>

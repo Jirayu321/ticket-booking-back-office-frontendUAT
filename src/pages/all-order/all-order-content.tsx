@@ -28,6 +28,7 @@ import Header from "../common/header";
 // import { getOrderD } from "../../services/order-d.service";
 
 import { getOrderAll } from "../../services/order-all.service";
+import { getAllEventList } from "../../services/event-list.service";
 
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -45,7 +46,7 @@ const AllOrderContent: React.FC = () => {
   const [orderDData, setOrderDData] = useState<any[]>([]);
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
   const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
-  console.log("orderHispayDetail", orderHispayDetail);
+  const [evntDetail, setEvntDetail] = useState<any[]>([]);
 
   // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
@@ -79,20 +80,6 @@ const AllOrderContent: React.FC = () => {
   //   setStartDate(null);
   //   setEndDate(null);
   // };
-
-  const handleClearFilters = () => {
-    setStartDate(null);
-    setEndDate(null);
-    setFilters({
-      orderNo: "",
-      eventName: "",
-      customerName: "",
-      customerPhone: "",
-      status: "all",
-      paymentStatus: "all",
-      ticketType: "all",
-    });
-  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({
@@ -308,33 +295,77 @@ const AllOrderContent: React.FC = () => {
   // const Event_Time = orderDetail
   // const สถานะคำสั่งซื้อ = orderDetail
 
-  useEffect(() => {
-    async function fetchOrderData() {
-      try {
-        const OrderAll = await getOrderAll();
-        console.log("hi:", OrderAll);
+  async function fetchOrderData() {
+    try {
+      const OrderAll = await getOrderAll();
+      const evntDetailAll = await getAllEventList();
+      console.log("hi:", OrderAll);
+      console.log("evntDetailAll:", evntDetailAll);
 
-        setOrderHData(
-          OrderAll?.orderAll.filter((order: any) => order.Net_Price !== null)
-        );
+      setEvntDetail(
+        evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
+      );
+      setOrderHData(
+        OrderAll?.orderAll.filter((order: any) => order.Net_Price !== null)
+      );
 
-        setOrderDData(
-          OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
-        );
-      } catch (error) {
-        toast.error("Failed to fetch order data");
-      } finally {
-        const savedOrderDetail = localStorage.getItem("orderDetail");
+      setOrderDData(
+        OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
+      );
+    } catch (error) {
+      toast.error("Failed to fetch order data");
+    } finally {
+      const savedOrderDetail = localStorage.getItem("orderDetail");
 
-        if (savedOrderDetail) {
-          handleOrderClick(savedOrderDetail); // เรียก `handleOrderClick` ทันทีหากมีข้อมูลใน `localStorage`
-        }
+      if (savedOrderDetail) {
+        handleOrderClick(savedOrderDetail); // เรียก `handleOrderClick` ทันทีหากมีข้อมูลใน `localStorage`
       }
     }
-
+  }
+  useEffect(() => {
     fetchOrderData();
   }, []);
 
+  const totalOrders = filteredOrders?.length;
+
+  const OutstandingPayment = filteredOrders
+    .filter((order) => order.Total_Balance !== 0)
+    .reduce((sum, order) => sum + order.Total_Balance, 0);
+
+  const totalNetPriceWithZeroBalance = filteredOrders
+    .filter((order) => order.Total_Balance === 0)
+    .reduce((sum, order) => sum + order.Total_Price, 0);
+
+  const totalNetPriceWithNonZeroBalance = filteredOrders
+    .filter((order) => order.Total_Balance !== 0)
+    .reduce((sum, order) => sum + order.Total_Pay, 0);
+
+  // รวมผลรวมทั้งสองส่วน
+  const totalNetPrice =
+    totalNetPriceWithZeroBalance + totalNetPriceWithNonZeroBalance;
+
+  const handleClearFilters = () => {
+    setStartDate((prevStartDate) =>
+      prevStartDate !== null ? prevStartDate : null
+    );
+    setEndDate((prevEndDate) => (prevEndDate !== null ? prevEndDate : null));
+
+    setFilters((prevFilters) => ({
+      orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
+      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+      customerName:
+        prevFilters.customerName !== "" ? prevFilters.customerName : "",
+      customerPhone:
+        prevFilters.customerPhone !== "" ? prevFilters.customerPhone : "",
+      status: prevFilters.status !== "all" ? prevFilters.status : "all",
+      paymentStatus:
+        prevFilters.paymentStatus !== "all" ? prevFilters.paymentStatus : "all",
+      ticketType:
+        prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
+    }));
+    localStorage.removeItem("orderDetail");
+    fetchOrderData();
+  };
   return (
     <div className="all-orders-content">
       <Header title="คำสั่งซื้อทั้งหมด" />
@@ -380,9 +411,11 @@ const AllOrderContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>
                     คำสั่งซื้อทั้งหมด
                   </Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {/* {totalOrders} */}
-                  </Typography>
+                  {filters.eventName !== "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {totalOrders}
+                    </Typography>
+                  ) : null}
                 </Box>
               </Box>
             </Box>
@@ -427,9 +460,11 @@ const AllOrderContent: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {/* {`${ordersWithBalance}/${totalOrders}`} */}
-                  </Typography>
+                  {filters.eventName !== "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {formatNumberWithCommas(OutstandingPayment)}
+                    </Typography>
+                  ) : null}
                 </Box>
               </Box>
             </Box>
@@ -474,20 +509,12 @@ const AllOrderContent: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "23px" }}>ยอดขาย</Typography>
-                  <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {/* {`${new Intl.NumberFormat("th-TH", {
-                      style: "currency",
-                      currency: "THB",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(totalPaySum)} / 
-                ${new Intl.NumberFormat("th-TH", {
-                  style: "currency",
-                  currency: "THB",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(totalNetPrice)}`} */}
-                  </Typography>
+
+                  {filters.eventName !== "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {formatNumberWithCommas(totalNetPrice)}
+                    </Typography>
+                  ) : null}
                 </Box>
               </Box>
             </Box>
@@ -512,6 +539,27 @@ const AllOrderContent: React.FC = () => {
             }}
           >
             <Box sx={{ display: "flex", gap: 2 }}>
+              <FormControl
+                variant="outlined"
+                sx={{ backgroundColor: "white" }}
+                style={{ minWidth: 125 }}
+              >
+                <InputLabel>ชื่องาน</InputLabel>
+                <Select
+                  label="ชื่องาน"
+                  name="eventName"
+                  value={filters.eventName}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="">ทั้งหมด</MenuItem>
+                  {evntDetail.map((item, index) => (
+                    <MenuItem key={index + 1} value={item.Event_Name}>
+                      {item.Event_Name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <FormControl sx={{ backgroundColor: "white" }}>
                 <DatePicker
                   label="วันที่เริ่มต้น"
@@ -569,25 +617,7 @@ const AllOrderContent: React.FC = () => {
                     },
                   }}
                 />
-                <TextField
-                  variant="outlined"
-                  label="ชื่องาน"
-                  name="eventName"
-                  value={filters.eventName}
-                  onChange={handleSearchChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& input": {
-                        border: "none", // Remove the inner border
-                        transform: "translateY(5px)",
-                        width: "120px",
-                      },
-                    },
-                  }}
-                />
+
                 <TextField
                   variant="outlined"
                   label="ชื่อลูกค้า"
@@ -695,7 +725,7 @@ const AllOrderContent: React.FC = () => {
                   flexShrink: 0,
                 }}
               >
-                ล้างค่าการค้นหา
+                ค้นหา
               </Button>
             </Box>
           </Box>

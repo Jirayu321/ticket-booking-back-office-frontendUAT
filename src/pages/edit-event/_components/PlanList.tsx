@@ -37,6 +37,7 @@ const PlanList: FC<PlanListProps> = ({ plans }) => {
         marginY: 2,
       }}
       gap={1}
+      style={{maxHeight:"60vh",overflowY:"auto"}}
     >
       {plans.map((plan) =>
         Boolean(plan) ? (

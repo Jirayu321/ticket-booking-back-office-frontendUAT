@@ -26,6 +26,8 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
     (plan: any) => plan.PlanGroup_Id === selectedPlanGroupId
   );
 
+  console.log("filteredPlans", filteredPlans);
+
   useSyncPlanGroup(viewEventStocks);
 
   if (isLoadingPlanGroups || isLoadingViewEventStocks)

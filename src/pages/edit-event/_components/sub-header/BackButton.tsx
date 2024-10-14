@@ -10,12 +10,12 @@ const BackButton = () => {
 
   const handleBackClick = () => {
     if (activeTab === "โซน & ราคา") {
-      const userConfirmed = window.confirm(
-        "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด"
-      );
-      if (userConfirmed) {
+      // const userConfirmed = window.confirm(
+      //   "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด"
+      // );
+      // if (userConfirmed) {
         setActiveTab("รายละเอียด");
-      }
+      // }
     } else {
       navigate("/all-events");
     }

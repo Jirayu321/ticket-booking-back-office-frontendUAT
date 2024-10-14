@@ -32,6 +32,7 @@ const ConfirmNumberInput: FC<Props> = ({
           }
           setTempValue(Number(e.target.value));
         }}
+        disabled={true}
       />
       <Button
         color="success"

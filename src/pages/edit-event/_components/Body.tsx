@@ -2,7 +2,7 @@ import { CircularProgress, Collapse } from "@mui/material";
 import { FC, useState } from "react";
 import { useFetchTicketTypes } from "../../../hooks/fetch-data/useFetchTicketTypes";
 import usePlanInfoStore from "../_hook/usePlanInfoStore";
-import { useUpdateTicketNumbers } from "../_hook/useUpdateTicketNumbers";
+// import { useUpdateTicketNumbers } from "../_hook/useUpdateTicketNumbers";
 import { getPrefix, getStartNumber } from "../helper";
 import { TicketNoOption } from "../type";
 import LogPrices from "./LogPrices";
@@ -10,7 +10,7 @@ import NumberAndPrefix from "./NumberAndPrefix";
 import SaveButton from "./SaveButton";
 import SelectInputMethod from "./SelectInputMethod";
 import TicketNoList from "./TicketNoList";
-import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
+// import { useUpdateTicketNumbersBySeatQtyPerPlan } from "../_hook/useUpdateTicketNumbersBySeatQtyPerPlan";
 import ConfirmNumberInput from "../../../components/common/input/date-picker/ConfirmNumberInput";
 import { SwalError } from "../../../lib/sweetalert";
 
@@ -43,7 +43,7 @@ const Body: FC<BodyProps> = ({
     onUpdatePlanInfo,
     staticTicketQty,
   } = state;
-
+  // console.log("state", state);
   const [tempTicketNumbers, setTempTicketNumbers] =
     useState<any[]>(ticketNumbers);
 
@@ -71,27 +71,30 @@ const Body: FC<BodyProps> = ({
     setTicketNoOption(option);
   }
 
-  function handleTicketNumberChange(newTicketNumber: string, index: number) {
-    setTempTicketNumbers((prev) =>
-      prev.map((tnp, i) =>
-        i === index ? { ...tnp, Ticket_No: newTicketNumber } : tnp
-      )
-    );
-  }
+  // function handleTicketNumberChange(newTicketNumber: string, index: number) {
+  //   setTempTicketNumbers((prev) =>
+  //     prev.map((tnp, i) =>
+  //       i === index ? { ...tnp, Ticket_No: newTicketNumber } : tnp
+  //     )
+  //   );
+  // }
 
-  useUpdateTicketNumbers({
-    startNumber,
-    prefix,
-    ticketNoOption,
-    selectedTicketType: ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? "",
-    setPrefix,
-    setTempTicketNumbers, 
-  });
-  
-  useUpdateTicketNumbersBySeatQtyPerPlan({
-    seatQtyPerPlan: seatQtyPerticket,
-    setTicketNumbers: setTempTicketNumbers,
-  });
+  // useUpdateTicketNumbers({
+  //   startNumber,
+  //   prefix,
+  //   ticketNoOption,
+  //   selectedTicketType:
+  //     ticketTypes?.find(
+  //       (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId)
+  //     )?.Ticket_Type_Name ?? "",
+  //   setPrefix,
+  //   setTempTicketNumbers,
+  // });
+
+  // useUpdateTicketNumbersBySeatQtyPerPlan({
+  //   seatQtyPerPlan: seatQtyPerticket,
+  //   setTicketNumbers: setTempTicketNumbers,
+  // });
 
   if (isLoadingTicketTypes) return <CircularProgress />;
 
@@ -104,7 +107,7 @@ const Body: FC<BodyProps> = ({
               <img
                 src={Plan_Pic}
                 alt="Plan Pic"
-                style={{  width: "500px", height: "250px" }}
+                style={{ width: "500px", height: "250px" }}
               />
             </a>
           </div>
@@ -178,7 +181,12 @@ const Body: FC<BodyProps> = ({
         <LogPrices planId={planId} zones={zones} />
         <div className="table-input-method-section">
           <SelectInputMethod
-            selectedTicketType={ticketTypes?.find( (ticketType: any) => ticketType.Ticket_Type_Id === Number(ticketTypeId))?.Ticket_Type_Name ?? ""}
+            selectedTicketType={
+              ticketTypes?.find(
+                (ticketType: any) =>
+                  ticketType.Ticket_Type_Id === Number(ticketTypeId)
+              )?.Ticket_Type_Name ?? ""
+            }
             currentPlan={
               zones.filter((zone: any) => zone.Plan_Id === planId)[0]
             }
@@ -197,19 +205,21 @@ const Body: FC<BodyProps> = ({
             <TicketNoList
               tempTicketNumbers={tempTicketNumbers}
               currentOption={ticketNoOption}
-              handleTicketNumberChange={handleTicketNumberChange}
+              // handleTicketNumberChange={handleTicketNumberChange}
             />
           ) : null}
         </div>
-        {expandedZones[Plan_Id] ? (
-          <SaveButton
-            planId={Plan_Id}
-            planGroupId={PlanGroup_Id}
-            refreshViewEventStocks={refreshViewEventStocks}
-            ticketNumbers={tempTicketNumbers}
-            ticketNoOption={ticketNoOption}
-          />
-        ) : null}
+        <div style={{ marginTop: 20 }}>
+          {expandedZones[Plan_Id] ? (
+            <SaveButton
+              planId={Plan_Id}
+              planGroupId={PlanGroup_Id}
+              refreshViewEventStocks={refreshViewEventStocks}
+              ticketNumbers={tempTicketNumbers}
+              ticketNoOption={ticketNoOption}
+            />
+          ) : null}
+        </div>
       </div>
     </Collapse>
   );

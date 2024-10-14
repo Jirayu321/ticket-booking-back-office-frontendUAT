@@ -267,14 +267,14 @@ const Sidebars: React.FC = () => {
               >
                 <MenuItem icon={<AssignmentIndIcon />}>Role setting</MenuItem>
               </Link>
-              <Link
+              {/* <Link
                 to="/settings"
                 className={`menu-bars ${
                   activePath === "/settings" ? "active" : ""
                 }`}
               >
                 <MenuItem icon={<SettingsIcon />}>Setting</MenuItem>
-              </Link>
+              </Link> */}
               <MenuItem
                 icon={<LogoutIcon />}
                 className="menu-bars"

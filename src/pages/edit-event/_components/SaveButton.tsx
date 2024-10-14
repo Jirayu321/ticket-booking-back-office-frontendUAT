@@ -50,25 +50,25 @@ const SaveButton: FC<SaveButtonProps> = ({
     try {
       toast.loading("กำลังบันทึกข้อมูล...");
 
-      const {
-        isValid: isLogEventPriceValid,
-        message: logEventPriceErrorMessage,
-      } = validateLogEventPrices(logEventPrices);
+      // const {
+      //   isValid: isLogEventPriceValid,
+      //   message: logEventPriceErrorMessage,
+      // } = validateLogEventPrices(logEventPrices);
 
-      const { isValid: isTicketNoValid, message: ticketNoErrorMessage } =
-        validateTicketNumbers(ticketNumbers, ticketNoOption);
+      // const { isValid: isTicketNoValid, message: ticketNoErrorMessage } =
+      //   validateTicketNumbers(ticketNumbers, ticketNoOption);
 
-      if (!isLogEventPriceValid) {
-        SwalError(logEventPriceErrorMessage);
-        toast.dismiss();
-        return;
-      }
+      // if (!isLogEventPriceValid) {
+      //   SwalError(logEventPriceErrorMessage);
+      //   toast.dismiss();
+      //   return;
+      // }
 
-      if (!isTicketNoValid) {
-        SwalError(ticketNoErrorMessage);
-        toast.dismiss();
-        return;
-      }
+      // if (!isTicketNoValid) {
+      //   SwalError(ticketNoErrorMessage);
+      //   toast.dismiss();
+      //   return;
+      // }
 
       await updateEventStock({
         eventId: Number(eventId),
@@ -164,7 +164,7 @@ const SaveButton: FC<SaveButtonProps> = ({
       }, 1000);
     } catch (error: any) {
       toast.dismiss();
-      SwalError(error.message);
+      // SwalError(error.message);
     }
   }
 

@@ -21,6 +21,7 @@ import {
   Box,
   Typography,
 } from "@mui/material";
+import { getAllEventList } from "../../services/event-list.service";
 import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import toast from "react-hot-toast";
 import Header from "../common/header";
@@ -40,12 +41,14 @@ const MAX_ITEMS_PER_PAGE = 50;
 const AllSeatContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [ticketData, setTicketData] = useState<any[]>([]);
+  const [evntDetail, setEvntDetail] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     event: "all",
+    eventName: "",
     ticketType: "all",
     printStatus: "all",
     scanStatus: "all",
@@ -54,23 +57,29 @@ const AllSeatContent: React.FC = () => {
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
   const [endDate, setEndDate] = useState(dayjs().endOf("month"));
 
-  useEffect(() => {
-    const fetchTicketData = async () => {
-      try {
-        const data = await getViewTicketList();
-        console.log("data", data);
-        if (Array.isArray(data)) {
-          setTicketData(data);
-        } else if (data?.ticketList && Array.isArray(data.ticketList)) {
-          setTicketData(data.ticketList);
-        } else {
-          toast.error("Unexpected data format");
-        }
-      } catch (error) {
-        toast.error("Failed to fetch ticket data");
-      }
-    };
+  const fetchTicketData = async () => {
+    try {
+      const data = await getViewTicketList();
+      console.log("data", data);
+      const evntDetailAll = await getAllEventList();
+      console.log("evntDetailAll:", evntDetailAll);
 
+      setEvntDetail(
+        evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
+      );
+      if (Array.isArray(data)) {
+        setTicketData(data);
+      } else if (data?.ticketList && Array.isArray(data.ticketList)) {
+        setTicketData(data.ticketList);
+      } else {
+        toast.error("Unexpected data format");
+      }
+    } catch (error) {
+      toast.error("Failed to fetch ticket data");
+    }
+  };
+
+  useEffect(() => {
     fetchTicketData();
   }, []);
 
@@ -94,16 +103,19 @@ const AllSeatContent: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      search: "",
-      event: "all",
-      ticketType: "all",
-      printStatus: "all",
-      scanStatus: "all",
-      ticket_Reserve: "all",
-    });
+
+      setFilters((prevFilters) => ({
+    search: prevFilters.search !== "" ? prevFilters.search : "",
+    event: prevFilters.event !== "all" ? prevFilters.event : "all",
+    eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+    ticketType: prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
+    printStatus: prevFilters.printStatus !== "all" ? prevFilters.printStatus : "all",
+    scanStatus: prevFilters.scanStatus !== "all" ? prevFilters.scanStatus : "all",
+    ticket_Reserve: prevFilters.ticket_Reserve !== "all" ? prevFilters.ticket_Reserve : "all",
+  }));
     setStartDate(dayjs().startOf("month"));
     setEndDate(dayjs().endOf("month"));
+    fetchTicketData();
   };
 
   const applyFilters = (tickets) => {
@@ -146,6 +158,13 @@ const AllSeatContent: React.FC = () => {
           current.ticket_Reserve === "W" &&
           current.Total_Balance !== 0);
 
+      const matchesEventName =
+        filters.eventName === "" ||
+        (filters.eventName &&
+          current.Event_Name &&
+          current.Event_Name.toLowerCase().includes(
+            filters.eventName.toLowerCase()
+          ));
       // Combine all conditions
       if (
         matchesSearch &&
@@ -153,7 +172,8 @@ const AllSeatContent: React.FC = () => {
         matchesTicketType &&
         matchesPrintStatus &&
         matchesScanStatus &&
-        matchesTicketReserve
+        matchesTicketReserve &&
+        matchesEventName
       ) {
         // Check if we already have a ticket with the same ID
         const existingTicket = acc.find(
@@ -191,12 +211,13 @@ const AllSeatContent: React.FC = () => {
 
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
-  const scannedCount = ticketData.filter(
+  const scannedCount = filteredTickets.filter(
     (ticket) => ticket.check_in_status === 1
   ).length;
-  const printedCount = ticketData.filter(
-    (ticket) => ticket.PrintStatus_Name === "ปริ้นแล้ว"
+  const printedCount = filteredTickets.filter(
+    (ticket) => ticket.PrintStatus_Name === "พิมพ์แล้ว"
   ).length;
+  console.log("filteredTickets", filteredTickets);
 
   const countSeatsPerTable = (tickets: any[]) => {
     const tableCount: { [key: string]: number } = {};
@@ -248,6 +269,7 @@ const AllSeatContent: React.FC = () => {
     setModalOpen(false);
     setSelectedTicket(null);
   };
+
   return (
     <div className="all-seats-content">
       <Header title="ที่นั่งทั้งหมด" />
@@ -292,7 +314,7 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>แสกนแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {/* {scannedCount} */}
+                    {scannedCount}
                   </Typography>
                 </Box>
               </Box>
@@ -334,7 +356,7 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>ปริ้นแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {/* {printedCount} */}
+                    {printedCount}
                   </Typography>
                 </Box>
               </Box>
@@ -350,6 +372,22 @@ const AllSeatContent: React.FC = () => {
       >
         <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
           <Stack direction="row" spacing={2}>
+            <FormControl variant="outlined" style={{ minWidth: 150 }}>
+              <InputLabel>ชื่องาน</InputLabel>
+              <Select
+                label="ชื่องาน"
+                name="eventName"
+                value={filters.eventName}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="">ทั้งหมด</MenuItem>
+                {evntDetail.map((item, index) => (
+                  <MenuItem key={index + 1} value={item.Event_Name}>
+                    {item.Event_Name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <TextField
               variant="outlined"
               label="ค้นหา"
@@ -424,7 +462,7 @@ const AllSeatContent: React.FC = () => {
                 },
               }}
             >
-              ล้างค่าการค้นหา
+              ค้นหา
             </Button>
           </Stack>
         </Container>

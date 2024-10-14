@@ -18,11 +18,19 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
   totalSeats,
   zoneId,
   selectedTicketType,
+  letter,
   // mode,
   // dataEdit,
 }) => {
-  const { setStartNumberAndPrefix, setTableValues, zones, setStartNumber, startNumber } =
-    useZoneStore();
+  // console.log("hi", method, totalSeats, zoneId, selectedTicketType);
+  console.log("letter", letter);
+  const {
+    setStartNumberAndPrefix,
+    setTableValues,
+    zones,
+    setStartNumber,
+    startNumber,
+  } = useZoneStore();
 
   const { prefix, setPrefix, renderBoxes } = useGenerateBoxes({
     method,
@@ -38,7 +46,19 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
     console.log("Props:", { method, totalSeats, zoneId, selectedTicketType });
     console.log("Store values:", { startNumber, zones });
     console.log("Generated values:", { prefix });
-  }, [method, totalSeats, zoneId, selectedTicketType, startNumber, zones, prefix]);
+  }, [
+    method,
+    totalSeats,
+    zoneId,
+    selectedTicketType,
+    startNumber,
+    zones,
+    prefix,
+  ]);
+
+  useEffect(() => {
+    setPrefix(letter);
+  }, [letter]);
 
   return method === "5" ? null : (
     <Box>

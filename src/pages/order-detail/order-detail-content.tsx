@@ -114,7 +114,7 @@ const OrderDetailContent: React.FC = () => {
 
       for (let ticket of latestTickets) {
         const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
-        if (ticket.ticket_no === "บัตรเสริม") {
+        if (ticket.Ticket_Type_Cal === "N") {
           contentHtml += `
           <div class="ticket-container">
             <img src="${dataUrl}"/>
@@ -122,7 +122,7 @@ const OrderDetailContent: React.FC = () => {
           <p class="details">${ticket.Event_Name}</p>
           <p class="details">
           (เบอร์โต๊ะ: ${ticket.ticket_no})
-          - ที่นั่ง ${ticket.ticket_line}/${ticket.ticket_line}
+          - ที่นั่ง ${ticket.ticket_line}/${ticket.Total_stc}
           </p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Date
@@ -152,7 +152,7 @@ const OrderDetailContent: React.FC = () => {
               "th-TH",
               { year: "numeric", month: "long", day: "numeric" }
             )} - ที่นั่ง ${ticket.ticket_line}/${
-            response.ticketList.length
+              ticket.Total_stc
           } (เบอร์โต๊ะ: ${ticket.ticket_no})</p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Time

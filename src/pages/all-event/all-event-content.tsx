@@ -74,7 +74,7 @@ const AllEventContent: React.FC = () => {
   const totalPages = Math.ceil((events?.length ?? 0) / MAX_ITEMS_PER_PAGE);
 
   function handleCopyEventLink(eventId: number) {
-    const eventLink = `${import.meta.env.VITE_CUSTOMER_URL}/event/${eventId}`;
+    const eventLink = `https://deedclub.appsystemyou.com/event/${eventId}`;
     navigator.clipboard.writeText(eventLink);
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
@@ -127,15 +127,15 @@ const AllEventContent: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      sortBy: "publish-date",
-      publishStatus: "all",
-      status: "all",
-      search: "",
-      startDate: null,
-      endDate: null,
-      dateFilterType: "publish-date",
-    });
+    setFilters((prevFilters) => ({
+      sortBy: prevFilters.sortBy !== "publish-date" ? prevFilters.sortBy : "publish-date",
+      publishStatus: prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
+      status: prevFilters.status !== "all" ? prevFilters.status : "all",
+      search: prevFilters.search !== "" ? prevFilters.search : "",
+      startDate: prevFilters.startDate !== null ? prevFilters.startDate : null,
+      endDate: prevFilters.endDate !== null ? prevFilters.endDate : null,
+      dateFilterType: prevFilters.dateFilterType !== "publish-date" ? prevFilters.dateFilterType : "publish-date",
+    }));
   };
 
   const filteredEvents = events
@@ -537,7 +537,7 @@ const AllEventContent: React.FC = () => {
                     flexShrink: 0, // Prevent the button from shrinking
                   }}
                 >
-                  ล้างค่าการค้นหา
+                  ค้นหา
                 </Button>
               </Box>
             </Box>

@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { SwalError } from "../lib/sweetalert";
 import { Box, TextField } from "@mui/material";
-import { useZoneStore } from "../pages/create-event/form-store"; 
+import { useZoneStore } from "../pages/create-event/form-store";
 
 export function useGenerateBoxes(options: {
   method: string;
@@ -25,15 +25,16 @@ export function useGenerateBoxes(options: {
     zones,
     selectedTicketType,
   } = options;
-
-  const { inputValues, setInputValueStore, startNumber, setStartNumber } = useZoneStore();
+  console.log("options", options);
+  const { inputValues, setInputValueStore, startNumber, setStartNumber } =
+    useZoneStore();
 
   const [prefix, setPrefix] = useState<string>(zones[zoneId]?.prefix || "");
 
   useEffect(() => {
     const savedStartNumber = zones[zoneId]?.startNumber;
     const savedPrefix = zones[zoneId]?.prefix;
-
+    console.log("zones", zones);
     if (savedStartNumber !== undefined) setStartNumber(savedStartNumber);
     if (savedPrefix !== undefined) setPrefix(savedPrefix);
 
@@ -69,25 +70,37 @@ export function useGenerateBoxes(options: {
 
   const generateBoxesData = () => {
     let boxesData: string[] = [];
+    console.log(" generateBoxesData method", method);
+    console.log(" generateBoxesData prefix", prefix);
+    console.log("generateBoxesData startNumber", startNumber);
+
     if (method === "1") {
-      boxesData = Array.from({ length: totalSeats }, (_, i) => inputValues[i]?.trimEnd() || "");
+
+      boxesData = Array.from(
+        { length: totalSeats },
+        (_, i) => inputValues[i]?.trimEnd() || ""
+      );
     } else if (["2", "3", "4"].includes(method) && startNumber !== null) {
+
       for (let i = 0; i < totalSeats; i++) {
         const boxValue =
-          method === "3" ? `${selectedTicketType} ${startNumber + i}` :
-          method === "4" ? `${prefix}${startNumber + i}` :
-          `${startNumber + i}`;
+          method === "3"
+            ? `${selectedTicketType} ${startNumber + i}`
+            : method === "4"
+            ? `${prefix}${startNumber + i}`
+            : `${startNumber + i}`;
         boxesData.push(boxValue);
       }
     } else if (method === "5") {
       boxesData = Array.from({ length: totalSeats }, () => "");
     }
+    console.log("boxesData", boxesData);
     return boxesData;
   };
 
   const renderBoxes = () => {
     return generateBoxesData().map((value, index) => {
-      console.log('generateBoxesData value =>', value); 
+      // console.log('generateBoxesData value =>', value);
       return (
         <Box
           key={index}
@@ -112,8 +125,9 @@ export function useGenerateBoxes(options: {
             type="text"
             value={value}
             onBlur={() => {
-              const doesValueDuplicate = inputValues.filter(v => v === value && Boolean(v)).length > 1;
-    
+              const doesValueDuplicate =
+                inputValues.filter((v) => v === value && Boolean(v)).length > 1;
+
               if (doesValueDuplicate) {
                 SwalError("มีเลขซ้ำกันในโต๊ะ");
                 handleInputChange(index, "");
