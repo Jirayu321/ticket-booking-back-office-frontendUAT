@@ -101,7 +101,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
               fontWeight: "bold",
             }}
           >
-            คัดลอกลิงก์ตวจสอบตั๋วงาน
+            คัดลอกลิงก์ตรวจสอบตั๋วงาน
           </p>
           <svg
             xmlns="http://www.w3.org/2000/svg"
