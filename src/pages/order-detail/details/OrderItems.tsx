@@ -61,9 +61,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
     fetchTicketList();
   }, [order_id]);
 
-  if (groupedTickets.length === 0) {
-    return <p>No order details available</p>;
-  }
+  // if (groupedTickets.length === 0) {
+  //   return <p>No order details available</p>;
+  // }
 
   const totalPrice = groupedTickets.reduce(
     (total, ticket) => total + ticket.Plan_Price,

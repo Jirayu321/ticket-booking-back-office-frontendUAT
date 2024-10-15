@@ -279,7 +279,6 @@ const OrderDetailContent: React.FC = () => {
   return (
     <div>
       <Header title="รายละเอียดคำสั่งซื้อ" />
-
       <div
         style={{
           backgroundColor: "#000",
@@ -314,7 +313,7 @@ const OrderDetailContent: React.FC = () => {
               margin: 0,
               display: "flex",
               alignItems: "center",
-              marginLeft:10
+              marginLeft: 10,
             }}
           >
             {orderDetail?.Order_no}
@@ -357,14 +356,7 @@ const OrderDetailContent: React.FC = () => {
           {isOrderPaid ? "Print QR" : "ชำระส่วนที่เหลือ"}
         </Button>
       </div>
-
-      {/* <Container sx={{ my: 4, mx: 2 }}> */}
-        {/* <Box style={{ width: "100%" }}>
-          <Tabs value={tabIndex} onChange={handleTabChange} centered>
-            <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "50%" }} />
-            <Tab label="ประวัติการชำระ" sx={{ width: "50%" }} />
-          </Tabs>
-        </Box> */}
+      <div style={{ maxHeight: "600px", overflowY: "auto" }}>
         <Paper
           sx={{
             padding: "20px",
@@ -374,15 +366,15 @@ const OrderDetailContent: React.FC = () => {
             width: "max-content",
           }}
         >
-          <>
+          <div>
             {orderDetail ? <BuyerInfo buyer={orderDetail} /> : null}
             <OrderItems order_id={order_id} />
             <div style={{ maxWidth: "800px", overflowX: "auto" }}>
               <PaymentHistory dtOrderId={order_id} />
             </div>
-          </>
+          </div>
         </Paper>
-      {/* </Container> */}
+      </div>
     </div>
   );
 };
