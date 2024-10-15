@@ -161,8 +161,10 @@ const AllSeatContent: React.FC = () => {
 
       const matchesScanStatus =
         filters.scanStatus === "all" ||
-        (filters.scanStatus === "แสกนแล้ว" && current.check_in_status === 1) ||
-        (filters.scanStatus === "ยังไม่แสกน" && current.check_in_status === 0);
+        (filters.scanStatus === "เช็คอินแล้ว" &&
+          current.check_in_status === 1) ||
+        (filters.scanStatus === "ยังไม่เช็คอิน" &&
+          current.check_in_status === 0);
 
       const matchesTicketReserve =
         filters.ticket_Reserve === "all" ||
@@ -228,12 +230,15 @@ const AllSeatContent: React.FC = () => {
 
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
+  const totalCount = filteredTickets?.length;
   const scannedCount = filteredTickets.filter(
     (ticket) => ticket.check_in_status === 1
   ).length;
+
   const printedCount = filteredTickets.filter(
     (ticket) => ticket.PrintStatus_Name === "พิมพ์แล้ว"
   ).length;
+
   console.log("filteredTickets", filteredTickets);
 
   const countSeatsPerTable = (tickets: any[]) => {
@@ -329,9 +334,10 @@ const AllSeatContent: React.FC = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography sx={{ fontSize: "23px" }}>แสกนแล้ว</Typography>
+                  <Typography sx={{ fontSize: "23px" }}>เช็คอินแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {scannedCount}
+                  {filters.eventName !== "" ? `${scannedCount} / ${totalCount} `:``}
+                    
                   </Typography>
                 </Box>
               </Box>
@@ -371,9 +377,10 @@ const AllSeatContent: React.FC = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography sx={{ fontSize: "23px" }}>ปริ้นแล้ว</Typography>
+                  <Typography sx={{ fontSize: "23px" }}>พิมพ์แล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {printedCount}
+                    {filters.eventName !== "" ? `${printedCount} / ${totalCount} `:``}
+                    
                   </Typography>
                 </Box>
               </Box>
@@ -448,8 +455,8 @@ const AllSeatContent: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <MenuItem value="all">ทั้งหมด</MenuItem>
-                <MenuItem value="ยังไม่ปริ้น">ยังไม่ปริ้น</MenuItem>
-                <MenuItem value="ปริ้นแล้ว">ปริ้นแล้ว</MenuItem>
+                <MenuItem value="ยังไม่ปริ้น">ยังไม่พิมพ์</MenuItem>
+                <MenuItem value="ปริ้นแล้ว">พิมพ์แล้ว</MenuItem>
               </Select>
             </FormControl>
             <FormControl variant="outlined" style={{ minWidth: 150 }}>
@@ -461,8 +468,8 @@ const AllSeatContent: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <MenuItem value="all">ทั้งหมด</MenuItem>
-                <MenuItem value="แสกนแล้ว">แสกนแล้ว</MenuItem>
-                <MenuItem value="ยังไม่แสกน">ยังไม่แสกน</MenuItem>
+                <MenuItem value="เช็คอินแล้ว">เช็คอินแล้ว</MenuItem>
+                <MenuItem value="ยังไม่เช็คอิน">ยังไม่เช็คอิน</MenuItem>
               </Select>
             </FormControl>
             <Button

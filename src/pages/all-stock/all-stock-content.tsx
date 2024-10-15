@@ -433,6 +433,7 @@ const AllStockContent: React.FC = () => {
                     border: "none", // Remove the inner border
                     transform: "translateY(5px)",
                     height: 30,
+                    width: 200,
                   },
                 },
               }}
