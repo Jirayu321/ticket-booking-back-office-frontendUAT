@@ -423,7 +423,7 @@ const AllStockContent: React.FC = () => {
               value={filters.search}
               onChange={handleSearchChange}
               placeholder="ค้นหาโดย ชื่องาน หรือ ชื่อโซน"
-              style={{ marginRight: "10px", height: "50px", width: "300px" }}
+              style={{ marginRight: "10px", width: "300px" }}
               InputLabelProps={{
                 shrink: true,
               }}
@@ -432,6 +432,7 @@ const AllStockContent: React.FC = () => {
                   "& input": {
                     border: "none", // Remove the inner border
                     transform: "translateY(5px)",
+                    height: 30,
                   },
                 },
               }}

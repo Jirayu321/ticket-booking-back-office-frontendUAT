@@ -411,7 +411,7 @@ const AllSeatContent: React.FC = () => {
               value={filters.search}
               onChange={handleSearchChange}
               placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
-              style={{ marginRight: "10px", height: "55px", width: "450px" }}
+              style={{ marginRight: "10px", width: "450px" }}
               InputLabelProps={{
                 shrink: true,
               }}
@@ -420,6 +420,7 @@ const AllSeatContent: React.FC = () => {
                   "& input": {
                     border: "none",
                     transform: "translateY(5px)",
+                    height: 30,
                   },
                 },
               }}
