@@ -227,7 +227,10 @@ const AllStockContent: React.FC = () => {
   };
 
   return (
-    <div className="all-orders-content">
+    <div
+      className="all-orders-content"
+      style={{ display: "grid", height: "100%" }}
+    >
       <Header title="สต๊อกทั้งหมด" />
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
@@ -505,7 +508,11 @@ const AllStockContent: React.FC = () => {
           </Stack>
         </Container>
       </div>
-      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
+
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: "0", maxHeight: "100vh", overflowY: "auto" }}
+      >
         <Table>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
@@ -621,6 +628,7 @@ const AllStockContent: React.FC = () => {
               </TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {stocksInCurrentPage.map((stock, index) => {
               const { label, backgroundColor } = getStatusDetails(

@@ -284,7 +284,7 @@ const OrderDetailContent: React.FC = () => {
           backgroundColor: "#000",
           width: "100%",
           // maxWidth: "1690px", // Fixed maximum width for the black header
-          height: "100px",
+          height: "65px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -307,13 +307,14 @@ const OrderDetailContent: React.FC = () => {
               style={{ width: "58px", height: "58px" }}
             />
           </button> */}
-          <h2
+          <p
             style={{
               color: "white",
               margin: 0,
               display: "flex",
               alignItems: "center",
               marginLeft: 10,
+              fontSize:18
             }}
           >
             {orderDetail?.Order_no}
@@ -328,7 +329,7 @@ const OrderDetailContent: React.FC = () => {
             >
               {statusLabel}
             </div>
-          </h2>
+          </p>
         </div>
         <Button
           onClick={() => {
@@ -356,7 +357,7 @@ const OrderDetailContent: React.FC = () => {
           {isOrderPaid ? "Print QR" : "ชำระส่วนที่เหลือ"}
         </Button>
       </div>
-      <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+      <div >
         <Paper
           sx={{
             padding: "20px",

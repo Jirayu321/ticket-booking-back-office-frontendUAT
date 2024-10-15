@@ -128,13 +128,20 @@ const AllEventContent: React.FC = () => {
 
   const handleClearFilters = () => {
     setFilters((prevFilters) => ({
-      sortBy: prevFilters.sortBy !== "publish-date" ? prevFilters.sortBy : "publish-date",
-      publishStatus: prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
+      sortBy:
+        prevFilters.sortBy !== "publish-date"
+          ? prevFilters.sortBy
+          : "publish-date",
+      publishStatus:
+        prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
       status: prevFilters.status !== "all" ? prevFilters.status : "all",
       search: prevFilters.search !== "" ? prevFilters.search : "",
       startDate: prevFilters.startDate !== null ? prevFilters.startDate : null,
       endDate: prevFilters.endDate !== null ? prevFilters.endDate : null,
-      dateFilterType: prevFilters.dateFilterType !== "publish-date" ? prevFilters.dateFilterType : "publish-date",
+      dateFilterType:
+        prevFilters.dateFilterType !== "publish-date"
+          ? prevFilters.dateFilterType
+          : "publish-date",
     }));
   };
 
@@ -185,7 +192,10 @@ const AllEventContent: React.FC = () => {
   if (isLoadingEventList) return <CircularProgress />;
 
   return (
-    <div className="all-events-content">
+    <div
+      className="all-events-content"
+      style={{ display: "grid", height: "100%" }}
+    >
       <Header title="งานทั้งหมด" />
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
@@ -355,7 +365,7 @@ const AllEventContent: React.FC = () => {
                 src="/ยกเลิก.svg"
                 alt="ยกเลิก icon"
                 className="filter-icon"
-                sx={{ width: 70, height: 70 }} 
+                sx={{ width: 70, height: 70 }}
               />
               <Box
                 sx={{
@@ -563,7 +573,10 @@ const AllEventContent: React.FC = () => {
         </Container>
       </div>
       {/* Table Component */}
-      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: "0", maxHeight: "68vh", overflowY: "auto" }}
+      >
         <Table>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
@@ -681,7 +694,7 @@ const AllEventContent: React.FC = () => {
                   >
                     {indexOfFirstItem + index + 1}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", color: "black"  }}>
+                  <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {Event_Name}
                   </TableCell>
                   <TableCell sx={{ textAlign: "left", color: "black" }}>

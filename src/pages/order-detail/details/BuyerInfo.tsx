@@ -49,7 +49,7 @@ const BuyerInfo: React.FC<{ buyer: any }> = ({ buyer }) => {
         </Typography>
         <Typography variant="body1">
           <strong>LINE ID:</strong>{" "}
-          {buyer.Line_id ? `${buyer.Line_id}` : ``}
+          {buyer.Line_id ? `${buyer.Line_id}` : `8888888888`}
         </Typography>
       </Box>
     </Stack>

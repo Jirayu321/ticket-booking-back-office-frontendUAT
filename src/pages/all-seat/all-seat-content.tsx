@@ -293,7 +293,10 @@ const AllSeatContent: React.FC = () => {
   };
 
   return (
-    <div className="all-seats-content">
+    <div
+      className="all-seats-content"
+      style={{ display: "grid", height: "100%" }}
+    >
       <Header title="ที่นั่งทั้งหมด" />
 
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
@@ -301,7 +304,6 @@ const AllSeatContent: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
-                display: "flex",
                 alignItems: "center",
                 gap: 2,
                 backgroundColor: "rgba(207, 183, 11, 0.1)",
@@ -315,16 +317,18 @@ const AllSeatContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "center",
+                display: "grid",
+                gridTemplateColumns: "auto auto",
               }}
             >
-              <LocalPrintshopIcon
-                style={{ color: "black", fontSize: "70px" }}
-              />
+              <QrCodeScannerIcon style={{ color: "black", fontSize: "70px" }} />
+
               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
+                  // paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -336,17 +340,18 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>เช็คอินแล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                  {filters.eventName !== "" ? `${scannedCount} / ${totalCount} `:``}
-                    
+                    {filters.eventName !== ""
+                      ? `${scannedCount} / ${totalCount} `
+                      : ``}
                   </Typography>
                 </Box>
               </Box>
             </Box>
           </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
-                display: "flex",
                 alignItems: "center",
                 gap: 2,
                 backgroundColor: "rgba(207, 183, 11, 0.1)",
@@ -360,14 +365,19 @@ const AllSeatContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "center",
+                display: "grid",
+                gridTemplateColumns: "auto auto",
               }}
             >
-              <QrCodeScannerIcon style={{ color: "black", fontSize: "70px" }} />
+              <LocalPrintshopIcon
+                style={{ color: "black", fontSize: "70px" }}
+              />
               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
+                  // paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -379,8 +389,9 @@ const AllSeatContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>พิมพ์แล้ว</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {filters.eventName !== "" ? `${printedCount} / ${totalCount} `:``}
-                    
+                    {filters.eventName !== ""
+                      ? `${printedCount} / ${totalCount} `
+                      : ``}
                   </Typography>
                 </Box>
               </Box>
@@ -493,7 +504,10 @@ const AllSeatContent: React.FC = () => {
         </Container>
       </div>
 
-      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: "0", maxHeight: "72vh" }}
+      >
         <Table>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>

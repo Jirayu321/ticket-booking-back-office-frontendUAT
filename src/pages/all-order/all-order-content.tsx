@@ -36,15 +36,20 @@ import { getAllEventList } from "../../services/event-list.service";
 
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import buddhistEra from "dayjs/plugin/buddhistEra";
-import { DatePicker } from "@mui/x-date-pickers";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-dayjs.extend(buddhistEra);
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import moment from "moment";
+import { format } from "date-fns";
+import { th } from "date-fns/locale";
+import "moment/locale/th";
+
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const MAX_ITEMS_PER_PAGE = 50;
 
 const AllOrderContent: React.FC = () => {
+  moment.locale("th");
   const [currentPage, setCurrentPage] = useState(1);
   const [orderHData, setOrderHData] = useState<any[]>([]);
   const [orderDData, setOrderDData] = useState<any[]>([]);
@@ -54,8 +59,8 @@ const AllOrderContent: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [startDate, setStartDate] = useState(dayjs().startOf("month"));
-  const [endDate, setEndDate] = useState(dayjs().endOf("month"));
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [filters, setFilters] = useState({
     orderNo: "",
     eventName: "",
@@ -85,11 +90,13 @@ const AllOrderContent: React.FC = () => {
     });
   };
 
-  const handleDateRangeChange = (start: any, end: any) => {
-    setStartDate(start);
-    setEndDate(end);
+  const handleDateRangeChange = (dates) => {
+    const [start, end] = dates;
+    setStartDate(start ?? undefined); // ตรวจสอบว่าค่าเป็น null หรือ undefined
+    setEndDate(end ?? undefined);
   };
 
+  console.log("handleDateRangeChange", startDate, endDate);
   // const handleClearDates = () => {
   //   setStartDate(null);
   //   setEndDate(null);
@@ -140,7 +147,21 @@ const AllOrderContent: React.FC = () => {
           .toLowerCase()
           .includes(filters.customerPhone.toLowerCase());
 
-      return matchesSearch;
+      const mstchesStatusOrder =
+        (filters.status === "สำเร็จ" && order.Order_Status === 1) ||
+        (filters.status === "มีแก้ไข" && order.Order_Status === 2) ||
+        (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
+        (filters.status === "ไม่สำเร็จเพราะติด R" &&
+          order.Order_Status === 3) ||
+        (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 4) ||
+        filters.status === "all";
+
+      const mstchesStatusPayment =
+        (filters.paymentStatus === "สำเร็จ" && order.Total_Balance === 0) ||
+        (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
+        filters.paymentStatus === "all";
+
+      return matchesSearch && mstchesStatusOrder && mstchesStatusPayment;
     })
     .reduce((acc, current) => {
       const existingOrder = acc.find(
@@ -148,18 +169,15 @@ const AllOrderContent: React.FC = () => {
       );
 
       if (existingOrder) {
-        // Compare Payment_Date7, keep the latest one
         const existingPaymentDate = new Date(existingOrder.Payment_Date7);
         const currentPaymentDate = new Date(current.Payment_Date7);
 
         if (currentPaymentDate > existingPaymentDate) {
-          // Replace with the latest order if the current one is newer
           return acc.map((order) =>
             order.Order_id === current.Order_id ? current : order
           );
         }
       } else {
-        // If no order with the same Order_id exists, add the current order
         acc.push(current);
       }
 
@@ -189,14 +207,13 @@ const AllOrderContent: React.FC = () => {
 
     const latestOrders = Object.values(
       orderHData
-        .filter((order) => order.Order_no === orderNo) // กรองข้อมูลตาม Order_no
+        .filter((order) => order.Order_no === orderNo)
         .reduce((acc, current) => {
-          const key = current.Event_Stc_id; // ใช้ Event_Stc_id เป็นคีย์ในการจัดกลุ่ม
+          const key = current.Event_Stc_id;
 
           if (!acc[key]) {
-            acc[key] = current; // ถ้าไม่มีใน acc ให้เพิ่มเข้าไป
+            acc[key] = current;
           } else {
-            // เปรียบเทียบวันที่ ถ้าข้อมูลปัจจุบันใหม่กว่าให้แทนที่
             const existingPaymentDate = new Date(acc[key].Payment_Date7);
             const currentPaymentDate = new Date(current.Payment_Date7);
             if (currentPaymentDate > existingPaymentDate) {
@@ -334,14 +351,13 @@ const AllOrderContent: React.FC = () => {
 
   const dataP = Object.values(
     orderHData
-      .filter((order) => order.Event_Id === filteredOrders[0].Event_Id) // กรองข้อมูลตาม Order_no
+      .filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
       .reduce((acc, current) => {
         const key = current.DT_order_id;
 
         if (!acc[key]) {
-          acc[key] = current; // ถ้าไม่มีใน acc ให้เพิ่มเข้าไป
+          acc[key] = current;
         } else {
-          // เปรียบเทียบวันที่ ถ้าข้อมูลปัจจุบันใหม่กว่าให้แทนที่
           const existingPaymentDate = new Date(acc[key].Payment_Date7);
           const currentPaymentDate = new Date(current.Payment_Date7);
           if (currentPaymentDate > existingPaymentDate) {
@@ -369,11 +385,11 @@ const AllOrderContent: React.FC = () => {
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment;
 
   console.log("totalNetPrice", totalNetPrice);
+
   const handleClearFilters = () => {
     setStartDate((prevStartDate) =>
       prevStartDate !== null ? prevStartDate : null
     );
-    setEndDate((prevEndDate) => (prevEndDate !== null ? prevEndDate : null));
 
     setFilters((prevFilters) => ({
       orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
@@ -409,8 +425,89 @@ const AllOrderContent: React.FC = () => {
     setModalOpen(false);
   };
 
+  const CustomInput = React.forwardRef(({ value, onClick }, ref) => {
+    const formatBuddhistYear = (dateString) => {
+      console.log("Input dateString:", dateString);
+
+      // แยกวันที่ช่วงวันที่ออกจากกัน (ถ้ามี)
+      const [startDateStr, endDateStr] = dateString.split(" - ");
+
+      // ตรวจสอบว่ามีค่า startDateStr หรือไม่
+      if (!startDateStr) {
+        return "Invalid date";
+      }
+
+      // แปลง startDateStr เป็น moment object
+      const parsedStartDate = moment(
+        startDateStr,
+        ["YYYY-MM-DD", "DD/MM/YYYY"],
+        true
+      );
+      if (!parsedStartDate.isValid()) {
+        console.error("Invalid start date format detected for:", startDateStr);
+        return "Invalid date"; // แสดง error ถ้า startDateStr ไม่สามารถแปลงได้
+      }
+
+      // แปลง endDateStr เป็น moment object ถ้ามีค่า
+      let parsedEndDate = null;
+      if (endDateStr) {
+        parsedEndDate = moment(endDateStr, ["YYYY-MM-DD", "DD/MM/YYYY"], true);
+        if (!parsedEndDate.isValid()) {
+          console.error("Invalid end date format detected for:", endDateStr);
+          return ""; // แสดง error ถ้า endDateStr ไม่สามารถแปลงได้
+        }
+      }
+
+      console.log("Parsed startDate using moment:", parsedStartDate);
+      if (parsedEndDate) {
+        console.log("Parsed endDate using moment:", parsedEndDate);
+      }
+
+      const formattedStartDate = parsedStartDate
+        .format("DD/MM/YYYY")
+        .replace(/\d{4}/, (year) => (parseInt(year) + 543).toString());
+
+      let formattedEndDate = null;
+      if (parsedEndDate) {
+        formattedEndDate = parsedEndDate
+          .format("DD/MM/YYYY")
+          .replace(/\d{4}/, (year) => (parseInt(year) + 543).toString());
+      }
+
+      if (formattedEndDate) {
+        return `${formattedStartDate} - ${formattedEndDate}`;
+      }
+
+      return formattedStartDate;
+    };
+
+    return (
+      <input
+        style={{
+          padding: "10px",
+          borderRadius: "4px",
+          border: "none",
+          fontSize: "16px",
+          width: "200px",
+          height: "30px",
+          textAlign: "start",
+          outline: "none",
+        }}
+        onClick={onClick}
+        ref={ref}
+        value={value ? formatBuddhistYear(value) : ""}
+        readOnly
+      />
+    );
+  });
+
+  // const formattedDate = format(new Date(), "MMMM", { locale: th });
+
   return (
-    <div className="all-orders-content">
+    <div
+      className="all-orders-content"
+      style={{ display: "grid", height: "100%" }}
+    >
       <Header title="คำสั่งซื้อทั้งหมด" />
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
@@ -463,55 +560,7 @@ const AllOrderContent: React.FC = () => {
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                backgroundColor: "rgba(207, 183, 11, 0.1)",
-                color: "black",
-                padding: "15px",
-                borderRadius: "4px",
-                borderColor: "#CFB70B",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                cursor: "pointer",
-                fontSize: "18px",
-                boxSizing: "border-box",
-                width: "100%",
-              }}
-            >
-              <Avatar
-                src="/not-pay.svg"
-                alt="ค้างชำระ"
-                className="filter-icon"
-                sx={{ width: 70, height: 70 }}
-              />
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  paddingLeft: "60px",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
-                  {filters.eventName !== "" ? (
-                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {formatNumberWithCommas(OutstandingPayment)}
-                    </Typography>
-                  ) : null}
-                </Box>
-              </Box>
-            </Box>
-          </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
@@ -562,6 +611,56 @@ const AllOrderContent: React.FC = () => {
               </Box>
             </Box>
           </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <Avatar
+                src="/not-pay.svg"
+                alt="ค้างชำระ"
+                className="filter-icon"
+                sx={{ width: 70, height: 70 }}
+              />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
+                  {filters.eventName !== "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {formatNumberWithCommas(OutstandingPayment)}
+                    </Typography>
+                  ) : null}
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
         </Grid>
       </Container>
 
@@ -603,8 +702,8 @@ const AllOrderContent: React.FC = () => {
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ backgroundColor: "white" }}>
-                <DatePicker
+              {/* <FormControl sx={{ backgroundColor: "white" }}> */}
+              {/* <DatePicker
                   label="วันที่เริ่มต้น"
                   value={startDate}
                   onChange={(date) => handleDateRangeChange(date, endDate)}
@@ -620,10 +719,98 @@ const AllOrderContent: React.FC = () => {
                       },
                     },
                   }}
-                />
-              </FormControl>
-              <FormControl sx={{ backgroundColor: "white" }}>
+                /> */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  border: "1px solid #bebebf",
+                  borderRadius: "5px",
+                  backgroundColor: "#fff",
+                  position: "relative",
+                  minWidth: "0",
+                  padding: "0",
+                  margin: "0",
+                }}
+              >
+                <label
+                  htmlFor="custom-datepicker"
+                  style={{
+                    fontSize: "1rem",
+                    marginBottom: "0px",
+                    fontWeight: 400,
+                    color: "rgba(0, 0, 0, 0.6)",
+                    fontFamily: '"Noto Sans Thai", sans-serif',
+                    lineHeight: "1.4375em",
+                    padding: 0,
+                    position: "absolute",
+                    display: "block",
+                    transformOrigin: "top left",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    left: "0px",
+                    top: "0px",
+                    transform: "translate(14px, -9px) scale(0.75)",
+                    background: "#f6f7f7",
+                    width: "fit-content",
+                    zIndex: 1,
+                  }}
+                >
+                  ช่วงระยะเวลา
+                </label>
+
                 <DatePicker
+                  id="custom-datepicker"
+                  selected={startDate}
+                  onChange={handleDateRangeChange}
+                  startDate={startDate}
+                  endDate={endDate}
+                  dateFormat="dd/MM/yyyy"
+                  locale={th}
+                  // isClearable={true}
+                  selectsRange
+                  customInput={<CustomInput />}
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                    prevMonthButtonDisabled,
+                    nextMonthButtonDisabled,
+                  }) => (
+                    <div
+                      style={{
+                        margin: 10,
+                        display: "flex",
+                        justifyContent: "space-around",
+                      }}
+                    >
+                      <button
+                        onClick={decreaseMonth}
+                        disabled={prevMonthButtonDisabled}
+                        style={{ fontSize: 18 }}
+                      >
+                        {"<"}
+                      </button>
+                      <span style={{ fontSize: 16 }}>
+                        {format(date, "MMMM", { locale: th })}{" "}
+                        {moment(date).year() + 543}
+                      </span>
+                      <button
+                        onClick={increaseMonth}
+                        disabled={nextMonthButtonDisabled}
+                        style={{ fontSize: 18 }}
+                      >
+                        {">"}
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
+
+              {/* </FormControl> */}
+              <FormControl sx={{ backgroundColor: "white" }}>
+                {/* <DatePicker
                   label="วันที่สิ้นสุด"
                   value={endDate}
                   onChange={(date) => handleDateRangeChange(startDate, date)}
@@ -639,7 +826,7 @@ const AllOrderContent: React.FC = () => {
                       },
                     },
                   }}
-                />
+                /> */}
               </FormControl>
 
               <Box sx={{ display: "flex", gap: 2 }}>
@@ -786,6 +973,8 @@ const AllOrderContent: React.FC = () => {
           display: "grid",
           gridTemplateColumns: "40% auto",
           marginLeft: 10,
+          maxHeight: "70vh",
+          overflowY: "auto",
         }}
       >
         <div>
