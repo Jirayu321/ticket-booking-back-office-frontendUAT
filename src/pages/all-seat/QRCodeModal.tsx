@@ -10,6 +10,11 @@ import { getViewTicketList } from "../../services/view-tikcet-list.service";
 import { updateOrderbyticketid } from "../../services/order-all.service";
 import CloseIcon from "@mui/icons-material/Close";
 
+import dayjs from "dayjs";
+import buddhistEra from "dayjs/plugin/buddhistEra";
+
+dayjs.extend(buddhistEra);
+
 type QRCodeModalProps = {
   open: boolean;
   handleClose: () => void;
@@ -236,7 +241,8 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
           <CalendarTodayIcon
             style={{ verticalAlign: "middle", marginRight: "4px" }}
           />
-          {new Date(Event_Date).toLocaleDateString("en-GB")}
+          {new Date(Event_Date).toLocaleDateString("th-TH")}
+          
           <AccessTimeIcon
             style={{
               verticalAlign: "middle",
@@ -246,16 +252,17 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
           />
           {new Date(
             new Date(Event_Time).getTime() - 7 * 60 * 60 * 1000
-          ).toLocaleTimeString([], {
+          ).toLocaleTimeString("th-TH", {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
             hour12: false,
           })}
+          
         </Typography>
         <Typography variant="body2" align="center" style={{ color: "black" }}>
-          {Plan_Name} - ที่นั่ง {ticket_line}/{totalTicketsWithSameNo}{" "}
-          (เบอร์โต๊ะ {ticket_no})
+          {Plan_Name} -   เบอร์โต๊ะ {ticket_no} ({ticket_line}/{totalTicketsWithSameNo})
+         
         </Typography>
         <Button
           variant="contained"

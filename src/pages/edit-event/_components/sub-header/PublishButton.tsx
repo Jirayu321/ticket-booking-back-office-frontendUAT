@@ -59,19 +59,39 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
   }
 
   return (
-    <label style={{ display: "flex", alignItems: "center" }}>
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        cursor: "pointer",
+      }}
+    >
       <p style={{ marginRight: "10px", marginLeft: "-90px" }}>
         {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
       </p>
       <input
-        style={{ marginRight: "10px" }}
+        style={{ display: "none" }}
         type="checkbox"
         checked={event.Event_Public === "Y"}
         onChange={() => {
           handlePublish();
         }}
       />
-      <span className="slider" />
+      <span
+        className="slider"
+        style={{
+          width: "50px",
+          height: "26px",
+          backgroundColor: event.Event_Public === "Y" ? "#4caf50" : "#ccc", // สีพื้นหลังของ toggle
+          borderRadius: "34px", // ทำให้เป็นมุมโค้งกลมๆ
+          position: "relative",
+          transition: "0.4s",
+          display: "inline-block",
+        }}
+        onClick={() => {
+          handlePublish();
+        }}
+      ></span>
     </label>
   );
 };

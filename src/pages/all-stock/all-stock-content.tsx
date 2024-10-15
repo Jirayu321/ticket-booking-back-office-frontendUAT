@@ -20,6 +20,7 @@ import {
   Box,
   Avatar,
   Typography,
+  Button,
 } from "@mui/material";
 import { getEventStock } from "../../services/event-stock.service"; // Import the correct service
 import toast from "react-hot-toast";
@@ -72,47 +73,58 @@ const AllStockContent: React.FC = () => {
   const [totalTicketsBalance, setTotalTicketsBalance] = useState<number>(0);
   const [evntDetail, setEvntDetail] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function fetchEventStockData() {
-      try {
-        const data = await getEventStock();
-        const evntDetailAll = await getAllEventList();
-        console.log("evntDetailAll:", evntDetailAll);
+  async function fetchEventStockData() {
+    try {
+      const data = await getEventStock();
+      const evntDetailAll = await getAllEventList();
+      console.log("data:", data);
 
-        setEvntDetail(
-          evntDetailAll?.events.filter(
-            (event: any) => event.Event_Public === "Y"
-          )
+      setEvntDetail(
+        evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
+      );
+      if (data && Array.isArray(data)) {
+        const dataWithEventName = data;
+
+        // จัดเรียงข้อมูลตาม Event_name และ Plan_Id
+        dataWithEventName.sort((a, b) => {
+          if (a.Event_Name < b.Event_Name) return -1;
+          if (a.Event_Name > b.Event_Name) return 1;
+          if (a.Plan_Id < b.Plan_Id) return -1;
+          if (a.Plan_Id > b.Plan_Id) return 1;
+          return 0;
+        });
+        setEventStockData(dataWithEventName);
+        const totalTicketsSum = data.reduce(
+          (sum, item) => sum + (item.Ticket_Qty || 0),
+          0
         );
-        if (data && Array.isArray(data)) {
-          setEventStockData(data);
-          const totalTicketsSum = data.reduce(
-            (sum, item) => sum + (item.Ticket_Qty || 0),
-            0
-          );
-          setTotalTickets(totalTicketsSum);
+        setTotalTickets(totalTicketsSum);
 
-          const totalTicketsBuySum = data.reduce(
-            (sum, item) => sum + (item.Ticket_Qty_Buy || 0),
-            0
-          );
-          setTotalTicketsBuy(totalTicketsBuySum);
+        const totalTicketsBuySum = data.reduce(
+          (sum, item) => sum + (item.Ticket_Qty_Buy || 0),
+          0
+        );
+        setTotalTicketsBuy(totalTicketsBuySum);
 
-          const totalTicketsBalanceSum = data.reduce(
-            (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
-            0
-          );
-          setTotalTicketsBalance(totalTicketsBalanceSum);
-        } else {
-          throw new Error("Unexpected data format");
-        }
-      } catch (error) {
-        toast.error("Failed to fetch event stock data");
-      } finally {
-        setIsLoading(false);
+        const totalTicketsBalanceSum = data.reduce(
+          (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
+          0
+        );
+        setTotalTicketsBalance(totalTicketsBalanceSum);
+      } else {
+        throw new Error("Unexpected data format");
       }
+      const savedFilters = localStorage.getItem("filtersStock");
+      if (savedFilters) {
+        setFilters(JSON.parse(savedFilters));
+      }
+    } catch (error) {
+      toast.error("Failed to fetch event stock data");
+    } finally {
+      setIsLoading(false);
     }
-
+  }
+  useEffect(() => {
     fetchEventStockData();
   }, []);
 
@@ -120,17 +132,30 @@ const AllStockContent: React.FC = () => {
     event: React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
     const { name, value } = event.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name as string]: value,
-    }));
+
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [name as string]: value,
+      };
+
+      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
+
+      return updatedFilters;
+    });
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({
-      ...prev,
-      search: event.target.value,
-    }));
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        search: event.target.value,
+      };
+
+      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
+
+      return updatedFilters;
+    });
   };
 
   const handleClick = (pageNumber: number) => {
@@ -166,6 +191,7 @@ const AllStockContent: React.FC = () => {
   });
 
   console.log("filteredStocks", filteredStocks);
+
   const TotalTickets = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty,
     0
@@ -187,7 +213,18 @@ const AllStockContent: React.FC = () => {
   const totalPages = Math.ceil(filteredStocks.length / MAX_ITEMS_PER_PAGE);
   const numberFormatter = new Intl.NumberFormat("en-US");
 
-  if (isLoading) return <CircularProgress />;
+  // if (isLoading) return <CircularProgress />;
+  const handleClearFilters = () => {
+    fetchEventStockData();
+    setFilters((prevFilters) => ({
+      search: prevFilters.search !== "" ? prevFilters.search : "",
+      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+      eventStatus:
+        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "",
+      publicStatus:
+        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "",
+    }));
+  };
 
   return (
     <div className="all-orders-content">
@@ -398,6 +435,7 @@ const AllStockContent: React.FC = () => {
                   },
                 },
               }}
+              style={{ height: 30 }}
             />
 
             <FormControl
@@ -435,6 +473,33 @@ const AllStockContent: React.FC = () => {
                 <MenuItem value="N">ไม่เผยแพร่</MenuItem>
               </Select>
             </FormControl>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleClearFilters}
+                sx={{
+                  backgroundColor: "#CFB70B",
+                  width: "160px",
+                  height: "45px",
+                  color: "black",
+                  fontSize: "15px",
+                  "&:hover": {
+                    backgroundColor: "#CFB70B",
+                  },
+                  flexShrink: 0,
+                }}
+              >
+                ค้นหา
+              </Button>
+            </Box>
           </Stack>
         </Container>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Button,
   // CircularProgress,
-  Pagination,
+  // Pagination,
   Paper,
   Table,
   TableBody,
@@ -65,10 +65,19 @@ const AllOrderContent: React.FC = () => {
     event: React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
     const { name, value } = event.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name as string]: value,
-    }));
+
+    // อัปเดต state filters
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [name as string]: value,
+      };
+
+      // เก็บค่า filters ใหม่ใน localStorage
+      localStorage.setItem("filters", JSON.stringify(updatedFilters));
+
+      return updatedFilters;
+    });
   };
 
   const handleDateRangeChange = (start: any, end: any) => {
@@ -82,10 +91,17 @@ const AllOrderContent: React.FC = () => {
   // };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.value,
-    }));
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [event.target.name]: event.target.value,
+      };
+
+      // เก็บค่า filters ใหม่ใน localStorage
+      localStorage.setItem("filters", JSON.stringify(updatedFilters));
+
+      return updatedFilters;
+    });
   };
 
   // const handleClick = (pageNumber: number) => {
@@ -95,22 +111,6 @@ const AllOrderContent: React.FC = () => {
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
-  // Combine orderD data with orderH data
-  // const combinedOrders = orderHData.map((order) => {
-  //   const relatedOrders = order.filter((od) => od.Order_id === order.Order_id);
-  //   const totalQtyBuy = relatedOrders.reduce(
-  //     (acc, cur) => acc + cur.Web_Qty_Buy,
-  //     0
-  //   );
-  //   const totalStc = relatedOrders.reduce((acc, cur) => acc + cur.Total_stc, 0);
-  //   return {
-  //     ...order,
-  //     totalQtyBuy,
-  //     totalStc,
-  //   };
-  // });
-
-  // Mapping for Order_Status to text
   const statusMap = {
     1: "สำเร็จ",
     2: "มีแก้ไข",
@@ -125,7 +125,7 @@ const AllOrderContent: React.FC = () => {
         String(order.Event_Name)
           .toLowerCase()
           .includes(filters.eventName.toLowerCase()) &&
-        String(order.Order_id)
+        String(order.Order_no)
           .toLowerCase()
           .includes(filters.orderNo.toLowerCase()) &&
         String(order.Cust_name)
@@ -161,71 +161,11 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  // const filteredOrders2 = orderDData.filter((order) => {
-  //   const matchesSearch =
-  //     String(order.Event_Name).includes(filters.eventName) &&
-  //     String(order.Order_id).includes(filters.orderNo) &&
-  //     String(order.Cust_name).includes(filters.customerName) &&
-  //     String(order.Cust_tel).includes(filters.customerPhone);
-  //   // const mappedStatus = statusMap[order.Order_Status] || "ไม่ระบุ";
-
-  //   // const matchesStatus =
-  //   //   filters.status === "all" || mappedStatus === filters.status;
-
-  //   // Payment status logic based on Order_Status and Total_Balance
-  //   // let paymentStatusLabel;
-  //   // if (order.Order_Status === 1) {
-  //   //   paymentStatusLabel = order.Total_Balance === 0 ? "สำเร็จ" : "ค้างจ่าย";
-  //   // } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-  //   //   paymentStatusLabel = "ไม่สำเร็จ";
-  //   // } else {
-  //   //   paymentStatusLabel = "ไม่ระบุ";
-  //   // }
-
-  //   // const matchesPaymentStatus =
-  //   //   filters.paymentStatus === "all" ||
-  //   //   paymentStatusLabel === filters.paymentStatus;
-
-  //   // const orderDate = new Date(order.Order_datetime);
-  //   // const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-  //   // const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
-
-  //   // const matchesDateRange =
-  //   //   (!start || orderDate >= start) && (!end || orderDate <= end);
-
-  //   return matchesSearch;
-  // });
-
-  // const ordersInCurrentPage = filteredOrders.slice(
-  //   indexOfFirstItem,
-  //   indexOfLastItem
-  // );
-
-  // const totalPages = Math.ceil(filteredOrders.length / MAX_ITEMS_PER_PAGE);
-
-  // const totalOrders = orderHData.length;
-
-  // const ordersWithBalance = orderHData.filter(
-  //   (order) => order.Total_Balance > 0
-  // ).length;
-
-  // const totalNetPrice = orderHData.reduce(
-  //   (sum, order) => sum + (order.Net_Price || 0),
-  //   0
-  // );
-
-  // const totalPaySum = orderHData.reduce(
-  //   (sum, order) => sum + (order.Total_Pay || 0),
-  //   0
-  // );
-
   const navigate = useNavigate();
 
   const handleViewHistoryClick = (orderId: string) => {
     navigate(`/order-detail/${orderId}`);
   };
-
-  // if (isLoading) return <CircularProgress />;
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
 
@@ -235,32 +175,75 @@ const AllOrderContent: React.FC = () => {
     return formattedDateTime;
   };
 
-  const handleOrderClick = (orderNo) => {
+  const handleOrderClick = (orderNo: any) => {
+    localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
+    console.log("orderHData", orderHData);
 
     const latestOrder = orderHData
       .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
       .reduce((acc, current) => {
-        // Check if we already have an order with the same Order_id
         const existingOrder = acc.find(
           (order) => order.Order_id === current.Order_id
         );
 
         if (existingOrder) {
-          // Compare Payment_Date7, keep the latest one
           const existingPaymentDate = new Date(existingOrder.Payment_Date7);
           const currentPaymentDate = new Date(current.Payment_Date7);
 
           if (currentPaymentDate > existingPaymentDate) {
-            // Replace with the latest order if the current one is newer
             return acc.map((order) =>
               order.Order_id === current.Order_id ? current : order
             );
           } else {
-            return acc; // Keep the existing order if it's newer or the same
+            return acc;
           }
         } else {
-          // If no order with the same Order_id exists, add the current order
+          acc.push(current);
+        }
+
+        return acc;
+      }, []);
+
+    console.log("latestOrder:", latestOrder);
+    setOrderDetail(latestOrder);
+
+    const h = orderDData
+      .filter((order) => order.Order_no === orderNo)
+      .sort(
+        (a, b) =>
+          new Date(a.Payment_Date7).getTime() -
+          new Date(b.Payment_Date7).getTime()
+      );
+
+    console.log("h:", h);
+    setOrderHispayDetail(h);
+  };
+
+  const handleOrderprevData = (orderNo: any, data: any, orderDData: any) => {
+    localStorage.setItem("orderDetail", orderNo);
+    setSelectedOrderNo(orderNo);
+    console.log("orderHData", orderHData);
+
+    const latestOrder = data
+      .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
+      .reduce((acc, current) => {
+        const existingOrder = acc.find(
+          (order) => order.Order_id === current.Order_id
+        );
+
+        if (existingOrder) {
+          const existingPaymentDate = new Date(existingOrder.Payment_Date7);
+          const currentPaymentDate = new Date(current.Payment_Date7);
+
+          if (currentPaymentDate > existingPaymentDate) {
+            return acc.map((order) =>
+              order.Order_id === current.Order_id ? current : order
+            );
+          } else {
+            return acc;
+          }
+        } else {
           acc.push(current);
         }
 
@@ -288,18 +271,12 @@ const AllOrderContent: React.FC = () => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
     return bath;
   }
-  // const Numberofseats = orderDetail
-  // const Plan_Name = orderDetail
-  // const Ticket_Type_Name && TicketNo_List = orderDetail
-  // const Event_Name = orderDetail
-  // const Event_Time = orderDetail
-  // const สถานะคำสั่งซื้อ = orderDetail
 
   async function fetchOrderData() {
     try {
       const OrderAll = await getOrderAll();
       const evntDetailAll = await getAllEventList();
-      console.log("hi:", OrderAll);
+      console.log("fetchOrderData", OrderAll);
       console.log("evntDetailAll:", evntDetailAll);
 
       setEvntDetail(
@@ -312,14 +289,33 @@ const AllOrderContent: React.FC = () => {
       setOrderDData(
         OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
       );
+      const savedOrderDetail = localStorage.getItem("orderDetail");
+      const savedOrderDetailFilter = localStorage.getItem("filters");
+      if (savedOrderDetail && savedOrderDetailFilter) {
+        const x = OrderAll?.orderAll.filter(
+          (order: any) => order.Net_Price !== null
+        );
+        const y = OrderAll?.hisPayment.filter(
+          (order: any) => order.Net_Price !== null
+        );
+        setFilters(JSON.parse(savedOrderDetailFilter));
+        handleOrderprevData(savedOrderDetail, x, y);
+      } else if (savedOrderDetail) {
+        console.log("hi2");
+        const x = OrderAll?.orderAll.filter(
+          (order: any) => order.Net_Price !== null
+        );
+        const y = OrderAll?.hisPayment.filter(
+          (order: any) => order.Net_Price !== null
+        );
+        handleOrderprevData(savedOrderDetail, x, y);
+      } else if (savedOrderDetailFilter) {
+        setFilters(JSON.parse(savedOrderDetailFilter));
+      }
     } catch (error) {
       toast.error("Failed to fetch order data");
     } finally {
-      const savedOrderDetail = localStorage.getItem("orderDetail");
-
-      if (savedOrderDetail) {
-        handleOrderClick(savedOrderDetail); // เรียก `handleOrderClick` ทันทีหากมีข้อมูลใน `localStorage`
-      }
+      console.log("มาหน้านี้โหลดข้อมูลเสร็จละ");
     }
   }
   useEffect(() => {
@@ -363,9 +359,14 @@ const AllOrderContent: React.FC = () => {
       ticketType:
         prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
     }));
-    localStorage.removeItem("orderDetail");
+    // setSelectedOrderNo(null);
+    // setOrderDetail([]);
+    // setOrderHispayDetail([]);
+    // localStorage.removeItem("orderDetail");
+
     fetchOrderData();
   };
+
   return (
     <div className="all-orders-content">
       <Header title="คำสั่งซื้อทั้งหมด" />
@@ -531,7 +532,7 @@ const AllOrderContent: React.FC = () => {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "flex-start",
               flexDirection: "row",
               alignItems: "center",
               gap: 2,
@@ -573,6 +574,7 @@ const AllOrderContent: React.FC = () => {
                         transform: "translateY(5px)",
                         backgroundColor: "white",
                         width: "90px",
+                        height: 30,
                       },
                     },
                   }}
@@ -591,6 +593,7 @@ const AllOrderContent: React.FC = () => {
                         transform: "translateY(5px)",
                         backgroundColor: "white",
                         width: "90px",
+                        height: 30,
                       },
                     },
                   }}
@@ -613,6 +616,7 @@ const AllOrderContent: React.FC = () => {
                         border: "none",
                         transform: "translateY(5px)",
                         width: "120px",
+                        height: 30,
                       },
                     },
                   }}
@@ -633,6 +637,7 @@ const AllOrderContent: React.FC = () => {
                         border: "none", // Remove the inner border
                         transform: "translateY(5px)",
                         width: "120px",
+                        height: 30,
                       },
                     },
                   }}
@@ -652,6 +657,7 @@ const AllOrderContent: React.FC = () => {
                         border: "none", // Remove the inner border
                         transform: "translateY(5px)",
                         width: "120px",
+                        height: 30,
                       },
                     },
                   }}
@@ -746,201 +752,179 @@ const AllOrderContent: React.FC = () => {
           </p>
 
           <TableContainer
-            component={Paper}
-            sx={{ borderRadius: "0" }}
-            style={{ maxHeight: "100vh" }}
+  component={Paper}
+  sx={{ borderRadius: "0" }}
+  style={{ maxHeight: "100vh" }}
+>
+  <Table
+    sx={{
+      tableLayout: "fixed", // บังคับให้ตารางใช้ layout แบบ fixed
+      width: "100%", // กำหนดความกว้างของตารางให้เต็ม
+    }}
+  >
+    <TableHead sx={{ backgroundColor: "#11131A" }}>
+      <TableRow>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "40px", // กำหนดความกว้างให้แคบ
+            minWidth: "40px", // ความกว้างขั้นต่ำ
+            maxWidth: "40px", // ความกว้างสูงสุด
+            padding: "5px", // ลด padding เพื่อให้คอลัมน์เล็กลง
+          }}
+        >
+          ลำดับ
+        </TableCell>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "20%", // ใช้ความกว้างแบบสัดส่วน
+          }}
+        >
+          ชื่องาน
+        </TableCell>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "20%",
+          }}
+        >
+          เลขคำสั่งซื้อ
+        </TableCell>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "20%",
+          }}
+        >
+          ชื่อลูกค้า
+        </TableCell>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "15%",
+          }}
+        >
+          เบอร์โทร
+        </TableCell>
+        <TableCell
+          style={{
+            fontWeight: "bold",
+            fontSize: "17px",
+            textAlign: "center",
+            color: "#fff",
+            width: "15%",
+          }}
+        >
+          สถานะการจ่ายเงิน
+        </TableCell>
+      </TableRow>
+    </TableHead>
+
+    <TableBody>
+      {filteredOrders.map((order: any, index: number) => {
+        let paymentStatusLabel;
+        let paymentStatusBgColor;
+
+        if (order.Order_Status === 1) {
+          if (order.Total_Balance === 0) {
+            paymentStatusLabel = "ชำระครบ";
+            paymentStatusBgColor = "#28a745"; // Green for success
+          } else if (order.Total_Balance > 0) {
+            paymentStatusLabel = "ค้างจ่าย";
+            paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
+          } else {
+            paymentStatusLabel = "ไม่สำเร็จ";
+            paymentStatusBgColor = "#dc3545"; // Red for failure
+          }
+        } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
+          paymentStatusLabel = "ไม่สำเร็จ";
+          paymentStatusBgColor = "#343a40"; // Gray for failure
+        } else {
+          paymentStatusLabel = "ไม่ระบุ";
+          paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
+        }
+
+        return (
+          <TableRow
+            key={index}
+            style={{
+              backgroundColor:
+                selectedOrderNo === order.Order_no ? "lightblue" : "inherit",
+              cursor: "pointer",
+            }}
+            onClick={() => handleOrderClick(order.Order_no)}
           >
-            <Table>
-              <TableHead sx={{ backgroundColor: "#11131A" }}>
-                <TableRow>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    ลำดับ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    ชื่องาน
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    เลขคำสั่งซื้อ
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    ชื่อลูกค้า
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    เบอร์โทร
-                  </TableCell>
-                  {/* <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    สถานะคำสั่งซื้อ
-                  </TableCell> */}
-                  <TableCell
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "17px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    สถานะการจ่ายเงิน
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+            <TableCell
+              style={{
+                textAlign: "center",
+                fontWeight: "bold",
+                width: "40px",
+                padding: "5px", // ลด padding เพื่อให้ช่องลำดับแคบลง
+              }}
+            >
+              {indexOfFirstItem + index + 1}
+            </TableCell>
+            <TableCell
+              style={{
+                textAlign: "center",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {order.Event_Name}
+            </TableCell>
+            <TableCell
+              style={{
+                textAlign: "center",
+              }}
+            >
+              {order.Order_no}
+            </TableCell>
+            <TableCell style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+              {order.Cust_name}
+            </TableCell>
+            <TableCell style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+              {order.Cust_tel}
+            </TableCell>
+            <TableCell style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "8px",
+                  borderRadius: "18px",
+                  textAlign: "center",
+                  display: "inline-block",
+                  width: "60px",
+                  backgroundColor: paymentStatusBgColor,
+                  color: "#fff",
+                }}
+              >
+                {paymentStatusLabel}
+              </div>
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </TableBody>
+  </Table>
+</TableContainer>
 
-              <TableBody>
-                {filteredOrders.map((order: any, index: number) => {
-                  // const formattedEventTime = dayjs(order.Order_datetime)
-                  //   .subtract(7, "hour")
-                  //   .locale("th")
-                  //   .format("D/M/BBBB HH:mm");
-                  // const statusLabel =
-                  //   statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
-
-                  let paymentStatusLabel;
-                  let paymentStatusBgColor;
-
-                  if (order.Order_Status === 1) {
-                    if (order.Total_Balance === 0) {
-                      paymentStatusLabel = "ชำระครบ";
-                      paymentStatusBgColor = "#28a745"; // Green for success
-                    } else if (order.Total_Balance > 0) {
-                      paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
-                    } else {
-                      paymentStatusLabel = "ไม่สำเร็จ";
-                      paymentStatusBgColor = "#dc3545"; // Red for failure
-                    }
-                  } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-                    paymentStatusLabel = "ไม่สำเร็จ";
-                    paymentStatusBgColor = "#343a40"; // Gray for failure
-                  } else {
-                    paymentStatusLabel = "ไม่ระบุ";
-                    paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
-                  }
-
-                  return (
-                    <TableRow
-                      key={order.index}
-                      style={{
-                        backgroundColor:
-                          selectedOrderNo === order.Order_no
-                            ? "lightblue"
-                            : "inherit",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleOrderClick(order.Order_no)}
-                    >
-                      <TableCell
-                        style={{
-                          textAlign: "center",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {indexOfFirstItem + index + 1}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          textAlign: "center",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {order.Event_Name}
-                      </TableCell>
-
-                      <TableCell
-                        style={{
-                          textAlign: "center",
-                        }}
-                        // onClick={() => handleOrderClick(order.Order_no)}
-                      >
-                        {order.Order_no}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Cust_name}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {order.Cust_tel}
-                      </TableCell>
-                      {/* <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "18px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "100px",
-                            backgroundColor: `${order.OrderSetColour}`,
-                            color: "#fff",
-                            // width: "10px",
-                          }}
-                        >
-                          <p style={{ margin: 0 }}>
-                            {order.OrderSetColour === "#13A10E" ? `สำเร็จ` : ""}
-                          </p>
-                        </div>
-                      </TableCell> */}
-                      <TableCell style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "8px",
-                            borderRadius: "18px",
-                            textAlign: "center",
-                            display: "inline-block",
-                            width: "100px",
-                            backgroundColor: paymentStatusBgColor,
-                            color: "#fff",
-                          }}
-                        >
-                          {paymentStatusLabel}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
         </div>
 
         <div style={{ marginLeft: 30 }}>

@@ -43,7 +43,6 @@
 .toggle-container label {
   position: relative;
   display: inline-block;
-  width: 60px;
   height: 34px;
   margin-right: 10px;
 }
@@ -61,13 +60,13 @@
 
 .slider {
   position: absolute;
-  cursor: not-allowed; /* Make the slider non-interactive */
+  cursor: pointer; /* ทำให้ slider เป็น interactive */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: 0.4s;
+  /* transition: 0.4s; */
   border-radius: 34px;
 }
 
@@ -76,12 +75,13 @@
   content: "";
   height: 26px;
   width: 26px;
-  left: 4px;
-  bottom: 4px;
+  left: 0px;
+  right: 0px;
   background-color: white;
-  transition: 0.4s;
+  /* transition: 0.4s; */
   border-radius: 50%;
 }
+
 
 input:checked + .slider {
   background-color: #2196f3;

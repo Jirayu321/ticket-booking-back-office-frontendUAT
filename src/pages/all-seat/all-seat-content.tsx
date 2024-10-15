@@ -74,6 +74,10 @@ const AllSeatContent: React.FC = () => {
       } else {
         toast.error("Unexpected data format");
       }
+      const savedFilters = localStorage.getItem("filtersSeat");
+      if (savedFilters) {
+        setFilters(JSON.parse(savedFilters));
+      }
     } catch (error) {
       toast.error("Failed to fetch ticket data");
     }
@@ -85,17 +89,25 @@ const AllSeatContent: React.FC = () => {
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [name]: value,
+      };
+      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
   };
 
   const handleSearchChange = (event) => {
-    setFilters((prev) => ({
-      ...prev,
-      search: event.target.value,
-    }));
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        search: event.target.value,
+      };
+      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
   };
 
   const handleClick = (pageNumber) => {
@@ -103,16 +115,21 @@ const AllSeatContent: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-
-      setFilters((prevFilters) => ({
-    search: prevFilters.search !== "" ? prevFilters.search : "",
-    event: prevFilters.event !== "all" ? prevFilters.event : "all",
-    eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
-    ticketType: prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
-    printStatus: prevFilters.printStatus !== "all" ? prevFilters.printStatus : "all",
-    scanStatus: prevFilters.scanStatus !== "all" ? prevFilters.scanStatus : "all",
-    ticket_Reserve: prevFilters.ticket_Reserve !== "all" ? prevFilters.ticket_Reserve : "all",
-  }));
+    setFilters((prevFilters) => ({
+      search: prevFilters.search !== "" ? prevFilters.search : "",
+      event: prevFilters.event !== "all" ? prevFilters.event : "all",
+      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+      ticketType:
+        prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
+      printStatus:
+        prevFilters.printStatus !== "all" ? prevFilters.printStatus : "all",
+      scanStatus:
+        prevFilters.scanStatus !== "all" ? prevFilters.scanStatus : "all",
+      ticket_Reserve:
+        prevFilters.ticket_Reserve !== "all"
+          ? prevFilters.ticket_Reserve
+          : "all",
+    }));
     setStartDate(dayjs().startOf("month"));
     setEndDate(dayjs().endOf("month"));
     fetchTicketData();
@@ -394,7 +411,7 @@ const AllSeatContent: React.FC = () => {
               value={filters.search}
               onChange={handleSearchChange}
               placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
-              style={{ marginRight: "10px", height: "50px", width: "450px" }}
+              style={{ marginRight: "10px", height: "55px", width: "450px" }}
               InputLabelProps={{
                 shrink: true,
               }}
