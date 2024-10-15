@@ -28,7 +28,8 @@ import {
 import QRCode from "qrcode";
 
 const OrderDetailContent: React.FC = () => {
-  const { order_id } = useParams<{ order_id: string }>();
+  const order_id = localStorage.getItem("orderId");
+  // const { order_id } = useParams<{ order_id: string }>();
   const location = useLocation();
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
@@ -122,9 +123,7 @@ const OrderDetailContent: React.FC = () => {
           <p class="details">${ticket.Event_Name}</p>
           <p class="details">
            ${ticket.Plan_Name}
-          - ${ticket.ticket_no}(${ticket.ticket_line}/${
-            ticket.Total_stc
-          })
+          - ${ticket.ticket_no}(${ticket.ticket_line}/${ticket.Total_stc})
           </p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Date
@@ -279,7 +278,7 @@ const OrderDetailContent: React.FC = () => {
 
   return (
     <div>
-      {/* <Header title="รายละเอียดคำสั่งซื้อ" /> */}
+      <Header title="รายละเอียดคำสั่งซื้อ" />
 
       <div
         style={{
@@ -295,7 +294,7 @@ const OrderDetailContent: React.FC = () => {
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
-          <button
+          {/* <button
             style={{
               backgroundColor: "black",
               paddingTop: "20px",
@@ -308,13 +307,14 @@ const OrderDetailContent: React.FC = () => {
               alt="Back Icon"
               style={{ width: "58px", height: "58px" }}
             />
-          </button>
+          </button> */}
           <h2
             style={{
               color: "white",
               margin: 0,
               display: "flex",
               alignItems: "center",
+              marginLeft:10
             }}
           >
             {orderDetail?.Order_no}
@@ -358,7 +358,7 @@ const OrderDetailContent: React.FC = () => {
         </Button>
       </div>
 
-      <Container sx={{ my: 4, mx: 2 }}>
+      {/* <Container sx={{ my: 4, mx: 2 }}> */}
         {/* <Box style={{ width: "100%" }}>
           <Tabs value={tabIndex} onChange={handleTabChange} centered>
             <Tab label="ข้อมูลผู้ซื้อ" sx={{ width: "50%" }} />
@@ -377,10 +377,12 @@ const OrderDetailContent: React.FC = () => {
           <>
             {orderDetail ? <BuyerInfo buyer={orderDetail} /> : null}
             <OrderItems order_id={order_id} />
-            <PaymentHistory dtOrderId={order_id} />
+            <div style={{ maxWidth: "800px", overflowX: "auto" }}>
+              <PaymentHistory dtOrderId={order_id} />
+            </div>
           </>
         </Paper>
-      </Container>
+      {/* </Container> */}
     </div>
   );
 };

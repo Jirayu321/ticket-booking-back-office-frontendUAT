@@ -215,6 +215,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
         >
           <CloseIcon />
         </IconButton>
+        
         <Box
           sx={{
             display: "flex",

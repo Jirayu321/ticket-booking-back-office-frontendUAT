@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
   // CircularProgress,
@@ -22,9 +23,11 @@ import {
   Box,
   Typography,
   Modal,
+  IconButton,
 } from "@mui/material";
 import toast from "react-hot-toast";
 import Header from "../common/header";
+import OrderDetailContent from "../order-detail/order-detail-content";
 // import { getOrderH } from "../../services/order-h.service";
 // import { getOrderD } from "../../services/order-d.service";
 
@@ -48,6 +51,7 @@ const AllOrderContent: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
   const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
   const [evntDetail, setEvntDetail] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
@@ -162,10 +166,12 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleViewHistoryClick = (orderId: string) => {
-    navigate(`/order-detail/${orderId}`);
+    localStorage.setItem("orderId", orderId);
+    setModalOpen(true);
+    // navigate(`/order-detail/${orderId}`);
   };
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
@@ -181,33 +187,29 @@ const AllOrderContent: React.FC = () => {
     setSelectedOrderNo(orderNo);
     console.log("orderHData", orderHData);
 
-    const latestOrder = orderHData
-      .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
-      .reduce((acc, current) => {
-        const existingOrder = acc.find(
-          (order) => order.Order_id === current.Order_id
-        );
+    const latestOrders = Object.values(
+      orderHData
+        .filter((order) => order.Order_no === orderNo) // กรองข้อมูลตาม Order_no
+        .reduce((acc, current) => {
+          const key = current.Event_Stc_id; // ใช้ Event_Stc_id เป็นคีย์ในการจัดกลุ่ม
 
-        if (existingOrder) {
-          const existingPaymentDate = new Date(existingOrder.Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-
-          if (currentPaymentDate > existingPaymentDate) {
-            return acc.map((order) =>
-              order.Order_id === current.Order_id ? current : order
-            );
+          if (!acc[key]) {
+            acc[key] = current; // ถ้าไม่มีใน acc ให้เพิ่มเข้าไป
           } else {
-            return acc;
+            // เปรียบเทียบวันที่ ถ้าข้อมูลปัจจุบันใหม่กว่าให้แทนที่
+            const existingPaymentDate = new Date(acc[key].Payment_Date7);
+            const currentPaymentDate = new Date(current.Payment_Date7);
+            if (currentPaymentDate > existingPaymentDate) {
+              acc[key] = current;
+            }
           }
-        } else {
-          acc.push(current);
-        }
 
-        return acc;
-      }, []);
+          return acc;
+        }, {})
+    );
 
-    console.log("latestOrder:", latestOrder);
-    setOrderDetail(latestOrder);
+    console.log("latestOrder:", latestOrders);
+    setOrderDetail(latestOrders);
 
     const h = orderDData
       .filter((order) => order.Order_no === orderNo)
@@ -319,6 +321,7 @@ const AllOrderContent: React.FC = () => {
       console.log("มาหน้านี้โหลดข้อมูลเสร็จละ");
     }
   }
+
   useEffect(() => {
     fetchOrderData();
   }, []);
@@ -329,18 +332,43 @@ const AllOrderContent: React.FC = () => {
     .filter((order) => order.Total_Balance !== 0)
     .reduce((sum, order) => sum + order.Total_Balance, 0);
 
-  const totalNetPriceWithZeroBalance = filteredOrders
-    .filter((order) => order.Total_Balance === 0)
-    .reduce((sum, order) => sum + order.Total_Price, 0);
+  const dataP = Object.values(
+    orderHData
+      .filter((order) => order.Event_Id === filteredOrders[0].Event_Id) // กรองข้อมูลตาม Order_no
+      .reduce((acc, current) => {
+        const key = current.DT_order_id;
 
-  const totalNetPriceWithNonZeroBalance = filteredOrders
-    .filter((order) => order.Total_Balance !== 0)
-    .reduce((sum, order) => sum + order.Total_Pay, 0);
+        if (!acc[key]) {
+          acc[key] = current; // ถ้าไม่มีใน acc ให้เพิ่มเข้าไป
+        } else {
+          // เปรียบเทียบวันที่ ถ้าข้อมูลปัจจุบันใหม่กว่าให้แทนที่
+          const existingPaymentDate = new Date(acc[key].Payment_Date7);
+          const currentPaymentDate = new Date(current.Payment_Date7);
+          if (currentPaymentDate > existingPaymentDate) {
+            acc[key] = current;
+          }
+        }
 
-  // รวมผลรวมทั้งสองส่วน
-  const totalNetPrice =
-    totalNetPriceWithZeroBalance + totalNetPriceWithNonZeroBalance;
+        return acc;
+      }, {})
+  );
 
+  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
+    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
+    0
+  );
+
+  console.log(
+    "totalNetPriceWithZeroBalance",
+    totalNetPriceWithZeroBalance,
+    dataP
+  );
+
+  console.log("totalNetPriceWithNonZeroBalance", OutstandingPayment);
+
+  const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment;
+
+  console.log("totalNetPrice", totalNetPrice);
   const handleClearFilters = () => {
     setStartDate((prevStartDate) =>
       prevStartDate !== null ? prevStartDate : null
@@ -366,6 +394,19 @@ const AllOrderContent: React.FC = () => {
     // localStorage.removeItem("orderDetail");
 
     fetchOrderData();
+  };
+
+  const totalSeats = orderDetail?.reduce(
+    (sum, order) => sum + order.Total_stc,
+    0
+  );
+  const totalPrice = orderDetail?.reduce(
+    (sum, order) => sum + order.Total_Price,
+    0
+  );
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -985,12 +1026,12 @@ const AllOrderContent: React.FC = () => {
                     <p style={{ textAlign: "center" }}>
                       <strong>จำนวนที่นั่ง:</strong>
                       <br />
-                      {orderDetail.at(0)?.Total_stc}
+                      {totalSeats}
                     </p>
                     <p>
                       <strong>ยอดสุทธิ:</strong>
                       <br />
-                      {formatNumberWithCommas(orderDetail.at(0)?.Total_Price)}
+                      {formatNumberWithCommas(totalPrice)}
                     </p>
 
                     <p>
@@ -1276,6 +1317,36 @@ const AllOrderContent: React.FC = () => {
           color="primary"
         /> */}
       </div>
+
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <div>
+            <OrderDetailContent />
+          </div>
+        </Box>
+      </Modal>
     </div>
   );
 };
