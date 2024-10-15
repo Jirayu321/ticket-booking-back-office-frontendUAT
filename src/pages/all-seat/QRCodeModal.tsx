@@ -47,8 +47,10 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
     ticket_no,
     print_count,
     order_id,
+    Total_stc,
   } = ticketData;
 
+  console.log("ticketData", ticketData);
   const [totalTicketsWithSameNo, setTotalTicketsWithSameNo] =
     useState<number>(0);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -151,7 +153,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
           <div class="divbody">
           <p class="details">${Event_Name}</p>
           <p class="details">
-          (เบอร์โต๊ะ: ${ticket_no})
+    ${Plan_Name}-${ticket_no}(${ticket_line}/${Total_stc})
           </p>
             <p class="details">เวลา: ${new Date(Event_Date).toLocaleDateString(
               "th-TH",
@@ -242,7 +244,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
             style={{ verticalAlign: "middle", marginRight: "4px" }}
           />
           {new Date(Event_Date).toLocaleDateString("th-TH")}
-          
+
           <AccessTimeIcon
             style={{
               verticalAlign: "middle",
@@ -258,11 +260,10 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
             second: "2-digit",
             hour12: false,
           })}
-          
         </Typography>
         <Typography variant="body2" align="center" style={{ color: "black" }}>
-          {Plan_Name} -   เบอร์โต๊ะ {ticket_no} ({ticket_line}/{totalTicketsWithSameNo})
-         
+          {Plan_Name} - เบอร์โต๊ะ {ticket_no} ({ticket_line}/
+          {totalTicketsWithSameNo})
         </Typography>
         <Button
           variant="contained"

@@ -27,10 +27,19 @@ const BuyerInfo: React.FC<{ buyer: any }> = ({ buyer }) => {
       <Box
         display="grid"
         justifyContent="space-between"
-        gridTemplateColumns={"auto auto auto"}
+        gridTemplateColumns={"auto auto auto auto"}
       >
         <Typography variant="body1" sx={{ fontWeight: "bold" }}>
           <strong>เลขคำสั่งซื้อ:</strong> {buyer.Order_no}
+        </Typography>
+        <Typography variant="body1">
+          <strong>ชื่องาน:</strong> {buyer.Event_Name}
+        </Typography>
+        <Typography></Typography>
+        <Typography></Typography>
+
+        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+          <strong>วันที่สั่งซื้อ:</strong> {adjustedDate} น.
         </Typography>
         <Typography>
           <strong>ชื่อ:</strong> {buyer.Cust_name}
@@ -39,13 +48,8 @@ const BuyerInfo: React.FC<{ buyer: any }> = ({ buyer }) => {
           <strong>เบอร์โทร:</strong> {buyer.Cust_tel}
         </Typography>
         <Typography variant="body1">
-          <strong>LINE ID:</strong> {buyer.Line_id}
-        </Typography>
-        <Typography variant="body1">
-          <strong>ชื่องาน:</strong> {buyer.Event_Name}
-        </Typography>
-        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-          <strong>วันที่สั่งซื้อ:</strong> {adjustedDate} น.
+          <strong>LINE ID:</strong>{" "}
+          {buyer.Line_id ? `${buyer.Line_id}` : ``}
         </Typography>
       </Box>
     </Stack>

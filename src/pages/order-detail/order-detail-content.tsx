@@ -34,7 +34,7 @@ const OrderDetailContent: React.FC = () => {
   const [orderItems, setOrderItems] = useState<any[]>([]);
   const queryParams = new URLSearchParams(location.search);
   const initialTabIndex = parseInt(queryParams.get("tabIndex") || "0", 10);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const navigate = useNavigate();
 
@@ -121,8 +121,10 @@ const OrderDetailContent: React.FC = () => {
           <div class="divbody">
           <p class="details">${ticket.Event_Name}</p>
           <p class="details">
-          (เบอร์โต๊ะ: ${ticket.ticket_no})
-          - ที่นั่ง ${ticket.ticket_line}/${ticket.Total_stc}
+           ${ticket.Plan_Name}
+          - ${ticket.ticket_no}(${ticket.ticket_line}/${
+            ticket.Total_stc
+          })
           </p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Date
@@ -137,7 +139,7 @@ const OrderDetailContent: React.FC = () => {
             minute: "2-digit",
             second: "2-digit",
             hour12: false,
-          })} น.</p>
+          })}น.</p>
           </div>
            
           
@@ -148,20 +150,23 @@ const OrderDetailContent: React.FC = () => {
           <div class="ticket-container">
             <img src="${dataUrl}"/>
             <p class="details">${ticket.Event_Name}</p>
-            <p class="details">${new Date(ticket.Event_Time).toLocaleDateString(
-              "th-TH",
-              { year: "numeric", month: "long", day: "numeric" }
-            )} - ที่นั่ง ${ticket.ticket_line}/${
-              ticket.Total_stc
-          } (เบอร์โต๊ะ: ${ticket.ticket_no})</p>
-            <p class="details">เวลา: ${new Date(
-              ticket.Event_Time
-            ).toLocaleTimeString("th-TH", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            })}</p>
+            <p class="details">${ticket.Plan_Name} -  ${ticket.ticket_no} (${
+            ticket.ticket_line
+          }/${ticket.Total_stc}) </p>
+            <p class="details">เวลา:
+            ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })} - ${new Date(
+            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+          ).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          })} น.
+           </p>
           </div>
         `;
         }
@@ -185,10 +190,6 @@ const OrderDetailContent: React.FC = () => {
       printWindow?.document.close();
     }
   };
-
-  // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-  //   setTabIndex(newValue);
-  // };
 
   useEffect(() => {
     setTabIndex(initialTabIndex);
@@ -218,7 +219,7 @@ const OrderDetailContent: React.FC = () => {
       } catch (error) {
         toast.error("Failed to fetch order data");
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
 
@@ -232,50 +233,53 @@ const OrderDetailContent: React.FC = () => {
     }
   }, [order_id, location.search]);
 
-  if (isLoading) return <CircularProgress />;
-  if (!orderDetail) return <Typography>Order not found</Typography>;
+  // if (isLoading) return <CircularProgress />;
+  // if (!orderDetail) return <Typography>Order not found</Typography>;
 
   let statusLabel;
   let bgColor;
 
   console.log("order :", orderDetail);
-  switch (orderDetail.Order_Status) {
-    case 1:
-      if (orderDetail.Total_Balance === 0) {
-        statusLabel = "สำเร็จ";
-        bgColor = "#28a745";
-      } else {
-        statusLabel = "ค้างจ่าย";
-        bgColor = "#ffc107";
-      }
-      break;
-    case 2:
-      statusLabel = "มีแก้ไข";
-      bgColor = "#17a2b8";
-      break;
-    case 13:
-      statusLabel = "ขอคืนเงิน";
-      bgColor = "#dc3545";
-      break;
-    case 3:
-      statusLabel = "ไม่สำเร็จเพราะติด R";
-      bgColor = "#343a40";
-      break;
-    case 4:
-      statusLabel = "ไม่สำเร็จจาก Omise";
-      bgColor = "#6c757d";
-      break;
-    default:
-      statusLabel = "ไม่ระบุ";
-      bgColor = "#f8f9fa";
-      break;
+
+  if (orderDetail) {
+    switch (orderDetail?.Order_Status) {
+      case 1:
+        if (orderDetail?.Total_Balance === 0) {
+          statusLabel = "สำเร็จ";
+          bgColor = "#28a745";
+        } else {
+          statusLabel = "ค้างจ่าย";
+          bgColor = "#ffc107";
+        }
+        break;
+      case 2:
+        statusLabel = "มีแก้ไข";
+        bgColor = "#17a2b8";
+        break;
+      case 13:
+        statusLabel = "ขอคืนเงิน";
+        bgColor = "#dc3545";
+        break;
+      case 3:
+        statusLabel = "ไม่สำเร็จเพราะติด R";
+        bgColor = "#343a40";
+        break;
+      case 4:
+        statusLabel = "ไม่สำเร็จจาก Omise";
+        bgColor = "#6c757d";
+        break;
+      default:
+        statusLabel = "ไม่ระบุ";
+        bgColor = "#f8f9fa";
+        break;
+    }
   }
 
   // if (isPaymentHistoriesLoading) return <CircularProgress />;
 
   return (
     <div>
-      <Header title="รายละเอียดคำสั่งซื้อ" />
+      {/* <Header title="รายละเอียดคำสั่งซื้อ" /> */}
 
       <div
         style={{
@@ -313,7 +317,7 @@ const OrderDetailContent: React.FC = () => {
               alignItems: "center",
             }}
           >
-            {orderDetail.Order_no}
+            {orderDetail?.Order_no}
             <div
               style={{
                 marginLeft: "20px",
@@ -371,7 +375,7 @@ const OrderDetailContent: React.FC = () => {
           }}
         >
           <>
-            <BuyerInfo buyer={orderDetail} />
+            {orderDetail ? <BuyerInfo buyer={orderDetail} /> : null}
             <OrderItems order_id={order_id} />
             <PaymentHistory dtOrderId={order_id} />
           </>

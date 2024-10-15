@@ -21,6 +21,7 @@ import {
   Avatar,
   Box,
   Typography,
+  Modal,
 } from "@mui/material";
 import toast from "react-hot-toast";
 import Header from "../common/header";
@@ -752,179 +753,184 @@ const AllOrderContent: React.FC = () => {
           </p>
 
           <TableContainer
-  component={Paper}
-  sx={{ borderRadius: "0" }}
-  style={{ maxHeight: "100vh" }}
->
-  <Table
-    sx={{
-      tableLayout: "fixed", // บังคับให้ตารางใช้ layout แบบ fixed
-      width: "100%", // กำหนดความกว้างของตารางให้เต็ม
-    }}
-  >
-    <TableHead sx={{ backgroundColor: "#11131A" }}>
-      <TableRow>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "40px", // กำหนดความกว้างให้แคบ
-            minWidth: "40px", // ความกว้างขั้นต่ำ
-            maxWidth: "40px", // ความกว้างสูงสุด
-            padding: "5px", // ลด padding เพื่อให้คอลัมน์เล็กลง
-          }}
-        >
-          ลำดับ
-        </TableCell>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "20%", // ใช้ความกว้างแบบสัดส่วน
-          }}
-        >
-          ชื่องาน
-        </TableCell>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "20%",
-          }}
-        >
-          เลขคำสั่งซื้อ
-        </TableCell>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "20%",
-          }}
-        >
-          ชื่อลูกค้า
-        </TableCell>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "15%",
-          }}
-        >
-          เบอร์โทร
-        </TableCell>
-        <TableCell
-          style={{
-            fontWeight: "bold",
-            fontSize: "17px",
-            textAlign: "center",
-            color: "#fff",
-            width: "15%",
-          }}
-        >
-          สถานะการจ่ายเงิน
-        </TableCell>
-      </TableRow>
-    </TableHead>
-
-    <TableBody>
-      {filteredOrders.map((order: any, index: number) => {
-        let paymentStatusLabel;
-        let paymentStatusBgColor;
-
-        if (order.Order_Status === 1) {
-          if (order.Total_Balance === 0) {
-            paymentStatusLabel = "ชำระครบ";
-            paymentStatusBgColor = "#28a745"; // Green for success
-          } else if (order.Total_Balance > 0) {
-            paymentStatusLabel = "ค้างจ่าย";
-            paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
-          } else {
-            paymentStatusLabel = "ไม่สำเร็จ";
-            paymentStatusBgColor = "#dc3545"; // Red for failure
-          }
-        } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-          paymentStatusLabel = "ไม่สำเร็จ";
-          paymentStatusBgColor = "#343a40"; // Gray for failure
-        } else {
-          paymentStatusLabel = "ไม่ระบุ";
-          paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
-        }
-
-        return (
-          <TableRow
-            key={index}
-            style={{
-              backgroundColor:
-                selectedOrderNo === order.Order_no ? "lightblue" : "inherit",
-              cursor: "pointer",
-            }}
-            onClick={() => handleOrderClick(order.Order_no)}
+            component={Paper}
+            sx={{ borderRadius: "0" }}
+            style={{ maxHeight: "100vh" }}
           >
-            <TableCell
-              style={{
-                textAlign: "center",
-                fontWeight: "bold",
-                width: "40px",
-                padding: "5px", // ลด padding เพื่อให้ช่องลำดับแคบลง
+            <Table
+              sx={{
+                tableLayout: "fixed", // บังคับให้ตารางใช้ layout แบบ fixed
+                width: "100%", // กำหนดความกว้างของตารางให้เต็ม
               }}
             >
-              {indexOfFirstItem + index + 1}
-            </TableCell>
-            <TableCell
-              style={{
-                textAlign: "center",
-                fontWeight: "bold",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {order.Event_Name}
-            </TableCell>
-            <TableCell
-              style={{
-                textAlign: "center",
-              }}
-            >
-              {order.Order_no}
-            </TableCell>
-            <TableCell style={{ textAlign: "center", whiteSpace: "nowrap" }}>
-              {order.Cust_name}
-            </TableCell>
-            <TableCell style={{ textAlign: "center", whiteSpace: "nowrap" }}>
-              {order.Cust_tel}
-            </TableCell>
-            <TableCell style={{ textAlign: "center" }}>
-              <div
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "8px",
-                  borderRadius: "18px",
-                  textAlign: "center",
-                  display: "inline-block",
-                  width: "60px",
-                  backgroundColor: paymentStatusBgColor,
-                  color: "#fff",
-                }}
-              >
-                {paymentStatusLabel}
-              </div>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  </Table>
-</TableContainer>
+              <TableHead sx={{ backgroundColor: "#11131A" }}>
+                <TableRow>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "40px", // กำหนดความกว้างให้แคบ
+                      minWidth: "40px", // ความกว้างขั้นต่ำ
+                      maxWidth: "40px", // ความกว้างสูงสุด
+                      padding: "5px", // ลด padding เพื่อให้คอลัมน์เล็กลง
+                    }}
+                  >
+                    ลำดับ
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "20%", // ใช้ความกว้างแบบสัดส่วน
+                    }}
+                  >
+                    ชื่องาน
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "20%",
+                    }}
+                  >
+                    เลขคำสั่งซื้อ
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "20%",
+                    }}
+                  >
+                    ชื่อลูกค้า
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "15%",
+                    }}
+                  >
+                    เบอร์โทร
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      width: "15%",
+                    }}
+                  >
+                    สถานะการจ่ายเงิน
+                  </TableCell>
+                </TableRow>
+              </TableHead>
 
+              <TableBody>
+                {filteredOrders.map((order: any, index: number) => {
+                  let paymentStatusLabel;
+                  let paymentStatusBgColor;
+
+                  if (order.Order_Status === 1) {
+                    if (order.Total_Balance === 0) {
+                      paymentStatusLabel = "ชำระครบ";
+                      paymentStatusBgColor = "#28a745"; // Green for success
+                    } else if (order.Total_Balance > 0) {
+                      paymentStatusLabel = "ค้างจ่าย";
+                      paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
+                    } else {
+                      paymentStatusLabel = "ไม่สำเร็จ";
+                      paymentStatusBgColor = "#dc3545"; // Red for failure
+                    }
+                  } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
+                    paymentStatusLabel = "ไม่สำเร็จ";
+                    paymentStatusBgColor = "#343a40"; // Gray for failure
+                  } else {
+                    paymentStatusLabel = "ไม่ระบุ";
+                    paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
+                  }
+
+                  return (
+                    <TableRow
+                      key={index}
+                      style={{
+                        backgroundColor:
+                          selectedOrderNo === order.Order_no
+                            ? "lightblue"
+                            : "inherit",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleOrderClick(order.Order_no)}
+                    >
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          width: "40px",
+                          padding: "5px", // ลด padding เพื่อให้ช่องลำดับแคบลง
+                        }}
+                      >
+                        {indexOfFirstItem + index + 1}
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {order.Event_Name}
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        {order.Order_no}
+                      </TableCell>
+                      <TableCell
+                        style={{ textAlign: "center", whiteSpace: "nowrap" }}
+                      >
+                        {order.Cust_name}
+                      </TableCell>
+                      <TableCell
+                        style={{ textAlign: "center", whiteSpace: "nowrap" }}
+                      >
+                        {order.Cust_tel}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div
+                          style={{
+                            border: "1px solid #ccc",
+                            padding: "8px",
+                            borderRadius: "18px",
+                            textAlign: "center",
+                            display: "inline-block",
+                            width: "60px",
+                            backgroundColor: paymentStatusBgColor,
+                            color: "#fff",
+                          }}
+                        >
+                          {paymentStatusLabel}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </div>
 
         <div style={{ marginLeft: 30 }}>
