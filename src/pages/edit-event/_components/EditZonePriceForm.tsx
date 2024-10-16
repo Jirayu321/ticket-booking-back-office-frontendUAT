@@ -1,4 +1,4 @@
-// import { CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { FC } from "react";
 import Select from "../../../components/common/input/date-picker/Select";
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
@@ -15,47 +15,44 @@ type EditZonePriceFormProp = {
 };
 
 const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
+  // Move hooks to the top level of the component
   const { selectedPlanGroupId, setSelectedPlanGroupId } =
     useEditZonePriceStore();
-
   const { data: planGroups, isPending: isLoadingPlanGroups } =
     useFetchPlanGroups();
-
   const { data: viewEventStocks, isPending: isLoadingViewEventStocks } =
     useFetchViewEventStocks({ eventId });
+  const { activeTab, setActiveTab } = useEditEventStore();
+  const navigate = useNavigate();
 
+  // Keep filtered plans after the data fetch
   const filteredPlans = viewEventStocks?.filter(
     (plan: any) => plan.PlanGroup_Id === selectedPlanGroupId
   );
 
-  console.log("filteredPlans", filteredPlans);
-
+  // Sync the plan group with the view event stocks
   useSyncPlanGroup(viewEventStocks);
 
-  // if (isLoadingPlanGroups || isLoadingViewEventStocks)
-  //   return <CircularProgress />;
+  // Early return for loading state after hooks have been declared
+  if (isLoadingPlanGroups || isLoadingViewEventStocks)
+    return <CircularProgress />;
 
-  const { activeTab, setActiveTab } = useEditEventStore();
-  const navigate = useNavigate();
+  // Function to handle back navigation
   const handleBackClick = () => {
     if (activeTab === "โซน & ราคา") {
-      // const userConfirmed = window.confirm(
-      //   "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมด"
-      // );
-      // if (userConfirmed) {
       setActiveTab("รายละเอียด");
-      // }
     } else {
       navigate("/all-events");
     }
   };
+
   return (
     <div className={styles.container}>
       {planGroups ? (
         <Select
           options={planGroups?.map((pg: any) => pg.PlanGroup_Name)}
           optionValues={planGroups?.map((pg: any) => pg.PlanGroup_id)}
-          value={selectedPlanGroupId}
+          value={selectedPlanGroupId ?? ""} // Ensure value is never undefined
           setter={setSelectedPlanGroupId}
           disabled={true}
           placeholder="เลือกผังร้าน"
@@ -63,7 +60,13 @@ const EditZonePriceForm: FC<EditZonePriceFormProp> = ({ eventId }) => {
       ) : null}
       <PlanList plans={filteredPlans} />
       <div className="next-form-section" style={{ position: "relative" }}>
-        <button className="buttonNext" onClick={handleBackClick}>
+        <button
+          className="buttonNext"
+          style={{
+            width: "10%",
+          }}
+          onClick={handleBackClick}
+        >
           ย้อนกลับ
         </button>
       </div>
