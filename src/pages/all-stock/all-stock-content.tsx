@@ -61,7 +61,7 @@ const getPublicStatusDetails = (status: string) => {
 const AllStockContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventStockData, setEventStockData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
     search: "",
     eventName: "",
@@ -121,7 +121,6 @@ const AllStockContent: React.FC = () => {
     } catch (error) {
       toast.error("Failed to fetch event stock data");
     } finally {
-      setIsLoading(false);
     }
   }
   useEffect(() => {
@@ -215,7 +214,6 @@ const AllStockContent: React.FC = () => {
 
   // if (isLoading) return <CircularProgress />;
   const handleClearFilters = () => {
-    fetchEventStockData();
     setFilters((prevFilters) => ({
       search: prevFilters.search !== "" ? prevFilters.search : "",
       eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
@@ -224,12 +222,13 @@ const AllStockContent: React.FC = () => {
       publicStatus:
         prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "",
     }));
+    fetchEventStockData();
   };
 
   return (
     <div
       className="all-orders-content"
-      style={{ display: "grid", height: "100%" }}
+      style={{ display: "grid", height: "100%", alignContent: "baseline" }}
     >
       <Header title="สต๊อกทั้งหมด" />
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
@@ -251,6 +250,7 @@ const AllStockContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-around",
               }}
             >
               <AddCardIcon
@@ -262,7 +262,6 @@ const AllStockContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -303,6 +302,7 @@ const AllStockContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-around",
               }}
             >
               <Avatar
@@ -315,7 +315,6 @@ const AllStockContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -358,6 +357,7 @@ const AllStockContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-around",
               }}
             >
               <InventoryIcon style={{ fontSize: 70 }} />
@@ -365,7 +365,6 @@ const AllStockContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box

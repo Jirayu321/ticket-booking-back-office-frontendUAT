@@ -506,7 +506,7 @@ const AllOrderContent: React.FC = () => {
   return (
     <div
       className="all-orders-content"
-      style={{ display: "grid", height: "100%" }}
+      style={{ display: "grid", height: "100%", alignContent: "baseline" }}
     >
       <Header title="คำสั่งซื้อทั้งหมด" />
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>

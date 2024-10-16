@@ -299,8 +299,20 @@ const AllSeatContent: React.FC = () => {
     >
       <Header title="ที่นั่งทั้งหมด" />
 
-      <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
-        <Grid container spacing={2}>
+      <Container
+        maxWidth={false}
+        sx={{
+          padding: 1,
+          display: "grid",
+          justifyContent: " flex-start",
+          margin: "5px 0px",
+        }}
+      >
+        <Grid
+          container
+          spacing={2}
+          sx={{ display: " grid", gridTemplateColumns: " auto auto auto auto" }}
+        >
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
@@ -316,7 +328,7 @@ const AllSeatContent: React.FC = () => {
                 cursor: "pointer",
                 fontSize: "18px",
                 boxSizing: "border-box",
-                width: "100%",
+                width: "250px",
                 justifyContent: "center",
                 display: "grid",
                 gridTemplateColumns: "auto auto",
@@ -364,7 +376,7 @@ const AllSeatContent: React.FC = () => {
                 cursor: "pointer",
                 fontSize: "18px",
                 boxSizing: "border-box",
-                width: "100%",
+                width: "250px",
                 justifyContent: "center",
                 display: "grid",
                 gridTemplateColumns: "auto auto",
