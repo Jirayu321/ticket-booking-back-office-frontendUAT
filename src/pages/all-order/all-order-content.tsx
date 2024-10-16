@@ -123,13 +123,13 @@ const AllOrderContent: React.FC = () => {
   const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
-  const statusMap = {
-    1: "สำเร็จ",
-    2: "มีแก้ไข",
-    13: "ขอคืนเงิน",
-    3: "ไม่สำเร็จเพราะติด R",
-    4: "ไม่สำเร็จจาก Omise",
-  };
+  // const statusMap = {
+  //   1: "สำเร็จ",
+  //   2: "มีแก้ไข",
+  //   13: "ขอคืนเงิน",
+  //   3: "ไม่สำเร็จเพราะติด R",
+  //   4: "ไม่สำเร็จจาก Omise",
+  // };
 
   const filteredOrders = orderHData
     .filter((order) => {

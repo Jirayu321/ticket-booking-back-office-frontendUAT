@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-
 import {
   Button,
-  CircularProgress,
   Pagination,
   Paper,
   Table,
@@ -17,6 +15,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import toast from "react-hot-toast";
 import { FaCopy } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -43,21 +42,28 @@ const formatEventTime = (dateTime: string | null) => {
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState({
-    sortBy: "publish-date",
-    publishStatus: "all",
-    status: "all",
-    search: "",
-    startDate: null as string | null,
-    endDate: null as string | null,
-    dateFilterType: "publish-date",
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("event");
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          sortBy: "publish-date",
+          publishStatus: "all",
+          status: "all",
+          search: "",
+          startDate: null as string | null,
+          endDate: null as string | null,
+          dateFilterType: "publish-date",
+        };
   });
+
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
     dayjs().startOf("month")
   );
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(
     dayjs().endOf("month")
   );
+  
   const { data: events, isPending: isLoadingEventList } = useFetchEventList({
     eventId: null,
   });
@@ -79,49 +85,63 @@ const AllEventContent: React.FC = () => {
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
 
-  const handleUpdateFilters = (event: React.ChangeEvent<any>) => {
+  const handleTextFieldChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
-    setFilters((prev) => ({
-      ...prev,
+  
+    const updatedFilters = {
+      ...filters,
       [name]: value,
-    }));
+    };
+  
+    setFilters(updatedFilters);
+    localStorage.setItem("event", JSON.stringify(updatedFilters));
+  };
+  
+  const handleUpdateFilters = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+  
+    const updatedFilters = {
+      ...filters,
+      [name]: value,
+    };
+  
+    setFilters(updatedFilters);
+    localStorage.setItem("event", JSON.stringify(updatedFilters));
   };
 
   const handleDateRangeChange = (
     startDate: dayjs.Dayjs | null,
     endDate: dayjs.Dayjs | null
   ) => {
-    // console.log("handleDateRangeChange called with:", { startDate, endDate });
-
-    // Set startDate to 00:01 and endDate to 23:59
     const adjustedStartDate = startDate
       ? startDate.hour(0).minute(1).second(0)
       : null;
     const adjustedEndDate = endDate
       ? endDate.hour(23).minute(59).second(59)
       : null;
-
-    // console.log("Adjusted dates:", { adjustedStartDate, adjustedEndDate });
-
-    setFilters((prev) => ({
-      ...prev,
+  
+    const updatedFilters = {
+      ...filters,
       startDate: adjustedStartDate
         ? adjustedStartDate.format("YYYY-MM-DD HH:mm:ss")
         : null,
       endDate: adjustedEndDate
         ? adjustedEndDate.format("YYYY-MM-DD HH:mm:ss")
         : null,
-    }));
+    };
+  
+    setFilters(updatedFilters);
+    localStorage.setItem("event", JSON.stringify(updatedFilters));
   };
 
   const handleStartDateChange = (newValue: dayjs.Dayjs | null) => {
-    // console.log("handleStartDateChange called with:", newValue);
     setStartDate(newValue);
     handleDateRangeChange(newValue, endDate);
   };
 
   const handleEndDateChange = (newValue: dayjs.Dayjs | null) => {
-    // console.log("handleEndDateChange called with:", newValue);
     setEndDate(newValue);
     handleDateRangeChange(startDate, newValue);
   };
@@ -189,14 +209,13 @@ const AllEventContent: React.FC = () => {
     })
     .slice(indexOfFirstItem, indexOfLastItem);
 
-  if (isLoadingEventList) return <CircularProgress />;
-
   return (
     <div
       className="all-events-content"
-      style={{ display: "grid", height: "100%" }}
+      style={{ display: "grid", height: "100%", alignContent: "baseline" }}
     >
       <Header title="งานทั้งหมด" />
+
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -394,7 +413,7 @@ const AllEventContent: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
-      {/* wdw */}
+
       <div
         style={{
           backgroundColor: "#f7f7f7",
@@ -415,7 +434,7 @@ const AllEventContent: React.FC = () => {
               <TextField
                 name="search"
                 value={filters.search}
-                onChange={handleUpdateFilters}
+                onChange={handleTextFieldChange}
                 variant="outlined"
                 label="ค้นจากชื่องาน"
                 InputLabelProps={{
