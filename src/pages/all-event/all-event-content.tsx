@@ -63,8 +63,8 @@ const AllEventContent: React.FC = () => {
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(
     dayjs().endOf("month")
   );
-  
-  const { data: events, isPending: isLoadingEventList } = useFetchEventList({
+
+  const { data: events } = useFetchEventList({
     eventId: null,
   });
 
@@ -89,24 +89,24 @@ const AllEventContent: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-  
+
     const updatedFilters = {
       ...filters,
       [name]: value,
     };
-  
+
     setFilters(updatedFilters);
     localStorage.setItem("event", JSON.stringify(updatedFilters));
   };
-  
+
   const handleUpdateFilters = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-  
+
     const updatedFilters = {
       ...filters,
       [name]: value,
     };
-  
+
     setFilters(updatedFilters);
     localStorage.setItem("event", JSON.stringify(updatedFilters));
   };
@@ -121,7 +121,7 @@ const AllEventContent: React.FC = () => {
     const adjustedEndDate = endDate
       ? endDate.hour(23).minute(59).second(59)
       : null;
-  
+
     const updatedFilters = {
       ...filters,
       startDate: adjustedStartDate
@@ -131,7 +131,7 @@ const AllEventContent: React.FC = () => {
         ? adjustedEndDate.format("YYYY-MM-DD HH:mm:ss")
         : null,
     };
-  
+
     setFilters(updatedFilters);
     localStorage.setItem("event", JSON.stringify(updatedFilters));
   };

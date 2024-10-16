@@ -296,8 +296,8 @@ const AllOrderContent: React.FC = () => {
     try {
       const OrderAll = await getOrderAll();
       const evntDetailAll = await getAllEventList();
-      console.log("fetchOrderData", OrderAll);
-      console.log("evntDetailAll:", evntDetailAll);
+      // console.log("fetchOrderData", OrderAll);
+      // console.log("evntDetailAll:", evntDetailAll);
 
       setEvntDetail(
         evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
@@ -600,7 +600,58 @@ const AllOrderContent: React.FC = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography sx={{ fontSize: "23px" }}>ยอดขาย</Typography>
+                  <Typography sx={{ fontSize: "23px" }}>ยอดขายทั้งหมด</Typography>
+
+                  {filters.eventName !== "" ? (
+                    <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
+                      {formatNumberWithCommas(totalNetPriceWithZeroBalance)}
+                    </Typography>
+                  ) : null}
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                backgroundColor: "rgba(207, 183, 11, 0.1)",
+                color: "black",
+                padding: "15px",
+                borderRadius: "4px",
+                borderColor: "#CFB70B",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                cursor: "pointer",
+                fontSize: "18px",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <Avatar
+                src="/money.svg"
+                alt="ยอดขาย"
+                className="filter-icon"
+                sx={{ width: 70, height: 70 }}
+              />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  paddingLeft: "60px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                   {filters.eventName !== "" ? (
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
