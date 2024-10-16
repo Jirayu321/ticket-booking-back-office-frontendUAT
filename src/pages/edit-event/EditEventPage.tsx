@@ -33,13 +33,15 @@ const EditEventPage = () => {
 
   return (
     <Container>
-      <Header title="งานทั้งหมด" />
-      {event ? <SubHeader event={event} /> : null}
-      <Steps />
-      {activeTab === "รายละเอียด" && <Form />}
-      {activeTab === "โซน & ราคา" && (
-        <EditZonePriceForm eventId={Number(eventId)} />
-      )}
+      <div style={{ display: "grid", height: "100%",alignContent:"baseline" }}>
+        <Header title="งานทั้งหมด" />
+        {event ? <SubHeader event={event}/> : null}
+        <Steps />
+        {activeTab === "รายละเอียด" && <Form />}
+        {activeTab === "โซน & ราคา" && (
+          <EditZonePriceForm eventId={Number(eventId)} />
+        )}
+      </div>
     </Container>
   );
 };

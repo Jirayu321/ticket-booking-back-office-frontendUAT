@@ -79,7 +79,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
   }
 
   return (
-    <div className={styles.subHeader}>
+    <div className={styles.subHeader} style={{ marginTop: "-10px" }}>
       <BackButton />
       <div className="toggle-container">
         <PublishButton event={event} />

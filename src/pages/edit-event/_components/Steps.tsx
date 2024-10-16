@@ -4,7 +4,10 @@ import useEditEventStore from "../_hook/useEditEventStore";
 const Steps = () => {
   const { activeTab, isDetailCompleted } = useEditEventStore();
   return (
-    <div className="nav-menu">
+    <div
+      className="nav-menu"
+      style={{ width: "100%", padding: 0, paddingTop: 10, height: 75 }}
+    >
       <div className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}>
         <img
           src={isDetailCompleted ? "/check-on.svg" : "/check-off.svg"}

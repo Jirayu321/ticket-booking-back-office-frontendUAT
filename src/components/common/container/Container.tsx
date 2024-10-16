@@ -12,7 +12,12 @@ const Container: FC<ContainerProp> = ({ children }) => {
     <div className={styles.container}>
       {/* <Sidebar /> */}
       <Sidebars />
-      <div className={styles.content}>{children}</div>
+      <div
+        className={styles.content}
+        // style={{ display: "grid", height: "100%", alignContent: "baseline" }}
+      >
+        {children}
+      </div>
     </div>
   );
 };
