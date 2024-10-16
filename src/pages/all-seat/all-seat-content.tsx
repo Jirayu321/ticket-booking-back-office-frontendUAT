@@ -295,7 +295,7 @@ const AllSeatContent: React.FC = () => {
   return (
     <div
       className="all-seats-content"
-      style={{ display: "grid", height: "100%" }}
+      style={{ display: "grid", height: "100%", alignContent: "baseline" }}
     >
       <Header title="ที่นั่งทั้งหมด" />
 
