@@ -436,7 +436,7 @@ const OverviewContent: React.FC = () => {
                   },
                 }}
               />
-              <FormControl>
+              {/* <FormControl>
                 <InputLabel htmlFor="publish-status">ช่องทางการำระ</InputLabel>
                 <Select
                   id="publish-status"
@@ -454,7 +454,7 @@ const OverviewContent: React.FC = () => {
                   <MenuItem value="published">เผยแพร่</MenuItem>
                   <MenuItem value="unpublished">ไม่เผยแพร่</MenuItem>
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
               <FormControl>
                 <InputLabel htmlFor="date-filter-type">
