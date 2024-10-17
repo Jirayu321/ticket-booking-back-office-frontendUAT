@@ -147,12 +147,16 @@ const AllOrderContent: React.FC = () => {
         (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
         (filters.status === "ไม่สำเร็จเพราะติด R" &&
           order.Order_Status === 4) ||
-        (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 4) ||
+        (filters.status === "ไม่สำเร็จจาก Omise" &&
+          order.Order_Status === 4 &&
+          order.Total_Balance === null) ||
         filters.status === "all";
 
       const mstchesStatusPayment =
         (filters.paymentStatus === "สำเร็จ" && order.Total_Balance === 0) ||
         (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
+        (filters.paymentStatus === "ไม่สำเร็จ" &&
+          order.Total_Balance === null) ||
         filters.paymentStatus === "all";
 
       const paymentDate = new Date(order.Payment_Date7);
@@ -358,7 +362,7 @@ const AllOrderContent: React.FC = () => {
     .filter((order) => order.Total_Balance !== 0 && order.Order_Status === 1)
     .reduce((sum, order) => sum + order.Total_Balance, 0);
 
-  const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2
+  const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
 
   console.log(
     "ค้างจ่าย",
@@ -397,7 +401,6 @@ const AllOrderContent: React.FC = () => {
     totalNetPriceWithZeroBalance,
     dataP
   );
-
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
@@ -1073,13 +1076,13 @@ const AllOrderContent: React.FC = () => {
               >
                 ค้นหา
               </Button>
-              {filteredOrders.length === 0 ? (
-                  <p style={{ color: "red", marginLeft: 10 }}>
-                    ผลการค้นหา 0 รายการ
-                  </p>
-                ) : (
-                  <p style={{}}></p>
-                )}
+              {filteredOrders?.length === 0 ? (
+                <p style={{ color: "red", marginLeft: 10 }}>
+                  ผลการค้นหา 0 รายการ
+                </p>
+              ) : (
+                <p style={{}}></p>
+              )}
             </Box>
           </Box>
         </Container>
@@ -1092,7 +1095,6 @@ const AllOrderContent: React.FC = () => {
           gridTemplateColumns: "40% auto",
           marginLeft: 10,
           maxHeight: "70vh",
-          overflowY: "auto",
         }}
       >
         <div>
@@ -1103,9 +1105,10 @@ const AllOrderContent: React.FC = () => {
           <TableContainer
             component={Paper}
             sx={{ borderRadius: "0" }}
-            style={{ maxHeight: "100vh" }}
+            style={{ maxHeight: "70vh" }}
           >
             <Table
+            stickyHeader
               sx={{
                 tableLayout: "fixed",
                 width: "100%",
@@ -1123,6 +1126,10 @@ const AllOrderContent: React.FC = () => {
                       minWidth: "40px",
                       maxWidth: "40px",
                       padding: "5px",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
                     }}
                   >
                     ลำดับ
@@ -1133,7 +1140,11 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "20%", // ใช้ความกว้างแบบสัดส่วน
+                      width: "20%", 
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,// ใช้ความกว้างแบบสัดส่วน
                     }}
                   >
                     ชื่องาน
@@ -1145,6 +1156,10 @@ const AllOrderContent: React.FC = () => {
                       textAlign: "center",
                       color: "#fff",
                       width: "20%",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
                     }}
                   >
                     เลขคำสั่งซื้อ
@@ -1156,6 +1171,10 @@ const AllOrderContent: React.FC = () => {
                       textAlign: "center",
                       color: "#fff",
                       width: "20%",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
                     }}
                   >
                     ชื่อลูกค้า
@@ -1167,6 +1186,10 @@ const AllOrderContent: React.FC = () => {
                       textAlign: "center",
                       color: "#fff",
                       width: "15%",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
                     }}
                   >
                     เบอร์โทร
@@ -1178,6 +1201,10 @@ const AllOrderContent: React.FC = () => {
                       textAlign: "center",
                       color: "#fff",
                       width: "15%",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
                     }}
                   >
                     สถานะการจ่ายเงิน

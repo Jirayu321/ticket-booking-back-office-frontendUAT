@@ -504,7 +504,7 @@ const AllStockContent: React.FC = () => {
                 ค้นหา
               </Button>
 
-              {filteredStocks.length === 0 ? (
+              {filteredStocks?.length === 0 ? (
                 <p style={{ color: "red", marginLeft: 10 }}>
                   ผลการค้นหา 0 รายการ
                 </p>
@@ -520,7 +520,7 @@ const AllStockContent: React.FC = () => {
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "100vh", overflowY: "auto" }}
       >
-        <Table>
+        <Table stickyHeader sx={{ minWidth: 800 }} >
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
               <TableCell
@@ -529,6 +529,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ลำดับ
@@ -539,6 +543,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ชื่องาน
@@ -549,6 +557,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ชื่อโซน
@@ -559,6 +571,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ประเภทบัตร
@@ -569,6 +585,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 จำนวนบัตรทั้งหมด
@@ -579,6 +599,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 จำนวนที่/บัตร
@@ -589,6 +613,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 จำนวนบัตรที่ถูกซื้อ
@@ -599,6 +627,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 จำนวนบัตรคงเหลือ
@@ -609,6 +641,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 จำนวนที่นั่งคงเหลือ
@@ -619,6 +655,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานะ Event
@@ -629,6 +669,10 @@ const AllStockContent: React.FC = () => {
                   fontSize: "17px",
                   textAlign: "center",
                   color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานะเผยแพร่

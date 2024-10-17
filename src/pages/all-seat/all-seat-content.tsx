@@ -527,7 +527,7 @@ const AllSeatContent: React.FC = () => {
               >
                 ค้นหา
               </Button>
-              {filteredTickets.length === 0 ? (
+              {filteredTickets?.length === 0 ? (
                 <p style={{color: "red", marginLeft:10}}>ผลการค้นหา 0 รายการ</p>
               ) : (
                 <p style={{}}></p>
@@ -541,7 +541,7 @@ const AllSeatContent: React.FC = () => {
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "72vh" }}
       >
-        <Table>
+        <Table stickyHeader sx={{ minWidth: 800 }}>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
               <TableCell
@@ -551,6 +551,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "10px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ลำดับ
@@ -562,6 +566,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ชื่องาน
@@ -573,6 +581,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 วันจัดงาน
@@ -584,6 +596,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ชื่อลูกค้า
@@ -595,6 +611,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 เบอร์โทร
@@ -606,6 +626,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "50px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 รหัสที่นั่ง
@@ -617,6 +641,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "50px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 เลขโต๊ะ
@@ -628,6 +656,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "50px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 โซน
@@ -639,6 +671,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "80px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 เลขคำสั่งซื้อ
@@ -650,6 +686,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานะการพิมพ์
@@ -661,6 +701,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "100px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานะการเช็คอิน
@@ -672,6 +716,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "50px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 เวลาเช็คอิน
@@ -683,6 +731,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "20px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ครั้งที่พิมพ์
@@ -694,6 +746,10 @@ const AllSeatContent: React.FC = () => {
                   fontWeight: "bold",
                   textAlign: "center",
                   width: "50px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 QR CODE

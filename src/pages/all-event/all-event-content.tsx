@@ -568,7 +568,7 @@ const AllEventContent: React.FC = () => {
                 >
                   ค้นหา
                 </Button>
-                {filteredEvents.length === 0 ? (
+                {filteredEvents?.length === 0 ? (
                   <p style={{ color: "red", marginLeft: 10 }}>
                     ผลการค้นหา 0 รายการ
                   </p>
@@ -603,7 +603,7 @@ const AllEventContent: React.FC = () => {
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "68vh", overflowY: "auto" }}
       >
-        <Table>
+        <Table stickyHeader sx={{ minWidth: 800 }}>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
               <TableCell
@@ -612,6 +612,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ลำดับ
@@ -622,6 +626,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 ชื่องาน
@@ -632,6 +640,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานที่
@@ -642,6 +654,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 วันที่เผยแพร่
@@ -652,6 +668,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 วันจัดงาน
@@ -662,6 +682,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 เผยแพร่
@@ -672,6 +696,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 สถานะ
@@ -682,6 +710,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 Link
@@ -692,6 +724,10 @@ const AllEventContent: React.FC = () => {
                   fontWeight: "bold",
                   fontSize: "17px",
                   textAlign: "center",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
                 }}
               >
                 รายละเอียด
@@ -723,7 +759,7 @@ const AllEventContent: React.FC = () => {
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {Event_Name}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "left", color: "black" }}>
+                  <TableCell sx={{ textAlign: "left", color: "black",width:100 }}>
                     {Event_Addr}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
