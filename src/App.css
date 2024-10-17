@@ -140,3 +140,7 @@ div:where(.swal2-container) {
   background-color: initial; /* ไม่ให้เปลี่ยนสี */
   color: inherit; /* ใช้สีปกติ */
 }
+.react-datepicker__tab-loop{
+  position: absolute;
+  z-index: 3;
+}

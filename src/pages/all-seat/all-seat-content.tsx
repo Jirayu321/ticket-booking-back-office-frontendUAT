@@ -62,22 +62,14 @@ const AllSeatContent: React.FC = () => {
       const data = await getViewTicketList();
       console.log("data", data);
       const evntDetailAll = await getAllEventList();
-      console.log("evntDetailAll:", evntDetailAll);
+      // console.log("evntDetailAll:", evntDetailAll);
 
       setEvntDetail(
         evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
       );
+
       if (Array.isArray(data)) {
-        const sortedData = data.sort((a, b) => {
-          if (a.Event_id !== b.Event_id) {
-            return a.Event_id - b.Event_id; // เรียงตาม Event_id ก่อน
-          } else if (a.Plan_id !== b.Plan_id) {
-            return a.Plan_id - b.Plan_id; // หาก Event_id เท่ากัน เรียงตาม Plan_id
-          } else {
-            return a.Ticket_Running - b.Ticket_Running; // หาก Plan_id เท่ากัน เรียงตาม Ticket_Running
-          }
-        });
-        setTicketData(sortedData);
+        setTicketData(data);
       } else if (data?.ticketList && Array.isArray(data.ticketList)) {
         const sortedData = data.ticketList.sort((a, b) => {
           if (a.Event_id !== b.Event_id) {
@@ -88,7 +80,7 @@ const AllSeatContent: React.FC = () => {
             return a.Ticket_Running - b.Ticket_Running; // หาก Plan_id เท่ากัน เรียงตาม Ticket_Running
           }
         });
-
+        // console.log("sortedData", data.ticketList);
         setTicketData(sortedData);
       } else {
         toast.error("Unexpected data format");
@@ -509,7 +501,7 @@ const AllSeatContent: React.FC = () => {
                 <MenuItem value="ยังไม่เช็คอิน">ยังไม่เช็คอิน</MenuItem>
               </Select>
             </FormControl>
-            <div style={{ color: "black" ,display:"flex"}}>
+            <div style={{ color: "black", display: "flex" }}>
               <Button
                 variant="contained"
                 color="primary"
@@ -528,7 +520,9 @@ const AllSeatContent: React.FC = () => {
                 ค้นหา
               </Button>
               {filteredTickets?.length === 0 ? (
-                <p style={{color: "red", marginLeft:10}}>ผลการค้นหา 0 รายการ</p>
+                <p style={{ color: "red", marginLeft: 10 }}>
+                  ผลการค้นหา 0 รายการ
+                </p>
               ) : (
                 <p style={{}}></p>
               )}

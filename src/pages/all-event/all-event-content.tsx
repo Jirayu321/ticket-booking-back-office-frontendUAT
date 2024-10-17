@@ -169,7 +169,7 @@ const AllEventContent: React.FC = () => {
     ?.filter((event) => {
       if (
         filters.search &&
-        !event.Event_Name.toLowerCase().includes(filters.search.toLowerCase())
+        !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
       ) {
         return false;
       }

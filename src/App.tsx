@@ -56,33 +56,33 @@ function App() {
           <Route
             path="/overview"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Overview />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/all-events"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <AllEvent />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/all-events/create-event"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <CreateNewEvent />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/edit-event/:eventId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <EditEventPage />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route path="/zone" element={<ZonePage />} />

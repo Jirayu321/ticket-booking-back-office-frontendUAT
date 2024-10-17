@@ -107,7 +107,7 @@ function OutstandingPayment(data: any, filteredOrders: any) {
     .filter((order) => order.Total_Balance !== 0) // กรอง Total_Balance ที่ไม่เท่ากับ 0
     .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
 
-  console.log("totalBalance", totalOutstandingPayment, dataP);
+  // console.log("totalBalance", totalOutstandingPayment, dataP);
 
   let res = formatNumberWithCommas(totalOutstandingPayment);
 
@@ -153,7 +153,7 @@ function totalNetPrice(data: any, filteredOrders: any) {
     .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
 
   const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
-  console.log("total", x, dataP);
+  // console.log("total", x, dataP);
 
   let res = formatNumberWithCommas(x);
 
@@ -383,6 +383,8 @@ const OverviewContent: React.FC = () => {
       })
       .slice(indexOfFirstItem, indexOfLastItem);
   }, [combinedData, filters, indexOfFirstItem, indexOfLastItem]);
+  
+  console.log("filteredEvents", filteredEvents);
 
   const tableCellHeadStyle = {
     color: "white",
@@ -653,17 +655,6 @@ const OverviewContent: React.FC = () => {
                 ค้างชำระ
               </TableCell>
 
-              {/* <TableCell
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  textAlign: "center",
-                }}
-              >
-                ช่องทางการำระ
-              </TableCell> */}
-
               <TableCell
                 sx={{
                   ...tableCellHeadStyle,
@@ -741,6 +732,14 @@ const OverviewContent: React.FC = () => {
                       {orders
                         ? OutstandingPayment(orders, orders)
                         : "ยังไม่ระบุ"}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", color: "black" }}>
+                      {orders?.at(0)?.UnCheckin_By_Event
+                        ? orders?.at(0)?.UnCheckin_By_Event + orders.at(0)?.Checkin_By_Event
+                        : ""}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", color: "black" }}>
+                      {orders ? orders.at(0)?.Checkin_By_Event : ""}
                     </TableCell>
                   </TableRow>
                 );

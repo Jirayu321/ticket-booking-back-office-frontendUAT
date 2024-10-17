@@ -28,8 +28,6 @@ import {
 import toast from "react-hot-toast";
 import Header from "../common/header";
 import OrderDetailContent from "../order-detail/order-detail-content";
-// import { getOrderH } from "../../services/order-h.service";
-// import { getOrderD } from "../../services/order-d.service";
 
 import { getOrderAll } from "../../services/order-all.service";
 import { getAllEventList } from "../../services/event-list.service";
@@ -48,8 +46,8 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const MAX_ITEMS_PER_PAGE = 50;
 
+moment.locale("th");
 const AllOrderContent: React.FC = () => {
-  moment.locale("th");
   const [currentPage, setCurrentPage] = useState(1);
   const [orderHData, setOrderHData] = useState<any[]>([]);
   const [orderDData, setOrderDData] = useState<any[]>([]);
@@ -147,22 +145,24 @@ const AllOrderContent: React.FC = () => {
         (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
         (filters.status === "ไม่สำเร็จเพราะติด R" &&
           order.Order_Status === 4) ||
-        (filters.status === "ไม่สำเร็จจาก Omise" &&
-          order.Order_Status === 4 &&
-          order.Total_Balance === null) ||
+        (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 5) ||
         filters.status === "all";
 
       const mstchesStatusPayment =
         (filters.paymentStatus === "สำเร็จ" && order.Total_Balance === 0) ||
         (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
-        (filters.paymentStatus === "ไม่สำเร็จ" &&
-          order.Total_Balance === null) ||
         filters.paymentStatus === "all";
 
-      const paymentDate = new Date(order.Payment_Date7);
-      const matchesDate =
-        (!startDate || paymentDate >= startDate) &&
-        (!endDate || paymentDate <= endDate);
+        const orderDatetime = new Date(order.Order_datetime);
+        const normalizedStartDate = startDate ? new Date(startDate.setHours(0, 0, 0, 0)) : null; // กำหนดเวลาเป็น 00:00 น.
+        const normalizedEndDate = endDate ? new Date(endDate.setHours(23, 59, 59, 999)) : null; // กำหนดเวลาเป็น 23:59 น.
+      
+        console.log("Order_datetime:", orderDatetime);
+        console.log("startDate:", normalizedStartDate);
+      
+        const matchesDate =
+          (!normalizedStartDate || orderDatetime >= normalizedStartDate) &&
+          (!normalizedEndDate || orderDatetime <= normalizedEndDate);
 
       return (
         matchesSearch &&
@@ -241,14 +241,14 @@ const AllOrderContent: React.FC = () => {
           new Date(b.Payment_Date7).getTime()
       );
 
-    console.log("h:", h);
+    // console.log("h:", h);
     setOrderHispayDetail(h);
   };
 
   const handleOrderprevData = (orderNo: any, data: any, orderDData: any) => {
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
-    console.log("orderHData", orderHData);
+    // console.log("orderHData", orderHData);
 
     const latestOrder = data
       .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
@@ -301,8 +301,6 @@ const AllOrderContent: React.FC = () => {
     try {
       const OrderAll = await getOrderAll();
       const evntDetailAll = await getAllEventList();
-      console.log("fetchOrderData", OrderAll);
-      // console.log("evntDetailAll:", evntDetailAll);
 
       setEvntDetail(
         evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
@@ -310,12 +308,13 @@ const AllOrderContent: React.FC = () => {
       setOrderHData(
         OrderAll?.orderAll.filter((order: any) => order.DT_order_id !== null)
       );
-
       setOrderDData(
         OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
       );
+
       const savedOrderDetail = localStorage.getItem("orderDetail");
       const savedOrderDetailFilter = localStorage.getItem("filters");
+
       if (savedOrderDetail && savedOrderDetailFilter) {
         const x = OrderAll?.orderAll.filter(
           (order: any) => order.Net_Price !== null
@@ -326,7 +325,7 @@ const AllOrderContent: React.FC = () => {
         setFilters(JSON.parse(savedOrderDetailFilter));
         handleOrderprevData(savedOrderDetail, x, y);
       } else if (savedOrderDetail) {
-        console.log("hi2");
+        // console.log("hi2");
         const x = OrderAll?.orderAll.filter(
           (order: any) => order.Net_Price !== null
         );
@@ -339,8 +338,6 @@ const AllOrderContent: React.FC = () => {
       }
     } catch (error) {
       toast.error("Failed to fetch order data");
-    } finally {
-      console.log("มาหน้านี้โหลดข้อมูลเสร็จละ");
     }
   }
 
@@ -364,12 +361,12 @@ const AllOrderContent: React.FC = () => {
 
   const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
 
-  console.log(
-    "ค้างจ่าย",
-    OutstandingPayment,
-    OutstandingPayment2,
-    OutstandingPayment3
-  );
+  // console.log(
+  //   "ค้างจ่าย",
+  //   OutstandingPayment,
+  //   OutstandingPayment2,
+  //   OutstandingPayment3
+  // );
 
   const dataP = Object.values(
     orderHData
@@ -396,20 +393,17 @@ const AllOrderContent: React.FC = () => {
     0
   );
 
-  console.log(
-    "totalNetPriceWithZeroBalance",
-    totalNetPriceWithZeroBalance,
-    dataP
-  );
+  // console.log(
+  //   "totalNetPriceWithZeroBalance",
+  //   totalNetPriceWithZeroBalance,
+  //   dataP
+  // );
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
-  console.log("totalNetPrice", totalNetPrice);
+  // console.log("totalNetPrice", totalNetPrice);
 
   const handleClearFilters = () => {
-    setStartDate((prevStartDate) =>
-      prevStartDate !== null ? prevStartDate : null
-    );
     setFilters((prevFilters) => ({
       orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
       eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
@@ -443,7 +437,7 @@ const AllOrderContent: React.FC = () => {
 
   const CustomInput = React.forwardRef(({ value, onClick }, ref) => {
     const formatBuddhistYear = (dateString) => {
-      console.log("Input dateString:", dateString);
+      // console.log("Input dateString:", dateString);
 
       // แยกวันที่ช่วงวันที่ออกจากกัน (ถ้ามี)
       const [startDateStr, endDateStr] = dateString.split(" - ");
@@ -474,9 +468,9 @@ const AllOrderContent: React.FC = () => {
         }
       }
 
-      console.log("Parsed startDate using moment:", parsedStartDate);
+      // console.log("Parsed startDate using moment:", parsedStartDate);
       if (parsedEndDate) {
-        console.log("Parsed endDate using moment:", parsedEndDate);
+        // console.log("Parsed endDate using moment:", parsedEndDate);
       }
 
       const formattedStartDate = parsedStartDate
@@ -922,27 +916,6 @@ const AllOrderContent: React.FC = () => {
                 />
               </div>
 
-              {/* </FormControl> */}
-              <FormControl sx={{ backgroundColor: "white" }}>
-                {/* <DatePicker
-                  label="วันที่สิ้นสุด"
-                  value={endDate}
-                  onChange={(date) => handleDateRangeChange(startDate, date)}
-                  format="DD/MM/YYYY"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& input": {
-                        border: "none",
-                        transform: "translateY(5px)",
-                        backgroundColor: "white",
-                        width: "90px",
-                        height: 30,
-                      },
-                    },
-                  }}
-                /> */}
-              </FormControl>
-
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   variant="outlined"
@@ -1045,7 +1018,6 @@ const AllOrderContent: React.FC = () => {
                     <MenuItem value="all">ทั้งหมด</MenuItem>
                     <MenuItem value="สำเร็จ">จ่ายครบ</MenuItem>
                     <MenuItem value="ค้างจ่าย">ค้างจ่าย</MenuItem>
-                    <MenuItem value="ไม่สำเร็จ">ไม่สำเร็จ</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -1093,7 +1065,7 @@ const AllOrderContent: React.FC = () => {
         style={{
           display: "grid",
           gridTemplateColumns: "40% auto",
-          marginLeft: 10,
+          justifyContent: "space-around",
           maxHeight: "70vh",
         }}
       >
@@ -1108,7 +1080,7 @@ const AllOrderContent: React.FC = () => {
             style={{ maxHeight: "70vh" }}
           >
             <Table
-            stickyHeader
+              stickyHeader
               sx={{
                 tableLayout: "fixed",
                 width: "100%",
@@ -1140,11 +1112,11 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "20%", 
+                      // width: "20%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
-                      zIndex: 2,// ใช้ความกว้างแบบสัดส่วน
+                      zIndex: 2, // ใช้ความกว้างแบบสัดส่วน
                     }}
                   >
                     ชื่องาน
@@ -1155,7 +1127,7 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "20%",
+                      // width: "20%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1170,7 +1142,7 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "20%",
+                      // width: "20%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1185,7 +1157,7 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "15%",
+                      // width: "15%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1200,14 +1172,29 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "15%",
+                      // width: "20%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
                       zIndex: 2,
                     }}
                   >
-                    สถานะการจ่ายเงิน
+                    สถานะ Order
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
+                      // width: "20%",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
+                    }}
+                  >
+                    สถานะจ่าย
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -1220,20 +1207,14 @@ const AllOrderContent: React.FC = () => {
                   if (order.Order_Status === 1) {
                     if (order.Total_Balance === 0) {
                       paymentStatusLabel = "ชำระครบ";
-                      paymentStatusBgColor = "#28a745"; // Green for success
+                      paymentStatusBgColor = "#28a745";
                     } else if (order.Total_Balance > 0) {
                       paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = "#ffc107"; // Yellow for pending payment
-                    } else {
-                      paymentStatusLabel = "ไม่สำเร็จ";
-                      paymentStatusBgColor = "#dc3545"; // Red for failure
+                      paymentStatusBgColor = "#ffc107";
                     }
-                  } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-                    paymentStatusLabel = "ไม่สำเร็จ";
-                    paymentStatusBgColor = "#343a40"; // Gray for failure
                   } else {
                     paymentStatusLabel = "ไม่ระบุ";
-                    paymentStatusBgColor = "#f8f9fa"; // Light gray for unknown status
+                    paymentStatusBgColor = "#f8f9fa";
                   }
 
                   return (
@@ -1262,26 +1243,15 @@ const AllOrderContent: React.FC = () => {
                         style={{
                           textAlign: "center",
                           fontWeight: "bold",
-                          whiteSpace: "nowrap",
                         }}
                       >
                         {order.Event_Name}
                       </TableCell>
-                      <TableCell
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        {order.Order_no}
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: "center", whiteSpace: "nowrap" }}
-                      >
+                      <TableCell style={{}}>{order.Order_no}</TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
                         {order.Cust_name}
                       </TableCell>
-                      <TableCell
-                        style={{ textAlign: "center", whiteSpace: "nowrap" }}
-                      >
+                      <TableCell style={{ textAlign: "center" }}>
                         {order.Cust_tel}
                       </TableCell>
                       <TableCell style={{ textAlign: "center" }}>
@@ -1292,12 +1262,36 @@ const AllOrderContent: React.FC = () => {
                             borderRadius: "18px",
                             textAlign: "center",
                             display: "inline-block",
-                            width: "60px",
-                            backgroundColor: paymentStatusBgColor,
+                            width: "40px",
+                            backgroundColor: `${order.OrderSetColour}`,
                             color: "#fff",
                           }}
                         >
-                          {paymentStatusLabel}
+                          {order.OrderStatus_Name}
+                        </div>
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div
+                          style={{
+                            border:
+                              paymentStatusLabel === "ไม่ระบุ"
+                                ? "transparent"
+                                : "1px solid #ccc",
+                            padding: "8px",
+                            borderRadius: "18px",
+                            textAlign: "center",
+                            display: "inline-block",
+                            width: "40px",
+                            backgroundColor:
+                              paymentStatusLabel === "ไม่ระบุ"
+                                ? "transparent"
+                                : paymentStatusBgColor,
+                            color: "#fff",
+                          }}
+                        >
+                          {paymentStatusLabel === "ไม่ระบุ"
+                            ? ``
+                            : paymentStatusLabel}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1326,71 +1320,85 @@ const AllOrderContent: React.FC = () => {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "auto auto auto auto auto  auto",
-                      marginBottom: 20,
-                      justifyItems: "flex-start",
-                      alignItems: "center",
+                      gridTemplateColumns: "80% auto",
                     }}
                   >
-                    {/* <p>
-                      <strong>ชื่อโซน:</strong>
-                      <br />
-                      {orderDetail.at(0)?.Plan_Name}
-                    </p> */}
-                    {/* <p>
-                      <strong>
-                        ชื่อ
-                        {orderDetail.at(0)?.Ticket_Type_Name}:
-                      </strong>
-                      <br />
-                      {orderDetail.at(0)?.TicketNo_List}
-                    </p> */}
-                    <p>
-                      <strong>ชื่องาน:</strong>
-                      <br />
-                      {orderDetail.at(0)?.Event_Name}
-                    </p>
-                    <p>
-                      <strong>เวลาเริ่มงาน:</strong>
-                      <br />
-                      {orderDetail?.length === 0
-                        ? ``
-                        : handletime(orderDetail.at(0)?.Event_Time)}
-                    </p>
-                    <p style={{ textAlign: "center" }}>
-                      <strong>จำนวนที่นั่ง:</strong>
-                      <br />
-                      {totalSeats}
-                    </p>
-                    <p>
-                      <strong>ยอดสุทธิ:</strong>
-                      <br />
-                      {formatNumberWithCommas(totalPrice)}
-                    </p>
-
-                    <p>
-                      <strong>สถานะคำสั่งซื้อ:</strong>
-                      <br />
-                      <span
-                        style={{
-                          color:
-                            orderDetail.at(0)?.OrderStatus_Name === "สำเร็จ"
-                              ? "green"
-                              : orderDetail.at(0)?.OrderStatus_Name ===
-                                "รอดำเนินการ"
-                              ? "orange"
-                              : orderDetail.at(0)?.OrderStatus_Name ===
-                                "จ่ายไม่สำเร็จ"
-                              ? "red"
-                              : "black",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {orderDetail.at(0)?.OrderStatus_Name}
-                      </span>
-                    </p>
                     <div
-                    // style={{display:"flex",justifyContent:"flex-end"}}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "auto auto auto auto auto  auto",
+                        marginBottom: 20,
+                        justifyItems: "flex-start",
+                        alignItems: "center",
+                      }}
+                    >
+                      <p>
+                        <strong>ชื่องาน:</strong>
+                        <br />
+                        {orderDetail.at(0)?.Event_Name}
+                      </p>
+                      <p>
+                        <strong>เวลาเริ่มงาน:</strong>
+                        <br />
+                        {orderDetail?.length === 0
+                          ? ``
+                          : handletime(orderDetail.at(0)?.Event_Time)}
+                      </p>
+
+                      <p>
+                        <strong>Plan_Name:</strong>
+                        <br />
+                        <span>
+                          {orderDetail?.length === 0
+                            ? ``
+                            : `${orderDetail?.map((data) => data?.Plan_Name)}`}
+                        </span>
+                      </p>
+                      <p style={{ textAlign: "center" }}>
+                        <strong>จำนวนที่นั่ง:</strong>
+                        <br />
+                        {totalSeats}
+                      </p>
+                      <p>
+                        <strong>ยอดสุทธิ:</strong>
+                        <br />
+                        {formatNumberWithCommas(totalPrice)}
+                      </p>
+
+                      <p>
+                        <strong>สถานะคำสั่งซื้อ:</strong>
+                        <br />
+                        <span
+                          style={{
+                            color: ` ${orderDetail.at(0)?.OrderSetColour}`,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {orderDetail.at(0)?.OrderStatus_Name}
+                        </span>
+                      </p>
+                      <p>
+                        <strong>เวลาสั่งซื้อ:</strong>
+                        <br />
+                        {orderDetail?.length === 0
+                          ? ``
+                          : handletime(orderDetail.at(0)?.Order_datetime)}
+                      </p>
+
+                      <p>
+                        <strong>line_id:</strong>
+                        <br />
+                        {orderDetail?.length === 0
+                          ? ``
+                          : `${orderDetail.at(0)?.Cust_line}`}
+                      </p>
+                    </div>
+                    <div
+                      style={{
+                        display: "grid",
+                        justifyContent: "center",
+                        alignContent: "center",
+                      }}
                     >
                       {orderDetail.length !== 0 ? (
                         <Button
@@ -1399,6 +1407,7 @@ const AllOrderContent: React.FC = () => {
                           onClick={() =>
                             handleViewHistoryClick(orderDetail.at(0)?.Order_id)
                           }
+                          style={{ width: 110, height: 50 }}
                         >
                           ดูรายละเอียด
                         </Button>
@@ -1428,16 +1437,6 @@ const AllOrderContent: React.FC = () => {
               <Table>
                 <TableHead sx={{ backgroundColor: "#11131A" }}>
                   <TableRow>
-                    <TableCell
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "17px",
-                        textAlign: "center",
-                        color: "#fff",
-                      }}
-                    >
-                      ลำดับ
-                    </TableCell>
                     <TableCell
                       style={{
                         fontWeight: "bold",
@@ -1534,13 +1533,6 @@ const AllOrderContent: React.FC = () => {
 
                 <TableBody>
                   {orderHispayDetail.map((order: any, index: number) => {
-                    // const formattedEventTime = dayjs(order.Order_datetime)
-                    //   .subtract(7, "hour")
-                    //   .locale("th")
-                    //   .format("D/M/BBBB HH:mm");
-                    // const statusLabel =
-                    //   statusMap[order.Order_Status] || "ไม่ระบุ"; // Map numeric status to text
-
                     let paymentStatusLabel;
                     let paymentStatusBgColor;
 
@@ -1551,13 +1543,7 @@ const AllOrderContent: React.FC = () => {
                       } else if (order.Total_Balance > 0) {
                         paymentStatusLabel = "ค้างจ่าย";
                         paymentStatusBgColor = "#ffc107";
-                      } else {
-                        paymentStatusLabel = "ไม่สำเร็จ";
-                        paymentStatusBgColor = "#dc3545";
                       }
-                    } else if ([2, 13, 3, 4].includes(order.Order_Status)) {
-                      paymentStatusLabel = "ไม่สำเร็จ";
-                      paymentStatusBgColor = "#343a40";
                     } else {
                       paymentStatusLabel = "ไม่ระบุ";
                       paymentStatusBgColor = "#f8f9fa";
@@ -1575,28 +1561,28 @@ const AllOrderContent: React.FC = () => {
                         }}
                         // onClick={() => handleOrderClick(order.Order_no)}
                       >
-                        <TableCell
-                          style={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {indexOfFirstItem + index + 1}
-                        </TableCell>
                         <TableCell style={{ textAlign: "center" }}>
                           <div
                             style={{
-                              border: "1px solid #ccc",
+                              border:
+                                paymentStatusLabel === "ไม่ระบุ"
+                                  ? "transparent"
+                                  : "1px solid #ccc",
                               padding: "8px",
                               borderRadius: "18px",
                               textAlign: "center",
                               display: "inline-block",
                               width: "100px",
-                              backgroundColor: paymentStatusBgColor,
+                              backgroundColor:
+                                paymentStatusLabel === "ไม่ระบุ"
+                                  ? "transparent"
+                                  : paymentStatusBgColor,
                               color: "#fff",
                             }}
                           >
-                            {paymentStatusLabel}
+                            {paymentStatusLabel === "ไม่ระบุ"
+                              ? ``
+                              : paymentStatusLabel}
                           </div>
                         </TableCell>
                         <TableCell
@@ -1613,9 +1599,6 @@ const AllOrderContent: React.FC = () => {
                         <TableCell style={{ textAlign: "center" }}>
                           {order.Pay_By_Name}
                         </TableCell>
-                        {/* <TableCell style={{ textAlign: "center" }}>
-                          {formatNumberWithCommas(order.Net_Price)}
-                        </TableCell> */}
                         <TableCell style={{ textAlign: "center" }}>
                           {formatNumberWithCommas(order.Total_Pay)}
                         </TableCell>

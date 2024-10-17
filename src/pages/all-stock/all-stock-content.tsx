@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  CircularProgress,
+  // CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -110,6 +110,7 @@ const AllStockContent: React.FC = () => {
           (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
           0
         );
+
         setTotalTicketsBalance(totalTicketsBalanceSum);
       } else {
         throw new Error("Unexpected data format");
@@ -120,9 +121,9 @@ const AllStockContent: React.FC = () => {
       }
     } catch (error) {
       toast.error("Failed to fetch event stock data");
-    } finally {
     }
   }
+
   useEffect(() => {
     fetchEventStockData();
   }, []);
@@ -152,7 +153,6 @@ const AllStockContent: React.FC = () => {
       };
 
       localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
-
       return updatedFilters;
     });
   };
@@ -520,7 +520,7 @@ const AllStockContent: React.FC = () => {
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "100vh", overflowY: "auto" }}
       >
-        <Table stickyHeader sx={{ minWidth: 800 }} >
+        <Table stickyHeader sx={{ minWidth: 800 }}>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
             <TableRow>
               <TableCell
