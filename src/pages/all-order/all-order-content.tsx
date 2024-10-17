@@ -1262,7 +1262,7 @@ const AllOrderContent: React.FC = () => {
                             borderRadius: "18px",
                             textAlign: "center",
                             display: "inline-block",
-                            width: "40px",
+                            width: "50px",
                             backgroundColor: `${order.OrderSetColour}`,
                             color: "#fff",
                           }}
@@ -1281,7 +1281,7 @@ const AllOrderContent: React.FC = () => {
                             borderRadius: "18px",
                             textAlign: "center",
                             display: "inline-block",
-                            width: "40px",
+                            width: "50px",
                             backgroundColor:
                               paymentStatusLabel === "ไม่ระบุ"
                                 ? "transparent"
@@ -1445,7 +1445,7 @@ const AllOrderContent: React.FC = () => {
                         color: "#fff",
                       }}
                     >
-                      สถานะการจ่ายเงิน
+                      สถานะจ่ายเงิน
                     </TableCell>
                     <TableCell
                       style={{
