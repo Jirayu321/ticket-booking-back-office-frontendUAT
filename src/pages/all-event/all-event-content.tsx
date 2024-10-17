@@ -568,6 +568,13 @@ const AllEventContent: React.FC = () => {
                 >
                   ค้นหา
                 </Button>
+                {filteredEvents.length === 0 ? (
+                  <p style={{ color: "red", marginLeft: 10 }}>
+                    ผลการค้นหา 0 รายการ
+                  </p>
+                ) : (
+                  <p style={{}}></p>
+                )}
               </Box>
             </Box>
             <Button

@@ -392,7 +392,6 @@ const AllStockContent: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
-      
 
       <div
         style={{
@@ -504,6 +503,14 @@ const AllStockContent: React.FC = () => {
               >
                 ค้นหา
               </Button>
+
+              {filteredStocks.length === 0 ? (
+                <p style={{ color: "red", marginLeft: 10 }}>
+                  ผลการค้นหา 0 รายการ
+                </p>
+              ) : (
+                <p style={{}}></p>
+              )}
             </Box>
           </Stack>
         </Container>

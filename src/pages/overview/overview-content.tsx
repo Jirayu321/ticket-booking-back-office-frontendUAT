@@ -265,7 +265,7 @@ const OverviewContent: React.FC = () => {
     if (isSuccess && Array.isArray(dashboardData) && dashboardData.length > 0) {
       processDashboardData(dashboardData);
     } else {
-      console.log("kuy")
+      console.log("kuy");
     }
   }, [dashboardData]);
 
@@ -532,6 +532,13 @@ const OverviewContent: React.FC = () => {
                 >
                   ค้นหา
                 </Button>
+                {filteredEvents.length === 0 ? (
+                  <p style={{ color: "red", marginLeft: 10 }}>
+                    ผลการค้นหา 0 รายการ
+                  </p>
+                ) : (
+                  <p style={{}}></p>
+                )}
               </Box>
             </Box>
           </Box>

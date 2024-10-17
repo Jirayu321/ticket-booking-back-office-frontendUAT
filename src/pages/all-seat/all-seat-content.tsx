@@ -68,9 +68,28 @@ const AllSeatContent: React.FC = () => {
         evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
       );
       if (Array.isArray(data)) {
-        setTicketData(data);
+        const sortedData = data.sort((a, b) => {
+          if (a.Event_id !== b.Event_id) {
+            return a.Event_id - b.Event_id; // เรียงตาม Event_id ก่อน
+          } else if (a.Plan_id !== b.Plan_id) {
+            return a.Plan_id - b.Plan_id; // หาก Event_id เท่ากัน เรียงตาม Plan_id
+          } else {
+            return a.Ticket_Running - b.Ticket_Running; // หาก Plan_id เท่ากัน เรียงตาม Ticket_Running
+          }
+        });
+        setTicketData(sortedData);
       } else if (data?.ticketList && Array.isArray(data.ticketList)) {
-        setTicketData(data.ticketList);
+        const sortedData = data.ticketList.sort((a, b) => {
+          if (a.Event_id !== b.Event_id) {
+            return a.Event_id - b.Event_id; // เรียงตาม Event_id ก่อน
+          } else if (a.Plan_id !== b.Plan_id) {
+            return a.Plan_id - b.Plan_id; // หาก Event_id เท่ากัน เรียงตาม Plan_id
+          } else {
+            return a.Ticket_Running - b.Ticket_Running; // หาก Plan_id เท่ากัน เรียงตาม Ticket_Running
+          }
+        });
+
+        setTicketData(sortedData);
       } else {
         toast.error("Unexpected data format");
       }
@@ -145,7 +164,8 @@ const AllSeatContent: React.FC = () => {
         current.ticket_no?.toLowerCase().includes(searchValue) ||
         current.Event_Name?.toLowerCase().includes(searchValue) ||
         current.Cust_name?.toLowerCase().includes(searchValue) ||
-        current.Cust_tel?.toLowerCase().includes(searchValue);
+        current.Cust_tel?.toLowerCase().includes(searchValue) ||
+        current.Plan_Name?.toLowerCase().includes(searchValue);
 
       const matchesEvent =
         filters.event === "all" || current.Event_Name.includes(filters.event);
@@ -227,6 +247,7 @@ const AllSeatContent: React.FC = () => {
     indexOfFirstItem,
     indexOfLastItem
   );
+  console.log("ticketsInCurrentPage", ticketsInCurrentPage);
 
   const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
@@ -433,7 +454,7 @@ const AllSeatContent: React.FC = () => {
               label="ค้นหา"
               value={filters.search}
               onChange={handleSearchChange}
-              placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร หรือ เลขคำสั่งซื้อ"
+              placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร,โซน หรือ เลขคำสั่งซื้อ"
               style={{ marginRight: "10px", width: "450px" }}
               InputLabelProps={{
                 shrink: true,
@@ -488,23 +509,30 @@ const AllSeatContent: React.FC = () => {
                 <MenuItem value="ยังไม่เช็คอิน">ยังไม่เช็คอิน</MenuItem>
               </Select>
             </FormControl>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleClearFilters}
-              sx={{
-                backgroundColor: "#CFB70B",
-                width: "160px",
-                height: "45px",
-                color: "black",
-                fontSize: "15px",
-                "&:hover": {
+            <div style={{ color: "black" ,display:"flex"}}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleClearFilters}
+                sx={{
                   backgroundColor: "#CFB70B",
-                },
-              }}
-            >
-              ค้นหา
-            </Button>
+                  width: "160px",
+                  height: "45px",
+                  color: "black",
+                  fontSize: "15px",
+                  "&:hover": {
+                    backgroundColor: "#CFB70B",
+                  },
+                }}
+              >
+                ค้นหา
+              </Button>
+              {filteredTickets.length === 0 ? (
+                <p style={{color: "red", marginLeft:10}}>ผลการค้นหา 0 รายการ</p>
+              ) : (
+                <p style={{}}></p>
+              )}
+            </div>
           </Stack>
         </Container>
       </div>
@@ -697,7 +725,7 @@ const AllSeatContent: React.FC = () => {
                   >
                     {indexOfFirstItem + index + 1}
                   </TableCell>
-                  <TableCell style={{ textAlign: "left" }}>
+                  <TableCell style={{ textAlign: "center" }}>
                     {ticket.Event_Name}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
