@@ -44,7 +44,13 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ dtOrderId }) => {
           Array.isArray(paymentHistories) &&
           paymentHistories.length > 0
         ) {
-          setPayments(paymentHistories);
+          const sortedPayments = paymentHistories.sort((a, b) => {
+            const dateA = new Date(a.Payment_Date7);
+            const dateB = new Date(b.Payment_Date7);
+            return dateA - dateB; // หากต้องการเรียงจากเก่าไปใหม่
+            // return dateB - dateA; // หากต้องการเรียงจากใหม่ไปเก่า
+          });
+          setPayments(sortedPayments);
         } else {
           setError("No payment history found.");
         }

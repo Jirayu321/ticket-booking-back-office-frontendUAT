@@ -346,9 +346,26 @@ const AllOrderContent: React.FC = () => {
 
   const totalOrders = filteredOrders?.length;
 
+  // const OutstandingPayment = filteredOrders
+  //   .filter((order) => order.Total_Balance !== 0)
+  //   .reduce((sum, order) => sum + order.Total_Balance, 0);
+
   const OutstandingPayment = filteredOrders
-    .filter((order) => order.Total_Balance !== 0)
+    .filter((order) => order.Order_Status === 4)
+    .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
+
+  const OutstandingPayment2 = filteredOrders
+    .filter((order) => order.Total_Balance !== 0 && order.Order_Status === 1)
     .reduce((sum, order) => sum + order.Total_Balance, 0);
+
+  const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2
+
+  console.log(
+    "ค้างจ่าย",
+    OutstandingPayment,
+    OutstandingPayment2,
+    OutstandingPayment3
+  );
 
   const dataP = Object.values(
     orderHData
@@ -381,9 +398,8 @@ const AllOrderContent: React.FC = () => {
     dataP
   );
 
-  console.log("OutstandingPayment", OutstandingPayment);
 
-  const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment;
+  const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
   console.log("totalNetPrice", totalNetPrice);
 
@@ -404,10 +420,6 @@ const AllOrderContent: React.FC = () => {
       ticketType:
         prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
     }));
-    // setSelectedOrderNo(null);
-    // setOrderDetail([]);
-    // setOrderHispayDetail([]);
-    // localStorage.removeItem("orderDetail");
 
     fetchOrderData();
   };
@@ -706,7 +718,7 @@ const AllOrderContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
                   {filters.eventName !== "" ? (
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {formatNumberWithCommas(OutstandingPayment)}
+                      {formatNumberWithCommas(OutstandingPayment3)}
                     </Typography>
                   ) : null}
                 </Box>
@@ -1088,8 +1100,8 @@ const AllOrderContent: React.FC = () => {
           >
             <Table
               sx={{
-                tableLayout: "fixed", 
-                width: "100%", 
+                tableLayout: "fixed",
+                width: "100%",
               }}
             >
               <TableHead sx={{ backgroundColor: "#11131A" }}>
@@ -1100,10 +1112,10 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "40px", 
-                      minWidth: "40px", 
-                      maxWidth: "40px", 
-                      padding: "5px", 
+                      width: "40px",
+                      minWidth: "40px",
+                      maxWidth: "40px",
+                      padding: "5px",
                     }}
                   >
                     ลำดับ
