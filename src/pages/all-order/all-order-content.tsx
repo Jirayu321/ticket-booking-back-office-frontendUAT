@@ -1064,7 +1064,7 @@ const AllOrderContent: React.FC = () => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "40% auto",
+          gridTemplateColumns: "45% auto",
           justifyContent: "space-around",
           maxHeight: "70vh",
         }}
