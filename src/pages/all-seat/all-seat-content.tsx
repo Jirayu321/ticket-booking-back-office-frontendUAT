@@ -304,18 +304,14 @@ const AllSeatContent: React.FC = () => {
         sx={{
           padding: 1,
           display: "grid",
-          justifyContent: " flex-start",
           margin: "5px 0px",
         }}
       >
-        <Grid
-          container
-          spacing={2}
-          sx={{ display: " grid", gridTemplateColumns: " auto auto auto auto" }}
-        >
+        <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
+                display: "flex",
                 alignItems: "center",
                 gap: 2,
                 backgroundColor: "rgba(207, 183, 11, 0.1)",
@@ -328,10 +324,8 @@ const AllSeatContent: React.FC = () => {
                 cursor: "pointer",
                 fontSize: "18px",
                 boxSizing: "border-box",
-                width: "250px",
-                justifyContent: "center",
-                display: "grid",
-                gridTemplateColumns: "auto auto",
+                width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <QrCodeScannerIcon style={{ color: "black", fontSize: "70px" }} />
@@ -364,6 +358,7 @@ const AllSeatContent: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Box
               sx={{
+                display: "flex",
                 alignItems: "center",
                 gap: 2,
                 backgroundColor: "rgba(207, 183, 11, 0.1)",
@@ -376,10 +371,8 @@ const AllSeatContent: React.FC = () => {
                 cursor: "pointer",
                 fontSize: "18px",
                 boxSizing: "border-box",
-                width: "250px",
-                justifyContent: "center",
-                display: "grid",
-                gridTemplateColumns: "auto auto",
+                width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <LocalPrintshopIcon

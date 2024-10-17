@@ -392,6 +392,7 @@ const AllStockContent: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+      
 
       <div
         style={{

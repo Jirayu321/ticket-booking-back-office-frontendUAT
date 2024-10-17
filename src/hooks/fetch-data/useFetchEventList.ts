@@ -9,22 +9,20 @@ export function useFetchEventList({ eventId }: { eventId: number | null }) {
   const query = useQuery({
     queryKey: ["get event by id", eventId],
     queryFn: async () => {
-      let events: any | null = null;
       try {
         if (eventId !== null) {
           const event = await getEventById(eventId);
-          events = event;
+          return event;
         } else {
           const data = await getAllEventList();
-          events = data.events;
+          return data?.events;
         }
-        return events;
       } catch (error: any) {
         toast.error(error.message);
-      } finally {
-        return events;
+        return null; // Return null if an error occurs
       }
     },
+    refetchOnWindowFocus: false, // ปิดการโหลดใหม่เมื่อกลับมาที่หน้านี้
   });
   return query;
 }

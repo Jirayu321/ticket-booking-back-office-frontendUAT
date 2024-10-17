@@ -235,6 +235,7 @@ const AllEventContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -247,7 +248,6 @@ const AllEventContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -282,6 +282,7 @@ const AllEventContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -294,7 +295,6 @@ const AllEventContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -331,6 +331,7 @@ const AllEventContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -343,7 +344,6 @@ const AllEventContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -378,6 +378,7 @@ const AllEventContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -390,7 +391,6 @@ const AllEventContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box

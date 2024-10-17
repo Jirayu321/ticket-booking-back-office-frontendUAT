@@ -104,3 +104,39 @@ div:where(.swal2-container) {
 .swal2-title, .swal2-content, .swal2-confirm, .swal2-cancel {
   font-family: 'Noto Sans Thai', sans-serif;
 }
+
+.custom-datepicker {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background-color: #fff;
+  color: #333;
+}
+
+.custom-datepicker:focus {
+  outline: none;
+  border-color: #007bff; /* สีน้ำเงินตอนที่ focused */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* shadow เมื่อ focused */
+}
+
+.custom-datepicker::placeholder {
+  color: #888; /* สีของ placeholder */
+  font-style: italic;
+}
+
+.custom-datepicker.isClearable {
+  position: relative;
+}
+
+.react-datepicker__close-icon {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.react-datepicker__close-icon:hover {
+  background-color: initial; /* ไม่ให้เปลี่ยนสี */
+  color: inherit; /* ใช้สีปกติ */
+}

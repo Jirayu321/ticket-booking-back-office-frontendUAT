@@ -1,12 +1,13 @@
-import React from 'react';
+import React from "react";
 
+import Container from "../../components/common/container/Container";
+import OverviewContent from "./overview-content";
 const Overview: React.FC = () => {
-    return (
-        <div>
-            <h1>Overview Page</h1>
-            {/* Add your content here */}
-        </div>
-    );
+  return (
+    <Container>
+      <OverviewContent />
+    </Container>
+  );
 };
 
 export default Overview;

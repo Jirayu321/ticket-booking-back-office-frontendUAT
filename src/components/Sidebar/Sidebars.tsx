@@ -265,7 +265,7 @@ const Sidebars: React.FC = () => {
                   activePath === "/role-settings" ? "active" : ""
                 }`}
               >
-                <MenuItem icon={<AssignmentIndIcon />}>Role setting</MenuItem>
+                <MenuItem icon={<AssignmentIndIcon />}>ตั้งค่าผู้ใช้</MenuItem>
               </Link>
               {/* <Link
                 to="/settings"

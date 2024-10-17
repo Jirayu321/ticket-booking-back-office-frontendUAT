@@ -34,7 +34,7 @@ import OrderDetailContent from "../order-detail/order-detail-content";
 import { getOrderAll } from "../../services/order-all.service";
 import { getAllEventList } from "../../services/event-list.service";
 
-import { Link, useNavigate } from "react-router-dom";
+// import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 import DatePicker from "react-datepicker";
@@ -96,12 +96,6 @@ const AllOrderContent: React.FC = () => {
     setEndDate(end ?? undefined);
   };
 
-  console.log("handleDateRangeChange", startDate, endDate);
-  // const handleClearDates = () => {
-  //   setStartDate(null);
-  //   setEndDate(null);
-  // };
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => {
       const updatedFilters = {
@@ -152,7 +146,7 @@ const AllOrderContent: React.FC = () => {
         (filters.status === "มีแก้ไข" && order.Order_Status === 2) ||
         (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
         (filters.status === "ไม่สำเร็จเพราะติด R" &&
-          order.Order_Status === 3) ||
+          order.Order_Status === 4) ||
         (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 4) ||
         filters.status === "all";
 
@@ -161,7 +155,17 @@ const AllOrderContent: React.FC = () => {
         (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
         filters.paymentStatus === "all";
 
-      return matchesSearch && mstchesStatusOrder && mstchesStatusPayment;
+      const paymentDate = new Date(order.Payment_Date7);
+      const matchesDate =
+        (!startDate || paymentDate >= startDate) &&
+        (!endDate || paymentDate <= endDate);
+
+      return (
+        matchesSearch &&
+        mstchesStatusOrder &&
+        mstchesStatusPayment &&
+        matchesDate
+      );
     })
     .reduce((acc, current) => {
       const existingOrder = acc.find(
@@ -184,12 +188,9 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  // const navigate = useNavigate();
-
   const handleViewHistoryClick = (orderId: string) => {
     localStorage.setItem("orderId", orderId);
     setModalOpen(true);
-    // navigate(`/order-detail/${orderId}`);
   };
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
@@ -270,7 +271,7 @@ const AllOrderContent: React.FC = () => {
         return acc;
       }, []);
 
-    console.log("latestOrder:", latestOrder);
+    // console.log("latestOrder:", latestOrder);
     setOrderDetail(latestOrder);
 
     const h = orderDData
@@ -296,14 +297,14 @@ const AllOrderContent: React.FC = () => {
     try {
       const OrderAll = await getOrderAll();
       const evntDetailAll = await getAllEventList();
-      // console.log("fetchOrderData", OrderAll);
+      console.log("fetchOrderData", OrderAll);
       // console.log("evntDetailAll:", evntDetailAll);
 
       setEvntDetail(
         evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
       );
       setOrderHData(
-        OrderAll?.orderAll.filter((order: any) => order.Net_Price !== null)
+        OrderAll?.orderAll.filter((order: any) => order.DT_order_id !== null)
       );
 
       setOrderDData(
@@ -380,7 +381,7 @@ const AllOrderContent: React.FC = () => {
     dataP
   );
 
-  console.log("totalNetPriceWithNonZeroBalance", OutstandingPayment);
+  console.log("OutstandingPayment", OutstandingPayment);
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment;
 
@@ -390,7 +391,6 @@ const AllOrderContent: React.FC = () => {
     setStartDate((prevStartDate) =>
       prevStartDate !== null ? prevStartDate : null
     );
-
     setFilters((prevFilters) => ({
       orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
       eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
@@ -416,6 +416,7 @@ const AllOrderContent: React.FC = () => {
     (sum, order) => sum + order.Total_stc,
     0
   );
+
   const totalPrice = orderDetail?.reduce(
     (sum, order) => sum + order.Total_Price,
     0
@@ -501,8 +502,6 @@ const AllOrderContent: React.FC = () => {
     );
   });
 
-  // const formattedDate = format(new Date(), "MMMM", { locale: th });
-
   return (
     <div
       className="all-orders-content"
@@ -528,6 +527,7 @@ const AllOrderContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <ShoppingCartIcon
@@ -538,7 +538,6 @@ const AllOrderContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -578,6 +577,7 @@ const AllOrderContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -590,7 +590,6 @@ const AllOrderContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -600,7 +599,9 @@ const AllOrderContent: React.FC = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography sx={{ fontSize: "23px" }}>ยอดขายทั้งหมด</Typography>
+                  <Typography sx={{ fontSize: "23px" }}>
+                    ยอดขายทั้งหมด
+                  </Typography>
 
                   {filters.eventName !== "" ? (
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
@@ -629,6 +630,7 @@ const AllOrderContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -641,7 +643,6 @@ const AllOrderContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -680,6 +681,7 @@ const AllOrderContent: React.FC = () => {
                 fontSize: "18px",
                 boxSizing: "border-box",
                 width: "100%",
+                justifyContent: "space-evenly",
               }}
             >
               <Avatar
@@ -692,7 +694,6 @@ const AllOrderContent: React.FC = () => {
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  paddingLeft: "60px",
                 }}
               >
                 <Box
@@ -753,24 +754,6 @@ const AllOrderContent: React.FC = () => {
                 </Select>
               </FormControl>
 
-              {/* <FormControl sx={{ backgroundColor: "white" }}> */}
-              {/* <DatePicker
-                  label="วันที่เริ่มต้น"
-                  value={startDate}
-                  onChange={(date) => handleDateRangeChange(date, endDate)}
-                  format="DD/MM/YYYY"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& input": {
-                        border: "none",
-                        transform: "translateY(5px)",
-                        backgroundColor: "white",
-                        width: "90px",
-                        height: 30,
-                      },
-                    },
-                  }}
-                /> */}
               <div
                 style={{
                   display: "flex",
@@ -808,52 +791,117 @@ const AllOrderContent: React.FC = () => {
                     zIndex: 1,
                   }}
                 >
-                  ช่วงระยะเวลา
+                  ช่วงวันที่ใบสั่งซื้อ
                 </label>
 
                 <DatePicker
-                  id="custom-datepicker"
+                  className="custom-datepicker"
                   selected={startDate}
                   onChange={handleDateRangeChange}
                   startDate={startDate}
                   endDate={endDate}
                   dateFormat="dd/MM/yyyy"
                   locale={th}
-                  // isClearable={true}
+                  isClearable
+                  showMonthDropdown
+                  useShortMonthInDropdown
+                  dropdownMode="select"
                   selectsRange
                   customInput={<CustomInput />}
                   renderCustomHeader={({
                     date,
+                    changeYear,
+                    changeMonth,
                     decreaseMonth,
                     increaseMonth,
                     prevMonthButtonDisabled,
                     nextMonthButtonDisabled,
                   }) => (
-                    <div
-                      style={{
-                        margin: 10,
-                        display: "flex",
-                        justifyContent: "space-around",
-                      }}
-                    >
-                      <button
-                        onClick={decreaseMonth}
-                        disabled={prevMonthButtonDisabled}
-                        style={{ fontSize: 18 }}
+                    <div>
+                      <div
+                        style={{
+                          margin: 10,
+                          display: "flex",
+                          justifyContent: "space-around",
+                        }}
                       >
-                        {"<"}
-                      </button>
-                      <span style={{ fontSize: 16 }}>
-                        {format(date, "MMMM", { locale: th })}{" "}
-                        {moment(date).year() + 543}
-                      </span>
-                      <button
-                        onClick={increaseMonth}
-                        disabled={nextMonthButtonDisabled}
-                        style={{ fontSize: 18 }}
+                        <button
+                          onClick={decreaseMonth}
+                          disabled={prevMonthButtonDisabled}
+                          style={{ fontSize: 18 }}
+                        >
+                          {"<"}
+                        </button>
+                        <span style={{ fontSize: 16 }}>
+                          {format(date, "MMMM", { locale: th })}{" "}
+                          {moment(date).year() + 543}
+                        </span>
+                        <button
+                          onClick={increaseMonth}
+                          disabled={nextMonthButtonDisabled}
+                          style={{ fontSize: 18 }}
+                        >
+                          {">"}
+                        </button>
+                      </div>
+                      <div
+                        style={{
+                          textAlign: "center",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
-                        {">"}
-                      </button>
+                        {/* Dropdown สำหรับเลือกเดือน */}
+                        <select
+                          value={date.getMonth()}
+                          onChange={({ target: { value } }) =>
+                            changeMonth(Number(value))
+                          }
+                          style={{
+                            fontSize: 16,
+                            margin: "0 5px",
+                            height: 40,
+                            width: "auto",
+                          }}
+                        >
+                          {Array.from({ length: 12 }, (_, index) => {
+                            const monthDate = new Date(
+                              date.getFullYear(),
+                              index,
+                              1
+                            );
+                            return (
+                              <option key={index} value={index}>
+                                {format(monthDate, "MMMM", { locale: th })}
+                              </option>
+                            );
+                          })}
+                        </select>
+
+                        {/* Dropdown สำหรับเลือกปี */}
+                        <select
+                          value={date.getFullYear()}
+                          onChange={({ target: { value } }) =>
+                            changeYear(Number(value))
+                          }
+                          style={{
+                            fontSize: 16,
+                            margin: "0 5px",
+                            height: 40,
+                            width: "auto",
+                          }}
+                        >
+                          {Array.from({ length: 20 }, (_, index) => {
+                            const year = moment().year() - 5 + index; // ปรับช่วงปีที่ต้องการให้เลือก
+                            return (
+                              <option key={index} value={year}>
+                                {year + 543}{" "}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
                     </div>
                   )}
                 />
@@ -1040,8 +1088,8 @@ const AllOrderContent: React.FC = () => {
           >
             <Table
               sx={{
-                tableLayout: "fixed", // บังคับให้ตารางใช้ layout แบบ fixed
-                width: "100%", // กำหนดความกว้างของตารางให้เต็ม
+                tableLayout: "fixed", 
+                width: "100%", 
               }}
             >
               <TableHead sx={{ backgroundColor: "#11131A" }}>
@@ -1052,10 +1100,10 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "40px", // กำหนดความกว้างให้แคบ
-                      minWidth: "40px", // ความกว้างขั้นต่ำ
-                      maxWidth: "40px", // ความกว้างสูงสุด
-                      padding: "5px", // ลด padding เพื่อให้คอลัมน์เล็กลง
+                      width: "40px", 
+                      minWidth: "40px", 
+                      maxWidth: "40px", 
+                      padding: "5px", 
                     }}
                   >
                     ลำดับ
