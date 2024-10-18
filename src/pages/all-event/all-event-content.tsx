@@ -28,6 +28,16 @@ import { Container, Grid, Box, Typography, Avatar } from "@mui/material";
 import "./all-event-content.css";
 import { DatePicker } from "@mui/x-date-pickers";
 
+import {
+  selectedColor,
+  Event_PublicY,
+  Event_PublicN,
+  // Event_Status1,
+  // Event_Status2,
+  // Event_Status3,
+  // Event_Status13,
+} from "../../lib/util";
+
 dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null) => {
@@ -39,7 +49,7 @@ const formatEventTime = (dateTime: string | null) => {
 };
 
 const AllEventContent: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
@@ -67,9 +77,9 @@ const AllEventContent: React.FC = () => {
     eventId: null,
   });
 
-  const handleClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
+  // const handleClick = (pageNumber: number) => {
+  //   setCurrentPage(pageNumber);
+  // };
 
   const navigate = useNavigate();
 
@@ -745,7 +755,9 @@ const AllEventContent: React.FC = () => {
                   key={Event_Id}
                   style={{
                     backgroundColor:
-                      selectedOrderNo === Event_Id ? "lightblue" : "inherit",
+                      selectedOrderNo === Event_Id
+                        ? `${selectedColor}`
+                        : "inherit",
                     cursor: "pointer",
                   }}
                   onClick={() => handleOrderClick(Event_Id)}
@@ -779,12 +791,12 @@ const AllEventContent: React.FC = () => {
                     <Button
                       sx={{
                         backgroundColor:
-                          Event_Public === "Y" ? "green" : "#11131A1F",
+                          Event_Public === "Y" ? `${Event_PublicY}` : `${Event_PublicN}`,
                         padding: "4px 15px",
                         borderRadius: "30px",
                         "&:hover": {
                           backgroundColor:
-                            Event_Public === "Y" ? "green" : "#11131A1F",
+                            Event_Public === "Y" ? `${Event_PublicY}` : `${Event_PublicN}`,
                         },
                       }}
                       className={Event_Public === "Y" ? "publish" : "unpublish"}

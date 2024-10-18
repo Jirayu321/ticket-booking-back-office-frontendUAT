@@ -44,11 +44,16 @@ import "moment/locale/th";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-const MAX_ITEMS_PER_PAGE = 50;
+import {
+  selectedColor,
+  paymentStatusBgColor0,
+  paymentStatusBgColor1,
+  paymentStatusBgUnknown,
+} from "../../lib/util";
 
 moment.locale("th");
 const AllOrderContent: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [orderHData, setOrderHData] = useState<any[]>([]);
   const [orderDData, setOrderDData] = useState<any[]>([]);
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
@@ -111,9 +116,6 @@ const AllOrderContent: React.FC = () => {
   // const handleClick = (pageNumber: number) => {
   //   setCurrentPage(pageNumber);
   // };
-
-  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
   // const statusMap = {
   //   1: "สำเร็จ",
@@ -200,8 +202,6 @@ const AllOrderContent: React.FC = () => {
     localStorage.setItem("orderId", orderId);
     setModalOpen(true);
   };
-
-
 
   const handletime = (x) => {
     const adjustedDate = dayjs(x).subtract(7, "hour");
@@ -351,10 +351,6 @@ const AllOrderContent: React.FC = () => {
 
   const totalOrders = filteredOrders?.length;
 
-  // const OutstandingPayment = filteredOrders
-  //   .filter((order) => order.Total_Balance !== 0)
-  //   .reduce((sum, order) => sum + order.Total_Balance, 0);
-
   const OutstandingPayment = filteredOrders
     .filter((order) => order.Order_Status === 4)
     .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
@@ -396,12 +392,6 @@ const AllOrderContent: React.FC = () => {
     (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
     0
   );
-
-  // console.log(
-  //   "totalNetPriceWithZeroBalance",
-  //   totalNetPriceWithZeroBalance,
-  //   dataP
-  // );
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
@@ -1068,11 +1058,10 @@ const AllOrderContent: React.FC = () => {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-around",
           maxHeight: "70vh",
         }}
       >
-        <div>
+        <div style={{ width: "900px" }}>
           <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
             คำสั่งซื้อทั้งหมด
           </p>
@@ -1086,7 +1075,7 @@ const AllOrderContent: React.FC = () => {
               stickyHeader
               sx={{
                 tableLayout: "fixed",
-                width: "auto",
+                display: "grid",
               }}
             >
               <TableHead sx={{ backgroundColor: "#11131A" }}>
@@ -1097,9 +1086,8 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "40px",
-                      minWidth: "40px",
-                      maxWidth: "40px",
+                      minWidth: "60px",
+                      maxWidth: "60px",
                       padding: "5px",
                       position: "sticky",
                       top: 0,
@@ -1131,11 +1119,12 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      width: "10%",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
                       zIndex: 2,
+                      minWidth: "85px",
+                      maxWidth: "85px",
                     }}
                   >
                     เลขคำสั่งซื้อ
@@ -1147,6 +1136,7 @@ const AllOrderContent: React.FC = () => {
                       textAlign: "center",
                       color: "#fff",
                       minWidth: "130px",
+                      maxWidth: "130px",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1161,7 +1151,8 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      minWidth: "130px",
+                      minWidth: "60px",
+                      maxWidth: "60px",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1211,14 +1202,14 @@ const AllOrderContent: React.FC = () => {
                   if (order.Order_Status === 1) {
                     if (order.Total_Balance === 0) {
                       paymentStatusLabel = "ชำระครบ";
-                      paymentStatusBgColor = "#28a745";
+                      paymentStatusBgColor = `${paymentStatusBgColor0}`;
                     } else if (order.Total_Balance > 0) {
                       paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = "#ffc107";
+                      paymentStatusBgColor = `${paymentStatusBgColor1}`;
                     }
                   } else {
                     paymentStatusLabel = "ไม่ระบุ";
-                    paymentStatusBgColor = "#f8f9fa";
+                    paymentStatusBgColor = `${paymentStatusBgUnknown}`;
                   }
 
                   return (
@@ -1227,7 +1218,7 @@ const AllOrderContent: React.FC = () => {
                       style={{
                         backgroundColor:
                           selectedOrderNo === order.Order_no
-                            ? "lightblue"
+                            ? `${selectedColor}`
                             : "inherit",
                         cursor: "pointer",
                       }}
@@ -1237,16 +1228,19 @@ const AllOrderContent: React.FC = () => {
                         style={{
                           textAlign: "center",
                           fontWeight: "bold",
-                          width: "40px",
+                          minWidth: "60px",
+                          maxWidth: "60px",
                           padding: "5px",
                         }}
                       >
-                        {indexOfFirstItem + index + 1}
+                        {index + 1}
                       </TableCell>
                       <TableCell
                         style={{
                           textAlign: "left",
                           fontWeight: "bold",
+                          minWidth: "180px",
+                          maxWidth: "180px",
                         }}
                       >
                         {order.Event_Name}
@@ -1258,7 +1252,13 @@ const AllOrderContent: React.FC = () => {
                       >
                         {order.Order_no}
                       </TableCell>
-                      <TableCell style={{ textAlign: "center", width: "50px" }}>
+                      <TableCell
+                        style={{
+                          textAlign: "left",
+                          minWidth: "130px",
+                          maxWidth: "130px",
+                        }}
+                      >
                         {order.Cust_name}
                       </TableCell>
                       <TableCell style={{ textAlign: "center", width: "50px" }}>
@@ -1321,7 +1321,7 @@ const AllOrderContent: React.FC = () => {
           <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
             รายละเอียด
           </p>
-          <div>
+          <div style={{ width: "auto" }}>
             {orderDetail ? (
               <div>
                 <div
@@ -1329,7 +1329,6 @@ const AllOrderContent: React.FC = () => {
                     color: "#000",
                     border: " 1px solid ",
                     padding: 20,
-                    width: "36vw",
                   }}
                 >
                   <div
@@ -1345,6 +1344,7 @@ const AllOrderContent: React.FC = () => {
                         marginBottom: 20,
                         justifyItems: "flex-start",
                         alignItems: "center",
+                        width:"25vw"
                       }}
                     >
                       <p>
@@ -1453,24 +1453,26 @@ const AllOrderContent: React.FC = () => {
           <div
             style={{
               display: "inline-block",
-              maxWidth: "36vw",
+              maxWidth: "545px",
               overflowX: "auto",
             }}
           >
             <TableContainer
               component={Paper}
               sx={{ borderRadius: "0" }}
-              style={{ maxHeight: 300, width: "max-content" }}
+              style={{ maxHeight: 300, width: "auto" }}
             >
-              <Table>
+              <Table style={{ display: "grid", width: "min-content" }}>
                 <TableHead sx={{ backgroundColor: "#11131A" }}>
-                  <TableRow>
+                  <TableRow style={{ display: "flex", width: "100%" }}>
                     <TableCell
                       style={{
                         fontWeight: "bold",
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        minWidth: "75px",
+                        maxWidth: "75px",
                       }}
                     >
                       สถานะจ่าย
@@ -1481,6 +1483,8 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        minWidth: "91px",
+                        maxWidth: "91px",
                       }}
                     >
                       วันที่เวลาจ่าย
@@ -1491,6 +1495,7 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        minWidth: "91px",
                       }}
                     >
                       ช่องทางการจ่าย
@@ -1502,6 +1507,7 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       ยอดจ่าย
@@ -1512,6 +1518,7 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       ยอดค้างจ่าย
@@ -1532,6 +1539,7 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
+                        minWidth: "175px",
                       }}
                     >
                       Charge_Id
@@ -1571,10 +1579,8 @@ const AllOrderContent: React.FC = () => {
                       <TableRow
                         key={order.index}
                         style={{
-                          // backgroundColor:
-                          //   selectedOrderNo === order.Order_no
-                          //     ? "lightblue"
-                          //     : "inherit",
+                          display: "flex",
+                          width: "max-content",
                           cursor: "pointer",
                         }}
                         // onClick={() => handleOrderClick(order.Order_no)}
@@ -1603,25 +1609,49 @@ const AllOrderContent: React.FC = () => {
                               : paymentStatusLabel}
                           </div>
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                            minWidth: "91px",
+                            maxWidth: "91px",
+                          }}
+                        >
                           {handletime(order.Payment_Date7)}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                            minWidth: "91px",
+                          }}
+                        >
                           {order.Pay_By_Name}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{
+                            textAlign: "center",
+                            minWidth: "60px",
+                          }}
+                        >
                           {formatNumberWithCommas(order.Total_Pay)}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{ textAlign: "center", minWidth: "60px" }}
+                        >
                           {formatNumberWithCommas(order.Total_Balance)}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{ textAlign: "center", minWidth: "100px" }}
+                        >
                           {order.Pay_By_BankName}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{ textAlign: "center", minWidth: "60px" }}
+                        >
                           {order.Charge_Id}
                         </TableCell>
-                        <TableCell style={{ textAlign: "center" }}>
+                        <TableCell
+                          style={{ textAlign: "center", minWidth: "60px" }}
+                        >
                           {order.Ref_Number1}
                         </TableCell>
                       </TableRow>

@@ -34,6 +34,16 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 
+import {
+  selectedColor,
+  PrintStatusColor1,
+  PrintStatusColor0,
+  check_in_statusColor1,
+  check_in_statusColor0,
+  ticketReserveStatusColorR,
+  ticketReserveStatusColorW,
+} from "../../lib/util";
+
 dayjs.extend(buddhistEra);
 
 // const MAX_ITEMS_PER_PAGE = 50;
@@ -229,17 +239,6 @@ const AllSeatContent: React.FC = () => {
   };
 
   const filteredTickets = applyFilters(ticketData);
-  // const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  // const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
-
-  // const ticketsInCurrentPage = filteredTickets.slice(
-  //   indexOfFirstItem,
-  //   indexOfLastItem
-  // );
-  // console.log("ticketsInCurrentPage", ticketsInCurrentPage);
-
-  // const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
-
   const totalCount = filteredTickets?.length;
   const scannedCount = filteredTickets.filter(
     (ticket) => ticket.check_in_status === 1
@@ -249,7 +248,7 @@ const AllSeatContent: React.FC = () => {
     (ticket) => ticket.PrintStatus_Name === "พิมพ์แล้ว"
   ).length;
 
-  console.log("filteredTickets", filteredTickets);
+  // console.log("filteredTickets", filteredTickets);
 
   const countSeatsPerTable = (tickets: any[]) => {
     const tableCount: { [key: string]: number } = {};
@@ -307,6 +306,7 @@ const AllSeatContent: React.FC = () => {
   const handleticketClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
+
   return (
     <div
       className="all-seats-content"
@@ -751,6 +751,7 @@ const AllSeatContent: React.FC = () => {
               </TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {filteredTickets.map((ticket, index) => {
               const formattedEventTime = dayjs(ticket.Event_Time)
@@ -775,7 +776,7 @@ const AllSeatContent: React.FC = () => {
                   style={{
                     backgroundColor:
                       selectedOrderNo === ticket.ticket_running
-                        ? "lightblue"
+                        ? `${selectedColor}`
                         : "inherit",
                     cursor: "pointer",
                   }}
@@ -822,8 +823,8 @@ const AllSeatContent: React.FC = () => {
                       style={{
                         backgroundColor:
                           ticket.PrintStatus_Name === "ยังไม่พิมพ์"
-                            ? "grey"
-                            : "blue",
+                            ? `${PrintStatusColor1}`
+                            : `${PrintStatusColor0}`,
                         color: "white",
                         padding: "4px",
                         borderRadius: "4px",
@@ -837,7 +838,7 @@ const AllSeatContent: React.FC = () => {
                     <div
                       style={{
                         backgroundColor:
-                          ticket.check_in_status === 0 ? "grey" : "#28a745",
+                          ticket.check_in_status === 0 ? `${check_in_statusColor1}` : `${check_in_statusColor0}`,
                         color: "white",
                         padding: "4px",
                         borderRadius: "4px",
@@ -861,14 +862,17 @@ const AllSeatContent: React.FC = () => {
                       <Button
                         onClick={() => handleOpenModal(ticket)}
                         variant="contained"
-                        color="secondary"
+                        color={ticketReserveStatusColorW}
                       >
                         ดูบัตร
                       </Button>
                     ) : (
                       <Button
                         variant="contained"
-                        style={{ backgroundColor: "silver", color: "black" }}
+                        style={{
+                          backgroundColor: `${ticketReserveStatusColorR}`,
+                          color: "black",
+                        }}
                         disabled
                       >
                         ดูบัตร

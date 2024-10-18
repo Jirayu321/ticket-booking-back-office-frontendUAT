@@ -113,3 +113,35 @@ export function isInTimeRange({
 }) {
   return targetDate >= from && targetDate <= to;
 }
+
+export const selectedColor = "lightblue";
+
+// srock
+export const ColumnColorstock = "yellow";
+export const Event_StatusColor1 = "#FFA500";
+export const Event_StatusColor2 = "#4CAF50";
+export const Event_StatusColor3 = "#2196F3";
+export const Event_StatusColor13 = "#F44336";
+export const Event_StatusColorUnknown = "#9E9E9E";
+
+// seat
+export const PrintStatusColor1 = "grey";
+export const PrintStatusColor0 = "blue";
+export const check_in_statusColor1 = "grey";
+export const check_in_statusColor0 = "#28a745";
+export const ticketReserveStatusColorR = "silver";
+export const ticketReserveStatusColorW = "secondary";
+
+// order
+export const paymentStatusBgColor0 = "#28a745";
+export const paymentStatusBgColor1 = "#ffc107";
+export const paymentStatusBgUnknown = "#f8f9fa";
+
+// event
+export const Event_PublicY = "green";
+export const Event_PublicN = "#11131A1F";
+
+export const Event_Status1 = "##0094FF";
+export const Event_Status2 = "#0B8600";
+export const Event_Status3 = "#11131A1F";
+export const Event_Status13 = "#C82121";

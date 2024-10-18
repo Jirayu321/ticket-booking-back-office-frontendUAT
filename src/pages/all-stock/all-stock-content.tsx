@@ -28,20 +28,32 @@ import Header from "../common/header"; // Assuming you have a Header component
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import { getAllEventList } from "../../services/event-list.service";
+import {
+  selectedColor,
+  ColumnColorstock,
+  Event_StatusColor1,
+  Event_StatusColor13,
+  Event_StatusColor2,
+  Event_StatusColor3,
+  Event_StatusColorUnknown,
+} from "../../lib/util";
 
 // Map event statuses to text and style properties
 const getStatusDetails = (status: number) => {
   switch (status) {
     case 1:
-      return { label: "รอเริ่มงาน", backgroundColor: "#FFA500" }; // Orange
+      return { label: "รอเริ่มงาน", backgroundColor: `${Event_StatusColor1}` }; // Orange
     case 2:
-      return { label: "เริ่มงาน", backgroundColor: "#4CAF50" }; // Green
+      return { label: "เริ่มงาน", backgroundColor: `${Event_StatusColor2}` }; // Green
     case 3:
-      return { label: "ปิดงาน", backgroundColor: "#2196F3" }; // Blue
+      return { label: "ปิดงาน", backgroundColor: `${Event_StatusColor3}` }; // Blue
     case 13:
-      return { label: "ยกเลิก", backgroundColor: "#F44336" }; // Red
+      return { label: "ยกเลิก", backgroundColor: `${Event_StatusColor13}` }; // Red
     default:
-      return { label: "Unknown", backgroundColor: "#9E9E9E" }; // Grey for unknown statuses
+      return {
+        label: "Unknown",
+        backgroundColor: { Event_StatusColorUnknown },
+      }; // Grey for unknown statuses
   }
 };
 
@@ -49,11 +61,17 @@ const getStatusDetails = (status: number) => {
 const getPublicStatusDetails = (status: string) => {
   switch (status) {
     case "Y":
-      return { label: "เผยแพร่", backgroundColor: "#4CAF50" }; // Green
+      return { label: "เผยแพร่", backgroundColor: `${Event_StatusColor2}` }; // Green
     case "N":
-      return { label: "ไม่เผยแพร่", backgroundColor: "#F44336" }; // Red
+      return {
+        label: "ไม่เผยแพร่",
+        backgroundColor: `${Event_StatusColorUnknown}`,
+      }; // Red
     default:
-      return { label: "Unknown", backgroundColor: "#9E9E9E" }; // Grey for unknown statuses
+      return {
+        label: "Unknown",
+        backgroundColor: `${Event_StatusColorUnknown}`,
+      }; // Grey for unknown statuses
   }
 };
 
@@ -512,7 +530,14 @@ const AllStockContent: React.FC = () => {
 
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: "0", maxHeight: "100vh", overflowY: "auto" }}
+        sx={{
+          borderRadius: "0",
+          maxHeight: "100vh",
+          overflowY: "auto",
+          display: "grid",
+          minWidth: "800px",
+          maxWidth: "1200px",
+        }}
       >
         <Table stickyHeader sx={{ minWidth: 800 }}>
           <TableHead sx={{ backgroundColor: "#11131A" }}>
@@ -531,6 +556,7 @@ const AllStockContent: React.FC = () => {
               >
                 ลำดับ
               </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -541,10 +567,12 @@ const AllStockContent: React.FC = () => {
                   top: 0,
                   backgroundColor: "#11131A",
                   zIndex: 2,
+                  minWidth: "170px",
                 }}
               >
                 ชื่องาน
               </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -559,6 +587,39 @@ const AllStockContent: React.FC = () => {
               >
                 ชื่อโซน
               </TableCell>
+
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                  minWidth: "115px",
+                }}
+              >
+                ขายไป / ทั้งหมด (โต๊ะ)
+              </TableCell>
+
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                  minWidth: "115px",
+                }}
+              >
+                จำนวนบัตรคงเหลือ
+              </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -573,6 +634,23 @@ const AllStockContent: React.FC = () => {
               >
                 ประเภทบัตร
               </TableCell>
+
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                  textAlign: "center",
+                  color: "white",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                  minWidth: "115px",
+                }}
+              >
+                ที่นั่ง/โต๊ะ
+              </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -585,64 +663,9 @@ const AllStockContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                จำนวนบัตรทั้งหมด
+                ที่นั่งคงเหลือ
               </TableCell>
-              <TableCell
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  textAlign: "center",
-                  color: "white",
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                จำนวนที่/บัตร
-              </TableCell>
-              <TableCell
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  textAlign: "center",
-                  color: "white",
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                จำนวนบัตรที่ถูกซื้อ
-              </TableCell>
-              <TableCell
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  textAlign: "center",
-                  color: "white",
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                จำนวนบัตรคงเหลือ
-              </TableCell>
-              <TableCell
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  textAlign: "center",
-                  color: "white",
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                จำนวนที่นั่งคงเหลือ
-              </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -657,6 +680,7 @@ const AllStockContent: React.FC = () => {
               >
                 สถานะ Event
               </TableCell>
+
               <TableCell
                 style={{
                   fontWeight: "bold",
@@ -688,7 +712,7 @@ const AllStockContent: React.FC = () => {
                   style={{
                     backgroundColor:
                       selectedOrderNo === stock.Event_STC_Id
-                        ? "lightblue"
+                        ? `${selectedColor}`
                         : "inherit",
                     cursor: "pointer",
                   }}
@@ -699,30 +723,83 @@ const AllStockContent: React.FC = () => {
                   >
                     {index + 1}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center" }}>
+
+                  <TableCell style={{ textAlign:"left" }}>
                     {stock.Event_Name}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center" }}>
+
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      backgroundColor:
+                        selectedOrderNo === stock.Event_STC_Id
+                          ? `${selectedColor}`
+                          : `${ColumnColorstock}`,
+                    }}
+                  >
                     {stock.Plan_Name}
                   </TableCell>
+
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      backgroundColor:
+                        selectedOrderNo === stock.Event_STC_Id
+                          ? `${selectedColor}`
+                          : `${ColumnColorstock}`,
+                    }}
+                  >
+                    {stock.Ticket_Qty_Buy} / {stock.Ticket_Qty}
+                  </TableCell>
+
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      backgroundColor:
+                        selectedOrderNo === stock.Event_STC_Id
+                          ? `${selectedColor}`
+                          : `${ColumnColorstock}`,
+                    }}
+                  >
+                    {stock.Ticket_Qty_Balance === 0 ? (
+                      <p
+                        style={{
+                          textTransform: "uppercase",
+                          fontWeight: "bold",
+                          color: "red",
+                        }}
+                      >
+                        sold
+                      </p>
+                    ) : (
+                      <p>{stock.Ticket_Qty_Balance}</p>
+                    )}
+                  </TableCell>
+
                   <TableCell style={{ textAlign: "center" }}>
                     {stock.Ticket_Type_Name}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center" }}>
-                    {stock.Ticket_Qty}
-                  </TableCell>
+
                   <TableCell style={{ textAlign: "center" }}>
                     {stock.Ticket_Qty_Per}
                   </TableCell>
+
                   <TableCell style={{ textAlign: "center" }}>
-                    {stock.Ticket_Qty_Buy}
+                    {stock.STC_Total_Balance === 0 ? (
+                      <p
+                        style={{
+                          textTransform: "uppercase",
+                          fontWeight: "bold",
+                          color: "red",
+                        }}
+                      >
+                        sold
+                      </p>
+                    ) : (
+                      <p>{stock.STC_Total_Balance}</p>
+                    )}
                   </TableCell>
-                  <TableCell style={{ textAlign: "center" }}>
-                    {stock.Ticket_Qty_Balance}
-                  </TableCell>
-                  <TableCell style={{ textAlign: "center" }}>
-                    {stock.STC_Total_Balance}
-                  </TableCell>
+
                   <TableCell style={{ textAlign: "center" }}>
                     <div
                       style={{
@@ -736,6 +813,7 @@ const AllStockContent: React.FC = () => {
                       {label}
                     </div>
                   </TableCell>
+
                   <TableCell style={{ textAlign: "center" }}>
                     <div
                       style={{
