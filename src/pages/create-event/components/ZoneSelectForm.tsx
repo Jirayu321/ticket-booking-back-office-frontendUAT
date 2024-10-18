@@ -13,7 +13,10 @@ const ZoneSelectForm: FC<ZoneSelectFormProps> = ({
 }) => {
   return (
     <div style={{ paddingTop: "30px" }} className="form-section">
-      <div className="zone-select-container">
+      <div
+        className="zone-select-container"
+        style={{ display: "grid", maxHeight: "55vh" }}
+      >
         <label>เลือก ZONE GROUP</label>
         <select
           className="zone-select"

@@ -94,6 +94,7 @@ const ZonePriceForm = () => {
   //     setError("Failed to refresh zones. Please try again later.");
   //   }
   // };
+
   const forceRefreshFilteredZones = async (groupId: number) => {
     try {
       const fetchedViewPlans = (await getAllPlans()).plans;
@@ -217,22 +218,34 @@ const ZonePriceForm = () => {
 
   if (isLoadingPlanGroups) return <CircularProgress />;
 
-
-
   return (
-    <div className="zone-price-form-container">
-      {error && <div className="error-message">{error}</div>}
-      <ZoneSelectForm
-        onChange={handlePlanGroupChange}
-        selectedZoneGroup={selectedZoneGroup}
-        planGroups={planGroups}
-      />
-      <FilteredZones filteredZones={filteredZones} />
-
-      <div className="save-form-section">
-        {/* <button className="buttonSave" onClick={handleSaveEvent}>
-          บันทึก
-        </button> */}
+    <div
+      style={{ display: "grid", height: "80%", alignContent: "space-between" }}
+    >
+      <div className="zone-price-form-container">
+        {error && <div className="error-message">{error}</div>}
+        <ZoneSelectForm
+          onChange={handlePlanGroupChange}
+          selectedZoneGroup={selectedZoneGroup}
+          planGroups={planGroups}
+        />
+        <FilteredZones filteredZones={filteredZones} />
+      </div>
+      <div
+        className="next-form-section"
+        style={{ position: "relative", height: "50px" }}
+      >
+        <button
+          className="buttonNext"
+          style={{
+            width: "110px",
+            borderRadius: "inherit",
+            marginTop: "0px",
+          }}
+          // onClick={handleBackClick}
+        >
+          ย้อนกลับ
+        </button>
       </div>
     </div>
   );

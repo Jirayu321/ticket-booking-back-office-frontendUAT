@@ -1043,7 +1043,7 @@ const AllOrderContent: React.FC = () => {
           maxHeight: "70vh",
         }}
       >
-        <div style={{ width: "900px" }}>
+        <div style={{ width: "920px" }}>
           <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
             คำสั่งซื้อทั้งหมด
           </p>
@@ -1051,13 +1051,13 @@ const AllOrderContent: React.FC = () => {
           <TableContainer
             component={Paper}
             sx={{ borderRadius: "0" }}
-            style={{ maxHeight: "68vh", overflowX: "unset" }}
+            style={{ maxHeight: "68vh", overflowY: "auto" }}
           >
             <Table
               stickyHeader
               sx={{
                 tableLayout: "fixed",
-                display: "grid",
+                display: "table-cell",
               }}
             >
               <TableHead sx={{ backgroundColor: "#11131A" }}>

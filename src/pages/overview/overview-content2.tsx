@@ -835,6 +835,18 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
+                ช่องทางชำระ
+              </TableCell>
+
+              <TableCell
+                sx={{
+                  ...tableCellHeadStyle,
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                }}
+              >
                 คำสั่งซื้อทั้งหมด
               </TableCell>
 
@@ -874,7 +886,7 @@ const OverviewContent: React.FC = () => {
                 ค้างชำระ
               </TableCell>
 
-              <TableCell
+              {/* <TableCell
                 sx={{
                   ...tableCellHeadStyle,
                   position: "sticky",
@@ -896,11 +908,11 @@ const OverviewContent: React.FC = () => {
                 }}
               >
                 เช็คอิน
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
 
-          {combinedData && combinedData.length > 0 ? (
+          {/* {combinedData && combinedData.length > 0 ? (
             <TableBody>
               {filteredEvents.map((event: any, index: number) => {
                 const { Event_Id, Event_Name, Event_Time, payments, orders } =
@@ -970,7 +982,7 @@ const OverviewContent: React.FC = () => {
                 </TableCell>
               </TableRow>
             </TableBody>
-          )}
+          )} */}
         </Table>
       </TableContainer>
     </div>

@@ -1,6 +1,6 @@
 // Sidebars.tsx
 import React, { useEffect, useState } from "react";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
+import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { Box, IconButton, Typography, Modal } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
@@ -32,6 +32,9 @@ const Sidebars: React.FC = () => {
   const [isCollapsed, setisCollapsed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [activePath, setActivePath] = useState<string>("");
+  const [openSubMenu, setOpenSubMenu] = useState<
+    "charts" | "maps" | "theme" | undefined
+  >();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,6 +64,14 @@ const Sidebars: React.FC = () => {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
+  const handleOpenSubMenu = (key: "charts" | "maps" | "theme") => {
+    setOpenSubMenu((prevOpen) => (prevOpen === key ? undefined : key));
+  };
+
+  const handleMenuItemClick = () => {
+    setOpenSubMenu(undefined); // ปิด SubMenu เมื่อคลิก MenuItem นอก SubMenu
+  };
+
   const emmpToken = JSON.parse(localStorage.getItem("emmp"));
   return (
     <div style={{ display: "flex", height: "100%" }}>
@@ -127,19 +138,51 @@ const Sidebars: React.FC = () => {
                   เมนูหลัก
                 </Typography>
               </div>
-              <Link
-                to="/overview"
-                className={`menu-bars ${
-                  activePath === "/overview" ? "active" : ""
-                }`}
+
+              <SubMenu
+                label="รายงานสรุปยอดขาย"
+                icon={<DashboardIcon />}
+                rootStyles={{
+                  "& > .ps-menu-button": {
+                    backgroundColor: "#191a1a", // สีพื้นหลังของปุ่มเมนู
+                    color: "#cfcece !important", // สีตัวอักษรของปุ่มเมนู
+                    "&:hover": {
+                      backgroundColor: "#eecef9", // สีพื้นหลังเมื่อ hover
+                    },
+                  },
+                  ".ps-submenu-content": {
+                    backgroundColor: "transparent !important", // สีพื้นหลังของเนื้อหา SubMenu
+                  },
+                }}
+                open={openSubMenu === "charts"}
+                onClick={() => handleOpenSubMenu("charts")}
               >
-                <MenuItem icon={<DashboardIcon />}>ภาพรวม</MenuItem>
-              </Link>
+                <Link
+                  to="/overview"
+                  className={`menu-bars ${
+                    activePath === "/overview" ? "active" : ""
+                  }`}
+                  onClick={handleMenuItemClick}
+                >
+                  <MenuItem icon={<DashboardIcon />}>สรุปยอดทั้งหมด</MenuItem>
+                </Link>
+                <Link
+                  to="/overview2"
+                  className={`menu-bars ${
+                    activePath === "/overview2" ? "active" : ""
+                  }`}
+                  onClick={handleMenuItemClick}
+                >
+                  <MenuItem icon={<DashboardIcon />}>แยกตามการซื้อ</MenuItem>
+                </Link>
+              </SubMenu>
+
               <Link
                 to="/all-events"
                 className={`menu-bars ${
                   activePath === "/all-events" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<EventIcon />}>Event ทั้งหมด</MenuItem>
               </Link>
@@ -148,6 +191,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/all-orders" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<ShoppingCartIcon />}>
                   คำสั่งซื้อทั้งหมด
@@ -158,6 +202,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/all-stocks" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<ConfirmationNumberIcon />}>
                   สต๊อกทั้งหมด
@@ -168,6 +213,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/all-seats" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<EventSeatIcon />}>ที่นั่งทั้งหมด</MenuItem>
               </Link>
@@ -198,6 +244,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/zone-group" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<MapIcon />}>ผังร้าน</MenuItem>
               </Link>
@@ -206,6 +253,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/zone" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<FullscreenIcon />}>โซน</MenuItem>
               </Link>
@@ -214,6 +262,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/ticket-type" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<LocalActivityIcon />}>ประเภทบัตร</MenuItem>
               </Link>
@@ -222,6 +271,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/pay-by" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<PaymentIcon />}>วิธีการจ่ายเงิน</MenuItem>
               </Link>
@@ -230,6 +280,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/pay-option" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<PaidIcon />}>ตัวเลือกการจ่ายเงิน</MenuItem>
               </Link>
@@ -238,6 +289,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/employee" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<ManageAccountsIcon />}>ตั้งค่าบริษัท</MenuItem>
               </Link>
@@ -279,6 +331,7 @@ const Sidebars: React.FC = () => {
                 className={`menu-bars ${
                   activePath === "/role-settings" ? "active" : ""
                 }`}
+                onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<AssignmentIndIcon />}>ตั้งค่าผู้ใช้</MenuItem>
               </Link>
@@ -312,7 +365,7 @@ const Sidebars: React.FC = () => {
             border: "2px solid #000",
             boxShadow: 24,
             p: 4,
-            width: "25vw",
+            width: "15vw",
           }}
         >
           <IconButton
@@ -328,16 +381,16 @@ const Sidebars: React.FC = () => {
           </IconButton>
           <div style={{ color: "black" }}>
             <p>
-              <strong>รหัสพนักงาน:</strong>
-              <span style={{marginLeft:10}}>{emmpToken?.Emp_UUser || ""}</span>
-            </p>
-            <p>
               <strong>ชื่อ:</strong>
-              <span style={{marginLeft:10}}>{emmpToken?.Emp_Name || ""}</span>
+              <span style={{ marginLeft: 10 }}>
+                {emmpToken?.Emp_Name || ""}
+              </span>
             </p>
             <p>
               <strong>ตำแหน่ง:</strong>
-              <span style={{marginLeft:10}}>{emmpToken?.Emp_Position_Detail || ""}</span>
+              <span style={{ marginLeft: 10 }}>
+                {emmpToken?.Emp_Position_Detail || ""}
+              </span>
             </p>
           </div>
         </Box>

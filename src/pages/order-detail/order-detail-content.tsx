@@ -46,10 +46,11 @@ const OrderDetailContent: React.FC = () => {
     return ph.Total_Balance === 0;
   });
 
-  const handleNavigateBack = () => {
-    localStorage.setItem("orderDetail", orderDetail?.Order_no);
-    navigate("/all-orders");
-  };
+
+  // const handleNavigateBack = () => {
+  //   localStorage.setItem("orderDetail", orderDetail?.Order_no);
+  //   navigate("/all-orders");
+  // };
 
   const handleNavigateToOrderSite2 = async (order_id: string | number) => {
     const orderIdStr = String(order_id); // Ensure order_id is a string
@@ -283,30 +284,13 @@ const OrderDetailContent: React.FC = () => {
         style={{
           backgroundColor: "#000",
           width: "100%",
-          // maxWidth: "1690px", // Fixed maximum width for the black header
           height: "65px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          // padding: "0 20px",
-          // margin: "0 auto", // Center the header
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
-          {/* <button
-            style={{
-              backgroundColor: "black",
-              paddingTop: "20px",
-              marginRight: "20px",
-            }}
-            onClick={handleNavigateBack}
-          >
-            <img
-              src="/back.svg"
-              alt="Back Icon"
-              style={{ width: "58px", height: "58px" }}
-            />
-          </button> */}
           <p
             style={{
               color: "white",

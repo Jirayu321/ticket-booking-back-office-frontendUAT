@@ -21,9 +21,7 @@ import {
   Box,
   Typography,
 } from "@mui/material";
-import { getAllEventList } from "../../services/event-list.service";
-import { getViewTicketList } from "../../services/view-tikcet-list.service";
-import toast from "react-hot-toast";
+
 import Header from "../common/header";
 import QRCodeModal from "./QRCodeModal";
 import LocalPrintshopIcon from "@mui/icons-material/LocalPrintshop";
@@ -76,6 +74,7 @@ const AllSeatContent: React.FC = () => {
           printStatus: "all",
           scanStatus: "all",
           ticket_Reserve: "all",
+          ticket_pay: "all",
         };
   });
 
@@ -120,6 +119,8 @@ const AllSeatContent: React.FC = () => {
         prevFilters.ticket_Reserve !== "all"
           ? prevFilters.ticket_Reserve
           : "all",
+      ticket_pay:
+        prevFilters.ticket_pay !== "all" ? prevFilters.ticket_pay : "all",
     }));
     setStartDate(dayjs().startOf("month"));
     setEndDate(dayjs().endOf("month"));
@@ -161,9 +162,12 @@ const AllSeatContent: React.FC = () => {
         filters.ticket_Reserve === "all" ||
         (filters.ticket_Reserve === "ติดจอง" &&
           current.ticket_Reserve === "R") ||
-        (filters.ticket_Reserve === "ปกติ" &&
-          current.ticket_Reserve === "W" &&
-          current.Is_Balance === 0);
+        (filters.ticket_Reserve === "ปกติ" && current.ticket_Reserve === "W");
+
+      const matchesTicketPay =
+        filters.ticket_pay === "all" ||
+        (filters.ticket_pay === "ชำระครบ" && current.Is_Balance === 0) ||
+        (filters.ticket_pay === "ค้างจ่าย" && current.Is_Balance > 0);
 
       const matchesEventName =
         filters.eventName === "" ||
@@ -180,7 +184,8 @@ const AllSeatContent: React.FC = () => {
         matchesPrintStatus &&
         matchesScanStatus &&
         matchesTicketReserve &&
-        matchesEventName
+        matchesEventName &&
+        matchesTicketPay
       ) {
         // Check if we already have a ticket with the same ID
         const existingTicket = acc.find(
@@ -443,6 +448,20 @@ const AllSeatContent: React.FC = () => {
                 <MenuItem value="all">ทั้งหมด</MenuItem>
                 <MenuItem value="ปกติ">ปกติ</MenuItem>
                 <MenuItem value="ติดจอง">ติดจอง</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl variant="outlined" style={{ minWidth: 150 }}>
+              <InputLabel>สถานะการจ่าย</InputLabel>
+              <Select
+                label="สถานะการจ่าย"
+                name="ticket_pay"
+                value={filters.ticket_pay}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="all">ทั้งหมด</MenuItem>
+                <MenuItem value="ชำระครบ">ชำระครบ</MenuItem>
+                <MenuItem value="ค้างจ่าย">ค้างจ่าย</MenuItem>
               </Select>
             </FormControl>
             <FormControl variant="outlined" style={{ minWidth: 150 }}>
@@ -829,7 +848,7 @@ const AllSeatContent: React.FC = () => {
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {ticket.ticket_Reserve === "W" &&
-                    ticket.Total_Balance === 0 ? (
+                    ticket.Is_Balance === 0 ? (
                       <Button
                         onClick={() => handleOpenModal(ticket)}
                         variant="contained"

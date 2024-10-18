@@ -76,7 +76,7 @@ const getPublicStatusDetails = (status: string) => {
 };
 
 const AllStockContent: React.FC = () => {
-  const { data: Data, refetch } = useFetchEventStocktList({
+  const { data: Data, isFetching } = useFetchEventStocktList({
     eventId: null,
   });
   const evntDetail = Data?.dataEvent?.events.filter(
@@ -198,7 +198,6 @@ const AllStockContent: React.FC = () => {
   const numberFormatter = new Intl.NumberFormat("en-US");
 
   const handleClearFilters = () => {
-    refetch();
     setFilters((prevFilters) => ({
       search: prevFilters.search !== "" ? prevFilters.search : "",
       eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
@@ -223,6 +222,9 @@ const AllStockContent: React.FC = () => {
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
+
+ 
+
   return (
     <div
       className="all-orders-content"

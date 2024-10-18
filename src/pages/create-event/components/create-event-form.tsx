@@ -6,14 +6,13 @@ import { STATUS_MAP } from "../../../config/constants";
 import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
 import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
-import { useEventStore ,useZoneStore} from "../form-store"; // Zustand store
+import { useEventStore, useZoneStore } from "../form-store"; // Zustand store
 import "./create-event-form.css";
 import ZonePriceForm from "./zone-price-form";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
 import EditZonePriceForm from "../../edit-event/_components/EditZonePriceForm";
 import { handleSave } from "./save-form";
-
 
 const MINIMUM_EVENT_IMAGES = 1;
 
@@ -25,13 +24,13 @@ const CreateEventForm = () => {
     description,
     eventDateTime,
     status,
-    images, // Fetch images from Zustand store
+    images,
     setTitle,
     setTitle2,
     setDescription,
     setEventDateTime,
     setStatus,
-    setImages, // Zustand action to set images
+    setImages,
   } = useEventStore();
 
   const {
@@ -115,7 +114,7 @@ const CreateEventForm = () => {
     try {
       toast.loading("กำลังบันทึกข้อมูล Event");
 
-      console.log("handleSaveEvent 55555",zones);
+      console.log("handleSaveEvent 55555", zones);
 
       const { isValid, message } = isFormValid();
 
@@ -157,11 +156,27 @@ const CreateEventForm = () => {
   return (
     <div className="create-new-event">
       <Header title="งานทั้งหมด" />
-      <div className="sub-header">
-        <button className="back-button">
-          <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
-        </button>
-        <h2 className="title">สร้างงานใหม่</h2>
+      <div
+        className="sub-header"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "230px auto",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "65px auto",
+            alignItems: "center",
+          }}
+        >
+          <button className="back-button">
+            <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
+          </button>
+          <h2 className="title" style={{ margin: 0 }}>
+            สร้างงานใหม่
+          </h2>
+        </div>
         <div className="toggle-container">
           <button className="btn-cancel" onClick={handleCancel}>
             ยกเลิก
@@ -194,113 +209,120 @@ const CreateEventForm = () => {
         </div>
       </div>
       {activeTab === "รายละเอียด" && (
-        <form onSubmit={handleCreateEvent}>
-          <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
-          <div className="form-section">
-            <label>ชื่องาน*</label>
-            <input
-              onFocus={(e) => e.target.select()}
-              type="text"
-              value={title}
-              onChange={handleInputChange(setTitle)}
-              placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
-            />
-            <input
-              onFocus={(e) => e.target.select()}
-              type="text"
-              value={title2}
-              onChange={handleInputChange(setTitle2)}
-              className="second-input"
-              placeholder="บรรทัดที่ 2 (เช่น at deedclub)"
-            />
-          </div>
-          <div className="form-section">
-            <label>ข้อมูลงาน (ถ้ามี)</label>
-            <input
-              onFocus={(e) => e.target.select()}
-              type="text"
-              value={description}
-              onChange={handleInputChange(setDescription)}
-            />
-          </div>
-          <hr className="custom-hr" />
-          <div className="form-section">
-            <DatePicker
-              label="วันและเวลาจัดงาน*"
-              dateTimeValue={eventDateTime} // Ensure Dayjs object
-              setter={setEventDateTime} // Pass setter function for Dayjs object
-            />
-          </div>
-          <div className="form-section">
-            <label>สถานะ*</label>
-            <select
-              className="large-select"
-              value={status.toString()} // Convert to string for select element
-              onChange={handleStatusChange}
-            >
-              {Object.entries(STATUS_MAP).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <hr className="custom-hr" />
-          <div className="form-section">
-            <label>ภาพประกอบ</label>
-            <div className="image-grid">
-              {[
-                "ภาพปก*",
-                "ภาพประกอบ 1 (ไม่บังคับ)",
-                "ภาพประกอบ 2 (ไม่บังคับ)",
-                "ภาพประกอบ 3 (ไม่บังคับ)",
-              ].map((title, index) => (
-                <div key={index} className="image-upload-container">
-                  <span className="image-upload-title">{title}</span>
-                  <div className="image-upload-box">
-                    {images[index] && (
-                      <img src={images[index]} alt={`Upload ${index}`} />
-                    )}
-                  </div>
-                  <div className="upload-link-container">
-                    {images[index] ? (
-                      <>
+        <div>
+          <form
+            onSubmit={handleCreateEvent}
+            style={{ maxHeight: "70vh", overflowY: "auto" }}
+          >
+            <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
+            <div className="form-section">
+              <label>ชื่องาน*</label>
+              <input
+                onFocus={(e) => e.target.select()}
+                type="text"
+                value={title}
+                onChange={handleInputChange(setTitle)}
+                placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
+              />
+              <input
+                onFocus={(e) => e.target.select()}
+                type="text"
+                value={title2}
+                onChange={handleInputChange(setTitle2)}
+                className="second-input"
+                placeholder="บรรทัดที่ 2 (เช่น at deedclub)"
+              />
+            </div>
+            <div className="form-section">
+              <label>ข้อมูลงาน (ถ้ามี)</label>
+              <input
+                onFocus={(e) => e.target.select()}
+                type="text"
+                value={description}
+                onChange={handleInputChange(setDescription)}
+              />
+            </div>
+            <hr className="custom-hr" />
+            <div className="form-section">
+              <DatePicker
+                label="วันและเวลาจัดงาน*"
+                dateTimeValue={eventDateTime} // Ensure Dayjs object
+                setter={setEventDateTime} // Pass setter function for Dayjs object
+              />
+            </div>
+            <div className="form-section">
+              <label>สถานะ*</label>
+              <select
+                className="large-select"
+                value={status.toString()} // Convert to string for select element
+                onChange={handleStatusChange}
+              >
+                {Object.entries(STATUS_MAP).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <hr className="custom-hr" />
+            <div className="form-section">
+              <label>ภาพประกอบ</label>
+              <div className="image-grid">
+                {[
+                  "ภาพปก* ขนาดภาพแบบ1:1",
+                  "ภาพประกอบ 1 (ไม่บังคับ) ขนาดภาพแบบ1:1",
+                  "ภาพประกอบ 2 (ไม่บังคับ) ขนาดภาพแบบ1:1",
+                  "ภาพประกอบ 3 (ไม่บังคับ) ขนาดภาพแบบ1:1",
+                ].map((title, index) => (
+                  <div key={index} className="image-upload-container">
+                    <span className="image-upload-title">{title}</span>
+                    <div className="image-upload-box">
+                      {images[index] && (
+                        <img src={images[index]} alt={`Upload ${index}`} />
+                      )}
+                    </div>
+                    <div className="upload-link-container">
+                      {images[index] ? (
+                        <>
+                          <label className="image-upload-label">
+                            <span className="image-upload-link">
+                              เปลี่ยนภาพ
+                            </span>
+                            <input
+                              type="file"
+                              onChange={handleImageUpload(index)}
+                              className="image-upload-input"
+                            />
+                          </label>
+                          <span
+                            className="image-remove-button"
+                            onClick={handleImageRemove(index)}
+                          >
+                            ลบ
+                          </span>
+                        </>
+                      ) : (
                         <label className="image-upload-label">
-                          <span className="image-upload-link">เปลี่ยนภาพ</span>
+                          <span className="image-upload-link">+ อัปโหลด</span>
                           <input
                             type="file"
                             onChange={handleImageUpload(index)}
                             className="image-upload-input"
                           />
                         </label>
-                        <span
-                          className="image-remove-button"
-                          onClick={handleImageRemove(index)}
-                        >
-                          ลบ
-                        </span>
-                      </>
-                    ) : (
-                      <label className="image-upload-label">
-                        <span className="image-upload-link">+ อัปโหลด</span>
-                        <input
-                          type="file"
-                          onChange={handleImageUpload(index)}
-                          className="image-upload-input"
-                        />
-                      </label>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="next-form-section">
+          </form>
+          <div className="next-form-section" style={{ marginTop: " 5vh" }}>
             <button className="buttonNext" onClick={handleNext}>
               ถัดไป
             </button>
           </div>
-        </form>
+        </div>
       )}
       {activeTab === "โซน & ราคา" && (
         <ZonePriceForm onSaveEvent={handleSaveEvent} />

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AllEvent from "./pages/all-event/all-event";
 import Overview from "./pages/overview/overview";
+import Overview2 from "./pages/overview/orerview2";
+import Employee from "./pages/emp/emp";
 import CreateNewEvent from "./pages/create-event/create-event";
 import ZoneGroup from "./pages/zone-group/zone-group";
 import ZonePage from "./pages/zone/zone";
@@ -56,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Overview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/overview2"
+            element={
+              <ProtectedRoute>
+                <Overview2 />
               </ProtectedRoute>
             }
           />
@@ -150,6 +160,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/employee"
+            element={
+              <ProtectedRoute>
+                <Employee />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>
