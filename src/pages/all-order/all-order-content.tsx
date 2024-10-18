@@ -1051,7 +1051,7 @@ const AllOrderContent: React.FC = () => {
           <TableContainer
             component={Paper}
             sx={{ borderRadius: "0" }}
-            style={{ maxHeight: "68vh" }}
+            style={{ maxHeight: "68vh", overflowX: "unset" }}
           >
             <Table
               stickyHeader
@@ -1133,8 +1133,8 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
-                      minWidth: "60px",
-                      maxWidth: "60px",
+                      minWidth: "80px",
+                      maxWidth: "80px",
                       position: "sticky",
                       top: 0,
                       backgroundColor: "#11131A",
@@ -1299,7 +1299,7 @@ const AllOrderContent: React.FC = () => {
           </TableContainer>
         </div>
 
-        <div style={{ marginLeft: 10 }}>
+        <div style={{ marginLeft: 10, maxWidth: "35vw" }}>
           <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
             รายละเอียด
           </p>
@@ -1435,7 +1435,7 @@ const AllOrderContent: React.FC = () => {
           <div
             style={{
               display: "inline-block",
-              maxWidth: "545px",
+              maxWidth: "35vw",
               overflowX: "auto",
             }}
           >
@@ -1465,8 +1465,8 @@ const AllOrderContent: React.FC = () => {
                         fontSize: "17px",
                         textAlign: "center",
                         color: "#fff",
-                        minWidth: "91px",
-                        maxWidth: "91px",
+                        minWidth: "140px",
+                        maxWidth: "140px",
                       }}
                     >
                       วันที่เวลาจ่าย
@@ -1594,8 +1594,8 @@ const AllOrderContent: React.FC = () => {
                         <TableCell
                           style={{
                             textAlign: "center",
-                            minWidth: "91px",
-                            maxWidth: "91px",
+                            minWidth: "140px",
+                            maxWidth: "140px",
                           }}
                         >
                           {handletime(order.Payment_Date7)}
