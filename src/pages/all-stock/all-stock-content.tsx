@@ -22,7 +22,7 @@ import {
   Button,
 } from "@mui/material";
 
-import Header from "../common/header"; 
+import Header from "../common/header";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCardIcon from "@mui/icons-material/AddCard";
 
@@ -522,7 +522,7 @@ const AllStockContent: React.FC = () => {
           overflowY: "auto",
           display: "grid",
           minWidth: "800px",
-          maxWidth: "1200px",
+          maxWidth: "1500px",
         }}
       >
         <Table stickyHeader sx={{ minWidth: 800 }}>
@@ -701,6 +701,7 @@ const AllStockContent: React.FC = () => {
                         ? `${selectedColor}`
                         : "inherit",
                     cursor: "pointer",
+                    height: 50,
                   }}
                   onClick={() => handleOrderClick(stock.Event_STC_Id)}
                 >
@@ -721,6 +722,8 @@ const AllStockContent: React.FC = () => {
                         selectedOrderNo === stock.Event_STC_Id
                           ? `${selectedColor}`
                           : `${ColumnColorstock}`,
+                      whiteSpace: "nowrap",
+                      fontWeight: "bold",
                     }}
                   >
                     {stock.Plan_Name}
@@ -733,6 +736,8 @@ const AllStockContent: React.FC = () => {
                         selectedOrderNo === stock.Event_STC_Id
                           ? `${selectedColor}`
                           : `${ColumnColorstock}`,
+
+                      fontWeight: "bold",
                     }}
                   >
                     {stock.Ticket_Qty_Buy} / {stock.Ticket_Qty}
@@ -758,7 +763,9 @@ const AllStockContent: React.FC = () => {
                         sold
                       </p>
                     ) : (
-                      <p>{stock.Ticket_Qty_Balance}</p>
+                      <p style={{ fontWeight: "bold" }}>
+                        {stock.Ticket_Qty_Balance}
+                      </p>
                     )}
                   </TableCell>
 
@@ -794,6 +801,7 @@ const AllStockContent: React.FC = () => {
                         padding: "4px",
                         borderRadius: "4px",
                         textAlign: "center",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {label}
@@ -808,6 +816,7 @@ const AllStockContent: React.FC = () => {
                         padding: "4px",
                         borderRadius: "4px",
                         textAlign: "center",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {publicLabel}
