@@ -201,14 +201,14 @@ const AllOrderContent: React.FC = () => {
     setModalOpen(true);
   };
 
-  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+
 
   const handletime = (x) => {
     const adjustedDate = dayjs(x).subtract(7, "hour");
     const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
     return formattedDateTime;
   };
-
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
   const handleOrderClick = (orderNo: any) => {
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
@@ -1245,7 +1245,7 @@ const AllOrderContent: React.FC = () => {
                       </TableCell>
                       <TableCell
                         style={{
-                          textAlign: "center",
+                          textAlign: "left",
                           fontWeight: "bold",
                         }}
                       >

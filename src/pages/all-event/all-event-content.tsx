@@ -30,8 +30,6 @@ import { DatePicker } from "@mui/x-date-pickers";
 
 dayjs.extend(buddhistEra);
 
-const MAX_ITEMS_PER_PAGE = 50;
-
 const formatEventTime = (dateTime: string | null) => {
   if (!dateTime) return "ยังไม่ระบุ";
   return dayjs(dateTime)
@@ -42,7 +40,7 @@ const formatEventTime = (dateTime: string | null) => {
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
     return savedFilters
@@ -75,17 +73,11 @@ const AllEventContent: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
-
-  const totalPages = Math.ceil((events?.length ?? 0) / MAX_ITEMS_PER_PAGE);
-
   function handleCopyEventLink(eventId: number) {
     const eventLink = `https://deedclub.appsystemyou.com/event/${eventId}`;
     navigator.clipboard.writeText(eventLink);
     toast.success("คัดลอกลิงก์งานสำเร็จ");
   }
-
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -166,50 +158,52 @@ const AllEventContent: React.FC = () => {
     }));
   };
 
-  const filteredEvents = events
-    ?.filter((event) => {
-      if (
-        filters.search &&
-        !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
-      ) {
+  const filteredEvents = events?.filter((event) => {
+    if (
+      filters.search &&
+      !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (filters.publishStatus !== "all") {
+      const isPublished = filters.publishStatus === "published" ? "Y" : "N";
+      if (event.Event_Public !== isPublished) {
         return false;
       }
+    }
 
-      if (filters.publishStatus !== "all") {
-        const isPublished = filters.publishStatus === "published" ? "Y" : "N";
-        if (event.Event_Public !== isPublished) {
-          return false;
-        }
-      }
+    if (
+      filters.status !== "all" &&
+      event.Event_Status !== parseInt(filters.status)
+    ) {
+      return false;
+    }
 
-      if (
-        filters.status !== "all" &&
-        event.Event_Status !== parseInt(filters.status)
-      ) {
+    const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+    const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+
+    // Compare using dayjs objects
+    if (filters.startDate && filters.endDate) {
+      const startDate = dayjs(filters.startDate);
+      const endDate = dayjs(filters.endDate);
+
+      const dateToCompare =
+        filters.dateFilterType === "publish-date" ? publishDate : eventDate;
+
+      // Check if the event date is within the selected range
+      if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
         return false;
       }
+    }
 
-      const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
-      const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+    return true;
+  });
 
-      // Compare using dayjs objects
-      if (filters.startDate && filters.endDate) {
-        const startDate = dayjs(filters.startDate);
-        const endDate = dayjs(filters.endDate);
-
-        const dateToCompare =
-          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-        // Check if the event date is within the selected range
-        if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
-          return false;
-        }
-      }
-
-      return true;
-    })
-    .slice(indexOfFirstItem, indexOfLastItem);
-
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+  const handleOrderClick = (orderNo: any) => {
+    setSelectedOrderNo(orderNo);
+  };
   return (
     <div
       className="all-events-content"
@@ -600,7 +594,6 @@ const AllEventContent: React.FC = () => {
         </Container>
       </div>
 
-
       <TableContainer
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "68vh", overflowY: "auto" }}
@@ -748,7 +741,15 @@ const AllEventContent: React.FC = () => {
                 Event_Public_Date,
               } = event;
               return (
-                <TableRow key={Event_Id}>
+                <TableRow
+                  key={Event_Id}
+                  style={{
+                    backgroundColor:
+                      selectedOrderNo === Event_Id ? "lightblue" : "inherit",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleOrderClick(Event_Id)}
+                >
                   <TableCell
                     sx={{
                       textAlign: "center",
@@ -756,12 +757,14 @@ const AllEventContent: React.FC = () => {
                       fontWeight: "bold",
                     }}
                   >
-                    {indexOfFirstItem + index + 1}
+                    {index + 1}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {Event_Name}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "left", color: "black",width:100 }}>
+                  <TableCell
+                    sx={{ textAlign: "left", color: "black", width: 100 }}
+                  >
                     {Event_Addr}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
@@ -843,17 +846,6 @@ const AllEventContent: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        />
-      </div>
     </div>
   );
 };

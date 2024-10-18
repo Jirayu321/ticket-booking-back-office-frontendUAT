@@ -26,8 +26,6 @@ import { DatePicker } from "@mui/x-date-pickers";
 
 dayjs.extend(buddhistEra);
 
-const MAX_ITEMS_PER_PAGE = 50;
-
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
   return dayjs(dateTime)
@@ -273,11 +271,6 @@ const OverviewContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
-
-  const totalPages = Math.ceil(combinedData.length / MAX_ITEMS_PER_PAGE);
-
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -353,37 +346,33 @@ const OverviewContent: React.FC = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    return combinedData
-      .filter((event) => {
-        if (
-          filters.search &&
-          !event.Event_Name?.toLowerCase().includes(
-            filters.search.toLowerCase()
-          )
-        ) {
+    return combinedData.filter((event) => {
+      if (
+        filters.search &&
+        !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
+        return false;
+      }
+
+      const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+      const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+
+      if (filters.startDate && filters.endDate) {
+        const startDate = dayjs(filters.startDate);
+        const endDate = dayjs(filters.endDate);
+
+        const dateToCompare =
+          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
+
+        if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
           return false;
         }
+      }
 
-        const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
-        const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+      return true;
+    });
+  }, [combinedData, filters]);
 
-        if (filters.startDate && filters.endDate) {
-          const startDate = dayjs(filters.startDate);
-          const endDate = dayjs(filters.endDate);
-
-          const dateToCompare =
-            filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-          if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .slice(indexOfFirstItem, indexOfLastItem);
-  }, [combinedData, filters, indexOfFirstItem, indexOfLastItem]);
-  
   console.log("filteredEvents", filteredEvents);
 
   const tableCellHeadStyle = {
@@ -392,7 +381,11 @@ const OverviewContent: React.FC = () => {
     fontSize: "17px",
     textAlign: "center",
   };
-
+  
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+  const handleOrderClick = (orderNo: any) => {
+    setSelectedOrderNo(orderNo);
+  };
   return (
     <div
       className="all-events-content"
@@ -456,22 +449,7 @@ const OverviewContent: React.FC = () => {
                 </Select>
               </FormControl> */}
 
-              <FormControl>
-                <InputLabel htmlFor="date-filter-type">
-                  ตัวกรองวันที่
-                </InputLabel>
-                <Select
-                  id="date-filter-type"
-                  name="dateFilterType"
-                  value={filters.dateFilterType}
-                  onChange={handleUpdateFilters}
-                  label="ตัวกรองวันที่"
-                  sx={{ height: "50px", backgroundColor: "white" }}
-                >
-                  <MenuItem value="publish-date">วันที่เผยแพร่</MenuItem>
-                  <MenuItem value="event-date">วันจัดงาน</MenuItem>
-                </Select>
-              </FormControl>
+
               <FormControl sx={{ backgroundColor: "white" }}>
                 <DatePicker
                   label="วันที่เริ่มต้น"
@@ -592,18 +570,6 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                วันที่เผยแพร่
-              </TableCell>
-
-              <TableCell
-                sx={{
-                  ...tableCellHeadStyle,
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
                 วันจัดงาน
               </TableCell>
 
@@ -687,13 +653,21 @@ const OverviewContent: React.FC = () => {
                 const {
                   Event_Id,
                   Event_Name,
-                  Event_Public_Date,
                   Event_Time,
                   payments,
                   orders,
                 } = event;
                 return (
-                  <TableRow key={Event_Id}>
+                  <TableRow key={Event_Id}
+                  style={{
+                    backgroundColor:
+                      selectedOrderNo === Event_Id
+                        ? "lightblue"
+                        : "inherit",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleOrderClick(Event_Id)}
+                  >
                     <TableCell
                       sx={{
                         textAlign: "center",
@@ -701,15 +675,10 @@ const OverviewContent: React.FC = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      {indexOfFirstItem + index + 1}
+                      {index + 1}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {Event_Name}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {Event_Public_Date
-                        ? formatEventTime(Event_Public_Date)
-                        : "ยังไม่ระบุ"}
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
@@ -735,7 +704,8 @@ const OverviewContent: React.FC = () => {
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {orders?.at(0)?.UnCheckin_By_Event
-                        ? orders?.at(0)?.UnCheckin_By_Event + orders.at(0)?.Checkin_By_Event
+                        ? orders?.at(0)?.UnCheckin_By_Event +
+                          orders.at(0)?.Checkin_By_Event
                         : ""}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
@@ -756,17 +726,6 @@ const OverviewContent: React.FC = () => {
           )}
         </Table>
       </TableContainer>
-
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        />
-      </div>
     </div>
   );
 };

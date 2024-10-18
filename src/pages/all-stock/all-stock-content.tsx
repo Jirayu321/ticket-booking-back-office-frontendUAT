@@ -28,7 +28,6 @@ import Header from "../common/header"; // Assuming you have a Header component
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import { getAllEventList } from "../../services/event-list.service";
-const MAX_ITEMS_PER_PAGE = 50;
 
 // Map event statuses to text and style properties
 const getStatusDetails = (status: number) => {
@@ -161,9 +160,6 @@ const AllStockContent: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
-
   const filteredStocks = eventStockData.filter((stock) => {
     const matchesSearch =
       (stock.Event_Name || "").toLowerCase().includes(filters.search) ||
@@ -204,12 +200,6 @@ const AllStockContent: React.FC = () => {
     0
   );
 
-  const stocksInCurrentPage = filteredStocks.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const totalPages = Math.ceil(filteredStocks.length / MAX_ITEMS_PER_PAGE);
   const numberFormatter = new Intl.NumberFormat("en-US");
 
   // if (isLoading) return <CircularProgress />;
@@ -225,6 +215,10 @@ const AllStockContent: React.FC = () => {
     fetchEventStockData();
   };
 
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+  const handleOrderClick = (orderNo: any) => {
+    setSelectedOrderNo(orderNo);
+  };
   return (
     <div
       className="all-orders-content"
@@ -681,7 +675,7 @@ const AllStockContent: React.FC = () => {
           </TableHead>
 
           <TableBody>
-            {stocksInCurrentPage.map((stock, index) => {
+            {filteredStocks.map((stock, index) => {
               const { label, backgroundColor } = getStatusDetails(
                 stock.Event_Status
               );
@@ -689,11 +683,21 @@ const AllStockContent: React.FC = () => {
                 getPublicStatusDetails(stock.Event_Public);
 
               return (
-                <TableRow key={stock.Event_STC_Id}>
+                <TableRow
+                  key={stock.Event_STC_Id}
+                  style={{
+                    backgroundColor:
+                      selectedOrderNo === stock.Event_STC_Id
+                        ? "lightblue"
+                        : "inherit",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleOrderClick(stock.Event_STC_Id)}
+                >
                   <TableCell
                     style={{ textAlign: "center", fontWeight: "bold" }}
                   >
-                    {indexOfFirstItem + index + 1}
+                    {index + 1}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {stock.Event_Name}
@@ -751,17 +755,6 @@ const AllStockContent: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        />
-      </div>
     </div>
   );
 };

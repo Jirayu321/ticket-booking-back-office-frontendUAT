@@ -36,7 +36,7 @@ import buddhistEra from "dayjs/plugin/buddhistEra";
 
 dayjs.extend(buddhistEra);
 
-const MAX_ITEMS_PER_PAGE = 50;
+// const MAX_ITEMS_PER_PAGE = 50;
 
 const AllSeatContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -182,12 +182,9 @@ const AllSeatContent: React.FC = () => {
         filters.ticket_Reserve === "all" ||
         (filters.ticket_Reserve === "ติดจอง" &&
           current.ticket_Reserve === "R") ||
-        (filters.ticket_Reserve === "ชำระครบ" &&
+        (filters.ticket_Reserve === "ปกติ" &&
           current.ticket_Reserve === "W" &&
-          current.Total_Balance === 0) ||
-        (filters.ticket_Reserve === "ค้างชำระ" &&
-          current.ticket_Reserve === "W" &&
-          current.Total_Balance !== 0);
+          current.Total_Balance === 0);
 
       const matchesEventName =
         filters.eventName === "" ||
@@ -232,16 +229,16 @@ const AllSeatContent: React.FC = () => {
   };
 
   const filteredTickets = applyFilters(ticketData);
-  const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
+  // const indexOfLastItem = currentPage * MAX_ITEMS_PER_PAGE;
+  // const indexOfFirstItem = indexOfLastItem - MAX_ITEMS_PER_PAGE;
 
-  const ticketsInCurrentPage = filteredTickets.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  console.log("ticketsInCurrentPage", ticketsInCurrentPage);
+  // const ticketsInCurrentPage = filteredTickets.slice(
+  //   indexOfFirstItem,
+  //   indexOfLastItem
+  // );
+  // console.log("ticketsInCurrentPage", ticketsInCurrentPage);
 
-  const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
+  // const totalPages = Math.ceil(filteredTickets.length / MAX_ITEMS_PER_PAGE);
 
   const totalCount = filteredTickets?.length;
   const scannedCount = filteredTickets.filter(
@@ -300,11 +297,16 @@ const AllSeatContent: React.FC = () => {
     setSelectedTicket(ticket);
     setModalOpen(true);
   };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedTicket(null);
   };
 
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+  const handleticketClick = (orderNo: any) => {
+    setSelectedOrderNo(orderNo);
+  };
   return (
     <div
       className="all-seats-content"
@@ -470,9 +472,8 @@ const AllSeatContent: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <MenuItem value="all">ทั้งหมด</MenuItem>
+                <MenuItem value="ปกติ">ปกติ</MenuItem>
                 <MenuItem value="ติดจอง">ติดจอง</MenuItem>
-                <MenuItem value="ชำระครบ">ชำระครบ</MenuItem>
-                <MenuItem value="ค้างชำระ">ค้างชำระ</MenuItem>
               </Select>
             </FormControl>
             <FormControl variant="outlined" style={{ minWidth: 150 }}>
@@ -751,7 +752,7 @@ const AllSeatContent: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {ticketsInCurrentPage.map((ticket, index) => {
+            {filteredTickets.map((ticket, index) => {
               const formattedEventTime = dayjs(ticket.Event_Time)
                 .subtract(7, "hour")
                 .locale("th")
@@ -769,11 +770,21 @@ const AllSeatContent: React.FC = () => {
                 seatIndexInTable += 1; // Increment seat index for the same table
               }
               return (
-                <TableRow key={ticket.DT_order_id}>
+                <TableRow
+                  key={ticket.DT_order_id}
+                  style={{
+                    backgroundColor:
+                      selectedOrderNo === ticket.ticket_running
+                        ? "lightblue"
+                        : "inherit",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleticketClick(ticket.ticket_running)}
+                >
                   <TableCell
                     style={{ textAlign: "center", fontWeight: "bold" }}
                   >
-                    {indexOfFirstItem + index + 1}
+                    {index + 1}
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {ticket.Event_Name}
@@ -871,7 +882,7 @@ const AllSeatContent: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <div
+      {/* <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >
         <Pagination
@@ -880,7 +891,7 @@ const AllSeatContent: React.FC = () => {
           onChange={(_, page) => handleClick(page)}
           color="primary"
         />
-      </div>
+      </div> */}
 
       {selectedTicket && (
         <QRCodeModal
