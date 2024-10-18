@@ -42,6 +42,7 @@ const formatEventTime = (dateTime: string | null) => {
 
 const AllEventContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
     return savedFilters
@@ -598,7 +599,8 @@ const AllEventContent: React.FC = () => {
           </Box>
         </Container>
       </div>
-      {/* Table Component */}
+
+
       <TableContainer
         component={Paper}
         sx={{ borderRadius: "0", maxHeight: "68vh", overflowY: "auto" }}
