@@ -1,7 +1,7 @@
 // Sidebars.tsx
 import React, { useEffect, useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography, Modal } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import toast from "react-hot-toast";
@@ -23,11 +23,14 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import SettingsIcon from "@mui/icons-material/Settings";
+import CloseIcon from "@mui/icons-material/Close";
+
 import LogoutIcon from "@mui/icons-material/Logout";
 import { keyframes } from "@emotion/react";
 
 const Sidebars: React.FC = () => {
   const [isCollapsed, setisCollapsed] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [activePath, setActivePath] = useState<string>("");
 
   const location = useLocation();
@@ -51,7 +54,14 @@ const Sidebars: React.FC = () => {
     transform: rotate(360deg);
   }
 `;
+  const handleViewProfile = () => {
+    setModalOpen(true);
+  };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+  const emmpToken = JSON.parse(localStorage.getItem("emmp"));
   return (
     <div style={{ display: "flex", height: "100%" }}>
       <Sidebar
@@ -251,14 +261,19 @@ const Sidebars: React.FC = () => {
               </Typography>
             </div>
             <Menu>
-              <Link
+              {/* <Link
                 to="/profile"
                 className={`menu-bars ${
                   activePath === "/profile" ? "active" : ""
                 }`}
+              > */}
+              <MenuItem
+                icon={<AccountCircleIcon />}
+                onClick={handleViewProfile}
               >
-                <MenuItem icon={<AccountCircleIcon />}>Profile</MenuItem>
-              </Link>
+                Profile
+              </MenuItem>
+              {/* </Link> */}
               <Link
                 to="/role-settings"
                 className={`menu-bars ${
@@ -286,6 +301,47 @@ const Sidebars: React.FC = () => {
           </div>
         </div>
       </Sidebar>
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            width: "25vw",
+          }}
+        >
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <div style={{ color: "black" }}>
+            <p>
+              <strong>รหัสพนักงาน:</strong>
+              <span style={{marginLeft:10}}>{emmpToken?.Emp_UUser || ""}</span>
+            </p>
+            <p>
+              <strong>ชื่อ:</strong>
+              <span style={{marginLeft:10}}>{emmpToken?.Emp_Name || ""}</span>
+            </p>
+            <p>
+              <strong>ตำแหน่ง:</strong>
+              <span style={{marginLeft:10}}>{emmpToken?.Emp_Position_Detail || ""}</span>
+            </p>
+          </div>
+        </Box>
+      </Modal>
     </div>
   );
 };

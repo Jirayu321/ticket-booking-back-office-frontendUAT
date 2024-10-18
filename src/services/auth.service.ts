@@ -17,8 +17,7 @@ export async function login({
     if (response.status !== 200) {
       throw new Error("ล้มเหลวในการเข้าสู่ระบบ");
     }
-
-    return response.data.token;
+    return response.data;
   } catch (error: any) {
     let errorMessage: string = error.message;
 

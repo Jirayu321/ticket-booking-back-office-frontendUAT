@@ -28,7 +28,8 @@ function LoginPage() {
       const { username, password } = data;
       toast.dismiss();
       const token = await login({ username, password });
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", token.token);
+      localStorage.setItem("emmp", JSON.stringify(token));
       toast.success("เข้าสู่ระบบสำเร็จ");
       navigate("/all-events");
     } catch (error: any) {
@@ -38,7 +39,7 @@ function LoginPage() {
   }
   return (
     <div className={styles.container}>
-      <Card className={styles.card} >
+      <Card className={styles.card}>
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           <Stack
             className="w-full h-full"
@@ -48,16 +49,18 @@ function LoginPage() {
           >
             <h1 className={styles.title}>Deedclub</h1>
             <FormControl fullWidth>
-              <TextField label="username" {...register("username")}
+              <TextField
+                label="username"
+                {...register("username")}
                 sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& input": {
-                        border: "none", 
-                        transform: "translateY(5px)",
-                   
-                      },
+                  "& .MuiOutlinedInput-root": {
+                    "& input": {
+                      border: "none",
+                      transform: "translateY(5px)",
                     },
-                  }} />
+                  },
+                }}
+              />
               {errors.username && (
                 <p className={styles.errorMessage}>{errors.username.message}</p>
               )}

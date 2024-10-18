@@ -3,6 +3,7 @@ import { createContext, FC, ReactNode } from "react";
 import { useUser } from "../../hooks/useUser";
 import { useNavigate } from "react-router-dom";
 
+
 type ProtectRouteType = {
   userInfo: any;
   isLoadingUserInfo: boolean;
@@ -16,8 +17,6 @@ type ProtectedRouteProps = {
 const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
   const navigate = useNavigate();
   const { data: userInfo, isFetching: isLoadingUserInfo } = useUser();
-
-  if (isLoadingUserInfo) return <CircularProgress />;
 
   if (!userInfo) navigate("/login");
 

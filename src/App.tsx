@@ -23,8 +23,6 @@ import "./App.css";
 
 window.Buffer = Buffer;
 
-// Set global configuration for SweetAlert2 with a higher z-index
-
 Swal.mixin({
   toast: true,
   position: "top",
@@ -48,7 +46,7 @@ function App() {
           position="top-right"
           reverseOrder={false}
           toastOptions={{
-            duration: 3000, // Duration in milliseconds (e.g., 5000ms = 5 seconds)
+            duration: 3000,
           }}
         />
         <Routes>
@@ -56,44 +54,102 @@ function App() {
           <Route
             path="/overview"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <Overview />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/all-events"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <AllEvent />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/all-events/create-event"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <CreateNewEvent />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/edit-event/:eventId"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <EditEventPage />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
-          <Route path="/zone" element={<ZonePage />} />
-          <Route path="/zone-group" element={<ZoneGroup />} />
-          <Route path="/ticket-type" element={<TicketTypePage />} />
-          <Route path="/pay-option" element={<PayOptionPage />} />
-          <Route path="/pay-by" element={<PayByPage />} />
+          <Route
+            path="/zone"
+            element={
+              <ProtectedRoute>
+                <ZonePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/zone-group"
+            element={
+              <ProtectedRoute>
+                <ZoneGroup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ticket-type"
+            element={
+              <ProtectedRoute>
+                <TicketTypePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pay-option"
+            element={
+              <ProtectedRoute>
+                {" "}
+                <PayOptionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pay-by"
+            element={
+              <ProtectedRoute>
+                {" "}
+                <PayByPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/all-orders" element={<AllOrder />} />
-          <Route path="/order-detail/:order_id" element={<OrderDetailPage />} />
-          <Route path="/all-stocks" element={<AllStockPage />} />
-          <Route path="/all-seats" element={<AllSeatPage />} />
+          <Route
+            path="/order-detail/:order_id"
+            element={
+              <ProtectedRoute>
+                <OrderDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/all-stocks"
+            element={
+              <ProtectedRoute>
+                <AllStockPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/all-seats"
+            element={
+              <ProtectedRoute>
+                <AllSeatPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>
