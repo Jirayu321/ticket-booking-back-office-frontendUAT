@@ -32,17 +32,8 @@ const ConfirmNumberInput: FC<Props> = ({
           }
           setTempValue(Number(e.target.value));
         }}
-        disabled={true}
+        disabled
       />
-      <Button
-        color="success"
-        variant="contained"
-        onClick={() => {
-          setter(tempValue);
-        }}
-      >
-        ยืนยัน
-      </Button>
     </Stack>
   );
 };

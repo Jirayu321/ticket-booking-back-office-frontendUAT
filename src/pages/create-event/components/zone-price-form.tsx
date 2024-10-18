@@ -216,7 +216,7 @@ const ZonePriceForm = () => {
     }
   }
 
-  if (isLoadingPlanGroups) return <CircularProgress />;
+  // if (isLoadingPlanGroups) return <CircularProgress />;
 
   return (
     <div

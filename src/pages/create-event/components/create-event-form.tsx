@@ -190,7 +190,7 @@ const CreateEventForm = () => {
           </button>
         </div>
       </div>
-      <div className="nav-menu">
+      <div className="nav-menu" style={{ position: "relative", zIndex: 0 }}>
         <div
           className={`left-box ${activeTab === "รายละเอียด" ? "active" : ""}`}
         >

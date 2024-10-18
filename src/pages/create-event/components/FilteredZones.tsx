@@ -24,6 +24,7 @@ import {
   Typography,
   Collapse,
   CircularProgress,
+  Grid
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import dayjs from "dayjs";
@@ -56,6 +57,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
   const [ticketNoPerPlan, setTicketNoPerPlan] = useState<any[]>([]);
   console.log("ticketNoPerPlan", ticketNoPerPlan);
   const [letter, setTetter] = useState<string>("");
+
   const { data: ticketTypes, isPending: isLoadingTicketTypes } =
     useFetchTicketTypes();
   // console.log("ticketTypes =>", ticketTypes);
@@ -239,7 +241,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
     }
   }, [ticketNoPerPlan]);
 
-  if (isLoadingTicketTypes) return <CircularProgress />;
+  // if (isLoadingTicketTypes) return <CircularProgress />;
 
   return (
     <>
@@ -286,13 +288,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                     <img
                       src={zone.Plan_Pic}
                       alt="Plan Pic"
-                      style={{ width: "500px", height: "250px" }}
+                      style={{ width: "100%", height: "auto" }}
                     />
                   </a>
                 </div>
                 <div
                   className="ticket-details"
-                  style={{ display: "grid", padding: "16px" }}
+                  style={{ display: "grid", padding: "16px",width:"800px" }}
                 >
                   <Box
                     sx={{
@@ -321,7 +323,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                             color: "black",
                           }}
                           value={getThaiText(zone.Plan_Ticket_Type_Id)}
-                          disabled={!!getThaiText(zone.Plan_Ticket_Type_Id)}
+                          disabled
                         />
                       </div>
                       <div
@@ -354,7 +356,7 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                               borderRadius: "4px",
                               border: "1px solid #ccc",
                             }}
-                            disabled={true}
+                            disabled
                           />
                         </div>
                         <div className="ticket-amount-row">
@@ -384,12 +386,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                                 Number(e.target.value)
                               )
                             }
-                            disabled={!!zone.Plan_Ticket_Qty_Per}
+                            disabled
                           />
                         </div>
                       </div>
                     </div>
                   </Box>
+
                   <div className="price-section">
                     <Box
                       sx={{
@@ -409,11 +412,13 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         + เพิ่มราคาบัตร
                       </Button>
                     </Box>
+                    <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
                     <Box
                       sx={{
                         display: "flex",
                         flexDirection: "column",
-                        width:"70%"
+                        width: "70%",
                       }}
                     >
                       <DataGrid
@@ -509,6 +514,9 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         hideFooterPagination
                       />
                     </Box>
+                      </Grid>
+                      </Grid>
+                    
                     <Box>
                       <FormControl
                         sx={{
@@ -572,15 +580,15 @@ const FilteredZones: FC<FilteredZonesProps> = ({ filteredZones }) => {
                         </Select>
                       </FormControl>
 
-                      <GenerateBoxes
+                      {/* <GenerateBoxes
                         method={zone.ticketNoPlanList?.[0]?.Ticket_No_Option.toString()}
                         totalSeats={zone.Plan_Ticket_Qty}
                         zoneId={zone.Plan_id}
                         selectedTicketType={getThaiText(
                           zone.Plan_Ticket_Type_Id
                         )}
-                        letter={letter || null}
-                      />
+                        letter={letter || null} */}
+                      {/* /> */}
                     </Box>
                   </div>
                 </div>

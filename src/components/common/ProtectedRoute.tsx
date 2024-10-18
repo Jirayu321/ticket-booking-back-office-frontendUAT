@@ -1,4 +1,4 @@
-import { CircularProgress } from "@mui/material";
+// import { CircularProgress } from "@mui/material";
 import { createContext, FC, ReactNode } from "react";
 import { useUser } from "../../hooks/useUser";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ export const ProtectRouteContext = createContext<ProtectRouteType | null>(null);
 type ProtectedRouteProps = {
   children: ReactNode;
 };
+
 const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
   const navigate = useNavigate();
   const { data: userInfo, isFetching: isLoadingUserInfo } = useUser();
@@ -21,7 +22,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
   if (!userInfo) navigate("/login");
 
   return (
-    <ProtectRouteContext.Provider value={{ userInfo, isLoadingUserInfo }}>
+    <ProtectRouteContext.Provider value={{ userInfo }}>
       {children}
     </ProtectRouteContext.Provider>
   );
