@@ -168,47 +168,51 @@ const AllEventContent: React.FC = () => {
     }));
   };
 
-  const filteredEvents = events?.filter((event) => {
-    if (
-      filters.search &&
-      !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
-    ) {
-      return false;
-    }
+  const filteredEvents = Array.isArray(events)
+    ? events.filter((event) => {
+        if (
+          filters.search &&
+          !event.Event_Name?.toLowerCase().includes(
+            filters.search.toLowerCase()
+          )
+        ) {
+          return false;
+        }
 
-    if (filters.publishStatus !== "all") {
-      const isPublished = filters.publishStatus === "published" ? "Y" : "N";
-      if (event.Event_Public !== isPublished) {
-        return false;
-      }
-    }
+        if (filters.publishStatus !== "all") {
+          const isPublished = filters.publishStatus === "published" ? "Y" : "N";
+          if (event.Event_Public !== isPublished) {
+            return false;
+          }
+        }
 
-    if (
-      filters.status !== "all" &&
-      event.Event_Status !== parseInt(filters.status)
-    ) {
-      return false;
-    }
+        if (
+          filters.status !== "all" &&
+          event.Event_Status !== parseInt(filters.status)
+        ) {
+          return false;
+        }
 
-    const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
-    const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+        const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+        const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
 
-    // Compare using dayjs objects
-    if (filters.startDate && filters.endDate) {
-      const startDate = dayjs(filters.startDate);
-      const endDate = dayjs(filters.endDate);
+        // Compare using dayjs objects
+        if (filters.startDate && filters.endDate) {
+          const startDate = dayjs(filters.startDate);
+          const endDate = dayjs(filters.endDate);
 
-      const dateToCompare =
-        filters.dateFilterType === "publish-date" ? publishDate : eventDate;
+          const dateToCompare =
+            filters.dateFilterType === "publish-date" ? publishDate : eventDate;
 
-      // Check if the event date is within the selected range
-      if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
-        return false;
-      }
-    }
+          // Check if the event date is within the selected range
+          if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
+            return false;
+          }
+        }
 
-    return true;
-  });
+        return true;
+      })
+    : [];
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
   const handleOrderClick = (orderNo: any) => {
@@ -264,7 +268,10 @@ const AllEventContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>รอเริ่มงาน</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {events?.filter((event) => event.Event_Status === 1).length}
+                    {Array.isArray(events)
+                      ? events.filter((event) => event?.Event_Status === 1)
+                          .length
+                      : 0}
                   </Typography>
                 </Box>
               </Box>
@@ -312,8 +319,12 @@ const AllEventContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>
                     เริ่มงานแล้ว
                   </Typography>
+
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {events?.filter((event) => event.Event_Status === 2).length}
+                    {Array.isArray(events)
+                      ? events.filter((event) => event?.Event_Status === 2)
+                          .length
+                      : 0}
                   </Typography>
                 </Box>
               </Box>
@@ -359,8 +370,12 @@ const AllEventContent: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "23px" }}>ปิดงาน</Typography>
+
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {events?.filter((event) => event.Event_Status === 3).length}
+                    {Array.isArray(events)
+                      ? events.filter((event) => event?.Event_Status === 3)
+                          .length
+                      : 0}
                   </Typography>
                 </Box>
               </Box>
@@ -406,11 +421,12 @@ const AllEventContent: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "23px" }}>ยกเลิก</Typography>
+
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {
-                      events?.filter((event) => event.Event_Status === 13)
-                        .length
-                    }
+                    {Array.isArray(events)
+                      ? events.filter((event) => event?.Event_Status === 13)
+                          .length
+                      : 0}
                   </Typography>
                 </Box>
               </Box>
@@ -791,12 +807,16 @@ const AllEventContent: React.FC = () => {
                     <Button
                       sx={{
                         backgroundColor:
-                          Event_Public === "Y" ? `${Event_PublicY}` : `${Event_PublicN}`,
+                          Event_Public === "Y"
+                            ? `${Event_PublicY}`
+                            : `${Event_PublicN}`,
                         padding: "4px 15px",
                         borderRadius: "30px",
                         "&:hover": {
                           backgroundColor:
-                            Event_Public === "Y" ? `${Event_PublicY}` : `${Event_PublicN}`,
+                            Event_Public === "Y"
+                              ? `${Event_PublicY}`
+                              : `${Event_PublicN}`,
                         },
                       }}
                       className={Event_Public === "Y" ? "publish" : "unpublish"}

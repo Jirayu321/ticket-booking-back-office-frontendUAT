@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   // CircularProgress,
   Paper,
@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Pagination,
   Stack,
   FormControl,
   InputLabel,
@@ -22,12 +21,11 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { getEventStock } from "../../services/event-stock.service"; // Import the correct service
-import toast from "react-hot-toast";
-import Header from "../common/header"; // Assuming you have a Header component
+
+import Header from "../common/header"; 
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCardIcon from "@mui/icons-material/AddCard";
-import { getAllEventList } from "../../services/event-list.service";
+
 import {
   selectedColor,
   ColumnColorstock,
@@ -37,6 +35,8 @@ import {
   Event_StatusColor3,
   Event_StatusColorUnknown,
 } from "../../lib/util";
+
+import { useFetchEventStocktList } from "../../hooks/fetch-data/useFetchEventList";
 
 // Map event statuses to text and style properties
 const getStatusDetails = (status: number) => {
@@ -76,74 +76,50 @@ const getPublicStatusDetails = (status: string) => {
 };
 
 const AllStockContent: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [eventStockData, setEventStockData] = useState<any[]>([]);
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [filters, setFilters] = useState({
-    search: "",
-    eventName: "",
-    eventStatus: "*",
-    publicStatus: "*",
+  const { data: Data, refetch } = useFetchEventStocktList({
+    eventId: null,
   });
-  const [totalTickets, setTotalTickets] = useState<number>(0);
-  const [totalTicketsBuy, setTotalTicketsBuy] = useState<number>(0);
-  const [totalTicketsBalance, setTotalTicketsBalance] = useState<number>(0);
-  const [evntDetail, setEvntDetail] = useState<any[]>([]);
+  const evntDetail = Data?.dataEvent?.events.filter(
+    (event: any) => event?.Event_Public === "Y"
+  );
 
-  async function fetchEventStockData() {
-    try {
-      const data = await getEventStock();
-      const evntDetailAll = await getAllEventList();
-      console.log("data:", data);
+  const eventStockData = Array.isArray(Data?.dataEventStock)
+    ? Data.dataEventStock.sort((a, b) => {
+        if (a.Event_Name < b.Event_Name) return -1;
+        if (a.Event_Name > b.Event_Name) return 1;
+        if (a.Plan_Id < b.Plan_Id) return -1;
+        if (a.Plan_Id > b.Plan_Id) return 1;
+        return 0;
+      })
+    : [];
 
-      setEvntDetail(
-        evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
-      );
-      if (data && Array.isArray(data)) {
-        const dataWithEventName = data;
+  const totalTickets = Array.isArray(Data?.dataEventStock)
+    ? Data.dataEventStock.reduce((sum, item) => sum + (item.Ticket_Qty || 0), 0)
+    : 0;
+  const totalTicketsBuy = Array.isArray(Data?.dataEventStock)
+    ? Data.dataEventStock.reduce(
+        (sum, item) => sum + (item.Ticket_Qty_Buy || 0),
+        0
+      )
+    : 0;
 
-        // จัดเรียงข้อมูลตาม Event_name และ Plan_Id
-        dataWithEventName.sort((a, b) => {
-          if (a.Event_Name < b.Event_Name) return -1;
-          if (a.Event_Name > b.Event_Name) return 1;
-          if (a.Plan_Id < b.Plan_Id) return -1;
-          if (a.Plan_Id > b.Plan_Id) return 1;
-          return 0;
-        });
-        setEventStockData(dataWithEventName);
-        const totalTicketsSum = data.reduce(
-          (sum, item) => sum + (item.Ticket_Qty || 0),
-          0
-        );
-        setTotalTickets(totalTicketsSum);
-
-        const totalTicketsBuySum = data.reduce(
-          (sum, item) => sum + (item.Ticket_Qty_Buy || 0),
-          0
-        );
-        setTotalTicketsBuy(totalTicketsBuySum);
-
-        const totalTicketsBalanceSum = data.reduce(
-          (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
-          0
-        );
-
-        setTotalTicketsBalance(totalTicketsBalanceSum);
-      } else {
-        throw new Error("Unexpected data format");
-      }
-      const savedFilters = localStorage.getItem("filtersStock");
-      if (savedFilters) {
-        setFilters(JSON.parse(savedFilters));
-      }
-    } catch (error) {
-      toast.error("Failed to fetch event stock data");
-    }
-  }
-
-  useEffect(() => {
-    fetchEventStockData();
-  }, []);
+  const totalTicketsBalance = Array.isArray(Data?.dataEventStock)
+    ? Data.dataEventStock.reduce(
+        (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
+        0
+      )
+    : 0;
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("filtersStock");
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          search: "",
+          eventName: "",
+          eventStatus: "*",
+          publicStatus: "*",
+        };
+  });
 
   const handleFilterChange = (
     event: React.ChangeEvent<{ name?: string; value: unknown }>
@@ -174,21 +150,22 @@ const AllStockContent: React.FC = () => {
     });
   };
 
-  const handleClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
   const filteredStocks = eventStockData.filter((stock) => {
     const matchesSearch =
       (stock.Event_Name || "").toLowerCase().includes(filters.search) ||
       (stock.Plan_Name || "").toLowerCase().includes(filters.search);
 
     const matchesEventStatus =
-      filters.eventStatus === "*" || stock.Event_Status == filters.eventStatus;
+      filters.eventStatus === "*" ||
+      (filters.eventStatus === "1" && stock.Event_Status === 1) ||
+      (filters.eventStatus === "2" && stock.Event_Status === 2) ||
+      (filters.eventStatus === "3" && stock.Event_Status === 3) ||
+      (filters.eventStatus === "13" && stock.Event_Status === 13);
 
     const matchesPublicStatus =
       filters.publicStatus === "*" ||
-      stock.Event_Public === filters.publicStatus;
+      (filters.publicStatus === "Y" && stock.Event_Public === "Y") ||
+      (filters.publicStatus === "N" && stock.Event_Public === "N");
 
     const matchesEvent =
       filters.eventName === "" ||
@@ -203,7 +180,7 @@ const AllStockContent: React.FC = () => {
     );
   });
 
-  console.log("filteredStocks", filteredStocks);
+  // console.log("filteredStocks", filteredStocks);
 
   const TotalTickets = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty,
@@ -220,17 +197,26 @@ const AllStockContent: React.FC = () => {
 
   const numberFormatter = new Intl.NumberFormat("en-US");
 
-  // if (isLoading) return <CircularProgress />;
   const handleClearFilters = () => {
+    refetch();
     setFilters((prevFilters) => ({
       search: prevFilters.search !== "" ? prevFilters.search : "",
       eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
       eventStatus:
-        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "",
+        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "*",
       publicStatus:
-        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "",
+        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "*",
     }));
-    fetchEventStockData();
+
+    localStorage.setItem(
+      "filtersStock",
+      JSON.stringify({
+        search: filters.search !== "" ? filters.search : "",
+        eventName: filters.eventName !== "" ? filters.eventName : "",
+        eventStatus: filters.eventStatus !== "*" ? filters.eventStatus : "*",
+        publicStatus: filters.publicStatus !== "*" ? filters.publicStatus : "*",
+      })
+    );
   };
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
@@ -424,7 +410,7 @@ const AllStockContent: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <MenuItem value="">ทั้งหมด</MenuItem>
-                {evntDetail.map((item, index) => (
+                {evntDetail?.map((item, index) => (
                   <MenuItem key={index + 1} value={item.Event_Name}>
                     {item.Event_Name}
                   </MenuItem>
@@ -724,7 +710,7 @@ const AllStockContent: React.FC = () => {
                     {index + 1}
                   </TableCell>
 
-                  <TableCell style={{ textAlign:"left" }}>
+                  <TableCell style={{ textAlign: "left" }}>
                     {stock.Event_Name}
                   </TableCell>
 

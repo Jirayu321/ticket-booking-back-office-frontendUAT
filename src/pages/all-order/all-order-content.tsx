@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -25,16 +25,9 @@ import {
   Modal,
   IconButton,
 } from "@mui/material";
-import toast from "react-hot-toast";
 import Header from "../common/header";
 import OrderDetailContent from "../order-detail/order-detail-content";
-
-import { getOrderAll } from "../../services/order-all.service";
-import { getAllEventList } from "../../services/event-list.service";
-
-// import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
@@ -43,6 +36,7 @@ import { th } from "date-fns/locale";
 import "moment/locale/th";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
 
 import {
   selectedColor,
@@ -53,26 +47,83 @@ import {
 
 moment.locale("th");
 const AllOrderContent: React.FC = () => {
-  // const [currentPage, setCurrentPage] = useState(1);
-  const [orderHData, setOrderHData] = useState<any[]>([]);
-  const [orderDData, setOrderDData] = useState<any[]>([]);
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
   const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
-  const [evntDetail, setEvntDetail] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [filters, setFilters] = useState({
-    orderNo: "",
-    eventName: "",
-    customerName: "",
-    customerPhone: "",
-    status: "all",
-    paymentStatus: "all",
-    ticketType: "all",
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+
+  const { data: events, refetch } = useFetchOrdertList({
+    eventId: null,
   });
+
+  const evntDetail = events?.dataEvent?.events.filter(
+    (event: any) => event?.Event_Public === "Y"
+  );
+
+  const orderHData =
+    events?.dataOrder?.orderAll?.filter(
+      (order: any) => order?.DT_order_id !== null
+    ) || [];
+
+  const orderDData =
+    events?.dataOrder?.hisPayment?.filter(
+      (order: any) => order?.Net_Price !== null
+    ) || [];
+
+  const OrderAll = events?.dataOrder;
+
+  const handleOrderprevData = (
+    orderNo: any,
+    data: any = [],
+    orderDData: any = []
+  ) => {
+    // Ensure data and orderDData are initialized properly
+    if (!data.length || !orderDData.length) {
+      return;
+    }
+
+    localStorage.setItem("orderDetail", orderNo);
+    setSelectedOrderNo(orderNo);
+
+    const latestOrder = data
+      .filter((order) => order.Order_no === orderNo)
+      .reduce((acc, current) => {
+        const existingOrder = acc.find(
+          (order) => order.Order_id === current.Order_id
+        );
+
+        if (existingOrder) {
+          const existingPaymentDate = new Date(existingOrder.Payment_Date7);
+          const currentPaymentDate = new Date(current.Payment_Date7);
+
+          if (currentPaymentDate > existingPaymentDate) {
+            return acc.map((order) =>
+              order.Order_id === current.Order_id ? current : order
+            );
+          } else {
+            return acc;
+          }
+        } else {
+          acc.push(current);
+        }
+
+        return acc;
+      }, []);
+
+    setOrderDetail(latestOrder);
+
+    const h = orderDData
+      .filter((order) => order.Order_no === orderNo)
+      .sort(
+        (a, b) =>
+          new Date(a.Payment_Date7).getTime() -
+          new Date(b.Payment_Date7).getTime()
+      );
+
+    setOrderHispayDetail(h);
+  };
 
   const handleFilterChange = (
     event: React.ChangeEvent<{ name?: string; value: unknown }>
@@ -100,6 +151,7 @@ const AllOrderContent: React.FC = () => {
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    refetch();
     setFilters((prev) => {
       const updatedFilters = {
         ...prev,
@@ -113,20 +165,113 @@ const AllOrderContent: React.FC = () => {
     });
   };
 
-  // const handleClick = (pageNumber: number) => {
-  //   setCurrentPage(pageNumber);
-  // };
+  const initializeFilters = () => {
+    const savedOrderDetail = localStorage.getItem("orderDetail");
+    const savedOrderDetailFilter = localStorage.getItem("filters");
 
-  // const statusMap = {
-  //   1: "สำเร็จ",
-  //   2: "มีแก้ไข",
-  //   13: "ขอคืนเงิน",
-  //   3: "ไม่สำเร็จเพราะติด R",
-  //   4: "ไม่สำเร็จจาก Omise",
-  // };
+    if (savedOrderDetail && savedOrderDetailFilter) {
+      const x = OrderAll?.orderAll.filter(
+        (order: any) => order?.Net_Price !== null
+      );
+      const y = OrderAll?.hisPayment.filter(
+        (order: any) => order?.Net_Price !== null
+      );
+      handleOrderprevData(savedOrderDetail, x, y);
+      return JSON.parse(savedOrderDetailFilter);
+    } else if (savedOrderDetail) {
+      const x = OrderAll?.orderAll.filter(
+        (order: any) => order?.Net_Price !== null
+      );
+      const y = OrderAll?.hisPayment.filter(
+        (order: any) => order?.Net_Price !== null
+      );
+      handleOrderprevData(savedOrderDetail, x, y);
+      return {
+        orderNo: "",
+        eventName: "",
+        customerName: "",
+        customerPhone: "",
+        status: "all",
+        paymentStatus: "all",
+        ticketType: "all",
+      };
+    } else if (savedOrderDetailFilter) {
+      return JSON.parse(savedOrderDetailFilter);
+    } else {
+      return {
+        orderNo: "",
+        eventName: "",
+        customerName: "",
+        customerPhone: "",
+        status: "all",
+        paymentStatus: "all",
+        ticketType: "all",
+      };
+    }
+  };
+
+  const [filters, setFilters] = useState(initializeFilters);
+
+  const handleViewHistoryClick = (orderId: string) => {
+    localStorage.setItem("orderId", orderId);
+    setModalOpen(true);
+  };
+
+  const handletime = (x) => {
+    const adjustedDate = dayjs(x).subtract(7, "hour");
+    const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
+    return formattedDateTime;
+  };
+
+  const handleOrderClick = (orderNo: any) => {
+    localStorage.setItem("orderDetail", orderNo);
+    setSelectedOrderNo(orderNo);
+    console.log("orderHData", orderHData);
+
+    const latestOrders = Object.values(
+      orderHData
+        ?.filter((order) => order.Order_no === orderNo)
+        .reduce((acc, current) => {
+          const key = current.Event_Stc_id;
+
+          if (!acc[key]) {
+            acc[key] = current;
+          } else {
+            const existingPaymentDate = new Date(acc[key].Payment_Date7);
+            const currentPaymentDate = new Date(current.Payment_Date7);
+            if (currentPaymentDate > existingPaymentDate) {
+              acc[key] = current;
+            }
+          }
+
+          return acc;
+        }, {})
+    );
+
+    console.log("latestOrder:", latestOrders);
+    setOrderDetail(latestOrders);
+
+    const h = orderDData
+      ?.filter((order) => order.Order_no === orderNo)
+      .sort(
+        (a, b) =>
+          new Date(a.Payment_Date7).getTime() -
+          new Date(b.Payment_Date7).getTime()
+      );
+
+    // console.log("h:", h);
+    setOrderHispayDetail(h);
+  };
+
+  function formatNumberWithCommas(number: number | string): string {
+    const bath = `${number
+      ?.toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
+    return bath;
+  }
 
   const filteredOrders = orderHData
-    .filter((order) => {
+    ?.filter((order) => {
       const matchesSearch =
         String(order.Event_Name)
           .toLowerCase()
@@ -141,7 +286,7 @@ const AllOrderContent: React.FC = () => {
           .toLowerCase()
           .includes(filters.customerPhone.toLowerCase());
 
-      const mstchesStatusOrder =
+      const matchesStatusOrder =
         (filters.status === "สำเร็จ" && order.Order_Status === 1) ||
         (filters.status === "มีแก้ไข" && order.Order_Status === 2) ||
         (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
@@ -150,7 +295,7 @@ const AllOrderContent: React.FC = () => {
         (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 5) ||
         filters.status === "all";
 
-      const mstchesStatusPayment =
+      const matchesStatusPayment =
         (filters.paymentStatus === "สำเร็จ" && order.Total_Balance === 0) ||
         (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
         filters.paymentStatus === "all";
@@ -158,13 +303,10 @@ const AllOrderContent: React.FC = () => {
       const orderDatetime = new Date(order.Order_datetime);
       const normalizedStartDate = startDate
         ? new Date(startDate.setHours(0, 0, 0, 0))
-        : null; // กำหนดเวลาเป็น 00:00 น.
+        : null;
       const normalizedEndDate = endDate
         ? new Date(endDate.setHours(23, 59, 59, 999))
-        : null; // กำหนดเวลาเป็น 23:59 น.
-
-      console.log("Order_datetime:", orderDatetime);
-      console.log("startDate:", normalizedStartDate);
+        : null;
 
       const matchesDate =
         (!normalizedStartDate || orderDatetime >= normalizedStartDate) &&
@@ -172,8 +314,8 @@ const AllOrderContent: React.FC = () => {
 
       return (
         matchesSearch &&
-        mstchesStatusOrder &&
-        mstchesStatusPayment &&
+        matchesStatusOrder &&
+        matchesStatusPayment &&
         matchesDate
       );
     })
@@ -198,161 +340,10 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  const handleViewHistoryClick = (orderId: string) => {
-    localStorage.setItem("orderId", orderId);
-    setModalOpen(true);
-  };
-
-  const handletime = (x) => {
-    const adjustedDate = dayjs(x).subtract(7, "hour");
-    const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
-    return formattedDateTime;
-  };
-  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
-  const handleOrderClick = (orderNo: any) => {
-    localStorage.setItem("orderDetail", orderNo);
-    setSelectedOrderNo(orderNo);
-    console.log("orderHData", orderHData);
-
-    const latestOrders = Object.values(
-      orderHData
-        .filter((order) => order.Order_no === orderNo)
-        .reduce((acc, current) => {
-          const key = current.Event_Stc_id;
-
-          if (!acc[key]) {
-            acc[key] = current;
-          } else {
-            const existingPaymentDate = new Date(acc[key].Payment_Date7);
-            const currentPaymentDate = new Date(current.Payment_Date7);
-            if (currentPaymentDate > existingPaymentDate) {
-              acc[key] = current;
-            }
-          }
-
-          return acc;
-        }, {})
-    );
-
-    console.log("latestOrder:", latestOrders);
-    setOrderDetail(latestOrders);
-
-    const h = orderDData
-      .filter((order) => order.Order_no === orderNo)
-      .sort(
-        (a, b) =>
-          new Date(a.Payment_Date7).getTime() -
-          new Date(b.Payment_Date7).getTime()
-      );
-
-    // console.log("h:", h);
-    setOrderHispayDetail(h);
-  };
-
-  const handleOrderprevData = (orderNo: any, data: any, orderDData: any) => {
-    localStorage.setItem("orderDetail", orderNo);
-    setSelectedOrderNo(orderNo);
-    // console.log("orderHData", orderHData);
-
-    const latestOrder = data
-      .filter((order) => order.Order_no === orderNo) // ต้องคืนค่าเงื่อนไขใน filter
-      .reduce((acc, current) => {
-        const existingOrder = acc.find(
-          (order) => order.Order_id === current.Order_id
-        );
-
-        if (existingOrder) {
-          const existingPaymentDate = new Date(existingOrder.Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-
-          if (currentPaymentDate > existingPaymentDate) {
-            return acc.map((order) =>
-              order.Order_id === current.Order_id ? current : order
-            );
-          } else {
-            return acc;
-          }
-        } else {
-          acc.push(current);
-        }
-
-        return acc;
-      }, []);
-
-    // console.log("latestOrder:", latestOrder);
-    setOrderDetail(latestOrder);
-
-    const h = orderDData
-      .filter((order) => order.Order_no === orderNo)
-      .sort(
-        (a, b) =>
-          new Date(a.Payment_Date7).getTime() -
-          new Date(b.Payment_Date7).getTime()
-      );
-
-    console.log("h:", h);
-    setOrderHispayDetail(h);
-  };
-
-  function formatNumberWithCommas(number: number | string): string {
-    const bath = `${number
-      ?.toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
-    return bath;
-  }
-
-  async function fetchOrderData() {
-    try {
-      const OrderAll = await getOrderAll();
-      const evntDetailAll = await getAllEventList();
-
-      setEvntDetail(
-        evntDetailAll?.events.filter((event: any) => event.Event_Public === "Y")
-      );
-      setOrderHData(
-        OrderAll?.orderAll.filter((order: any) => order.DT_order_id !== null)
-      );
-      setOrderDData(
-        OrderAll?.hisPayment.filter((order: any) => order.Net_Price !== null)
-      );
-
-      const savedOrderDetail = localStorage.getItem("orderDetail");
-      const savedOrderDetailFilter = localStorage.getItem("filters");
-
-      if (savedOrderDetail && savedOrderDetailFilter) {
-        const x = OrderAll?.orderAll.filter(
-          (order: any) => order.Net_Price !== null
-        );
-        const y = OrderAll?.hisPayment.filter(
-          (order: any) => order.Net_Price !== null
-        );
-        setFilters(JSON.parse(savedOrderDetailFilter));
-        handleOrderprevData(savedOrderDetail, x, y);
-      } else if (savedOrderDetail) {
-        // console.log("hi2");
-        const x = OrderAll?.orderAll.filter(
-          (order: any) => order.Net_Price !== null
-        );
-        const y = OrderAll?.hisPayment.filter(
-          (order: any) => order.Net_Price !== null
-        );
-        handleOrderprevData(savedOrderDetail, x, y);
-      } else if (savedOrderDetailFilter) {
-        setFilters(JSON.parse(savedOrderDetailFilter));
-      }
-    } catch (error) {
-      toast.error("Failed to fetch order data");
-    }
-  }
-
-  useEffect(() => {
-    fetchOrderData();
-  }, []);
-
   const totalOrders = filteredOrders?.length;
 
   const OutstandingPayment = filteredOrders
-    .filter((order) => order.Order_Status === 4)
+    ?.filter((order) => order.Order_Status === 4)
     .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
 
   const OutstandingPayment2 = filteredOrders
@@ -360,13 +351,6 @@ const AllOrderContent: React.FC = () => {
     .reduce((sum, order) => sum + order.Total_Balance, 0);
 
   const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
-
-  // console.log(
-  //   "ค้างจ่าย",
-  //   OutstandingPayment,
-  //   OutstandingPayment2,
-  //   OutstandingPayment3
-  // );
 
   const dataP = Object.values(
     orderHData
@@ -411,8 +395,6 @@ const AllOrderContent: React.FC = () => {
       ticketType:
         prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
     }));
-
-    fetchOrderData();
   };
 
   const totalSeats = orderDetail?.reduce(
@@ -749,7 +731,7 @@ const AllOrderContent: React.FC = () => {
                   onChange={handleFilterChange}
                 >
                   <MenuItem value="">ทั้งหมด</MenuItem>
-                  {evntDetail.map((item, index) => (
+                  {evntDetail?.map((item, index) => (
                     <MenuItem key={index + 1} value={item.Event_Name}>
                       {item.Event_Name}
                     </MenuItem>
@@ -1344,7 +1326,7 @@ const AllOrderContent: React.FC = () => {
                         marginBottom: 20,
                         justifyItems: "flex-start",
                         alignItems: "center",
-                        width:"25vw"
+                        width: "25vw",
                       }}
                     >
                       <p>
