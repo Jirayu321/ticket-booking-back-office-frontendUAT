@@ -85,10 +85,10 @@ const AllEventContent: React.FC = () => {
   const [eventsData, setEventsData] = useState<any>([]);
 
   useEffect(() => {
-    testFetchData();
+    fetchDataEvent();
   }, []);
 
-  const testFetchData = async () => {
+  const fetchDataEvent = async () => {
     setEventsData([]);
     const fromEvent = await getAllEventList();
 
@@ -602,7 +602,7 @@ const AllEventContent: React.FC = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={testFetchData}
+                  onClick={fetchDataEvent}
                   sx={{
                     backgroundColor: "#CFB70B",
                     width: "160px",
