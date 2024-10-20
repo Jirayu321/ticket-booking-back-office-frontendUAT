@@ -65,7 +65,17 @@ const CreateEventForm = () => {
 
   const { data: planGroups } = useFetchPlanGroups();
 
-  console.log("planGroups", planGroups);
+  console.log("planGroups", planGroups?.allPlan_TicketNo);
+
+  const groupedData = planGroups?.allPlan_TicketNo.reduce((acc, item) => {
+    if (!acc[item.PlanGroup_Id]) {
+      acc[item.PlanGroup_Id] = [];
+    }
+
+    acc[item.PlanGroup_Id].push(item);
+    return acc;
+  }, {});
+  console.log(groupedData);
 
   const combinedData = planGroups?.planGroups?.map((group) => {
     const plansInGroup = planGroups?.getAllPlans?.plans?.filter(

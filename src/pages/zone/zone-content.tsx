@@ -85,7 +85,7 @@ const ZoneContent: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [letter, setTetter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
-  const [currentPage, setCurrentPage] = useState<number>(1);
+
   const [selectTableModal, setSelectTableModal] = useState<sting>("");
   console.log("selectTableModal =>", selectTableModal);
   console.log("plans =>", plans);
@@ -453,11 +453,10 @@ const ZoneContent: React.FC = () => {
   // };
 
   // ส่งข้อมูลไปหา API
-  
+
   const handleCreate = async () => {
     console.log("handleCreate:", newPlan);
 
-    // Check if planGroupId is selected
     if (!newPlan.planGroupId) {
       Swal.fire({
         icon: "warning",
@@ -497,9 +496,7 @@ const ZoneContent: React.FC = () => {
         Plan_Ticket_Qty_Per: newPlan.seats, // Number of seats/ticket
       });
 
-      console.log("Response from createPlan:", res); // Log the response data
-
-      // Check if the response from creating the new plan has a planId
+      console.log("Response from createPlan:", res);
       if (typeof res.planId === "number") {
         // Save ticket numbers
         await handleSaveTicketNumbers(
@@ -518,7 +515,6 @@ const ZoneContent: React.FC = () => {
         },
       });
 
-      // Reset the form fields after success
       setNewPlan({
         name: "",
         desc: "",
@@ -532,8 +528,8 @@ const ZoneContent: React.FC = () => {
 
       setOpen(false);
 
-      // Refresh the plans list after creation
       const data = await getAllPlans();
+      console.log("eeee", data);
       setPlans(data.plans);
     } catch (error: any) {
       console.error("Error creating plan:", error.message);
@@ -702,10 +698,6 @@ const ZoneContent: React.FC = () => {
     }
   };
 
-  const handleClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
   const handleImageClick = (image) => {
     setSelectedImage(image);
     setModalOpen(true);
@@ -731,11 +723,8 @@ const ZoneContent: React.FC = () => {
     );
   });
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredPlans.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredPlans;
   // console.log("currentItems =>", currentItems);
-  const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -768,7 +757,7 @@ const ZoneContent: React.FC = () => {
   //     reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
   //   }
   // };
-  
+
   const handleEditImageChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -784,14 +773,31 @@ const ZoneContent: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   function Letter() {
     if (ticketNoPerPlan.length !== 0) {
       const firstTicketNo = ticketNoPerPlan[0]?.Ticket_No;
-      const letter = firstTicketNo.match(/[A-Za-z]+/)[0];
-      setTetter(letter);
+      console.log("firstTicketNo", firstTicketNo);
+
+      if (firstTicketNo) {
+        const letterMatch = firstTicketNo.match(/[A-Za-z]+/);
+
+        if (letterMatch && letterMatch[0]) {
+          setTetter(letterMatch[0]);
+        } else {
+          console.warn("No letters found in ticket number.");
+          setTetter(null); // or set to a default value if needed
+        }
+      } else {
+        console.warn("firstTicketNo is null or undefined.");
+        setTetter(null);
+      }
+    } else {
+      console.warn("ticketNoPerPlan array is empty.");
+      setTetter(null);
     }
   }
+
   useEffect(() => {
     Letter();
   }, [ticketNoPerPlan]);
@@ -877,176 +883,210 @@ const ZoneContent: React.FC = () => {
           + เพิ่มรายการ
         </Button>
       </div>
-      <TableContainer component={Paper} sx={{ borderRadius: "0" }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: "#11131A" }}>
-            <TableRow>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  width: "100px",
-                }}
-              >
-                ลำดับ
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  width: "200px",
-                }}
-              >
-                ชื่อผังร้าน
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  width: "200px",
-                }}
-              >
-                ชื่อโซน
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  width: "300px",
-                }}
-              >
-                คำอธิบาย
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  width: "100px",
-                }}
-              >
-                รูปภาพ
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                สถานะ
-              </TableCell>
-              <TableCell
-                style={{
-                  color: "white",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                จัดการ
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {currentItems.length > 0 ? (
-              currentItems.map((plan, index) => (
-                <TableRow key={plan.Plan_id}>
-                  <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                    {indexOfFirstItem + index + 1}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {plan.PlanGroup_Name}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {plan.Plan_Name}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {plan.Plan_Desc}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <div
-                      style={{
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                      }}
-                    >
-                      <img
-                        src={plan.Plan_Pic}
-                        alt="Plan Image"
-                        style={{
-                          width: "100px",
-                          height: "auto",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleImageClick(plan.Plan_Pic)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Switch
-                      checked={plan.Plan_Active === "Y"}
-                      onChange={() => toggleActiveStatus(plan)}
-                      color="primary"
-                    />
-                    <span>
-                      {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
-                    </span>
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleEditOpen(plan)}
-                      sx={{ marginRight: "5px" }}
-                    >
-                      รายละเอียด
-                    </Button>
-                    <IconButton
-                      onClick={() => handleDelete(plan.Plan_id)}
-                      style={{
-                        color: "gray",
-                        border: "1px solid gray",
-                        borderRadius: "5px",
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
+      <div>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: "0" }}
+          style={{ maxHeight: "68vh", overflowY: "auto" }}
+        >
+          <Table>
+            <TableHead sx={{ backgroundColor: "#11131A" }}>
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  ไม่พบข้อมูล
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    width: "100px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  ลำดับ
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    width: "200px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  ชื่อผังร้าน
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    width: "200px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  ชื่อโซน
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    width: "300px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  คำอธิบาย
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    width: "100px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  รูปภาพ
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  สถานะ
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  จัดการ
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {currentItems.length > 0 ? (
+                currentItems.map((plan, index) => (
+                  <TableRow key={plan.Plan_id}>
+                    <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                      {index + 1}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {plan.PlanGroup_Name}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {plan.Plan_Name}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {plan.Plan_Desc}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <div
+                        style={{
+                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        <img
+                          src={plan.Plan_Pic}
+                          alt="Plan Image"
+                          style={{
+                            width: "100px",
+                            height: "auto",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleImageClick(plan.Plan_Pic)}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Switch
+                        checked={plan.Plan_Active === "Y"}
+                        onChange={() => toggleActiveStatus(plan)}
+                        color="primary"
+                      />
+                      <span>
+                        {plan.Plan_Active === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+                      </span>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleEditOpen(plan)}
+                        sx={{ marginRight: "5px" }}
+                      >
+                        รายละเอียด
+                      </Button>
+                      <IconButton
+                        onClick={() => handleDelete(plan.Plan_id)}
+                        style={{
+                          color: "gray",
+                          border: "1px solid gray",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    ไม่พบข้อมูล
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
       <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        />
-      </div>
+      ></div>
 
       <Dialog
         open={open}

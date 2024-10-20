@@ -14,6 +14,21 @@ export async function getAllPlans() {
   }
 }
 
+export async function getAllPlan_TicketNo2() {
+  try {
+    const response = await authAxiosClient.get("/planticketno");
+
+    if (response.status !== 200) {
+      throw new Error("ล้มเหลวระหว่างดึงรายการโซนร้านทั้งหมด");
+    }
+    return response.data;
+  } catch (error) {
+    throw new Error("ล้มเหลวระหว่างดึงรายการโซนร้านทั้งหมด");
+  }
+}
+
+
+
 export async function createPlan({
   Plan_Desc,
   Plan_Name,

@@ -76,6 +76,16 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
     );
   };
 
+  // const handleNavigateToOrderSite2 = async (order_id: string | number) => {
+  //   const orderIdStr = String(order_id); // Ensure order_id is a string
+  //   window.open(
+  //     `  http://localhost:3000/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+  //       "token"
+  //     )}`,
+  //     "_blank"
+  //   );
+  // };
+
   const handleNavigateToOrderSite = async (order_id: string | number) => {
     const response = await getViewTicketListbyOrderid(order_id);
     const test = await updateOrder(order_id);
