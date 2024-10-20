@@ -1,5 +1,4 @@
-import { ChangeEvent, useState, useRef } from "react";
-import toast from "react-hot-toast";
+import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,41 +10,41 @@ import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore, useZoneStore } from "../form-store"; // Zustand store
 import "./create-event-form.css";
-import ZonePriceForm from "./zone-price-form";
+// import ZonePriceForm from "./zone-price-form";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
-import deleteOnIcon from "/delete-on.svg";
-import { SwalConfirmAction } from "../../../lib/sweetalert";
+// import deleteOnIcon from "/delete-on.svg";
+// import { SwalConfirmAction } from "../../../lib/sweetalert";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
+// import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
 
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  // Dialog,
+  // DialogActions,
+  // DialogContent,
+  // DialogTitle,
   TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
+  // MenuItem,
+  // Select,
+  // InputLabel,
+  // FormControl,
   IconButton,
-  Switch,
+  // Switch,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
+  // TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Pagination,
+  // Paper,
+  // Pagination,
   Box,
-  Modal,
-  Typography,
-  Collapse,
-  CircularProgress,
-  DataGrid,
+  // Modal,
+  // Typography,
+  // Collapse,
+  // CircularProgress,
+  // DataGrid,
   Grid,
 } from "@mui/material";
 
@@ -60,47 +59,29 @@ const MINIMUM_EVENT_IMAGES = 1;
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
-
   const { eventId } = useParams();
 
   const { data: planGroups } = useFetchPlanGroups();
 
-  console.log("planGroups", planGroups?.allPlan_TicketNo);
+  // จัดการ combinedData อย่างมีประสิทธิภาพ
+  const combinedData = useMemo(() => {
+    if (!planGroups?.planGroups || !planGroups?.getAllPlans?.plans) return [];
 
-  const groupedData = planGroups?.allPlan_TicketNo.reduce((acc, item) => {
-    if (!acc[item.PlanGroup_Id]) {
-      acc[item.PlanGroup_Id] = [];
-    }
-
-    acc[item.PlanGroup_Id].push(item);
-    return acc;
-  }, {});
-  console.log(groupedData);
-
-  const combinedData = planGroups?.planGroups?.map((group) => {
-    const plansInGroup = planGroups?.getAllPlans?.plans?.filter(
-      (plan) => plan.PlanGroup_id === group.PlanGroup_id
-    );
-    const plansWithTicketNumbers = plansInGroup?.map((plan) => {
-      // หาข้อมูลที่ตรงกัน
-      const ticketNumbersForPlan =
-        planGroups?.ticketNoPerPlans?.ticketNoPerPlans?.filter(
+    return planGroups.planGroups.map((group) => {
+      const plansInGroup = planGroups.getAllPlans.plans.filter(
+        (plan) => plan.PlanGroup_id === group.PlanGroup_id
+      );
+      const plansWithTicketNumbers = plansInGroup.map((plan) => {
+        const ticketNumbersForPlan = planGroups?.ticketNoPerPlans?.ticketNoPerPlans?.filter(
           (ticket) => ticket.Plan_Id === plan.Plan_id
         );
+        return { ...plan, ticketNumbers: ticketNumbersForPlan };
+      });
 
-      return {
-        ...plan,
-        ticketNumbers: ticketNumbersForPlan,
-      };
+      return { ...group, plans: plansWithTicketNumbers };
     });
+  }, [planGroups]);
 
-    return {
-      ...group,
-      plans: plansWithTicketNumbers,
-    };
-  });
-
-  console.log("Combined Data:", combinedData);
   const uniqueId = uuidv4();
 
   const {
@@ -117,6 +98,7 @@ const CreateEventForm = () => {
     setStatus,
     setImages,
   } = useEventStore();
+
   const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
 
   const {
@@ -134,16 +116,19 @@ const CreateEventForm = () => {
 
   const [allRows, setAllRows] = useState({});
 
-  const [selectedEndDate, setSelectedEndDate] = useState(new Date()); // กำหนดค่าเริ่มต้นเป็นวัตถุ Date
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
 
   const handleEndDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
+    if (date instanceof Date && !isNaN(date.getTime())) {
       setSelectedEndDate(date);
     }
   };
 
   const handleInputChange = (setter) => (e) => {
-    setter(e.target.value);
+    const { value } = e.target;
+    if (value.trim()) {
+      setter(value);
+    }
   };
 
   const handleImageUpload = (index) => (e) => {
@@ -151,7 +136,7 @@ const CreateEventForm = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64Image = reader.result as string;
+        const base64Image = reader.result;
         setImages(index, base64Image);
       };
       reader.readAsDataURL(file);
@@ -184,7 +169,6 @@ const CreateEventForm = () => {
       return;
     }
 
-    setIsDetailCompleted(true);
     setActiveTab("โซน & ราคา");
   };
 
@@ -203,53 +187,63 @@ const CreateEventForm = () => {
 
   const handleZoneChange = (e) => {
     const selectedValue = e.target.value;
-    // ค้นหากลุ่มโซนที่เลือก
+
     const foundGroup = combinedData.find(
       (group) => group.PlanGroup_id === parseInt(selectedValue)
     );
-    setSelectedGroupData(foundGroup);
+
+    if (foundGroup && Array.isArray(foundGroup.plans)) {
+      foundGroup.plans.forEach((plan) => {
+        handleAddRow(plan.Plan_id);
+      });
+
+      setSelectedGroupData(foundGroup);
+    } else {
+      SwalError("พบข้อผิดพลาด");
+    }
   };
 
   const getRowsForPlan = (planId) => {
-    // Define a default row structure with custom times
     const defaultRow = {
-      id: uuidv4(), // Generate a unique ID for the default row
-      startDate: new Date().setHours(0, 1, 0, 0), // Set start date to 00:01 of current day
-      endDate: new Date().setHours(23, 59, 0, 0), // Set end date to 23:59 of current day
-      price: 0, // Default price
+      id: uuidv4(),
+      startDate: new Date().setHours(0, 1, 0, 0),
+      endDate: new Date().setHours(23, 59, 0, 0),
+      price: 0,
     };
 
-    // Get rows for the specified planId
     const rows = allRows[planId]?.map((row) => ({
       ...row,
       startDate: row.startDate ? new Date(row.startDate) : null,
       endDate: row.endDate ? new Date(row.endDate) : null,
     }));
 
-    // If no rows are found, return an array with the default row
     return rows && rows.length > 0 ? rows : [defaultRow];
   };
 
   const handleAddRow = (planId) => {
-    // Define the new row with default values
+    const currentRows = allRows[planId] || [];
+
+    if (currentRows.length >= 3) {
+      SwalError("ไม่สามารถเพิ่มแถวเกิน 3 รายการได้");
+      return;
+    }
+
     const newRow = {
       id: uuidv4(),
-      startDate: new Date().setHours(0, 1, 0, 0), // ตั้งค่าเวลาเริ่มต้นเป็น 00:01 ของวันปัจจุบัน
-      endDate: selectedEndDate, // ใช้ค่า endDate ที่ผู้ใช้เลือกหรือค่าเริ่มต้น
+      startDate: new Date().setHours(0, 1, 0, 0),
+      endDate: new Date().setHours(23, 59, 0, 0),
       price: 0,
     };
 
-    // Update the state by adding the new row to the existing rows for the specified planId
     setAllRows((prevRows) => ({
       ...prevRows,
-      [planId]: [...(prevRows[planId] || []), newRow], // เก็บแถวเดิมและเพิ่มแถวใหม่
+      [planId]: [...currentRows, newRow],
     }));
   };
 
   const handleDeleteRow = (rowId, planId) => {
     setAllRows((prevAllRows) => {
-      const currentRows = prevAllRows[planId] || [];
-      const updatedRows = currentRows.filter((row) => row.id !== rowId);
+      const updatedRows = prevAllRows[planId].filter((row) => row.id !== rowId);
 
       return {
         ...prevAllRows,
@@ -258,38 +252,50 @@ const CreateEventForm = () => {
     });
   };
 
-  const handleDateChange = (planId, field, newDate) => {
-    if (newDate instanceof Date && !isNaN(newDate)) {
-      setAllRows((prevAllRows) => ({
-        ...prevAllRows,
-        [planId]: {
-          ...prevAllRows[planId],
-          [field]: newDate, // อัปเดตฟิลด์ที่ระบุ เช่น startDate หรือ endDate
-        },
-      }));
-    }
-  };
-
-  const handlePicChange = (planId, picUrl) => {
-    setAllRows((prevAllRows) => ({
-      ...prevAllRows,
-      [planId]: {
-        ...prevAllRows[planId],
-        pic: picUrl, // อัปเดตรูปภาพใหม่
-      },
+  const handleDateChange = (rowId, planId, field, newDate) => {
+    setAllRows((prevRows) => ({
+      ...prevRows,
+      [planId]: prevRows[planId].map((row) =>
+        row.id === rowId ? { ...row, [field]: newDate } : row
+      ),
     }));
   };
 
+  const handlePriceChange = (rowId, planId, field, newValue) => {
+    setAllRows((prevRows) => {
+      // ตรวจสอบว่ามี array สำหรับ planId หรือไม่ ถ้าไม่มีก็ให้กำหนดเป็น array ว่าง
+      const rows = prevRows[planId] || [];
+
+      // ใช้ map กับ rows ที่ตรวจสอบแล้ว
+      const updatedRows = rows.map((row) =>
+        row.id === rowId ? { ...row, [field]: Number(newValue) } : row
+      );
+
+      return {
+        ...prevRows,
+        [planId]: updatedRows,
+      };
+    });
+  };
+
+  // const handlePicChange = (planId, picUrl) => {
+  //   setAllRows((prevAllRows) => ({
+  //     ...prevAllRows,
+  //     [planId]: {
+  //       ...prevAllRows[planId],
+  //       pic: picUrl,
+  //     },
+  //   }));
+  // };
+
   const updateCombinedRows = () => {
-    // Make a deep copy of allRows to avoid direct mutation
     const combined = JSON.parse(JSON.stringify(allRows));
 
-    // Loop through each plan ID in priceState and update its corresponding rows in combined
     Object.keys(priceState).forEach((planId) => {
       if (combined[planId]) {
         combined[planId] = combined[planId].map((row) => ({
           ...row,
-          price: priceState[planId]?.[row.id] || row.price, // Update price if there's an entry in priceState
+          price: priceState[planId]?.[row.id] || row.price,
         }));
       }
     });
@@ -300,11 +306,94 @@ const CreateEventForm = () => {
   const handleSaveEvent = async () => {
     try {
       const combinedDataForSave = updateCombinedRows();
-      console.log("Combined Data for Save:", combinedDataForSave);
 
-      // Perform save operations
+      const filteredData = Object.keys(combinedDataForSave).reduce((acc, planId) => {
+        const filteredRows = combinedDataForSave[planId].filter((row) => row.price !== 0);
+
+        if (filteredRows.length > 0) {
+          acc[planId] = filteredRows;
+        }
+
+        return acc;
+      }, {});
+
+      // เตรียมข้อมูลสำหรับบันทึก Table : Event_List
+      const eventDate = new Date(eventDateTime).toISOString().split('T')[0];
+      const eventTime = new Date(eventDateTime).toTimeString().split(' ')[0];
+      const formEventList = {
+        event_name: title,
+        event_addr: title2,
+        event_desc: description,
+        event_date: eventDate,
+        event_time: eventTime,
+        event_pic_1: null,
+        event_pic_2: null,
+        event_pic_3: null,
+        event_pic_4: null,
+        event_status: status,
+        event_public: null,
+        event_public_date: null,
+        event_public_by: null,
+        event_created_date: null,
+        event_created_by: null,
+        event_updated_date: null,
+        event_update_by: null,
+        event_cancel_date: null,
+        event_cancel_by: null,
+      };
+      console.debug(formEventList);
+
+      // เตรียมข้อมูลสำหรับบันทึก Table : Event_Stock
+      const formEventStock = {
+        event_id: null,
+        plan_group_id: null,
+        plan_id: null,
+        ticket_type_id: null,
+        ticket_qty: null,
+        ticket_qty_per: null,
+        stc_total: null,
+        ticket_qty_buy: null,
+        ticket_qty_balance: null,
+        stc_total_balance: null,
+        created_date: null,
+        created_by: null,
+        updated_date: null,
+        update_by: null,
+        plan_pic: null
+      };
+      console.debug(formEventStock);
+
+      // เตรียมข้อมูลสำหรับบันทึก Table : Log_Event_Price
+      const formLogEventPrice = {
+        plan_group_id: null,
+        plan_id: null,
+        plan_price: null,
+        start_datetime: null,
+        end_datetime: null,
+        created_date: null,
+        created_by: null,
+        updated_date: null,
+        update_by: null,
+        cancel_date: null,
+        cancel_by: null,
+        log_id: null
+      };
+      console.debug(formLogEventPrice);
+      // [
+      //   {
+      //     "id": "b2abc776-b829-47e9-bd0b-ed4401d5c8ea",
+      //     "startDate": 1729357260000,
+      //     "endDate": 1729443540000,
+      //     "price": 1
+      //   }
+      // ]
+      // แสดงข้อมูลที่กรองแล้ว
+      console.debug(filteredData);
+
+      SwalSuccess("บันทึกอีเว้นท์สำเร็จ");
     } catch (error) {
       console.error("Error while saving event:", error);
+      SwalError("มีข้อผิดพลาดในการบันทึก Event");
     }
   };
 
@@ -322,6 +411,7 @@ const CreateEventForm = () => {
         return "ไม่ระบุ";
     }
   };
+
   return (
     <div className="create-new-event">
       <Header title="งานทั้งหมด" />
@@ -350,7 +440,7 @@ const CreateEventForm = () => {
         <div className="toggle-container">
           <button
             className="btn-cancel"
-            //   onClick={handleCancel}
+          //   onClick={handleCancel}
           >
             ยกเลิก
           </button>
@@ -825,31 +915,31 @@ const CreateEventForm = () => {
                                                     height: "45px",
                                                     padding: "0px 5px",
                                                   }}
-                                                  //   onChange={(e) =>
-                                                  //     handlePriceChange(
-                                                  //       row.id,
-                                                  //       plan.Plan_id,
-                                                  //       "endDate",
-                                                  //       e.target.value
-                                                  //     )
-                                                  //   }
+                                                  onChange={(e) =>
+                                                    handlePriceChange(
+                                                      row.id,
+                                                      plan.Plan_id,
+                                                      "price",
+                                                      e.target.value
+                                                    )
+                                                  }
                                                 />
                                               </TableCell>
                                               <TableCell>
                                                 {getRowsForPlan(plan.Plan_id)
                                                   .length > 1 && (
-                                                  <IconButton
-                                                    onClick={() =>
-                                                      handleDeleteRow(
-                                                        row.id,
-                                                        plan.Plan_id
-                                                      )
-                                                    }
-                                                    color="secondary"
-                                                  >
-                                                    <DeleteIcon />
-                                                  </IconButton>
-                                                )}
+                                                    <IconButton
+                                                      onClick={() =>
+                                                        handleDeleteRow(
+                                                          row.id,
+                                                          plan.Plan_id
+                                                        )
+                                                      }
+                                                      color="secondary"
+                                                    >
+                                                      <DeleteIcon />
+                                                    </IconButton>
+                                                  )}
                                               </TableCell>
                                             </TableRow>
                                           </TableBody>
