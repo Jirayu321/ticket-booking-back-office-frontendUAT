@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Pagination,
@@ -24,9 +24,14 @@ import Header from "../common/header";
 import dayjs from "dayjs";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 import { Container, Grid, Box, Typography, Avatar } from "@mui/material";
+import Axios from "axios";
 
 import "./all-event-content.css";
 import { DatePicker } from "@mui/x-date-pickers";
+
+import {
+  getAllEventList
+} from "../../services/event-list.service";
 
 import {
   selectedColor,
@@ -56,14 +61,14 @@ const AllEventContent: React.FC = () => {
     return savedFilters
       ? JSON.parse(savedFilters)
       : {
-          sortBy: "publish-date",
-          publishStatus: "all",
-          status: "all",
-          search: "",
-          startDate: null as string | null,
-          endDate: null as string | null,
-          dateFilterType: "publish-date",
-        };
+        sortBy: "publish-date",
+        publishStatus: "all",
+        status: "all",
+        search: "",
+        startDate: null as string | null,
+        endDate: null as string | null,
+        dateFilterType: "publish-date",
+      };
   });
 
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
@@ -73,9 +78,24 @@ const AllEventContent: React.FC = () => {
     dayjs().endOf("month")
   );
 
-  const { data: events } = useFetchEventList({
-    eventId: null,
-  });
+  // const { data: events } = useFetchEventList({
+  //   eventId: null,
+  // });
+
+  const [eventsData, setEventsData] = useState<any>([]);
+
+  useEffect(() => {
+    testFetchData();
+  }, []);
+
+  const testFetchData = async () => {
+    setEventsData([]);
+    const fromEvent = await getAllEventList();
+
+    if (fromEvent.events.length > 0) {
+      setEventsData(fromEvent.events);
+    }
+  };
 
   // const handleClick = (pageNumber: number) => {
   //   setCurrentPage(pageNumber);
@@ -97,6 +117,14 @@ const AllEventContent: React.FC = () => {
       ...filters,
       [name]: value,
     };
+
+    // if (name === 'search') {
+    //   setEventsData([]);
+    //   setEventsData(
+    //     ...eventsData.filter((event: any) =>
+
+    //   );
+    // }
 
     setFilters(updatedFilters);
     localStorage.setItem("event", JSON.stringify(updatedFilters));
@@ -149,69 +177,69 @@ const AllEventContent: React.FC = () => {
     handleDateRangeChange(startDate, newValue);
   };
 
-  const handleClearFilters = () => {
-    setFilters((prevFilters) => ({
-      sortBy:
-        prevFilters.sortBy !== "publish-date"
-          ? prevFilters.sortBy
-          : "publish-date",
-      publishStatus:
-        prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
-      status: prevFilters.status !== "all" ? prevFilters.status : "all",
-      search: prevFilters.search !== "" ? prevFilters.search : "",
-      startDate: prevFilters.startDate !== null ? prevFilters.startDate : null,
-      endDate: prevFilters.endDate !== null ? prevFilters.endDate : null,
-      dateFilterType:
-        prevFilters.dateFilterType !== "publish-date"
-          ? prevFilters.dateFilterType
-          : "publish-date",
-    }));
-  };
+  // const handleClearFilters = () => {
+  //   setFilters((prevFilters) => ({
+  //     sortBy:
+  //       prevFilters.sortBy !== "publish-date"
+  //         ? prevFilters.sortBy
+  //         : "publish-date",
+  //     publishStatus:
+  //       prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
+  //     status: prevFilters.status !== "all" ? prevFilters.status : "all",
+  //     search: prevFilters.search !== "" ? prevFilters.search : "",
+  //     startDate: prevFilters.startDate !== null ? prevFilters.startDate : null,
+  //     endDate: prevFilters.endDate !== null ? prevFilters.endDate : null,
+  //     dateFilterType:
+  //       prevFilters.dateFilterType !== "publish-date"
+  //         ? prevFilters.dateFilterType
+  //         : "publish-date",
+  //   }));
+  // };
 
-  const filteredEvents = Array.isArray(events)
-    ? events.filter((event) => {
-        if (
-          filters.search &&
-          !event.Event_Name?.toLowerCase().includes(
-            filters.search.toLowerCase()
-          )
-        ) {
+  const filteredEvents = Array.isArray(eventsData)
+    ? eventsData?.filter((event) => {
+      if (
+        filters.search &&
+        !event.Event_Name?.toLowerCase().includes(
+          filters.search.toLowerCase()
+        )
+      ) {
+        return false;
+      }
+
+      if (filters.publishStatus !== "all") {
+        const isPublished = filters.publishStatus === "published" ? "Y" : "N";
+        if (event.Event_Public !== isPublished) {
           return false;
         }
+      }
 
-        if (filters.publishStatus !== "all") {
-          const isPublished = filters.publishStatus === "published" ? "Y" : "N";
-          if (event.Event_Public !== isPublished) {
-            return false;
-          }
-        }
+      if (
+        filters.status !== "all" &&
+        event.Event_Status !== parseInt(filters.status)
+      ) {
+        return false;
+      }
 
-        if (
-          filters.status !== "all" &&
-          event.Event_Status !== parseInt(filters.status)
-        ) {
+      const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+      const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+
+      // Compare using dayjs objects
+      if (filters.startDate && filters.endDate) {
+        const startDate = dayjs(filters.startDate);
+        const endDate = dayjs(filters.endDate);
+
+        const dateToCompare =
+          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
+
+        // Check if the event date is within the selected range
+        if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
           return false;
         }
+      }
 
-        const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
-        const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
-
-        // Compare using dayjs objects
-        if (filters.startDate && filters.endDate) {
-          const startDate = dayjs(filters.startDate);
-          const endDate = dayjs(filters.endDate);
-
-          const dateToCompare =
-            filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-          // Check if the event date is within the selected range
-          if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
-            return false;
-          }
-        }
-
-        return true;
-      })
+      return true;
+    })
     : [];
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
@@ -268,9 +296,9 @@ const AllEventContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>รอเริ่มงาน</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(events)
-                      ? events.filter((event) => event?.Event_Status === 1)
-                          .length
+                    {Array.isArray(eventsData)
+                      ? eventsData.filter((event) => event?.Event_Status === 1)
+                        .length
                       : 0}
                   </Typography>
                 </Box>
@@ -321,9 +349,9 @@ const AllEventContent: React.FC = () => {
                   </Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(events)
-                      ? events.filter((event) => event?.Event_Status === 2)
-                          .length
+                    {Array.isArray(eventsData)
+                      ? eventsData?.filter((event) => event?.Event_Status === 2)
+                        .length
                       : 0}
                   </Typography>
                 </Box>
@@ -372,9 +400,9 @@ const AllEventContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>ปิดงาน</Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(events)
-                      ? events.filter((event) => event?.Event_Status === 3)
-                          .length
+                    {Array.isArray(eventsData)
+                      ? eventsData?.filter((event) => event?.Event_Status === 3)
+                        .length
                       : 0}
                   </Typography>
                 </Box>
@@ -423,9 +451,9 @@ const AllEventContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>ยกเลิก</Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(events)
-                      ? events.filter((event) => event?.Event_Status === 13)
-                          .length
+                    {Array.isArray(eventsData)
+                      ? eventsData?.filter((event) => event?.Event_Status === 13)
+                        .length
                       : 0}
                   </Typography>
                 </Box>
@@ -574,7 +602,7 @@ const AllEventContent: React.FC = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleClearFilters}
+                  onClick={testFetchData}
                   sx={{
                     backgroundColor: "#CFB70B",
                     width: "160px",
@@ -837,21 +865,21 @@ const AllEventContent: React.FC = () => {
                         Event_Status === 1
                           ? "pending"
                           : Event_Status === 2
-                          ? "active"
-                          : Event_Status === 3
-                          ? "closed"
-                          : "cancelled"
+                            ? "active"
+                            : Event_Status === 3
+                              ? "closed"
+                              : "cancelled"
                       }
                     >
                       {Event_Status === 1
                         ? "รอเริ่มงาน"
                         : Event_Status === 2
-                        ? "เริ่มงาน"
-                        : Event_Status === 3
-                        ? "ปิดงาน"
-                        : Event_Status === 13
-                        ? "ยกเลิก"
-                        : ""}
+                          ? "เริ่มงาน"
+                          : Event_Status === 3
+                            ? "ปิดงาน"
+                            : Event_Status === 13
+                              ? "ยกเลิก"
+                              : ""}
                     </Button>
                   </TableCell>
                   <TableCell style={{ textAlign: "center", cursor: "pointer" }}>
