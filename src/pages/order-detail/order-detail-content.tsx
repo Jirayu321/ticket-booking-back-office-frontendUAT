@@ -15,6 +15,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 // import { getOrderH } from "../../services/order-h.service";
 import { getOrderAll, updateOrder } from "../../services/order-all.service";
 import Header from "../common/header";
+
 import BuyerInfo from "./details/BuyerInfo";
 import OrderItems from "./details/OrderItems";
 import PaymentHistory from "./details/PaymentHistory";
@@ -27,9 +28,20 @@ import {
 
 import QRCode from "qrcode";
 
-const OrderDetailContent: React.FC = () => {
+interface OrderDetailContentProps {
+  orderD: any; // Adjust the type as per your actual data structure
+  hispay: any; // Adjust the type as per your actual data structure
+}
+
+const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
+  orderD,
+  hispay,
+}) => {
   const order_id = localStorage.getItem("orderId");
-  // const { order_id } = useParams<{ order_id: string }>();
+
+  // console.log("OrderD:", orderD[0]);
+  // console.log("Hispay:", hispay);
+
   const location = useLocation();
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
@@ -46,6 +58,8 @@ const OrderDetailContent: React.FC = () => {
     return ph.Total_Balance === 0;
   });
 
+  console.log("isOrderPaid:", isOrderPaid, isPaymentHistoriesLoading);
+  isPaymentHistoriesLoading;
 
   // const handleNavigateBack = () => {
   //   localStorage.setItem("orderDetail", orderDetail?.Order_no);
@@ -227,6 +241,7 @@ const OrderDetailContent: React.FC = () => {
 
     // Check if location state has a tab index to set
     const searchParams = new URLSearchParams(location.search);
+
     const tab = searchParams.get("tab");
     if (tab) {
       setTabIndex(Number(tab));
@@ -239,13 +254,11 @@ const OrderDetailContent: React.FC = () => {
   let statusLabel;
   let bgColor;
 
-  console.log("order :", orderDetail);
-
   if (orderDetail) {
     switch (orderDetail?.Order_Status) {
       case 1:
         if (orderDetail?.Total_Balance === 0) {
-          statusLabel = "สำเร็จ";
+          statusLabel = "ชำระครบ";
           bgColor = "#28a745";
         } else {
           statusLabel = "ค้างจ่าย";
@@ -298,23 +311,24 @@ const OrderDetailContent: React.FC = () => {
               display: "flex",
               alignItems: "center",
               marginLeft: 10,
-              fontSize:18
+              fontSize: 18,
             }}
           >
-            {orderDetail?.Order_no}
+            {orderD[0]?.Order_no}
             <div
               style={{
                 marginLeft: "20px",
                 padding: "8px 16px",
                 borderRadius: "20px",
-                backgroundColor: bgColor,
+                backgroundColor: isOrderPaid ? `#28a745` : `#ffc107`,
                 color: "#fff",
               }}
             >
-              {statusLabel}
+              {isOrderPaid ? `ชำระครบ` : `ค้างชำระ`}
             </div>
           </p>
         </div>
+
         <Button
           onClick={() => {
             isOrderPaid
@@ -341,7 +355,7 @@ const OrderDetailContent: React.FC = () => {
           {isOrderPaid ? "Print QR" : "ชำระส่วนที่เหลือ"}
         </Button>
       </div>
-      <div >
+      <div>
         <Paper
           sx={{
             padding: "20px",
@@ -352,10 +366,10 @@ const OrderDetailContent: React.FC = () => {
           }}
         >
           <div>
-            {orderDetail ? <BuyerInfo buyer={orderDetail} /> : null}
-            <OrderItems order_id={order_id} />
+            {orderD ? <BuyerInfo buyer={orderD[0]} /> : null}
+            <OrderItems buyer={orderD} />
             <div style={{ maxWidth: "800px", overflowX: "auto" }}>
-              <PaymentHistory dtOrderId={order_id} />
+              <PaymentHistory dtOrderId={hispay} />
             </div>
           </div>
         </Paper>

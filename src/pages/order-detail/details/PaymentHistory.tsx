@@ -28,45 +28,46 @@ interface PaymentHistory {
   Order_datetime: string;
 }
 
-const PaymentHistory: React.FC<PaymentHistoryProps> = ({ dtOrderId }) => {
+const PaymentHistory: React.FC<{ dtOrderId: any }> = ({ dtOrderId }) => {
   const [payments, setPayments] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  console.log("buyer::::", dtOrderId);
 
-  useEffect(() => {
-    async function fetchPayments() {
-      try {
-        const paymentHistories = await getPaymentHistoriesByOrderId(dtOrderId);
-        console.log("Fetched payments response:", paymentHistories);
+  // useEffect(() => {
+  //   async function fetchPayments() {
+  //     try {
+  //       const paymentHistories = await getPaymentHistoriesByOrderId(dtOrderId);
+  //       console.log("Fetched payments response:", paymentHistories);
 
-        if (
-          paymentHistories &&
-          Array.isArray(paymentHistories) &&
-          paymentHistories.length > 0
-        ) {
-          const sortedPayments = paymentHistories.sort((a, b) => {
-            const dateA = new Date(a.Payment_Date7);
-            const dateB = new Date(b.Payment_Date7);
-            return dateA - dateB; // หากต้องการเรียงจากเก่าไปใหม่
-            // return dateB - dateA; // หากต้องการเรียงจากใหม่ไปเก่า
-          });
-          setPayments(sortedPayments);
-        } else {
-          setError("No payment history found.");
-        }
-      } catch (error: any) {
-        setError("Failed to load payment history.");
-        console.error("Error fetching payment histories:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
+  //       if (
+  //         paymentHistories &&
+  //         Array.isArray(paymentHistories) &&
+  //         paymentHistories.length > 0
+  //       ) {
+  //         const sortedPayments = paymentHistories.sort((a, b) => {
+  //           const dateA = new Date(a.Payment_Date7);
+  //           const dateB = new Date(b.Payment_Date7);
+  //           return dateA - dateB; // หากต้องการเรียงจากเก่าไปใหม่
+  //           // return dateB - dateA; // หากต้องการเรียงจากใหม่ไปเก่า
+  //         });
+  //         setPayments(sortedPayments);
+  //       } else {
+  //         setError("No payment history found.");
+  //       }
+  //     } catch (error: any) {
+  //       setError("Failed to load payment history.");
+  //       console.error("Error fetching payment histories:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    fetchPayments();
-  }, [dtOrderId]);
+  //   fetchPayments();
+  // }, [buyer]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  // if (loading) return <div>Loading...</div>;
+  // if (error) return <div>{error}</div>;
 
   // const totalPayment = payments.reduce(
   //   (total, payment) => total + payment.Total_Pay,
@@ -164,32 +165,46 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ dtOrderId }) => {
               วิธีการชำระ
             </TableCell>
             <TableCell
-              style={{ fontWeight: "bold", color: "#000", fontSize: "18px" ,textAlign: "center"}}
+              style={{
+                fontWeight: "bold",
+                color: "#000",
+                fontSize: "18px",
+                textAlign: "center",
+              }}
             >
               Charge_Id
             </TableCell>
             <TableCell
-              style={{ fontWeight: "bold", color: "#000", fontSize: "18px",textAlign: "center"}}
+              style={{
+                fontWeight: "bold",
+                color: "#000",
+                fontSize: "18px",
+                textAlign: "center",
+              }}
             >
               Ref_Number1
             </TableCell>
             <TableCell
-              style={{ fontWeight: "bold", color: "#000", fontSize: "18px",textAlign: "center"}}
+              style={{
+                fontWeight: "bold",
+                color: "#000",
+                fontSize: "18px",
+                textAlign: "center",
+              }}
             >
-             ธนาคาร
+              ธนาคาร
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {payments.length === 0 ? (
+          {dtOrderId.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} align="center">
                 ไม่มีข้อมูลการชำระเงิน
               </TableCell>
             </TableRow>
           ) : (
-            payments.map((payment) => {
-              // Combined date and time
+            dtOrderId?.map((payment) => {
 
               return (
                 <TableRow key={payment.His_Payment_id}>

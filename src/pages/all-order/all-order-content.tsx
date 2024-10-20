@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -34,6 +34,7 @@ import moment from "moment";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import "moment/locale/th";
+import { useLocation } from "react-router-dom";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
@@ -52,11 +53,33 @@ const AllOrderContent: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [count, setCount] = useState(false);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location?.search);
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
 
-  const { data: events, refetch } = useFetchOrdertList({
-    eventId: null,
-  });
+  const { data: events, isFetching, refetch } = useFetchOrdertList({ count });
+
+  useEffect(() => {
+    if (events) {
+      console.log("ข้อมูล data เปลี่ยนไป:", events);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    if (isFetching) {
+      console.log("กำลังดึงข้อมูล...");
+    } else if (events) {
+      console.log("ข้อมูลโหลดเสร็จแล้ว");
+      setCount(true); // อาจจะต้องตรวจสอบว่าค่าของ `events` ถูกดึงมาแล้วจริง ๆ
+    }
+  }, [isFetching, events]);
+
+  // const isOrderPaid = events?.some((ph: any) => {
+  //   return ph.Total_Balance === 0;
+  // });
+
+  console.log("isFetched", queryParams);
 
   const evntDetail = events?.dataEvent?.events.filter(
     (event: any) => event?.Event_Public === "Y"
@@ -139,7 +162,7 @@ const AllOrderContent: React.FC = () => {
 
       // เก็บค่า filters ใหม่ใน localStorage
       localStorage.setItem("filters", JSON.stringify(updatedFilters));
-
+      setCount(true);
       return updatedFilters;
     });
   };
@@ -296,8 +319,8 @@ const AllOrderContent: React.FC = () => {
         filters.status === "all";
 
       const matchesStatusPayment =
-        (filters.paymentStatus === "สำเร็จ" && order.Total_Balance === 0) ||
-        (filters.paymentStatus === "ค้างจ่าย" && order.Total_Balance !== 0) ||
+        (filters.paymentStatus === "สำเร็จ" && order.Is_Balance === 0) ||
+        (filters.paymentStatus === "ค้างจ่าย" && order.Is_Balance !== 0) ||
         filters.paymentStatus === "all";
 
       const orderDatetime = new Date(order.Order_datetime);
@@ -382,19 +405,20 @@ const AllOrderContent: React.FC = () => {
   // console.log("totalNetPrice", totalNetPrice);
 
   const handleClearFilters = () => {
-    setFilters((prevFilters) => ({
-      orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
-      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
-      customerName:
-        prevFilters.customerName !== "" ? prevFilters.customerName : "",
-      customerPhone:
-        prevFilters.customerPhone !== "" ? prevFilters.customerPhone : "",
-      status: prevFilters.status !== "all" ? prevFilters.status : "all",
-      paymentStatus:
-        prevFilters.paymentStatus !== "all" ? prevFilters.paymentStatus : "all",
-      ticketType:
-        prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
-    }));
+    refetch();
+    // setFilters((prevFilters) => ({
+    //   orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
+    //   eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+    //   customerName:
+    //     prevFilters.customerName !== "" ? prevFilters.customerName : "",
+    //   customerPhone:
+    //     prevFilters.customerPhone !== "" ? prevFilters.customerPhone : "",
+    //   status: prevFilters.status !== "all" ? prevFilters.status : "all",
+    //   paymentStatus:
+    //     prevFilters.paymentStatus !== "all" ? prevFilters.paymentStatus : "all",
+    //   ticketType:
+    //     prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
+    // }));
   };
 
   const totalSeats = orderDetail?.reduce(
@@ -1182,10 +1206,10 @@ const AllOrderContent: React.FC = () => {
                   let paymentStatusBgColor;
 
                   if (order.Order_Status === 1) {
-                    if (order.Total_Balance === 0) {
+                    if (order.Is_Balance === 0) {
                       paymentStatusLabel = "ชำระครบ";
                       paymentStatusBgColor = `${paymentStatusBgColor0}`;
-                    } else if (order.Total_Balance > 0) {
+                    } else if (order.Is_Balance > 0) {
                       paymentStatusLabel = "ค้างจ่าย";
                       paymentStatusBgColor = `${paymentStatusBgColor1}`;
                     }
@@ -1682,7 +1706,10 @@ const AllOrderContent: React.FC = () => {
             <CloseIcon />
           </IconButton>
           <div>
-            <OrderDetailContent />
+            <OrderDetailContent
+              orderD={orderDetail}
+              hispay={orderHispayDetail}
+            />
           </div>
         </Box>
       </Modal>

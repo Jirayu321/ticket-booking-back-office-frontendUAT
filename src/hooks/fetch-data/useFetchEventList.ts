@@ -31,14 +31,14 @@ export function useFetchEventList({ eventId }: { eventId: number | null }) {
   return query;
 }
 
-export function useFetchOrdertList({ eventId }: { eventId: number | null }) {
+export function useFetchOrdertList({ cuont }: { cuont: boolean }) {
   const query = useQuery({
-    queryKey: ["get event by id", eventId],
+    queryKey: ["get event by id", cuont],
     queryFn: async () => {
       try {
-        if (eventId !== null) {
-          const event = await getEventById(eventId);
-          return event;
+        if (cuont === true) {
+          const dataEvent = await getAllEventList();
+          return dataEvent;
         } else {
           const dataEvent = await getAllEventList();
           const dataOrder = await getOrderAll();
@@ -47,10 +47,10 @@ export function useFetchOrdertList({ eventId }: { eventId: number | null }) {
         }
       } catch (error: any) {
         toast.error(error.message);
-        return null; // Return null if an error occurs
+        return null;
       }
     },
-    refetchOnWindowFocus: false, // ปิดการโหลดใหม่เมื่อกลับมาที่หน้านี้
+    refetchOnWindowFocus: true,
   });
   return query;
 }

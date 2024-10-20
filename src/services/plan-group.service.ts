@@ -47,10 +47,13 @@ export async function updatePlanGroup({
   PlanGroup_Active: string;
 }) {
   try {
-    const response = await authAxiosClient.patch(`/plan-group/${PlanGroup_id}`, {
-      PlanGroup_Name,
-      PlanGroup_Active,
-    });
+    const response = await authAxiosClient.patch(
+      `/plan-group/${PlanGroup_id}`,
+      {
+        PlanGroup_Name,
+        PlanGroup_Active,
+      }
+    );
 
     if (response.status !== 200) {
       throw "Failed to update plan group";
@@ -65,7 +68,9 @@ export async function updatePlanGroup({
 // Function to delete an existing plan group
 export async function deletePlanGroup(PlanGroup_id: number) {
   try {
-    const response = await authAxiosClient.delete(`/plan-group/${PlanGroup_id}`);
+    const response = await authAxiosClient.delete(
+      `/plan-group/${PlanGroup_id}`
+    );
 
     if (response.status !== 200) {
       throw "Failed to delete plan group";
@@ -74,5 +79,19 @@ export async function deletePlanGroup(PlanGroup_id: number) {
     return response.data;
   } catch (error) {
     throw "ล้มเหลวระหว่างลบ PlanGroup";
+  }
+}
+
+export async function getAllPlan_TicketNo() {
+  try {
+    const response = await authAxiosClient.get("/Plan_TicketNo");
+
+    if (response.status !== 200) {
+      throw "ล้มเหลวระหว่างดึงรายการ plan group ทั้งหมด";
+    }
+
+    return response.data;
+  } catch (error: any) {
+    throw "ล้มเหลวระหว่างดึงรายการ plan group ทั้งหมด";
   }
 }

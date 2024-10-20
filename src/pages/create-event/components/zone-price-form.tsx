@@ -14,6 +14,7 @@ import { getAllTicketNoPerPlan } from "../../../services/ticket-no-per-plan.serv
 import { set } from "react-hook-form";
 
 const ZonePriceForm = () => {
+  
   const {
     selectedZoneGroup,
     setSelectedZoneGroup,
@@ -28,6 +29,7 @@ const ZonePriceForm = () => {
     handleSaveTicketNumbers,
     isFormValid,
   } = useZonePriceForm();
+
 
   const navigate = useNavigate();
 
@@ -98,6 +100,7 @@ const ZonePriceForm = () => {
   const forceRefreshFilteredZones = async (groupId: number) => {
     try {
       const fetchedViewPlans = (await getAllPlans()).plans;
+      
       console.log("Fetched Plans =>", fetchedViewPlans);
 
       const newFilteredZones = fetchedViewPlans.filter(

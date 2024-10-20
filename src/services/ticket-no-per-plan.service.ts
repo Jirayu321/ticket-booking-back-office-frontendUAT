@@ -14,6 +14,18 @@ export async function getAllTicketNoPerPlan() {
   }
 }
 
+export async function getAllTicketNoPerPlanfromViwe() {
+  try {
+    const response = await authAxiosClient.get(`/view-ticket-no-per-plan`);
+
+    if (response.status !== 200) throw new Error();
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error("ล้มเหลวระหว่างดึงข้อมูลเลขตั๋ว");
+  }
+}
+
 export async function getAllTicketNoPerPlanByEventId({
   // eventId,
   planId,

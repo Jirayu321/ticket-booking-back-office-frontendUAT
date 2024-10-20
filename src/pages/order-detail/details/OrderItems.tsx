@@ -24,51 +24,20 @@ interface Ticket {
   ticket_running: string;
 }
 
-const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
+interface OrderItemsProps {
+  order_id: string;
+  buyer: any; // Adjust the type based on your data structure
+}
+
+const OrderItems: React.FC<{ buyer: any }> = ({ buyer }) => {
+  console.log("OrderItems buyer", buyer[0]?.Order_id);
   const [groupedTickets, setGroupedTickets] = useState<Ticket[]>([]);
 
-  useEffect(() => {
-    async function fetchTicketList() {
-      try {
-        const response = await getViewTicketListbyOrderid(order_id);
-        console.log("tickets response:", response);
-
-        if (Array.isArray(response.ticketList)) {
-          // Filter tickets that match the order_id
-          const matchingTickets = response.ticketList.filter(
-            (ticket: Ticket) => String(ticket.order_id) === String(order_id)
-          );
-
-          // Get unique tickets by ticket_no
-          const uniqueTickets = matchingTickets.filter(
-            (ticket, index, self) =>
-              index === self.findIndex((t) => t.ticket_no === ticket.ticket_no)
-          );
-
-          setGroupedTickets(uniqueTickets);
-          console.log("Unique tickets by ticket_no:", uniqueTickets);
-        } else {
-          console.error(
-            "Expected ticketList to be an array, but got:",
-            typeof response.ticketList
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch ticket list:", error);
-      }
-    }
-
-    fetchTicketList();
-  }, [order_id]);
-
-  // if (groupedTickets.length === 0) {
-  //   return <p>No order details available</p>;
-  // }
-
-  const totalPrice = groupedTickets.reduce(
+  const totalPrice = groupedTickets?.reduce(
     (total, ticket) => total + ticket.Plan_Price,
     0
   );
+
   console.log("groupedTickets", groupedTickets);
 
   return (
@@ -81,13 +50,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
         }}
       >
         <span>รายละเอียดคำสั่งซื้อ</span>
-        {/* <span style={{ color: "#28a745" }}> */}
-        {/* {new Intl.NumberFormat("th-TH", {
-            style: "currency",
-            currency: "THB",
-          }).format(totalPrice)} */}
-        {/* {groupedTickets.at(0)?.OrderStatus_Name} */}
-        {/* </span> */}
       </h2>
       <Table>
         <TableHead>
@@ -120,11 +82,11 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {groupedTickets.map((ticket, index) => (
+          {buyer.map((ticket, index) => (
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
               <TableCell>
-                {ticket.Plan_Name} [{ticket.ticket_no}]
+                {ticket.Plan_Name} [{ticket.TicketNo_List}]
               </TableCell>
               <TableCell>
                 {new Intl.NumberFormat("th-TH", {
@@ -132,9 +94,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ order_id }) => {
                   currency: "THB",
                 }).format(ticket.Plan_Price)}
               </TableCell>
-              <TableCell>
-               {ticket.Total_stc}
-              </TableCell>
+              <TableCell>{ticket.Total_stc}</TableCell>
               <TableCell
                 style={{
                   color:
