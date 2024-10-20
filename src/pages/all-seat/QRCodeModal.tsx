@@ -153,7 +153,7 @@ const QRCodeModal: FC<QRCodeModalProps> = ({
           <div class="divbody">
           <p class="details">${Event_Name}</p>
           <p class="details">
-    ${Plan_Name}-${ticket_no}(${ticket_line}/${Total_stc})
+    ${Plan_Name}-${ticket_no}(${ticket_line}/${totalTicketsWithSameNo})
           </p>
             <p class="details">เวลา: ${new Date(Event_Date).toLocaleDateString(
               "th-TH",
