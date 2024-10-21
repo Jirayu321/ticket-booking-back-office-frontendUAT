@@ -2,21 +2,18 @@ import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-// import { STATUS_MAP } from "../../../config/constants";
-// import { useWarnChangePage } from "../../../hooks/useWarnChangePage";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
 import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
-import { useEventStore, useZoneStore } from "../form-store"; // Zustand store
+import { useEventStore, useZoneStore } from "../form-store";
 import "./create-event-form.css";
-// import ZonePriceForm from "./zone-price-form";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
-// import deleteOnIcon from "/delete-on.svg";
-// import { SwalConfirmAction } from "../../../lib/sweetalert";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
+import DatePicker from "../../../components/common/input/date-picker/DatePicker";
+import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
+import { useFetchEventList } from "../../../hooks/fetch-data/useFetchEventList";
 
 import {
   Button,
@@ -49,19 +46,18 @@ import {
 } from "@mui/material";
 
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-// import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-// import dayjs from "dayjs";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
-
 const MINIMUM_EVENT_IMAGES = 1;
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
+  console.log("eventId", eventId);
 
   const { data: planGroups } = useFetchPlanGroups();
+  const { data: event } = useFetchEventList({
+    eventId: Number(eventId),
+  });
+  console.log("event", event);
 
   // จัดการ combinedData อย่างมีประสิทธิภาพ
   const combinedData = useMemo(() => {
@@ -72,9 +68,10 @@ const CreateEventForm = () => {
         (plan) => plan.PlanGroup_id === group.PlanGroup_id
       );
       const plansWithTicketNumbers = plansInGroup.map((plan) => {
-        const ticketNumbersForPlan = planGroups?.ticketNoPerPlans?.ticketNoPerPlans?.filter(
-          (ticket) => ticket.Plan_Id === plan.Plan_id
-        );
+        const ticketNumbersForPlan =
+          planGroups?.ticketNoPerPlans?.ticketNoPerPlans?.filter(
+            (ticket) => ticket.Plan_Id === plan.Plan_id
+          );
         return { ...plan, ticketNumbers: ticketNumbersForPlan };
       });
 
@@ -307,19 +304,24 @@ const CreateEventForm = () => {
     try {
       const combinedDataForSave = updateCombinedRows();
 
-      const filteredData = Object.keys(combinedDataForSave).reduce((acc, planId) => {
-        const filteredRows = combinedDataForSave[planId].filter((row) => row.price !== 0);
+      const filteredData = Object.keys(combinedDataForSave).reduce(
+        (acc, planId) => {
+          const filteredRows = combinedDataForSave[planId].filter(
+            (row) => row.price !== 0
+          );
 
-        if (filteredRows.length > 0) {
-          acc[planId] = filteredRows;
-        }
+          if (filteredRows.length > 0) {
+            acc[planId] = filteredRows;
+          }
 
-        return acc;
-      }, {});
+          return acc;
+        },
+        {}
+      );
 
       // เตรียมข้อมูลสำหรับบันทึก Table : Event_List
-      const eventDate = new Date(eventDateTime).toISOString().split('T')[0];
-      const eventTime = new Date(eventDateTime).toTimeString().split(' ')[0];
+      const eventDate = new Date(eventDateTime).toISOString().split("T")[0];
+      const eventTime = new Date(eventDateTime).toTimeString().split(" ")[0];
       const formEventList = {
         event_name: title,
         event_addr: title2,
@@ -359,7 +361,7 @@ const CreateEventForm = () => {
         created_by: null,
         updated_date: null,
         update_by: null,
-        plan_pic: null
+        plan_pic: null,
       };
       console.debug(formEventStock);
 
@@ -376,7 +378,7 @@ const CreateEventForm = () => {
         update_by: null,
         cancel_date: null,
         cancel_by: null,
-        log_id: null
+        log_id: null,
       };
       console.debug(formLogEventPrice);
       // [
@@ -415,40 +417,43 @@ const CreateEventForm = () => {
   return (
     <div className="create-new-event">
       <Header title="งานทั้งหมด" />
-
-      <div
-        className="sub-header"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "230px auto",
-        }}
-      >
+      {eventId ? (
+        <SubHeader event={event} />
+      ) : (
         <div
+          className="sub-header"
           style={{
             display: "grid",
-            gridTemplateColumns: "65px auto",
-            alignItems: "center",
+            gridTemplateColumns: "230px auto",
           }}
         >
-          <button className="back-button">
-            <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
-          </button>
-          <h2 className="title" style={{ margin: 0 }}>
-            สร้างงานใหม่
-          </h2>
-        </div>
-        <div className="toggle-container">
-          <button
-            className="btn-cancel"
-          //   onClick={handleCancel}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "65px auto",
+              alignItems: "center",
+            }}
           >
-            ยกเลิก
-          </button>
-          <button className="btn-save" onClick={handleSaveEvent}>
-            บันทึก
-          </button>
+            <button className="back-button">
+              <img src={BackIcon} alt="Back Icon" onClick={handleBackClick} />
+            </button>
+            <h2 className="title" style={{ margin: 0 }}>
+              สร้างงานใหม่
+            </h2>
+          </div>
+          <div className="toggle-container">
+            <button
+              className="btn-cancel"
+              //   onClick={handleCancel}
+            >
+              ยกเลิก
+            </button>
+            <button className="btn-save" onClick={handleSaveEvent}>
+              บันทึก
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ maxHeight: "88vh", overflowY: "auto" }}>
         <form
@@ -928,18 +933,18 @@ const CreateEventForm = () => {
                                               <TableCell>
                                                 {getRowsForPlan(plan.Plan_id)
                                                   .length > 1 && (
-                                                    <IconButton
-                                                      onClick={() =>
-                                                        handleDeleteRow(
-                                                          row.id,
-                                                          plan.Plan_id
-                                                        )
-                                                      }
-                                                      color="secondary"
-                                                    >
-                                                      <DeleteIcon />
-                                                    </IconButton>
-                                                  )}
+                                                  <IconButton
+                                                    onClick={() =>
+                                                      handleDeleteRow(
+                                                        row.id,
+                                                        plan.Plan_id
+                                                      )
+                                                    }
+                                                    color="secondary"
+                                                  >
+                                                    <DeleteIcon />
+                                                  </IconButton>
+                                                )}
                                               </TableCell>
                                             </TableRow>
                                           </TableBody>

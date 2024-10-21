@@ -108,6 +108,16 @@ const Sidebars: React.FC = () => {
                     >
                       TICKET
                     </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#ffd700",
+                        marginLeft:"1px"
+                      }}
+                    >
+                      v.001
+                    </Typography>
                     <IconButton
                       sx={{
                         color: "white",

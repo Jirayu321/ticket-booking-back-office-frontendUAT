@@ -887,10 +887,10 @@ const ZoneContent: React.FC = () => {
         <TableContainer
           component={Paper}
           sx={{ borderRadius: "0" }}
-          style={{ maxHeight: "68vh", overflowY: "auto" }}
+          style={{ maxHeight: "85vh", overflowY: "auto", maxWidth: "65vw" }}
         >
           <Table>
-            <TableHead sx={{ backgroundColor: "#11131A" }}>
+            <TableHead sx={{ backgroundColor: "#11131A", height: "60px" }}>
               <TableRow>
                 <TableCell
                   style={{

@@ -137,7 +137,6 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
           </head>
           <body>
       `;
-
       for (let ticket of latestTickets) {
         const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
         if (ticket.Ticket_Type_Cal === "N") {
@@ -148,7 +147,7 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
           <p class="details">${ticket.Event_Name}</p>
           <p class="details">
            ${ticket.Plan_Name}
-          - ${ticket.ticket_no}(${ticket.ticket_line}/${ticket.Total_stc})
+          - ${ticket.ticket_no}(${ticket.ticket_line}/${ticket.Total_stc / ticket.Web_Qty_Buy})
           </p>
             <p class="details">เวลา: ${new Date(
               ticket.Event_Date
