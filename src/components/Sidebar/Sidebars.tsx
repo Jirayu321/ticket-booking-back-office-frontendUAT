@@ -46,7 +46,7 @@ const Sidebars: React.FC = () => {
   const handleSignOut = () => {
     logOut();
     toast.success("ออกจากระบบเรียบร้อยแล้ว");
-    navigate(0);
+    navigate("/login");
   };
 
   const rotateAnimation = keyframes`

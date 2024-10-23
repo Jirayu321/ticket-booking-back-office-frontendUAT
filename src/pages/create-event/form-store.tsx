@@ -23,7 +23,7 @@ export const useEventStore = create<EventState>((set) => ({
   description: "",
   eventDateTime: addHours(new Date(), 7).toISOString(),
   status: 1,
-  images: [null, null, null, null], // Initialize with 4 image placeholders
+  images: [null, null, null, null], 
   setTitle: (title) => set({ title }),
   setTitle2: (title2) => set({ title2 }),
   setDescription: (description) => set({ description }),
@@ -37,7 +37,6 @@ export const useEventStore = create<EventState>((set) => ({
     }),
 }));
 
-// Zone store interface and Zustand implementation
 interface Price {
   id: number;
   startDate: string | null;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   // CircularProgress,
   Paper,
@@ -38,7 +38,6 @@ import {
 
 import { useFetchEventStocktList } from "../../hooks/fetch-data/useFetchEventList";
 
-// Map event statuses to text and style properties
 const getStatusDetails = (status: number) => {
   switch (status) {
     case 1:
@@ -76,9 +75,82 @@ const getPublicStatusDetails = (status: string) => {
 };
 
 const AllStockContent: React.FC = () => {
-  const { data: Data, isFetching } = useFetchEventStocktList({
-    eventId: null,
+  const [fetchData, setfetchData] = useState(false);
+  const [DataAll, setDataAll] = useState([]);
+
+  const { data: Data } = useFetchEventStocktList({
+    eventId: fetchData,
   });
+
+  useEffect(() => {
+    setfetchData(false);
+    if (Data) {
+      setfetchData(true);
+      setDataAll(Data);
+    }
+    setfetchData(true);
+  }, [Data]);
+
+  // console.log("DataAll", DataAll);
+
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("filtersStock");
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          search: "",
+          eventName: "",
+          eventStatus: "*",
+          publicStatus: "*",
+        };
+  });
+
+  const handleFilterChange = (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>
+  ) => {
+    const { name, value } = event.target;
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [name as string]: value,
+      };
+      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        search: event.target.value,
+      };
+      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
+  };
+
+  const handleClearFilters = () => {
+    setfetchData(true);
+    setFilters((prevFilters) => ({
+      search: prevFilters.search !== "" ? prevFilters.search : "",
+      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+      eventStatus:
+        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "*",
+      publicStatus:
+        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "*",
+    }));
+    localStorage.setItem(
+      "filtersStock",
+      JSON.stringify({
+        search: filters.search !== "" ? filters.search : "",
+        eventName: filters.eventName !== "" ? filters.eventName : "",
+        eventStatus: filters.eventStatus !== "*" ? filters.eventStatus : "*",
+        publicStatus: filters.publicStatus !== "*" ? filters.publicStatus : "*",
+      })
+    );
+  };
+
   const evntDetail = Data?.dataEvent?.events.filter(
     (event: any) => event?.Event_Public === "Y"
   );
@@ -109,46 +181,6 @@ const AllStockContent: React.FC = () => {
         0
       )
     : 0;
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem("filtersStock");
-    return savedFilters
-      ? JSON.parse(savedFilters)
-      : {
-          search: "",
-          eventName: "",
-          eventStatus: "*",
-          publicStatus: "*",
-        };
-  });
-
-  const handleFilterChange = (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>
-  ) => {
-    const { name, value } = event.target;
-
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        [name as string]: value,
-      };
-
-      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
-
-      return updatedFilters;
-    });
-  };
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        search: event.target.value,
-      };
-
-      localStorage.setItem("filtersStock", JSON.stringify(updatedFilters));
-      return updatedFilters;
-    });
-  };
 
   const filteredStocks = eventStockData.filter((stock) => {
     const matchesSearch =
@@ -186,10 +218,12 @@ const AllStockContent: React.FC = () => {
     (sum, order) => sum + order.Ticket_Qty,
     0
   );
+
   const TotalTicketsBuy = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty_Balance,
     0
   );
+
   const TotalTicketsBalance = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty_Buy,
     0
@@ -197,33 +231,10 @@ const AllStockContent: React.FC = () => {
 
   const numberFormatter = new Intl.NumberFormat("en-US");
 
-  const handleClearFilters = () => {
-    setFilters((prevFilters) => ({
-      search: prevFilters.search !== "" ? prevFilters.search : "",
-      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
-      eventStatus:
-        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "*",
-      publicStatus:
-        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "*",
-    }));
-
-    localStorage.setItem(
-      "filtersStock",
-      JSON.stringify({
-        search: filters.search !== "" ? filters.search : "",
-        eventName: filters.eventName !== "" ? filters.eventName : "",
-        eventStatus: filters.eventStatus !== "*" ? filters.eventStatus : "*",
-        publicStatus: filters.publicStatus !== "*" ? filters.publicStatus : "*",
-      })
-    );
-  };
-
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
-
- 
 
   return (
     <div

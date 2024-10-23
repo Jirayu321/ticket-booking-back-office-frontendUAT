@@ -365,40 +365,33 @@ const AllOrderContent: React.FC = () => {
 
   const totalOrders = filteredOrders?.length;
 
-  const OutstandingPayment = filteredOrders
-    ?.filter((order) => order.Order_Status === 4)
-    .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
+  // const OutstandingPayment = filteredOrders
+  //   ?.filter((order) => order.Order_Status === 4)
+  //   .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
 
-  const OutstandingPayment2 = filteredOrders
-    .filter((order) => order.Total_Balance !== 0 && order.Order_Status === 1)
-    .reduce((sum, order) => sum + order.Total_Balance, 0);
+  // const OutstandingPayment2 = filteredOrders
+  //   .filter((order) => order.Total_Balance !== 0 && order.Order_Status === 1)
+  //   .reduce((sum, order) => sum + order.Total_Balance, 0);
 
-  const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
+  // const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
 
   const dataP = Object.values(
-    orderHData
-      .filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-
-        return acc;
-      }, {})
+    orderDData.filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
   );
 
   const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
+    (sum, order) => sum + order.Total_Pay,
     0
   );
+  
+
+  const OutstandingPayment3 =  dataP?.reduce<number>(
+    (sum, order) => sum + order.Total_Balance,
+    0
+  );
+  
+
+  console.log("totalNetPriceWithZeroBalance", dataP);
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 

@@ -79,26 +79,11 @@ function totalNetPriceWithZeroBalance(data: any, filteredOrders: any) {
 
 function OutstandingPayment(data: any, filteredOrders: any) {
   const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-        return acc;
-      }, {})
+    data.filter(
+      (order) =>
+        order.Event_Id === filteredOrders[0]?.Event_Id &&
+        order.Order_Status !== 4
+    ).length
   );
   const uniqueDataP = dataP.filter(
     (order, index, self) =>
@@ -261,8 +246,6 @@ const OverviewContent: React.FC = () => {
     setCombinedData(combinedData);
   };
 
-  console.log("dddddd", dashboardData);
-
   useEffect(() => {
     if (isSuccess && Array.isArray(dashboardData) && dashboardData.length > 0) {
       processDashboardData(dashboardData);
@@ -387,6 +370,34 @@ const OverviewContent: React.FC = () => {
   };
 
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+
+  const totalOrdersCount = filteredEvents.reduce(
+    (total, event) => total + (event.orders?.length || 0),
+    0
+  );
+
+  const totalpay = filteredEvents.reduce((total, event) => {
+    // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
+    const eventTotalPay = event.payments.reduce(
+      (sum, payment) => sum + (payment.Total_Pay || 0),
+      0
+    );
+    // รวมผลรวมของแต่ละ event เข้ากับ total ทั้งหมด
+    return total + eventTotalPay;
+  }, 0);
+
+  const totalpayBalen = filteredEvents.reduce((total, event) => {
+    // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
+    const eventTotalPay = event.payments.reduce(
+      (sum, payment) => sum + (payment.Total_Balance || 0),
+      0
+    );
+    // รวมผลรวมของแต่ละ event เข้ากับ total ทั้งหมด
+    return total + eventTotalPay;
+  }, 0);
+
+  const totalpayfun = totalpay - totalpayBalen;
+
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
@@ -432,7 +443,7 @@ const OverviewContent: React.FC = () => {
                   src="/รอจัดงาน.svg"
                   alt="รอจัดงาน icon"
                   className="filter-icon"
-                  sx={{ width: 70, height: 70 }} // Adjust the size as needed
+                  sx={{ width: 70, height: 70 }}
                 />
                 <Box
                   sx={{
@@ -451,10 +462,9 @@ const OverviewContent: React.FC = () => {
                       จำนวนอีเว้นทั้งหมด
                     </Typography>
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 1)
-                            .length
-                        : 0} */}
+                      {Array.isArray(filteredEvents)
+                        ? filteredEvents.length
+                        : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -503,10 +513,7 @@ const OverviewContent: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 2)
-                            .length
-                        : 0} */}
+                      {totalOrdersCount ? totalOrdersCount : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -561,6 +568,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 3)
                             .length
                         : 0} */}
+                      {totalpay ? totalpay : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -613,6 +621,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 13)
                             .length
                         : 0} */}
+                      {totalpayfun ? totalpayfun : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -665,6 +674,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 13)
                             .length
                         : 0} */}
+                      {totalpayBalen ? totalpayBalen : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -780,7 +790,12 @@ const OverviewContent: React.FC = () => {
 
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: "0", maxHeight: "68vh", overflowY: "auto" }}
+        sx={{
+          borderRadius: "0",
+          maxHeight: "68vh",
+          overflowY: "auto",
+          width: "60vw",
+        }}
       >
         <Table stickyHeader sx={{ minWidth: 800 }}>
           <TableHead

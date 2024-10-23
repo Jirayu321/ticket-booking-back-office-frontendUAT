@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore, useZoneStore } from "../form-store";
@@ -11,9 +11,10 @@ import "./create-event-form.css";
 import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
 import DeleteIcon from "@mui/icons-material/Delete";
-import DatePicker from "../../../components/common/input/date-picker/DatePicker";
+// import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
 import { useFetchEventList } from "../../../hooks/fetch-data/useFetchEventList";
+// import { useZonePriceForm } from "../components/zone-price-form.hooks";
 
 import {
   Button,
@@ -98,18 +99,21 @@ const CreateEventForm = () => {
 
   const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
 
-  const {
-    handleSaveEventStock,
-    handleSaveLogEventPrice,
-    handleSaveTicketNumbers,
-    handleCreateEvent,
-    isFormValid,
-  } = useZonePriceForm();
+  //   const {
+  //     handleSaveEventStock,
+  //     handleSaveLogEventPrice,
+  //     handleSaveTicketNumbers,
+  //     handleCreateEvent,
+  //     isFormValid,
+  //   } = useZonePriceForm();
 
   const [priceState, setPriceState] = useState({});
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [selectedZoneGroup, setSelectedZoneGroup] = useState("");
   const [selectedGroupData, setSelectedGroupData] = useState(null);
+  const [event_name, setevent_name] = useState("");
+  const [event_addr, setevent_addr] = useState("");
+  const [event_desc, setevent_desc] = useState("");
 
   const [allRows, setAllRows] = useState({});
 
@@ -118,13 +122,24 @@ const CreateEventForm = () => {
   const handleEndDateChange = (date) => {
     if (date instanceof Date && !isNaN(date.getTime())) {
       setSelectedEndDate(date);
+      setEventDateTime(date);
     }
   };
 
-  const handleInputChange = (setter) => (e) => {
-    const { value } = e.target;
-    if (value.trim()) {
-      setter(value);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case "event_name":
+        setevent_name(value.trim() ? value : "");
+        break;
+      case "event_addr":
+        setevent_addr(value.trim() ? value : "");
+        break;
+      case "event_desc":
+        setevent_desc(value.trim() ? value : "");
+        break;
+      default:
+        break;
     }
   };
 
@@ -303,17 +318,14 @@ const CreateEventForm = () => {
   const handleSaveEvent = async () => {
     try {
       const combinedDataForSave = updateCombinedRows();
-
       const filteredData = Object.keys(combinedDataForSave).reduce(
         (acc, planId) => {
           const filteredRows = combinedDataForSave[planId].filter(
             (row) => row.price !== 0
           );
-
           if (filteredRows.length > 0) {
             acc[planId] = filteredRows;
           }
-
           return acc;
         },
         {}
@@ -323,64 +335,57 @@ const CreateEventForm = () => {
       const eventDate = new Date(eventDateTime).toISOString().split("T")[0];
       const eventTime = new Date(eventDateTime).toTimeString().split(" ")[0];
       const formEventList = {
-        event_name: title,
-        event_addr: title2,
-        event_desc: description,
+        event_name: event_name,
+        event_addr: event_addr,
+        event_desc: event_desc,
         event_date: eventDate,
         event_time: eventTime,
-        event_pic_1: null,
-        event_pic_2: null,
-        event_pic_3: null,
-        event_pic_4: null,
+        // event_Pic_1: images[0] || null,
+        // event_Pic_2: images[1] || null,
+        // event_Pic_3: images[2] || null,
+        // event_Pic_4: images[3] || null,
         event_status: status,
-        event_public: null,
-        event_public_date: null,
-        event_public_by: null,
-        event_created_date: null,
-        event_created_by: null,
-        event_updated_date: null,
-        event_update_by: null,
-        event_cancel_date: null,
-        event_cancel_by: null,
       };
       console.debug(formEventList);
+      const event_id = await useZonePriceForm(formEventList);
+      console.log(event_id);
 
       // เตรียมข้อมูลสำหรับบันทึก Table : Event_Stock
-      const formEventStock = {
-        event_id: null,
-        plan_group_id: null,
-        plan_id: null,
-        ticket_type_id: null,
-        ticket_qty: null,
-        ticket_qty_per: null,
-        stc_total: null,
-        ticket_qty_buy: null,
-        ticket_qty_balance: null,
-        stc_total_balance: null,
-        created_date: null,
-        created_by: null,
-        updated_date: null,
-        update_by: null,
-        plan_pic: null,
-      };
-      console.debug(formEventStock);
+      //   const formEventStock = {
+      //     event_id: null,
+      //     plan_group_id: null,
+      //     plan_id: null,
+      //     ticket_type_id: null,
+      //     ticket_qty: null,
+      //     ticket_qty_per: null,
+      //     stc_total: null,
+      //     ticket_qty_buy: null,
+      //     ticket_qty_balance: null,
+      //     stc_total_balance: null,
+      //     created_date: null,
+      //     created_by: null,
+      //     updated_date: null,
+      //     update_by: null,
+      //     plan_pic: null,
+      //   };
+      //   console.debug(formEventStock);
 
       // เตรียมข้อมูลสำหรับบันทึก Table : Log_Event_Price
-      const formLogEventPrice = {
-        plan_group_id: null,
-        plan_id: null,
-        plan_price: null,
-        start_datetime: null,
-        end_datetime: null,
-        created_date: null,
-        created_by: null,
-        updated_date: null,
-        update_by: null,
-        cancel_date: null,
-        cancel_by: null,
-        log_id: null,
-      };
-      console.debug(formLogEventPrice);
+      //   const formLogEventPrice = {
+      //     plan_group_id: null,
+      //     plan_id: null,
+      //     plan_price: null,
+      //     start_datetime: null,
+      //     end_datetime: null,
+      //     created_date: null,
+      //     created_by: null,
+      //     updated_date: null,
+      //     update_by: null,
+      //     cancel_date: null,
+      //     cancel_by: null,
+      //     log_id: null,
+      //   };
+      //   console.debug(formLogEventPrice);
       // [
       //   {
       //     "id": "b2abc776-b829-47e9-bd0b-ed4401d5c8ea",
@@ -457,7 +462,7 @@ const CreateEventForm = () => {
 
       <div style={{ maxHeight: "88vh", overflowY: "auto" }}>
         <form
-          onSubmit={handleCreateEvent}
+          //   onSubmit={handleCreateEvent}
           style={{ display: "grid", padding: "10px" }}
         >
           <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
@@ -473,10 +478,10 @@ const CreateEventForm = () => {
                 ชื่องาน:<span style={{ color: "red" }}>*</span>
               </label>
               <input
-                onFocus={(e) => e.target.select()}
                 type="text"
-                value={title}
-                onChange={handleInputChange(setTitle)}
+                name="event_name"
+                value={event_name}
+                onChange={handleInputChange}
                 placeholder="บรรทัดที่ 1 (เช่น This is my first event)"
               />
             </div>
@@ -485,21 +490,23 @@ const CreateEventForm = () => {
                 สถานที่:<span style={{ color: "red" }}>*</span>
               </label>
               <input
-                onFocus={(e) => e.target.select()}
                 type="text"
-                value={title2}
-                onChange={handleInputChange(setTitle2)}
-                className="second-input"
+                name="event_addr"
+                value={event_addr}
+                onChange={handleInputChange}
                 placeholder="บรรทัดที่ 2 (เช่น at deedclub)"
+                onFocus={(e) => e.target.select()}
               />
             </div>
             <div>
               <label>ข้อมูลงาน (ถ้ามี)</label>
               <input
-                onFocus={(e) => e.target.select()}
                 type="text"
-                value={description}
-                onChange={handleInputChange(setDescription)}
+                name="event_desc"
+                value={event_desc}
+                onChange={handleInputChange}
+                placeholder="คำอธิบาย (เช่น Event description)"
+                onFocus={(e) => e.target.select()}
               />
             </div>
           </div>
@@ -574,10 +581,7 @@ const CreateEventForm = () => {
           </div>
         </form>
         <div>
-          <form
-            // onSubmit={handleCreateEvent}
-            style={{ display: "grid", padding: "10px" }}
-          >
+          <form style={{ display: "grid", padding: "10px" }}>
             <h3
               style={{
                 color: "black",
