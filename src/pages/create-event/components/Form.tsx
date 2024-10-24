@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
+import { SwalError } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore, useZoneStore } from "../form-store";
 import "./create-event-form.css";
-import { useZonePriceForm } from "./zone-price-form.hooks";
 import BackIcon from "/back.svg";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
@@ -30,7 +29,6 @@ import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups
 import toast from "react-hot-toast";
 
 const CreateEventForm = () => {
-  const navigate = useNavigate();
   const { eventId } = useParams();
 
   const { data: planGroups } = useFetchPlanGroups();
@@ -63,14 +61,18 @@ const CreateEventForm = () => {
     title2,
     description,
     eventDateTime,
+    status,
     images,
     setTitle,
     setTitle2,
     setDescription,
     setEventDateTime,
+    setStatus,
     setImages,
   } = useEventStore();
+
   // const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
+
   // const {
   //   handleSaveEventStock,
   //   handleSaveLogEventPrice,
@@ -126,7 +128,7 @@ const CreateEventForm = () => {
         setActiveTab("รายละเอียด");
       }
     } else {
-      navigate("/all-events");
+      window.location.replace("/all-events");
     }
   };
 
@@ -251,7 +253,6 @@ const CreateEventForm = () => {
   const handleSaveEvent = async () => {
     try {
       const combinedDataForSave = updateCombinedRows();
-
       const filteredData = Object.keys(combinedDataForSave).reduce(
         (acc, planId) => {
           const filteredRows = combinedDataForSave[planId].filter(
@@ -378,7 +379,6 @@ const CreateEventForm = () => {
           <div className="toggle-container">
             <button
               className="btn-cancel"
-            //   onClick={handleCancel}
             >
               ยกเลิก
             </button>
@@ -391,6 +391,7 @@ const CreateEventForm = () => {
 
       <div style={{ maxHeight: "88vh", overflowY: "auto" }}>
         <form
+          // onSubmit={handleCreateEvent}
           style={{ display: "grid", padding: "10px" }}
         >
           <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
@@ -508,6 +509,7 @@ const CreateEventForm = () => {
         </form>
         <div>
           <form
+            // onSubmit={handleCreateEvent}
             style={{ display: "grid", padding: "10px" }}
           >
             <h3
@@ -744,7 +746,7 @@ const CreateEventForm = () => {
 
                               <div className="price-section">
                                 <Grid container spacing={2}>
-                                  <Grid item xs={6} md={12} sm={12}>
+                                  <Grid item xs={12} md={6}>
                                     <Table>
                                       <TableHead>
                                         <TableRow

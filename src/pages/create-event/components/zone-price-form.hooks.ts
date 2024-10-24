@@ -12,19 +12,17 @@ const DEFAULT_INPUT_METHOD = 1;
 const DEFAULT_ACTIONER = "admin";
 const MINIMUM_EVENT_IMAGES = 1;
 
-export function useZonePriceForm() {
-  const { title, title2, description, eventDateTime, status } = useEventStore();
-
+export function useZonePriceForm({ data }) {
+  console.log("data:::", data);
+  const { event_name, event_addr, event_desc, event_date, event_status } = data;
   const { selectedZoneGroup, zones } = useZoneStore();
 
   const handleCreateEvent = async () => {
-    if (!eventDateTime) {
+    if (!event_date) {
       throw new Error("กรุณาเลือกวันจัดงานก่อนทำการสร้าง event");
     }
-
     try {
       const { images } = useEventStore.getState();
-
       if (
         images.filter((image) => image !== null).length < MINIMUM_EVENT_IMAGES
       ) {
@@ -32,28 +30,26 @@ export function useZonePriceForm() {
           `กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`
         );
       }
-
       const eventData = {
-        Event_Name: title,
-        Event_Addr: title2,
-        Event_Desc: description,
-        Event_Date: convertLocalTimeToISO(eventDateTime),
-        Event_Time: convertLocalTimeToISO(eventDateTime),
-        Event_Status: status,
+        Event_Name: event_name,
+        Event_Addr: event_addr,
+        Event_Desc: event_desc,
+        Event_Date: event_date,
+        Event_Time: event_date,
+        Event_Status: event_status,
         Event_Public: "N",
         Event_Pic_1: images[0] || null,
         Event_Pic_2: images[1] || null,
         Event_Pic_3: images[2] || null,
         Event_Pic_4: images[3] || null,
       };
-
       const { eventId } = await createEvent(eventData);
-
       return eventId;
     } catch (error: any) {
       throw new Error(error.message);
     }
   };
+
 
   const handleSaveEventStock = async (event_id: number) => {
     try {

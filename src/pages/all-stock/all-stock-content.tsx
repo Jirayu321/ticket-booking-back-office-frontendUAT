@@ -94,9 +94,7 @@ const AllStockContent: React.FC = () => {
 
   const initialize = async () => {
     setIsFetching(true);
-
     setEventStocks(null);
-
     const result = await refetch();
     if (result?.data) {
       setEventStocks(result.data);
@@ -222,10 +220,12 @@ const AllStockContent: React.FC = () => {
     (sum, order) => sum + order.Ticket_Qty,
     0
   );
+
   const TotalTicketsBuy = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty_Balance,
     0
   );
+
   const TotalTicketsBalance = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty_Buy,
     0

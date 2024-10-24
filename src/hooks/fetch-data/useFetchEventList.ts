@@ -58,7 +58,7 @@ export function useFetchOrdertList({ cuont }: { cuont: boolean }) {
 export function useFetchEventStocktList({
   eventId,
 }: {
-  eventId: number | null;
+eventId: number | null;
 }) {
   const query = useQuery({
     queryKey: ["get event by id", eventId],
