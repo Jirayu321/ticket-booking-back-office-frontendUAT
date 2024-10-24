@@ -134,8 +134,8 @@ export function useZonePriceForm() {
   const handleSaveTicketNumbers = async (eventId: number) => {
     const ticketNumberData = Object.entries(zones)
       .flatMap(([zoneId, zoneData]) => {
-        const ticketValues = zoneData.tableValues;  
-        
+        const ticketValues = zoneData.tableValues;
+
         if (!ticketValues) return null;
 
         return ticketValues.map((ticketValue, index) => ({
@@ -161,7 +161,7 @@ export function useZonePriceForm() {
             Plan_Id,
             Line,
             Ticket_No,
-            Ticket_No_Option, 
+            Ticket_No_Option,
           });
         })
       );

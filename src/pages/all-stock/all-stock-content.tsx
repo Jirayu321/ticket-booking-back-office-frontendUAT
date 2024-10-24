@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  // CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -21,11 +20,9 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-
 import Header from "../common/header";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCardIcon from "@mui/icons-material/AddCard";
-
 import {
   selectedColor,
   ColumnColorstock,
@@ -35,10 +32,8 @@ import {
   Event_StatusColor3,
   Event_StatusColorUnknown,
 } from "../../lib/util";
-
 import { useFetchEventStocktList } from "../../hooks/fetch-data/useFetchEventList";
 
-// Map event statuses to text and style properties
 const getStatusDetails = (status: number) => {
   switch (status) {
     case 1:
@@ -57,7 +52,6 @@ const getStatusDetails = (status: number) => {
   }
 };
 
-// Map event public status to text and style properties
 const getPublicStatusDetails = (status: string) => {
   switch (status) {
     case "Y":
@@ -76,49 +70,93 @@ const getPublicStatusDetails = (status: string) => {
 };
 
 const AllStockContent: React.FC = () => {
-  const { data: Data, isFetching } = useFetchEventStocktList({
-    eventId: null,
-  });
-  const evntDetail = Data?.dataEvent?.events.filter(
-    (event: any) => event?.Event_Public === "Y"
-  );
+  const [eventStocks, setEventStocks] = useState<any[] | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const { refetch } = useFetchEventStocktList({ eventId: null });
 
-  const eventStockData = Array.isArray(Data?.dataEventStock)
-    ? Data.dataEventStock.sort((a, b) => {
-        if (a.Event_Name < b.Event_Name) return -1;
-        if (a.Event_Name > b.Event_Name) return 1;
-        if (a.Plan_Id < b.Plan_Id) return -1;
-        if (a.Plan_Id > b.Plan_Id) return 1;
-        return 0;
+  useEffect(() => {
+    if (eventStocks) {
+      console.log("ข้อมูล data เปลี่ยนไป:", eventStocks);
+    }
+  }, [eventStocks]);
+
+  useEffect(() => {
+    if (isFetching) {
+      console.log("กำลังดึงข้อมูล...");
+    } else if (eventStocks) {
+      console.log("ข้อมูลโหลดเสร็จแล้ว");
+    }
+  }, [isFetching, eventStocks]);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  const initialize = async () => {
+    setIsFetching(true);
+
+    setEventStocks(null);
+
+    const result = await refetch();
+    if (result?.data) {
+      setEventStocks(result.data);
+      console.log("ข้อมูล data เปลี่ยนไป:", result.data);
+    }
+    setIsFetching(false);
+  };
+
+  const handleClearFilters = () => {
+    setFilters((prevFilters) => ({
+      search: prevFilters.search !== "" ? prevFilters.search : "",
+      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
+      eventStatus:
+        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "*",
+      publicStatus:
+        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "*",
+    }));
+
+    localStorage.setItem(
+      "filtersStock",
+      JSON.stringify({
+        search: filters.search !== "" ? filters.search : "",
+        eventName: filters.eventName !== "" ? filters.eventName : "",
+        eventStatus: filters.eventStatus !== "*" ? filters.eventStatus : "*",
+        publicStatus: filters.publicStatus !== "*" ? filters.publicStatus : "*",
       })
-    : [];
+    );
 
-  const totalTickets = Array.isArray(Data?.dataEventStock)
-    ? Data.dataEventStock.reduce((sum, item) => sum + (item.Ticket_Qty || 0), 0)
-    : 0;
-  const totalTicketsBuy = Array.isArray(Data?.dataEventStock)
-    ? Data.dataEventStock.reduce(
-        (sum, item) => sum + (item.Ticket_Qty_Buy || 0),
-        0
-      )
-    : 0;
+    initialize();
+  };
 
-  const totalTicketsBalance = Array.isArray(Data?.dataEventStock)
-    ? Data.dataEventStock.reduce(
-        (sum, item) => sum + (item.Ticket_Qty_Balance || 0),
-        0
-      )
-    : 0;
+  const dataEvent = eventStocks?.dataEvent || {};
+  const dataEventStock = eventStocks?.dataEventStock || [];
+
+  const evntDetail = dataEvent.events?.filter(
+    (event: any) => event.Event_Public === 'Y'
+  ) || [];
+
+  const eventStockData = dataEventStock.sort((a, b) => {
+    if (a.Event_Name < b.Event_Name) return -1;
+    if (a.Event_Name > b.Event_Name) return 1;
+    if (a.Plan_Id < b.Plan_Id) return -1;
+    if (a.Plan_Id > b.Plan_Id) return 1;
+    return 0;
+  });
+
+  const totalTickets = eventStockData.reduce((sum, item) => sum + (item.Ticket_Qty || 0), 0);
+  const totalTicketsBuy = eventStockData.reduce((sum, item) => sum + (item.Ticket_Qty_Buy || 0), 0);
+  const totalTicketsBalance = eventStockData.reduce((sum, item) => sum + (item.Ticket_Qty_Balance || 0), 0);
+
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("filtersStock");
     return savedFilters
       ? JSON.parse(savedFilters)
       : {
-          search: "",
-          eventName: "",
-          eventStatus: "*",
-          publicStatus: "*",
-        };
+        search: "",
+        eventName: "",
+        eventStatus: "*",
+        publicStatus: "*",
+      };
   });
 
   const handleFilterChange = (
@@ -180,8 +218,6 @@ const AllStockContent: React.FC = () => {
     );
   });
 
-  // console.log("filteredStocks", filteredStocks);
-
   const TotalTickets = filteredStocks.reduce(
     (sum, order) => sum + order.Ticket_Qty,
     0
@@ -197,33 +233,10 @@ const AllStockContent: React.FC = () => {
 
   const numberFormatter = new Intl.NumberFormat("en-US");
 
-  const handleClearFilters = () => {
-    setFilters((prevFilters) => ({
-      search: prevFilters.search !== "" ? prevFilters.search : "",
-      eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
-      eventStatus:
-        prevFilters.eventStatus !== "*" ? prevFilters.eventStatus : "*",
-      publicStatus:
-        prevFilters.publicStatus !== "*" ? prevFilters.publicStatus : "*",
-    }));
-
-    localStorage.setItem(
-      "filtersStock",
-      JSON.stringify({
-        search: filters.search !== "" ? filters.search : "",
-        eventName: filters.eventName !== "" ? filters.eventName : "",
-        eventStatus: filters.eventStatus !== "*" ? filters.eventStatus : "*",
-        publicStatus: filters.publicStatus !== "*" ? filters.publicStatus : "*",
-      })
-    );
-  };
-
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
-
- 
 
   return (
     <div

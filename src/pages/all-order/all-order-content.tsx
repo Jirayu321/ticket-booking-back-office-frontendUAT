@@ -34,7 +34,6 @@ import moment from "moment";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import "moment/locale/th";
-import { useLocation } from "react-router-dom";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
@@ -53,12 +52,11 @@ const AllOrderContent: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [count, setCount] = useState(false);
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location?.search);
+  const [count, setCount] = useState<boolean>(false);
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
-
-  const { data: events, isFetching, refetch } = useFetchOrdertList({ count });
+  const [events, setEvents] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const { refetch } = useFetchOrdertList({ count });
 
   useEffect(() => {
     if (events) {
@@ -71,15 +69,23 @@ const AllOrderContent: React.FC = () => {
       console.log("กำลังดึงข้อมูล...");
     } else if (events) {
       console.log("ข้อมูลโหลดเสร็จแล้ว");
-      setCount(true); // อาจจะต้องตรวจสอบว่าค่าของ `events` ถูกดึงมาแล้วจริง ๆ
+      setCount(true);
     }
   }, [isFetching, events]);
 
-  // const isOrderPaid = events?.some((ph: any) => {
-  //   return ph.Total_Balance === 0;
-  // });
+  useEffect(() => {
+    initialize();
+  }, []);
 
-  console.log("isFetched", queryParams);
+  const initialize = async () => {
+    setIsFetching(true);
+    const result = await refetch();
+    if (result?.data) {
+      setEvents(result.data);
+      console.log("ข้อมูล data เปลี่ยนไป:", result.data);
+    }
+    setIsFetching(false);
+  };
 
   const evntDetail = events?.dataEvent?.events.filter(
     (event: any) => event?.Event_Public === "Y"
@@ -102,7 +108,6 @@ const AllOrderContent: React.FC = () => {
     data: any = [],
     orderDData: any = []
   ) => {
-    // Ensure data and orderDData are initialized properly
     if (!data.length || !orderDData.length) {
       return;
     }
@@ -402,23 +407,10 @@ const AllOrderContent: React.FC = () => {
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
-  // console.log("totalNetPrice", totalNetPrice);
-
   const handleClearFilters = () => {
-    refetch();
-    // setFilters((prevFilters) => ({
-    //   orderNo: prevFilters.orderNo !== "" ? prevFilters.orderNo : "",
-    //   eventName: prevFilters.eventName !== "" ? prevFilters.eventName : "",
-    //   customerName:
-    //     prevFilters.customerName !== "" ? prevFilters.customerName : "",
-    //   customerPhone:
-    //     prevFilters.customerPhone !== "" ? prevFilters.customerPhone : "",
-    //   status: prevFilters.status !== "all" ? prevFilters.status : "all",
-    //   paymentStatus:
-    //     prevFilters.paymentStatus !== "all" ? prevFilters.paymentStatus : "all",
-    //   ticketType:
-    //     prevFilters.ticketType !== "all" ? prevFilters.ticketType : "all",
-    // }));
+    setEvents(null);
+    setIsFetching(false);
+    initialize();
   };
 
   const totalSeats = orderDetail?.reduce(
@@ -1589,7 +1581,7 @@ const AllOrderContent: React.FC = () => {
                           width: "max-content",
                           cursor: "pointer",
                         }}
-                        // onClick={() => handleOrderClick(order.Order_no)}
+                      // onClick={() => handleOrderClick(order.Order_no)}
                       >
                         <TableCell style={{ textAlign: "center" }}>
                           <div

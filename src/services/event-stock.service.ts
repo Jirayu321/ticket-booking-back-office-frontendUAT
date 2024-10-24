@@ -17,13 +17,13 @@ export async function createEventStock({
   Event_Id: number;
   PlanGroup_Id: number;
   Plan_Id: number;
-  Ticket_Type_Id: number;
+  Ticket_Type_Id: number | null; // เปลี่ยนให้รองรับ null
   Ticket_Qty: number;
   Ticket_Qty_Per: number;
   STC_Total: number;
-  Ticket_Qty_Buy: number;
-  Ticket_Qty_Balance: number;
-  STC_Total_Balance: number;
+  Ticket_Qty_Buy: number | null; // เปลี่ยนให้รองรับ null
+  Ticket_Qty_Balance: number | null; // เปลี่ยนให้รองรับ null
+  STC_Total_Balance: number | null; // เปลี่ยนให้รองรับ null
   Created_By: string;
 }) {
   try {
@@ -41,9 +41,20 @@ export async function createEventStock({
       Created_By,
     });
 
-    if (response.status !== 200) throw "";
-  } catch (error) {
-    throw "ล้มเหลวระหว่างสร้าง event stock";
+    if (response.status !== 200) {
+      console.error("Unexpected response:", response);
+      throw new Error("Unexpected response status: " + response.status);
+    }
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      console.error("Error response headers:", error.response.headers);
+      throw new Error("ล้มเหลวระหว่างสร้าง event stock: " + error.response.data);
+    } else {
+      console.error("Error message:", error.message);
+      throw new Error("ล้มเหลวระหว่างสร้าง event stock: " + error.message);
+    }
   }
 }
 

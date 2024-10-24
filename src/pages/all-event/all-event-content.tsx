@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
-  Pagination,
   Paper,
   Table,
   TableBody,
@@ -18,14 +17,10 @@ import {
 import { SelectChangeEvent } from "@mui/material/Select";
 import toast from "react-hot-toast";
 import { FaCopy } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { useFetchEventList } from "../../hooks/fetch-data/useFetchEventList";
 import Header from "../common/header";
 import dayjs from "dayjs";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 import { Container, Grid, Box, Typography, Avatar } from "@mui/material";
-import Axios from "axios";
-
 import "./all-event-content.css";
 import { DatePicker } from "@mui/x-date-pickers";
 
@@ -54,8 +49,6 @@ const formatEventTime = (dateTime: string | null) => {
 };
 
 const AllEventContent: React.FC = () => {
-  // const [currentPage, setCurrentPage] = useState(1);
-
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
     return savedFilters
@@ -70,19 +63,14 @@ const AllEventContent: React.FC = () => {
         dateFilterType: "publish-date",
       };
   });
-
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
     dayjs().startOf("month")
   );
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(
     dayjs().endOf("month")
   );
-
-  // const { data: events } = useFetchEventList({
-  //   eventId: null,
-  // });
-
   const [eventsData, setEventsData] = useState<any>([]);
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
 
   useEffect(() => {
     fetchDataEvent();
@@ -97,17 +85,6 @@ const AllEventContent: React.FC = () => {
     }
   };
 
-  // const handleClick = (pageNumber: number) => {
-  //   setCurrentPage(pageNumber);
-  // };
-
-  const navigate = useNavigate();
-
-  function handleCopyEventLink(eventId: number) {
-    const eventLink = `https://deedclub.appsystemyou.com/event/${eventId}`;
-    navigator.clipboard.writeText(eventLink);
-    toast.success("คัดลอกลิงก์งานสำเร็จ");
-  }
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -117,14 +94,6 @@ const AllEventContent: React.FC = () => {
       ...filters,
       [name]: value,
     };
-
-    // if (name === 'search') {
-    //   setEventsData([]);
-    //   setEventsData(
-    //     ...eventsData.filter((event: any) =>
-
-    //   );
-    // }
 
     setFilters(updatedFilters);
     localStorage.setItem("event", JSON.stringify(updatedFilters));
@@ -177,24 +146,9 @@ const AllEventContent: React.FC = () => {
     handleDateRangeChange(startDate, newValue);
   };
 
-  // const handleClearFilters = () => {
-  //   setFilters((prevFilters) => ({
-  //     sortBy:
-  //       prevFilters.sortBy !== "publish-date"
-  //         ? prevFilters.sortBy
-  //         : "publish-date",
-  //     publishStatus:
-  //       prevFilters.publishStatus !== "all" ? prevFilters.publishStatus : "all",
-  //     status: prevFilters.status !== "all" ? prevFilters.status : "all",
-  //     search: prevFilters.search !== "" ? prevFilters.search : "",
-  //     startDate: prevFilters.startDate !== null ? prevFilters.startDate : null,
-  //     endDate: prevFilters.endDate !== null ? prevFilters.endDate : null,
-  //     dateFilterType:
-  //       prevFilters.dateFilterType !== "publish-date"
-  //         ? prevFilters.dateFilterType
-  //         : "publish-date",
-  //   }));
-  // };
+  const handleOrderClick = (orderNo: any) => {
+    setSelectedOrderNo(orderNo);
+  };
 
   const filteredEvents = Array.isArray(eventsData)
     ? eventsData?.filter((event) => {
@@ -242,10 +196,12 @@ const AllEventContent: React.FC = () => {
     })
     : [];
 
-  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
-  const handleOrderClick = (orderNo: any) => {
-    setSelectedOrderNo(orderNo);
-  };
+  function handleCopyEventLink(eventId: number) {
+    const eventLink = `https://deedclub.appsystemyou.com/event/${eventId}`;
+    navigator.clipboard.writeText(eventLink);
+    toast.success("คัดลอกลิงก์งานสำเร็จ");
+  }
+
   return (
     <div
       className="all-events-content"
@@ -279,7 +235,7 @@ const AllEventContent: React.FC = () => {
                 src="/รอจัดงาน.svg"
                 alt="รอจัดงาน icon"
                 className="filter-icon"
-                sx={{ width: 70, height: 70 }} // Adjust the size as needed
+                sx={{ width: 70, height: 70 }}
               />
               <Box
                 sx={{
@@ -296,8 +252,8 @@ const AllEventContent: React.FC = () => {
                 >
                   <Typography sx={{ fontSize: "23px" }}>รอเริ่มงาน</Typography>
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(eventsData)
-                      ? eventsData.filter((event) => event?.Event_Status === 1)
+                    {Array.isArray(filteredEvents)
+                      ? filteredEvents.filter((event) => event?.Event_Status === 1)
                         .length
                       : 0}
                   </Typography>
@@ -349,8 +305,8 @@ const AllEventContent: React.FC = () => {
                   </Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(eventsData)
-                      ? eventsData?.filter((event) => event?.Event_Status === 2)
+                    {Array.isArray(filteredEvents)
+                      ? filteredEvents?.filter((event) => event?.Event_Status === 2)
                         .length
                       : 0}
                   </Typography>
@@ -400,8 +356,8 @@ const AllEventContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>ปิดงาน</Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(eventsData)
-                      ? eventsData?.filter((event) => event?.Event_Status === 3)
+                    {Array.isArray(filteredEvents)
+                      ? filteredEvents?.filter((event) => event?.Event_Status === 3)
                         .length
                       : 0}
                   </Typography>
@@ -451,8 +407,8 @@ const AllEventContent: React.FC = () => {
                   <Typography sx={{ fontSize: "23px" }}>ยกเลิก</Typography>
 
                   <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {Array.isArray(eventsData)
-                      ? eventsData?.filter((event) => event?.Event_Status === 13)
+                    {Array.isArray(filteredEvents)
+                      ? filteredEvents?.filter((event) => event?.Event_Status === 13)
                         .length
                       : 0}
                   </Typography>
@@ -888,8 +844,7 @@ const AllEventContent: React.FC = () => {
                   <TableCell style={{ textAlign: "center" }}>
                     <Button
                       variant="contained"
-                      // color="primary"
-                      onClick={() => navigate(`/edit-event/${Event_Id}`)}
+                      onClick={() => window.location.replace(`/edit-event/${Event_Id}`)}
                       style={{
                         padding: "4px 15px",
                         borderRadius: "4px",

@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  // Pagination,
   Stack,
   Button,
   FormControl,
@@ -44,64 +43,63 @@ dayjs.extend(buddhistEra);
 import { useFetchgetTicketList } from "../../hooks/fetch-data/useFetchEventList";
 
 const AllSeatContent: React.FC = () => {
-  const { data: Data, refetch } = useFetchgetTicketList({
-    eventId: null,
-  });
-
-  const evntDetail = Data?.dataEvent?.events.filter(
-    (event: any) => event?.Event_Public === "Y"
-  );
-
-  const ticketData = Array.isArray(Data?.dataTicketList?.ticketList)
-    ? Data?.dataTicketList?.ticketList
-    : [];
-
-  console.log("Data", Data);
-  console.log("ticketData", ticketData);
-
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-
+  const [startDate, setStartDate] = useState(dayjs().startOf("month"));
+  const [endDate, setEndDate] = useState(dayjs().endOf("month"));
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("filtersSeat");
     return savedFilters
       ? JSON.parse(savedFilters)
       : {
-          search: "",
-          event: "all",
-          eventName: "",
-          ticketType: "all",
-          printStatus: "all",
-          scanStatus: "all",
-          ticket_Reserve: "all",
-          ticket_pay: "all",
-        };
+        search: "",
+        event: "all",
+        eventName: "",
+        ticketType: "all",
+        printStatus: "all",
+        scanStatus: "all",
+        ticket_Reserve: "all",
+        ticket_pay: "all",
+      };
   });
 
-  const [startDate, setStartDate] = useState(dayjs().startOf("month"));
-  const [endDate, setEndDate] = useState(dayjs().endOf("month"));
+  // const { data: Data, refetch } = useFetchgetTicketList({
+  //   eventId: null,
+  // });
 
-  const handleFilterChange = (event) => {
-    const { name, value } = event.target;
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        [name]: value,
-      };
-      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
-      return updatedFilters;
-    });
-  };
+  const [seats, setSeats] = useState<any[] | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const { refetch } = useFetchgetTicketList({ eventId: null });
 
-  const handleSearchChange = (event) => {
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        search: event.target.value,
-      };
-      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
-      return updatedFilters;
-    });
+  useEffect(() => {
+    if (seats) {
+      console.log("ข้อมูล data เปลี่ยนไป:", seats);
+    }
+  }, [seats]);
+
+  useEffect(() => {
+    if (isFetching) {
+      console.log("กำลังดึงข้อมูล...");
+    } else if (seats) {
+      console.log("ข้อมูลโหลดเสร็จแล้ว");
+    }
+  }, [isFetching, seats]);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  const initialize = async () => {
+    setIsFetching(true);
+
+    setSeats(null);
+
+    const result = await refetch();
+    if (result?.data) {
+      setSeats(result.data);
+      console.log("ข้อมูล data เปลี่ยนไป:", result.data);
+    }
+    setIsFetching(false);
   };
 
   const handleClearFilters = () => {
@@ -124,6 +122,36 @@ const AllSeatContent: React.FC = () => {
     }));
     setStartDate(dayjs().startOf("month"));
     setEndDate(dayjs().endOf("month"));
+
+    initialize();
+  };
+
+  const dataEvent = seats?.dataEvent || {};
+  const dataTicketStock = seats?.dataTicketList || [];
+  const evntDetail = dataEvent.events?.filter((event: any) => event?.Event_Public === "Y") || [];
+  const ticketData = Array.isArray(dataTicketStock?.ticketList) ? dataTicketStock.ticketList : [];
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        [name]: value,
+      };
+      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
+  };
+
+  const handleSearchChange = (event) => {
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        search: event.target.value,
+      };
+      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
   };
 
   const applyFilters = (tickets) => {
@@ -222,8 +250,6 @@ const AllSeatContent: React.FC = () => {
     (ticket) => ticket.PrintStatus_Name === "พิมพ์แล้ว"
   ).length;
 
-  // console.log("filteredTickets", filteredTickets);
-
   const countSeatsPerTable = (tickets: any[]) => {
     const tableCount: { [key: string]: number } = {};
     let previousTableNumber = ""; // ตัวแปรสำหรับเก็บ ticket_no ก่อนหน้า
@@ -248,11 +274,10 @@ const AllSeatContent: React.FC = () => {
 
     return tableCount;
   };
-  // Count the total number of seats per table
   const tableCount = countSeatsPerTable(ticketData);
 
-  let previousTableNumber = ""; // Keeps track of the previous table number
-  let seatIndexInTable = 0; // Index for seat in the table
+  let previousTableNumber = "";
+  let seatIndexInTable = 0;
 
   const formatTableDisplay = (tableNumber, seatIndex, totalSeats) => {
     if (tableNumber === "บัตรเสริม") {
@@ -260,11 +285,6 @@ const AllSeatContent: React.FC = () => {
     }
     return `${tableNumber} (${seatIndex}/${totalSeats})`;
   };
-
-  // console.log(
-  //   "ticketsInCurrentPage",
-  //   ticketsInCurrentPage.filter((ticket) => ticket.ticket_no === "0")
-  // );
 
   const handleOpenModal = (ticket) => {
     setSelectedTicket(ticket);
@@ -848,7 +868,7 @@ const AllSeatContent: React.FC = () => {
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {ticket.ticket_Reserve === "W" &&
-                    ticket.Is_Balance === 0 ? (
+                      ticket.Is_Balance === 0 ? (
                       <Button
                         onClick={() => handleOpenModal(ticket)}
                         variant="contained"

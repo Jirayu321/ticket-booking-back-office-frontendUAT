@@ -1,9 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
 import { SwalError, SwalSuccess } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore, useZoneStore } from "../form-store";
@@ -14,50 +11,32 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DatePicker from "../../../components/common/input/date-picker/DatePicker";
 import SubHeader from "../../edit-event/_components/sub-header/SubHeader";
 import { useFetchEventList } from "../../../hooks/fetch-data/useFetchEventList";
-
+import { createEvent } from "../../../services/event-list.service";
+import { createEventStock } from "../../../services/event-stock.service";
+import { createLogEventPrice } from "../../../services/log-event-price.service";
 import {
   Button,
-  // Dialog,
-  // DialogActions,
-  // DialogContent,
-  // DialogTitle,
   TextField,
-  // MenuItem,
-  // Select,
-  // InputLabel,
-  // FormControl,
   IconButton,
-  // Switch,
   Table,
   TableBody,
   TableCell,
-  // TableContainer,
   TableHead,
   TableRow,
-  // Paper,
-  // Pagination,
   Box,
-  // Modal,
-  // Typography,
-  // Collapse,
-  // CircularProgress,
-  // DataGrid,
   Grid,
 } from "@mui/material";
-
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
-const MINIMUM_EVENT_IMAGES = 1;
+import toast from "react-hot-toast";
 
 const CreateEventForm = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
-  console.log("eventId", eventId);
 
   const { data: planGroups } = useFetchPlanGroups();
   const { data: event } = useFetchEventList({
     eventId: Number(eventId),
   });
-  console.log("event", event);
 
   // จัดการ combinedData อย่างมีประสิทธิภาพ
   const combinedData = useMemo(() => {
@@ -79,32 +58,26 @@ const CreateEventForm = () => {
     });
   }, [planGroups]);
 
-  const uniqueId = uuidv4();
-
   const {
     title,
     title2,
     description,
     eventDateTime,
-    status,
     images,
     setTitle,
     setTitle2,
     setDescription,
     setEventDateTime,
-    setStatus,
     setImages,
   } = useEventStore();
-
-  const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
-
-  const {
-    handleSaveEventStock,
-    handleSaveLogEventPrice,
-    handleSaveTicketNumbers,
-    handleCreateEvent,
-    isFormValid,
-  } = useZonePriceForm();
+  // const { setZoneData, removeZonePrice, addZonePrice, zones } = useZoneStore();
+  // const {
+  //   handleSaveEventStock,
+  //   handleSaveLogEventPrice,
+  //   handleSaveTicketNumbers,
+  //   handleCreateEvent,
+  //   isFormValid,
+  // } = useZonePriceForm();
 
   const [priceState, setPriceState] = useState({});
   const [activeTab, setActiveTab] = useState("รายละเอียด");
@@ -142,31 +115,6 @@ const CreateEventForm = () => {
 
   const handleImageRemove = (index) => () => {
     setImages(index, null);
-  };
-
-  const handleNext = (e) => {
-    e.preventDefault();
-
-    setStatus(1);
-
-    const isDetailCompleted = Boolean(
-      title && title2 && eventDateTime && status
-    );
-
-    if (!isDetailCompleted) {
-      SwalError("กรุณากรอกข้อมูลให้ครบถ้วน");
-      return;
-    }
-
-    const haveImagesBeenUploaded =
-      images.filter((image) => image !== null).length >= MINIMUM_EVENT_IMAGES;
-
-    if (!haveImagesBeenUploaded) {
-      SwalError(`กรุณาอัปโหลดภาพ event อย่างน้อย ${MINIMUM_EVENT_IMAGES} รูป`);
-      return;
-    }
-
-    setActiveTab("โซน & ราคา");
   };
 
   const handleBackClick = () => {
@@ -309,93 +257,79 @@ const CreateEventForm = () => {
           const filteredRows = combinedDataForSave[planId].filter(
             (row) => row.price !== 0
           );
-
           if (filteredRows.length > 0) {
             acc[planId] = filteredRows;
           }
-
           return acc;
         },
         {}
       );
 
-      // เตรียมข้อมูลสำหรับบันทึก Table : Event_List
+      // Table : Event_List
       const eventDate = new Date(eventDateTime).toISOString().split("T")[0];
-      const eventTime = new Date(eventDateTime).toTimeString().split(" ")[0];
-      const formEventList = {
-        event_name: title,
-        event_addr: title2,
-        event_desc: description,
-        event_date: eventDate,
-        event_time: eventTime,
-        event_pic_1: null,
-        event_pic_2: null,
-        event_pic_3: null,
-        event_pic_4: null,
-        event_status: status,
-        event_public: null,
-        event_public_date: null,
-        event_public_by: null,
-        event_created_date: null,
-        event_created_by: null,
-        event_updated_date: null,
-        event_update_by: null,
-        event_cancel_date: null,
-        event_cancel_by: null,
-      };
-      console.debug(formEventList);
+      const resEventList = await createEvent({
+        Event_Name: title,
+        Event_Addr: title2,
+        Event_Desc: description,
+        Event_Date: eventDate,
+        Event_Time: eventDateTime,
+        Event_Status: 1,
+        Event_Public: "N",
+        Event_Pic_1: images[0] || null,
+        Event_Pic_2: images[1] || null,
+        Event_Pic_3: images[2] || null,
+        Event_Pic_4: images[3] || null,
+      });
 
-      // เตรียมข้อมูลสำหรับบันทึก Table : Event_Stock
-      const formEventStock = {
-        event_id: null,
-        plan_group_id: null,
-        plan_id: null,
-        ticket_type_id: null,
-        ticket_qty: null,
-        ticket_qty_per: null,
-        stc_total: null,
-        ticket_qty_buy: null,
-        ticket_qty_balance: null,
-        stc_total_balance: null,
-        created_date: null,
-        created_by: null,
-        updated_date: null,
-        update_by: null,
-        plan_pic: null,
-      };
-      console.debug(formEventStock);
+      // Table : Event_Stock
+      for (const planData of selectedGroupData.plans) {
+        const ticketQty = planData.Plan_Ticket_Qty || 0;
+        const ticketQtyPer = planData.Plan_Ticket_Qty_Per || 0;
+        const stcTotal = ticketQty * ticketQtyPer;
+        const eventStockData = {
+          Event_Id: resEventList.eventId,
+          PlanGroup_Id: selectedGroupData.PlanGroup_id || null,
+          Plan_Id: planData.Plan_id || null,
+          Ticket_Type_Id: planData.Plan_Ticket_Type_Id || null,
+          Ticket_Qty: ticketQty,
+          Ticket_Qty_Per: ticketQtyPer,
+          STC_Total: stcTotal,
+          Ticket_Qty_Buy: null,
+          Ticket_Qty_Balance: null,
+          STC_Total_Balance: null,
+          Created_By: "admin"
+        };
+        await createEventStock(eventStockData);
+      }
 
-      // เตรียมข้อมูลสำหรับบันทึก Table : Log_Event_Price
-      const formLogEventPrice = {
-        plan_group_id: null,
-        plan_id: null,
-        plan_price: null,
-        start_datetime: null,
-        end_datetime: null,
-        created_date: null,
-        created_by: null,
-        updated_date: null,
-        update_by: null,
-        cancel_date: null,
-        cancel_by: null,
-        log_id: null,
-      };
-      console.debug(formLogEventPrice);
-      // [
-      //   {
-      //     "id": "b2abc776-b829-47e9-bd0b-ed4401d5c8ea",
-      //     "startDate": 1729357260000,
-      //     "endDate": 1729443540000,
-      //     "price": 1
-      //   }
-      // ]
-      // แสดงข้อมูลที่กรองแล้ว
-      console.debug(filteredData);
+      // Table : Log_Event_Price
+      for (const planId in filteredData) {
+        if (filteredData.hasOwnProperty(planId)) {
+          console.debug("planId = ", planId); // 81
 
-      SwalSuccess("บันทึกอีเว้นท์สำเร็จ");
+          // เข้าถึงข้อมูลที่จำเป็นจาก filteredData
+          const planData = filteredData[planId][0]; // สมมุติว่ามีเพียงแค่รายการเดียวในแต่ละ Plan
+          const startDate = planData.startDate; // แปลงเป็นวันที่ที่เหมาะสมถ้าจำเป็น
+          const endDate = planData.endDate; // แปลงเป็นวันที่ที่เหมาะสมถ้าจำเป็น
+          const price = planData.price; // ราคา
+
+          await createLogEventPrice({
+            Created_By: "admin",
+            Created_Date: new Date().toISOString(),
+            End_Datetime: new Date(endDate).toISOString(), // แปลงเป็น ISO String
+            Event_Id: resEventList.eventId,
+            PlanGroup_Id: selectedGroupData.PlanGroup_id || null,
+            Plan_Id: planId,
+            Plan_Price: price, // แก้ไขการสะกดเป็น Plan_Price
+            Start_Datetime: new Date(startDate).toISOString(), // แปลงเป็น ISO String
+          });
+        }
+      }
+
+      window.location.replace("/all-events");
+      toast.success("บันทึกอีเว้นท์สำเร็จ");
     } catch (error) {
-      console.error("Error while saving event:", error);
-      SwalError("มีข้อผิดพลาดในการบันทึก Event");
+      toast.error("มีข้อผิดพลาดในการบันทึก Event");
     }
   };
 
@@ -444,7 +378,7 @@ const CreateEventForm = () => {
           <div className="toggle-container">
             <button
               className="btn-cancel"
-              //   onClick={handleCancel}
+            //   onClick={handleCancel}
             >
               ยกเลิก
             </button>
@@ -457,7 +391,6 @@ const CreateEventForm = () => {
 
       <div style={{ maxHeight: "88vh", overflowY: "auto" }}>
         <form
-          onSubmit={handleCreateEvent}
           style={{ display: "grid", padding: "10px" }}
         >
           <h3 style={{ color: "black", marginLeft: "15px" }}>1. ข้อมูลงาน</h3>
@@ -575,7 +508,6 @@ const CreateEventForm = () => {
         </form>
         <div>
           <form
-            // onSubmit={handleCreateEvent}
             style={{ display: "grid", padding: "10px" }}
           >
             <h3
@@ -812,7 +744,7 @@ const CreateEventForm = () => {
 
                               <div className="price-section">
                                 <Grid container spacing={2}>
-                                  <Grid item xs={12} md={6}>
+                                  <Grid item xs={6} md={12} sm={12}>
                                     <Table>
                                       <TableHead>
                                         <TableRow
@@ -933,18 +865,18 @@ const CreateEventForm = () => {
                                               <TableCell>
                                                 {getRowsForPlan(plan.Plan_id)
                                                   .length > 1 && (
-                                                  <IconButton
-                                                    onClick={() =>
-                                                      handleDeleteRow(
-                                                        row.id,
-                                                        plan.Plan_id
-                                                      )
-                                                    }
-                                                    color="secondary"
-                                                  >
-                                                    <DeleteIcon />
-                                                  </IconButton>
-                                                )}
+                                                    <IconButton
+                                                      onClick={() =>
+                                                        handleDeleteRow(
+                                                          row.id,
+                                                          plan.Plan_id
+                                                        )
+                                                      }
+                                                      color="secondary"
+                                                    >
+                                                      <DeleteIcon />
+                                                    </IconButton>
+                                                  )}
                                               </TableCell>
                                             </TableRow>
                                           </TableBody>
@@ -965,12 +897,6 @@ const CreateEventForm = () => {
             </div>
           )}
         </div>
-
-        {/* <div className="next-form-section" style={{ marginTop: " 5vh" }}>
-          <button className="buttonNext" onClick={handleNext}>
-            ถัดไป
-          </button>
-        </div> */}
       </div>
 
       {/* <ZonePriceForm onSaveEvent={handleSaveEvent} /> */}
