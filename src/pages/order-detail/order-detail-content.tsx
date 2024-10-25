@@ -27,6 +27,7 @@ import {
 } from "../../services/view-tikcet-list.service";
 
 import QRCode from "qrcode";
+import { setTime } from "react-datepicker/dist/date_utils";
 
 interface OrderDetailContentProps {
   orderD: any; // Adjust the type as per your actual data structure
@@ -35,13 +36,9 @@ interface OrderDetailContentProps {
 
 const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
   orderD,
-  hispay,
+  hispay
 }) => {
   const order_id = localStorage.getItem("orderId");
-
-  // console.log("OrderD:", orderD[0]);
-  // console.log("Hispay:", hispay);
-
   const location = useLocation();
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
@@ -60,11 +57,6 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
 
   console.log("isOrderPaid:", isOrderPaid, isPaymentHistoriesLoading);
   isPaymentHistoriesLoading;
-
-  // const handleNavigateBack = () => {
-  //   localStorage.setItem("orderDetail", orderDetail?.Order_no);
-  //   navigate("/all-orders");
-  // };
 
   const handleNavigateToOrderSite2 = async (order_id: string | number) => {
     const orderIdStr = String(order_id); // Ensure order_id is a string
@@ -96,7 +88,7 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
       if (
         !latestTicketsMap.has(ticket.ticket_id) ||
         new Date(ticket.Payment_Date7) >
-          new Date(latestTicketsMap.get(ticket.ticket_id).Payment_Date7)
+        new Date(latestTicketsMap.get(ticket.ticket_id).Payment_Date7)
       ) {
         latestTicketsMap.set(ticket.ticket_id, ticket);
       }
@@ -150,12 +142,12 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
           - ${ticket.ticket_no}(${ticket.ticket_line}/${ticket.Total_stc / ticket.Web_Qty_Buy})
           </p>
             <p class="details">เวลา: ${new Date(
-              ticket.Event_Date
-            ).toLocaleDateString("th-TH", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })} - ${new Date(
+            ticket.Event_Date
+          ).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })} - ${new Date(
             new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
           ).toLocaleTimeString([], {
             hour: "2-digit",
@@ -173,22 +165,21 @@ const OrderDetailContent: React.FC<OrderDetailContentProps> = ({
           <div class="ticket-container">
             <img src="${dataUrl}"/>
             <p class="details">${ticket.Event_Name}</p>
-            <p class="details">${ticket.Plan_Name} -  ${ticket.ticket_no} (${
-            ticket.ticket_line
-          }/${ticket.Total_stc}) </p>
+            <p class="details">${ticket.Plan_Name} -  ${ticket.ticket_no} (${ticket.ticket_line
+            }/${ticket.Total_stc}) </p>
             <p class="details">เวลา:
             ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
               year: "numeric",
               month: "long",
               day: "numeric",
             })} - ${new Date(
-            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
-          ).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          })} น.
+              new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+            ).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            })} น.
            </p>
           </div>
         `;

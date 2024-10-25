@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Dialog,
@@ -19,7 +19,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Pagination,
   Box,
   Modal,
   Typography,
@@ -64,7 +63,6 @@ interface Plan {
 const ZoneContent: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
-  // console.log("planGroups =>", planGroups);
   const [open, setOpen] = useState<boolean>(false);
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -79,32 +77,23 @@ const ZoneContent: React.FC = () => {
     zone: "", //  zone
     seats: "", // seats
   });
-  // console.log("newPlan =>", newPlan);
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
-  // console.log("editPlan =>", editPlan);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [letter, setTetter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
 
   const [selectTableModal, setSelectTableModal] = useState<sting>("");
-  console.log("selectTableModal =>", selectTableModal);
-  console.log("plans =>", plans);
   const itemsPerPage = 50;
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("");
   const [selectedTicketTypeName, setSelectedTicketTypeName] =
     useState<string>("");
-  // console.log("selectedTicketType =>", selectedTicketType);
   const [zone, setZone] = useState<string>("");
   const [seats, setSeats] = useState<string>("");
   const [selectedTable, setSelectedTable] = useState<string>(1);
   const [ticketNoPerPlan, setTicketNoPerPlan] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-
-  console.log("ticketNoPerPlan =>", ticketNoPerPlan);
-  // console.log("selectedTable =>", selectedTable);
-
-  // zones มาจาก store ที่จัดการ state ของโซนต่างๆ โดยใช้ custom hook useZoneStore()
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { zones, inputValues, setInputValueStore, setStartNumber } =
     useZoneStore();
   const { data: ticketTypes } = useFetchTicketTypes();
@@ -112,11 +101,10 @@ const ZoneContent: React.FC = () => {
   // ประเภทตั๋ว
   const handleTicketTypeChange = (e) => {
     const ticketTypeId = e.target.value;
-    console.log("Selected Ticket Type ID:", ticketTypeId); // Log the ticketTypeId
+    console.log("Selected Ticket Type ID:", ticketTypeId);
     const selectedTicket = ticketTypes.find(
       (ticket) => ticket.Ticket_Type_Id === ticketTypeId
     );
-    console.log("Selected Ticket:", selectedTicket); // Log the selected ticket
     // ประเภทตั๋ว ID
     setSelectedTicketType(ticketTypeId);
     // ประเภทตั๋ว Name
@@ -455,8 +443,6 @@ const ZoneContent: React.FC = () => {
   // ส่งข้อมูลไปหา API
 
   const handleCreate = async () => {
-    console.log("handleCreate:", newPlan);
-
     if (!newPlan.planGroupId) {
       Swal.fire({
         icon: "warning",
@@ -470,7 +456,6 @@ const ZoneContent: React.FC = () => {
     }
     const groupId = parseInt(newPlan.planGroupId, 10);
 
-    // Check for duplicate plan name
     if (isDuplicatePlanName(newPlan.name, groupId, plans)) {
       Swal.fire({
         icon: "warning",
@@ -488,21 +473,20 @@ const ZoneContent: React.FC = () => {
       const res = await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
-        Plan_Pic: newPlan.pic,
+        Plan_Pic: newPlan.pic || null, // Use null if no image is provided
         Plan_Active: newPlan.active,
         PlanGroup_id: groupId,
-        Plan_Ticket_Type_Id: newPlan.selectedTicketType, // Ticket type ID
-        Plan_Ticket_Qty: newPlan.zone, // Number of tickets/zones
-        Plan_Ticket_Qty_Per: newPlan.seats, // Number of seats/ticket
+        Plan_Ticket_Type_Id: newPlan.selectedTicketType,
+        Plan_Ticket_Qty: newPlan.zone,
+        Plan_Ticket_Qty_Per: newPlan.seats,
       });
 
       console.log("Response from createPlan:", res);
       if (typeof res.planId === "number") {
-        // Save ticket numbers
         await handleSaveTicketNumbers(
-          groupId, // Plan group ID
-          res.planId, // Plan ID
-          newPlan.selectedTicketType // Ticket type
+          groupId,
+          res.planId,
+          newPlan.selectedTicketType
         );
       }
 
@@ -729,15 +713,26 @@ const ZoneContent: React.FC = () => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-
       const reader = new FileReader();
       reader.onload = (e) => {
         setNewPlan((prev) => ({
           ...prev,
-          pic: e.target?.result as string, // Store the base64 string in state
+          pic: e.target?.result as string,
         }));
       };
-      reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setNewPlan((prev) => ({
+      ...prev,
+      pic: "",
+    }));
+
+    // เคลียร์ input file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -1166,6 +1161,7 @@ const ZoneContent: React.FC = () => {
             />
           )} */}
           <TextField
+            inputRef={fileInputRef}
             accept="image/*"
             type="file"
             onChange={handleImageChange}
@@ -1174,29 +1170,59 @@ const ZoneContent: React.FC = () => {
               display: "block",
               margin: "dense",
               "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+                borderColor: "grey.300",
+                "&:hover": {
+                  borderColor: "primary.main",
+                },
                 "& input": {
-                  border: "none",
-                  transform: "translateY(5px)",
+                  padding: "12px 12px",
                   textAlign: "center",
+                  fontSize: "0.9rem",
                 },
               },
             }}
           />
           {newPlan.pic && (
-            <Box
-              component="img"
-              src={newPlan.pic}
-              alt="Selected"
-              sx={{
-                width: 100,
-                height: "auto",
-                cursor: "pointer",
-                marginTop: 2,
-                border: "none",
-              }}
-            />
+            <Box sx={{ display: "flex", alignItems: "center", marginTop: 2 }}>
+              <Box
+                component="img"
+                src={newPlan.pic}
+                alt="Selected"
+                sx={{
+                  width: 100,
+                  height: "auto",
+                  cursor: "pointer",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  transition: "transform 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              />
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleImageRemove}
+                sx={{
+                  marginLeft: 2,
+                  padding: "6px 12px",
+                  fontSize: "0.8rem",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  boxShadow: "none",
+                  "&:hover": {
+                    backgroundColor: "error.main",
+                    color: "white",
+                  },
+                }}
+              >
+                ลบรูปภาพ
+              </Button>
+            </Box>
           )}
-
+          <br />
           <FormControl fullWidth margin="dense">
             <InputLabel id="active-label">Active (Y/N)</InputLabel>
             <Select
@@ -1291,15 +1317,12 @@ const ZoneContent: React.FC = () => {
               onChange={handleTableChange}
             >
               <MenuItem value="1">1.คีย์เลขโต๊ะได้เอง</MenuItem>
-              <MenuItem value="2">{`2. รันจาก 1 ถึง ${
-                zone ? parseInt(zone, 10) : 0
-              }`}</MenuItem>
-              <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
-                zone ? parseInt(zone, 10) : 0
-              } - (ประเภทบัตร 1-${zone ? parseInt(zone, 10) : 0})`}</MenuItem>
-              <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
-                zone ? parseInt(zone, 10) : 0
-              }`}</MenuItem>
+              <MenuItem value="2">{`2. รันจาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
+                }`}</MenuItem>
+              <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
+                } - (ประเภทบัตร 1-${zone ? parseInt(zone, 10) : 0})`}</MenuItem>
+              <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
+                }`}</MenuItem>
               <MenuItem value="5">5.ไม่ระบุเลขโต๊ะ</MenuItem>
             </Select>
           </FormControl>
@@ -1493,25 +1516,21 @@ const ZoneContent: React.FC = () => {
                 onChange={handleEditChange}
               >
                 <MenuItem value="1">1.คีย์เลขโต๊ะได้เอง</MenuItem>
-                <MenuItem value="2">{`2. รันจาก 1 ถึง ${
-                  editPlan.Plan_Ticket_Qty
+                <MenuItem value="2">{`2. รันจาก 1 ถึง ${editPlan.Plan_Ticket_Qty
+                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                  : 0
+                  }`}</MenuItem>
+                <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${editPlan.Plan_Ticket_Qty
+                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                  : 0
+                  } - (ประเภทบัตร 1-${editPlan.Plan_Ticket_Qty
                     ? parseInt(editPlan.Plan_Ticket_Qty, 10)
                     : 0
-                }`}</MenuItem>
-                <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
-                  editPlan.Plan_Ticket_Qty
-                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                    : 0
-                } - (ประเภทบัตร 1-${
-                  editPlan.Plan_Ticket_Qty
-                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                    : 0
-                })`}</MenuItem>
-                <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
-                  editPlan.Plan_Ticket_Qty
-                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                    : 0
-                }`}</MenuItem>
+                  })`}</MenuItem>
+                <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${editPlan.Plan_Ticket_Qty
+                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                  : 0
+                  }`}</MenuItem>
                 <MenuItem value="5">5.ไม่ระบุเลขโต๊ะ</MenuItem>
               </Select>
             </FormControl>
@@ -1521,8 +1540,8 @@ const ZoneContent: React.FC = () => {
               zoneId={1} // ID
               selectedTicketType={selectedTicketTypeName} // ประเภทตั๋ว
               letter={letter || null}
-              // mode="edit" // โหมดแก้ไข
-              // dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
+            // mode="edit" // โหมดแก้ไข
+            // dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
             />
           </DialogContent>
           <DialogActions>

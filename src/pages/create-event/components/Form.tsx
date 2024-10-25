@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { SwalError } from "../../../lib/sweetalert";
+import { SwalSuccess, SwalConfirmDialog, SwalError } from "../../../lib/sweetalert";
 import Header from "../../common/header";
 import { useEventStore } from "../form-store";
 import "./create-event-form.css";
@@ -28,6 +28,9 @@ import {
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import toast from "react-hot-toast";
 import dayjs from 'dayjs';
+import Swal from "sweetalert2";
+import { setTime } from "react-datepicker/dist/date_utils";
+import { getTicketTypeNameById } from "../../../services/ticket-type.service";
 
 const CreateEventForm = () => {
   const { eventId } = useParams();
@@ -37,11 +40,8 @@ const CreateEventForm = () => {
   });
   const combinedData = useMemo(() => {
     if (!planGroups?.planGroups || !planGroups?.getAllPlans?.plans) return [];
-
     return planGroups.planGroups.map((group) => {
-      const plansInGroup = planGroups.getAllPlans.plans.filter(
-        (plan) => plan.PlanGroup_id === group.PlanGroup_id
-      );
+      const plansInGroup = planGroups.getAllPlans.plans.filter((plan) => plan.PlanGroup_id === group.PlanGroup_id);
       const plansWithTicketNumbers = plansInGroup.map((plan) => {
         const ticketNumbersForPlan =
           planGroups?.ticketNoPerPlans?.ticketNoPerPlans?.filter(
@@ -147,10 +147,12 @@ const CreateEventForm = () => {
 
   const createDefaultRow = () => {
     const eventDate = dayjs(eventDateTime); // ใช้วันที่จาก eventDateTime
+    const today = dayjs(); // วันที่ปัจจุบัน
+
     return {
       id: uuidv4(),
-      startDate: eventDate.hour(0).minute(1).second(0).millisecond(0).toDate(), // วันที่เวลา 00:01
-      endDate: eventDate.hour(23).minute(59).second(0).millisecond(0).toDate(), // วันที่เวลา 23:59
+      startDate: today.hour(0).minute(1).second(0).millisecond(0).toDate(), // วันปัจจุบันเวลา 00:01
+      endDate: eventDate.hour(23).minute(59).second(0).millisecond(0).toDate(), // eventDate เวลา 23:59
       price: 0,
     };
   };
@@ -282,44 +284,50 @@ const CreateEventForm = () => {
       // Table : Log_Event_Price
       for (const planId in filteredData) {
         if (filteredData.hasOwnProperty(planId)) {
-          console.debug("planId = ", planId); // 81
 
-          // เข้าถึงข้อมูลที่จำเป็นจาก filteredData
-          const planData = filteredData[planId][0]; // สมมุติว่ามีเพียงแค่รายการเดียวในแต่ละ Plan
-          const startDate = planData.startDate; // แปลงเป็นวันที่ที่เหมาะสมถ้าจำเป็น
-          const endDate = planData.endDate; // แปลงเป็นวันที่ที่เหมาะสมถ้าจำเป็น
-          const price = planData.price; // ราคา
+          for (const planData of filteredData[planId]) {
+            const startDate = planData.startDate;
+            const endDate = planData.endDate;
+            const price = planData.price;
 
-          await createLogEventPrice({
-            Created_By: "admin",
-            Created_Date: new Date().toISOString(),
-            End_Datetime: new Date(endDate).toISOString(), // แปลงเป็น ISO String
-            Event_Id: resEventList.eventId,
-            PlanGroup_Id: selectedGroupData.PlanGroup_id || null,
-            Plan_Id: planId,
-            Plan_Price: price, // แก้ไขการสะกดเป็น Plan_Price
-            Start_Datetime: new Date(startDate).toISOString(), // แปลงเป็น ISO String
-          });
+            await createLogEventPrice({
+              Created_By: "admin",
+              Created_Date: new Date().toISOString(),
+              End_Datetime: new Date(endDate).toISOString(),
+              Event_Id: resEventList.eventId,
+              PlanGroup_Id: selectedGroupData.PlanGroup_id || null,
+              Plan_Id: planId,
+              Plan_Price: price,
+              Start_Datetime: new Date(startDate).toISOString(),
+            });
+          }
         }
       }
 
-      window.location.replace("/all-events");
-      toast.success("บันทึกอีเว้นท์สำเร็จ");
+      if (resEventList.status === 'SUCCESS') {
+        SwalSuccess("บันทึกข้อมูลสําเร็จ");
+        setTimeout(() => {
+          window.location.replace("/all-events");
+        }, 1500);
+      }
     } catch (error) {
       toast.error("มีข้อผิดพลาดในการบันทึก Event");
     }
   };
 
   const getThaiText = (id) => {
+    // พี่ไปร์ทค้างไว้ก่อน
+    // const getTicketTypeName = await getTicketTypeNameById(id);
+    // return getTicketTypeName[0]?.Ticket_Type_Name || "ไม่ระบุ";
     switch (id) {
       case 33:
-        return "โซฟา";
+        return "สเตชั่น";
       case 41:
         return "ห้อง";
       case 40:
         return "โต๊ะ";
       case 37:
-        return "บัตรเสริม";
+        return "Walk-In";
       default:
         return "ไม่ระบุ";
     }
@@ -358,9 +366,13 @@ const CreateEventForm = () => {
             >
               ยกเลิก
             </button>
-            <button className="btn-save" onClick={handleSaveEvent}>
-              บันทึก
-            </button>
+            <button className="btn-save" onClick={async () => {
+              const isConfirmed = await SwalConfirmDialog(
+                "ท่านยืนยันบันทึก Event นี้หรือไม่?"
+              );
+              if (!isConfirmed) return;
+              handleSaveEvent()
+            }}> บันทึก </button>
           </div>
         </div>
       )}

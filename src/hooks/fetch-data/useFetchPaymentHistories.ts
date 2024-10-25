@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { getPaymentHistoriesByOrderId } from "../../services/his-payment.service";
 
 export function useFetchPaymentHistories({
-  orderId,
+  orderId
 }: {
   orderId: string | undefined | null;
 }) {

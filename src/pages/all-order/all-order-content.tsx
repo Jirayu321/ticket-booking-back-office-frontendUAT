@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
-  // CircularProgress,
-  // Pagination,
   Paper,
   Table,
   TableBody,
@@ -16,7 +14,6 @@ import {
   TextField,
   FormControl,
   InputLabel,
-  // Stack,
   Container,
   Grid,
   Avatar,
@@ -102,6 +99,11 @@ const AllOrderContent: React.FC = () => {
     ) || [];
 
   const OrderAll = events?.dataOrder;
+
+  const onLoadOrderDetail = async () => {
+    await handleClearFilters();
+    await handleOrderClick(localStorage.getItem("orderDetail"));
+  }
 
   const handleOrderprevData = (
     orderNo: any,
@@ -251,7 +253,7 @@ const AllOrderContent: React.FC = () => {
     return formattedDateTime;
   };
 
-  const handleOrderClick = (orderNo: any) => {
+  const handleOrderClick = async (orderNo: any) => {
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
     console.log("orderHData", orderHData);
@@ -388,19 +390,19 @@ const AllOrderContent: React.FC = () => {
     (sum, order) => sum + order.Total_Pay,
     0
   );
-  
 
-  const OutstandingPayment3 =  dataP?.reduce<number>(
+
+  const OutstandingPayment3 = dataP?.reduce<number>(
     (sum, order) => sum + order.Total_Balance,
     0
   );
-  
+
 
   console.log("totalNetPriceWithZeroBalance", dataP);
 
   const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
 
-  const handleClearFilters = () => {
+  const handleClearFilters = async () => {
     setEvents(null);
     setIsFetching(false);
     initialize();
