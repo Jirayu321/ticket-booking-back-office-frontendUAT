@@ -9,26 +9,19 @@ const HOURS_DIFF = 7;
 
 type PublishButtonProps = {
   event: any;
+  isPublic: boolean;
+  setIsPublic: (isPublic: boolean) => void;
 };
 
-const PublishButton: FC<PublishButtonProps> = ({ event }) => {
+const PublishButton: FC<PublishButtonProps> = ({ event, isPublic, setIsPublic }) => {
   const { title, title2, eventDateTime, refreshEventInfo } =
     useEditEventStore();
 
   const isEventDetailValid = title && title2 && eventDateTime !== null;
 
-  const isEventPerformed = event
-    ? new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
-    : false;
-
-  console.log("isEventPerformed", isEventPerformed);
-  console.log(
-    " new Date() >= new Date(formatISOToLocalTime(event.Event_Time))",
-    new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
-  );
-  console.log("!refreshEventInfo", !refreshEventInfo);
-  console.log("!isEventDetailValid", !isEventDetailValid);
-  console.log("!isEventPerformed", !isEventPerformed);
+  // const isEventPerformed = event
+  //   ? new Date() >= new Date(formatISOToLocalTime(event.Event_Time))
+  //   : false;
 
   async function handlePublish() {
     try {
@@ -40,16 +33,18 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
         console.log("Event detail is not valid");
         return toast.error("กรุณาเติมข้อมูลให้ครบ");
       }
-      if (isEventPerformed) {
-        console.log("Event has already been performed");
-        return toast.error("ไม่สามารถเผยแพร่งานที่แสดงไปแล้วได้");
-      }
+      // if (isEventPerformed) {
+      //   console.log("Event has already been performed");
+      //   return toast.error("ไม่สามารถเผยแพร่งานที่แสดงไปแล้วได้");
+      // }
 
-      await updateEventById(Number(event.Event_Id), {
-        Event_Public: event.Event_Public === "Y" ? "N" : "Y",
-        Event_Public_Date: addHours(new Date(), HOURS_DIFF),
-        Event_Public_By: DEFAULT_ACTIONER,
-      });
+      // await updateEventById(Number(event.Event_Id), {
+      //   Event_Public: event.Event_Public === "Y" ? "N" : "Y",
+      //   Event_Public_Date: addHours(new Date(), HOURS_DIFF),
+      //   Event_Public_By: DEFAULT_ACTIONER,
+      // });
+
+      setIsPublic(!isPublic);
 
       refreshEventInfo();
     } catch (error: any) {
@@ -67,12 +62,12 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
       }}
     >
       <p style={{ marginRight: "10px", marginLeft: "-90px" }}>
-        {event.Event_Public === "Y" ? "เผยแพร่" : "ไม่เผยแพร่"}
+        {isPublic === true ? "เผยแพร่" : "ไม่เผยแพร่"}
       </p>
       <input
         style={{ display: "none" }}
         type="checkbox"
-        checked={event.Event_Public === "Y"}
+        checked={isPublic}
         onChange={() => {
           handlePublish();
         }}
@@ -82,14 +77,11 @@ const PublishButton: FC<PublishButtonProps> = ({ event }) => {
         style={{
           width: "50px",
           height: "26px",
-          backgroundColor: event.Event_Public === "Y" ? "#4caf50" : "#ccc", // สีพื้นหลังของ toggle
+          backgroundColor: isPublic === true ? "#4caf50" : "#ccc", // สีพื้นหลังของ toggle
           borderRadius: "34px", // ทำให้เป็นมุมโค้งกลมๆ
           position: "relative",
           transition: "0.4s",
           display: "inline-block",
-        }}
-        onClick={() => {
-          handlePublish();
         }}
       ></span>
     </label>

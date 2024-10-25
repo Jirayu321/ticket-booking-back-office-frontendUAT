@@ -271,9 +271,9 @@ const CreateEventForm = () => {
           Ticket_Qty: ticketQty,
           Ticket_Qty_Per: ticketQtyPer,
           STC_Total: stcTotal,
-          Ticket_Qty_Buy: null,
-          Ticket_Qty_Balance: null,
-          STC_Total_Balance: null,
+          Ticket_Qty_Buy: 0,
+          Ticket_Qty_Balance: ticketQty,
+          STC_Total_Balance: stcTotal,
           Created_By: "admin"
         };
         await createEventStock(eventStockData);

@@ -169,3 +169,21 @@ export async function updateEventById(eventId: number, newValue: any) {
     throw new Error("ล้มเหลวระหว่างอัพเดทข้อมูล event");
   }
 }
+
+export async function updatePublicEventById(eventId: number, isPublic: boolean) {
+  try {
+    const isPublicValue = isPublic ? 'Y' : 'N';
+
+    const response = await authAxiosClient.post("/event-list/public-event", {
+      Event_Id: eventId,
+      Event_Public: isPublicValue
+    });
+
+    if (response.status !== 200) throw new Error("Failed to update public event");
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Error updating event:', error);
+    throw new Error("ล้มเหลวระหว่างอัพเดทข้อมูล event");
+  }
+}

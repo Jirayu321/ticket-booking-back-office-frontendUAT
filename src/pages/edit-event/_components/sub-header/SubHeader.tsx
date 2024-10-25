@@ -1,9 +1,9 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { convertLocalTimeToISO } from "../../../../lib/util";
-import { updateEventById } from "../../../../services/event-list.service";
+import { updateEventById, updatePublicEventById } from "../../../../services/event-list.service";
 import useEditEventStore from "../../_hook/useEditEventStore";
 import styles from "../../edit-event-form.module.css";
 import BackButton from "./BackButton";
@@ -15,6 +15,8 @@ type SubHeaderProp = {
 
 const SubHeader: FC<SubHeaderProp> = ({ event }) => {
   const navigate = useNavigate();
+
+  const [isPublic, setIsPublic] = useState(false);
 
   const {
     title,
@@ -28,38 +30,43 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
 
   async function handleUpdateEvent() {
     try {
-      if (!refreshEventInfo) return;
-      toast.loading("กำลังอัพเดทข้อมูลงาน");
+      // if (!refreshEventInfo) return;
+      // toast.loading("กำลังอัพเดทข้อมูลงาน");
 
-      if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
+      // if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
 
-      // Add 7 hours to the eventDateTime before converting to ISO
-      const adjustedEventDateTime = dayjs(eventDateTime)
-        .add(7, "hour")
-        .toISOString();
+      // // Add 7 hours to the eventDateTime before converting to ISO
+      // const adjustedEventDateTime = dayjs(eventDateTime)
+      //   .add(7, "hour")
+      //   .toISOString();
 
-      // Make sure images are passed to the API call
-      await updateEventById(Number(event.Event_Id), {
-        Event_Name: title,
-        Event_Addr: title2,
-        Event_Desc: description,
-        Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
-        Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
-        Event_Status: status,
-        Event_Pic_1: images[0], // First image
-        Event_Pic_2: images[1], // Second image
-        Event_Pic_3: images[2], // Third image
-        Event_Pic_4: images[3], // Fourth image
-      });
+      // // Make sure images are passed to the API call
+      // await updateEventById(Number(event.Event_Id), {
+      //   Event_Name: title,
+      //   Event_Addr: title2,
+      //   Event_Desc: description,
+      //   Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
+      //   Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
+      //   Event_Status: status,
+      //   Event_Pic_1: images[0], // First image
+      //   Event_Pic_2: images[1], // Second image
+      //   Event_Pic_3: images[2], // Third image
+      //   Event_Pic_4: images[3], // Fourth image
+      // });
 
-      toast.dismiss();
+      // toast.dismiss();
 
-      toast.success("อัพเดทข้อมูลงานสำเร็จ");
+      // toast.success("อัพเดทข้อมูลงานสำเร็จ");
 
-      refreshEventInfo();
+      // refreshEventInfo();
+
+      updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
+    } finally {
+      window.location.replace('/all-events');
+      toast.success("เผยแพร่งานสำเร็จ");
     }
   }
 
@@ -82,7 +89,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
     <div className={styles.subHeader} style={{ marginTop: "-10px" }}>
       <BackButton />
       <div className="toggle-container">
-        <PublishButton event={event} />
+        <PublishButton event={event} isPublic={isPublic} setIsPublic={setIsPublic} />
         <button
           className=""
           style={{
