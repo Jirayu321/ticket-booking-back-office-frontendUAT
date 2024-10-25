@@ -8,6 +8,7 @@ import useEditEventStore from "../../_hook/useEditEventStore";
 import styles from "../../edit-event-form.module.css";
 import BackButton from "./BackButton";
 import PublishButton from "./PublishButton";
+import Swal from "sweetalert2";
 
 type SubHeaderProp = {
   event: any;
@@ -60,13 +61,22 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
 
       // refreshEventInfo();
 
-      updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
+      const response = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
+
+      if (response.status === 'SUCCESS') {
+        window.location.replace('/all-events');
+        Swal.fire({
+          icon: 'success',
+          title: `${isPublic === true ? 'เผยแผร่สำเร็จ' : 'ไม่เผยแผร่เรียบร้อย'}`,
+          customClass: {
+            title: "swal2-title",
+            content: "swal2-content",
+          },
+        });
+      }
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
-    } finally {
-      window.location.replace('/all-events');
-      toast.success("เผยแพร่งานสำเร็จ");
     }
   }
 
