@@ -1,7 +1,14 @@
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 
-const ErrorDialog = ({ open, handleClose, title, message }) => {
+interface ErrorDialogProps {
+  open: boolean;
+  handleClose: () => void;
+  title: string;
+  message: string;
+}
+
+const ErrorDialog: React.FC<ErrorDialogProps> = ({ open, handleClose, title, message }) => {
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
