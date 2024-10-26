@@ -44,57 +44,20 @@ function formatNumberWithCommas(number: number | string): string {
 }
 
 function totalNetPriceWithZeroBalance(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
+  console.log("data", data);
 
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-
-        return acc;
-      }, {})
-  );
-
-  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
+  const totalNetPriceWithZeroBalance = data?.reduce<number>(
+    (sum, order) => sum + order.Total_Pay,
     0
   );
   let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
-
   return res;
 }
 
 function OutstandingPayment(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data.filter(
-      (order) =>
-        order.Event_Id === filteredOrders[0]?.Event_Id &&
-        order.Order_Status !== 4
-    ).length
-  );
-  const uniqueDataP = dataP.filter(
-    (order, index, self) =>
-      index === self.findIndex((o) => o.Order_no === order.Order_no)
-  );
-  // คำนวณผลรวมของ Total_Balance ที่ไม่เท่ากับ 0
-  const totalOutstandingPayment = uniqueDataP
-    .filter((order) => order.Total_Balance !== 0) // กรอง Total_Balance ที่ไม่เท่ากับ 0
-    .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
-
-  // console.log("totalBalance", totalOutstandingPayment, dataP);
+  const totalOutstandingPayment = data
+    .filter((order) => order.Total_Balance !== 0)
+    .reduce((sum, order) => sum + order.Total_Balance, 0);
 
   let res = formatNumberWithCommas(totalOutstandingPayment);
 
@@ -102,57 +65,41 @@ function OutstandingPayment(data: any, filteredOrders: any) {
 }
 
 function totalNetPrice(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-        return acc;
-      }, {})
-  );
-
-  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
+  const totalNetPriceWithZeroBalance = data?.reduce<number>(
+    (sum, order) => sum + order.Total_Pay,
     0
   );
-
-  const uniqueDataP = dataP.filter(
-    (order, index, self) =>
-      index === self.findIndex((o) => o.Order_no === order.Order_no)
-  );
-  // คำนวณผลรวมของ Total_Balance ที่ไม่เท่ากับ 0
-  const totalOutstandingPayment = uniqueDataP
-    .filter((order) => order.Total_Balance !== 0) // กรอง Total_Balance ที่ไม่เท่ากับ 0
-    .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
+  const totalOutstandingPayment = data
+    .filter((order) => order.Total_Balance !== 0)
+    .reduce((sum, order) => sum + order.Total_Balance, 0);
 
   const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
-  // console.log("total", x, dataP);
+  console.log("total", x);
 
   let res = formatNumberWithCommas(x);
-
   return res;
 }
 
-// const formatCountOrder = (data: any | null) => {};
+function formatCountOrder(data: any | null) {
+  if (!data || !Array.isArray(data)) {
+    console.log("Invalid data");
+    return 0;
+  }
+
+  const uniqueOrders = data.reduce((acc: any[], current: any) => {
+    const exists = acc.find((order) => order.Order_no === current.Order_no);
+    if (!exists) acc.push(current);
+    return acc;
+  }, []);
+
+  console.log("Unique Orders:", uniqueOrders);
+  return uniqueOrders.length;
+}
 
 const OverviewContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [combinedData, setCombinedData] = useState<any[]>([]);
-  console.log("combinedData", combinedData);
+  // console.log("combinedData", combinedData);
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
@@ -175,16 +122,20 @@ const OverviewContent: React.FC = () => {
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(
     dayjs().endOf("month")
   );
+  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
 
   const { data: dashboardData, isSuccess } = useFetchDashboard({
     eventId: null,
   });
+
+  // console.log("dashboardData", dashboardData);
 
   const processDashboardData = async (dashboardData: any) => {
     if (!dashboardData || dashboardData.length === 0) {
       console.error("Dashboard data is empty or undefined");
       return;
     }
+    console.log("dashboardData", dashboardData);
 
     const { dataAllEvent, dataAllOrder } = dashboardData[0] ?? {};
 
@@ -197,49 +148,37 @@ const OverviewContent: React.FC = () => {
 
     const { events } = dataAllEvent;
     const { orderAll, hisPayment } = dataAllOrder;
+    // console.log("hisPayment", hisPayment);
 
     if (!events || !orderAll || !hisPayment) {
       console.error("events, orderAll, or hisPayment is missing");
-      console.log("events:", events);
-      console.log("orderAll:", orderAll);
-      console.log("hisPayment:", hisPayment);
+      // console.log("events:", events);
+      // console.log("orderAll:", orderAll);
+      // console.log("hisPayment:", hisPayment);
       return;
     }
 
     // ดำเนินการต่อหลังจากโหลดข้อมูลครบแล้ว
-    const filteredHisPayment = hisPayment.reduce((acc, current) => {
-      const existingOrder = acc.find(
-        (order) => order.Order_id === current.Order_id
-      );
-
-      if (existingOrder) {
-        const existingPaymentDate = new Date(existingOrder.Payment_Date7);
-        const currentPaymentDate = new Date(current.Payment_Date7);
-
-        if (currentPaymentDate > existingPaymentDate) {
-          return acc.map((order) =>
-            order.Order_id === current.Order_id ? current : order
-          );
-        }
-      } else {
-        acc.push(current);
-      }
-
-      return acc;
-    }, []);
+    const filteredHisPayment = hisPayment;
+    // .reduce((acc, current) => {
+    //   const exists = acc.find((order) => order.Event_Id === current.Event_Id);
+    //   if (exists) {
+    //     acc.push(current);
+    //   }
+    //   return acc;
+    // }, []);
 
     const combinedData = events.map((event) => {
       const relatedOrders = orderAll.filter(
         (order) => order.Event_Id === event.Event_Id
       );
-      const relatedPayments = filteredHisPayment.filter(
-        (payment) => payment.Event_Id === event.Event_Id
-      );
+
+      console.log("filteredHisPayment", filteredHisPayment);
 
       return {
         ...event,
         orders: relatedOrders,
-        payments: relatedPayments,
+        payments: filteredHisPayment,
       };
     });
 
@@ -253,6 +192,31 @@ const OverviewContent: React.FC = () => {
       console.log("kuy");
     }
   }, [dashboardData]);
+
+  const filteredEvents = useMemo(() => {
+    return combinedData.filter((event) => {
+      if (
+        filters.search &&
+        !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
+        return false;
+      }
+      // const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+      const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
+
+      if (filters.startDate && filters.endDate) {
+        const startDate = dayjs(filters.startDate);
+        const endDate = dayjs(filters.endDate);
+
+        // Use the already declared eventDate here
+        if (!eventDate.isBetween(startDate, endDate, null, "[]")) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [combinedData, filters]);
 
   const handleClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -332,36 +296,6 @@ const OverviewContent: React.FC = () => {
     localStorage.setItem("event", JSON.stringify(filters));
   };
 
-  const filteredEvents = useMemo(() => {
-    return combinedData.filter((event) => {
-      if (
-        filters.search &&
-        !event.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
-      ) {
-        return false;
-      }
-
-      const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
-      const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
-
-      if (filters.startDate && filters.endDate) {
-        const startDate = dayjs(filters.startDate);
-        const endDate = dayjs(filters.endDate);
-
-        const dateToCompare =
-          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-        if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [combinedData, filters]);
-
-  console.log("filteredEvents", filteredEvents);
-
   const tableCellHeadStyle = {
     color: "white",
     fontWeight: "bold",
@@ -369,22 +303,54 @@ const OverviewContent: React.FC = () => {
     textAlign: "center",
   };
 
-  const [selectedOrderNo, setSelectedOrderNo] = useState(null);
+  const uniqueOrders = filteredEvents
+    .flatMap((event) => event.orders)
+    .reduce((acc, current) => {
+      const exists = acc.find((order) => order.Order_no === current.Order_no);
+      if (!exists) acc.push(current);
+      return acc;
+    }, []);
 
-  const totalOrdersCount = filteredEvents.reduce(
-    (total, event) => total + (event.orders?.length || 0),
-    0
-  );
+  const totalOrders = uniqueOrders.length;
 
   const totalpay = filteredEvents.reduce((total, event) => {
+    console.log("event", event);
     // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
     const eventTotalPay = event.payments.reduce(
       (sum, payment) => sum + (payment.Total_Pay || 0),
       0
     );
-    // รวมผลรวมของแต่ละ event เข้ากับ total ทั้งหมด
     return total + eventTotalPay;
   }, 0);
+
+  const totalPayByEvent = filteredEvents.reduce((acc, event) => {
+    // ตรวจสอบว่ามี payment ที่ Event_Id ตรงกับ Event_Id ของ event หรือไม่
+    const matchingPayments = event.payments.filter(
+      (payment) => payment.Event_Id === event.Event_Id
+    );
+
+    // คำนวณยอดรวม Total_Pay สำหรับ payments ที่ตรงกัน
+    const eventTotalPay = matchingPayments.reduce(
+      (sum, payment) => sum + (payment.Total_Pay || 0),
+      0
+    );
+
+    // เพิ่มยอดรวมของ Event_Id นี้ใน acc
+    if (eventTotalPay > 0) {
+      acc[event.Event_Id] = (acc[event.Event_Id] || 0) + eventTotalPay;
+    }
+
+    return acc;
+  }, {});
+
+  // คำนวณยอดรวมทั้งหมดจาก totalPayByEvent
+  const grandTotalPay = Object.values(totalPayByEvent).reduce(
+    (sum, total) => sum + total,
+    0
+  );
+
+  console.log("Total Pay by Event:", totalPayByEvent);
+  console.log("Grand Total Pay:", grandTotalPay);
 
   const totalpayBalen = filteredEvents.reduce((total, event) => {
     // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
@@ -401,6 +367,7 @@ const OverviewContent: React.FC = () => {
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
+
   return (
     <div
       className="all-events-content"
@@ -513,7 +480,7 @@ const OverviewContent: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {totalOrdersCount ? totalOrdersCount : 0}
+                      {totalOrders ? totalOrders : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -617,10 +584,6 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 13)
-                            .length
-                        : 0} */}
                       {totalpayfun ? totalpayfun : 0}
                     </Typography>
                   </Box>
@@ -948,20 +911,20 @@ const OverviewContent: React.FC = () => {
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {payments ? payments?.length : "ยังไม่ระบุ"}
+                      {orders ? formatCountOrder(orders) : "ยังไม่ระบุ"}
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {orders
-                        ? totalNetPriceWithZeroBalance(orders, orders)
+                        ? totalNetPriceWithZeroBalance(payments, orders)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {orders ? totalNetPrice(orders, orders) : "ยังไม่ระบุ"}
+                      {orders ? totalNetPrice(payments, orders) : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {orders
-                        ? OutstandingPayment(orders, orders)
+                        ? OutstandingPayment(payments, orders)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>

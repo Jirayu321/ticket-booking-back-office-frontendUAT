@@ -369,10 +369,7 @@ const OverviewContent: React.FC = () => {
         const startDate = dayjs(filters.startDate);
         const endDate = dayjs(filters.endDate);
 
-        const dateToCompare =
-          filters.dateFilterType === "publish-date" ? publishDate : eventDate;
-
-        if (!dateToCompare.isBetween(startDate, endDate, null, "[]")) {
+        if (!eventDate.isBetween(startDate, endDate, null, "[]")) {
           return false;
         }
       }

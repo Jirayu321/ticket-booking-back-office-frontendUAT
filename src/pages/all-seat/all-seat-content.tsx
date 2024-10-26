@@ -52,15 +52,15 @@ const AllSeatContent: React.FC = () => {
     return savedFilters
       ? JSON.parse(savedFilters)
       : {
-        search: "",
-        event: "all",
-        eventName: "",
-        ticketType: "all",
-        printStatus: "all",
-        scanStatus: "all",
-        ticket_Reserve: "all",
-        ticket_pay: "all",
-      };
+          search: "",
+          event: "all",
+          eventName: "",
+          ticketType: "all",
+          printStatus: "all",
+          scanStatus: "all",
+          ticket_Reserve: "all",
+          ticket_pay: "all",
+        };
   });
 
   // const { data: Data, refetch } = useFetchgetTicketList({
@@ -128,8 +128,12 @@ const AllSeatContent: React.FC = () => {
 
   const dataEvent = seats?.dataEvent || {};
   const dataTicketStock = seats?.dataTicketList || [];
-  const evntDetail = dataEvent.events?.filter((event: any) => event?.Event_Public === "Y") || [];
-  const ticketData = Array.isArray(dataTicketStock?.ticketList) ? dataTicketStock.ticketList : [];
+  const TicketTypes = seats?.dataTicketTypes || [];
+  const evntDetail =
+    dataEvent.events?.filter((event: any) => event?.Event_Public === "Y") || [];
+  const ticketData = Array.isArray(dataTicketStock?.ticketList)
+    ? dataTicketStock.ticketList
+    : [];
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -279,12 +283,25 @@ const AllSeatContent: React.FC = () => {
   let previousTableNumber = "";
   let seatIndexInTable = 0;
 
-  const formatTableDisplay = (tableNumber, seatIndex, totalSeats) => {
-    if (tableNumber === "บัตรเสริม") {
-      return `${tableNumber} (1/1)`; // กรณีบัตรเสริม แสดง (1/1)
+  const formatTableDisplay = (tableNumber, seatIndex, totalSeats, ticket) => {
+    // console.log("ticket", ticket);
+    // console.log("TicketTypes", TicketTypes);
+  
+    if (TicketTypes.length !== 0) {
+      const matchingType = TicketTypes?.ticketTypes.find(
+        (type) => type.Ticket_Type_Id === ticket.Ticket_Type_Id
+      );
+  
+      if (matchingType && matchingType.Ticket_Type_Cal === "N") {
+        return `${tableNumber} (${1}/${1})`; // 1/1
+      } else {
+        return `${tableNumber} (${seatIndex}/${
+          ticket.Total_stc / ticket.Web_Qty_Buy
+        })`;
+      }
     }
-    return `${tableNumber} (${seatIndex}/${totalSeats})`;
   };
+  
 
   const handleOpenModal = (ticket) => {
     setSelectedTicket(ticket);
@@ -814,7 +831,8 @@ const AllSeatContent: React.FC = () => {
                     {formatTableDisplay(
                       ticket.ticket_no,
                       seatIndexInTable,
-                      tableCount[ticket.ticket_no] || 0
+                      tableCount[ticket.ticket_no] || 0,
+                      ticket
                     )}
                     {ticket.ticket_Reserve === "R" ? (
                       <span style={{ marginLeft: "10px" }}>R</span>
@@ -868,7 +886,7 @@ const AllSeatContent: React.FC = () => {
                   </TableCell>
                   <TableCell style={{ textAlign: "center" }}>
                     {ticket.ticket_Reserve === "W" &&
-                      ticket.Is_Balance === 0 ? (
+                    ticket.Is_Balance === 0 ? (
                       <Button
                         onClick={() => handleOpenModal(ticket)}
                         variant="contained"

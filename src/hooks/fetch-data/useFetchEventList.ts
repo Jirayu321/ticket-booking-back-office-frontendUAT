@@ -6,6 +6,7 @@ import {
 import { getOrderAll } from "../../services/order-all.service";
 import { getEventStock } from "../../services/event-stock.service";
 import { getViewTicketList } from "../../services/view-tikcet-list.service";
+import { getAllTicketTypes } from "../../services/ticket-type.service";
 
 import toast from "react-hot-toast";
 
@@ -58,7 +59,7 @@ export function useFetchOrdertList({ cuont }: { cuont: boolean }) {
 export function useFetchEventStocktList({
   eventId,
 }: {
-eventId: number | null;
+  eventId: number | null;
 }) {
   const query = useQuery({
     queryKey: ["get event by id", eventId],
@@ -94,7 +95,12 @@ export function useFetchgetTicketList({ eventId }: { eventId: number | null }) {
         } else {
           const dataTicketList = await getViewTicketList();
           const dataEvent = await getAllEventList();
-          const data = { dataEvent: dataEvent, dataTicketList: dataTicketList };
+          const dataTicketTypes = await getAllTicketTypes();
+          const data = {
+            dataEvent: dataEvent,
+            dataTicketList: dataTicketList,
+            dataTicketTypes: dataTicketTypes,
+          };
           return data;
         }
       } catch (error: any) {

@@ -386,6 +386,8 @@ const AllOrderContent: React.FC = () => {
     orderDData.filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
   );
 
+  console.log("dataP",dataP)
+
   const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
     (sum, order) => sum + order.Total_Pay,
     0

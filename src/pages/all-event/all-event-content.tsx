@@ -495,7 +495,7 @@ const AllEventContent: React.FC = () => {
                   <MenuItem value="13">ยกเลิก</MenuItem>
                 </Select>
               </FormControl>
-              <FormControl>
+              {/* <FormControl>
                 <InputLabel htmlFor="date-filter-type">
                   ตัวกรองวันที่
                 </InputLabel>
@@ -510,8 +510,8 @@ const AllEventContent: React.FC = () => {
                   <MenuItem value="publish-date">วันที่เผยแพร่</MenuItem>
                   <MenuItem value="event-date">วันจัดงาน</MenuItem>
                 </Select>
-              </FormControl>
-              <FormControl sx={{ backgroundColor: "white" }}>
+              </FormControl> */}
+              {/* <FormControl sx={{ backgroundColor: "white" }}>
                 <DatePicker
                   label="วันที่เริ่มต้น"
                   value={startDate}
@@ -528,8 +528,8 @@ const AllEventContent: React.FC = () => {
                     },
                   }}
                 />
-              </FormControl>
-              <FormControl sx={{ backgroundColor: "white" }}>
+              </FormControl> */}
+              {/* <FormControl sx={{ backgroundColor: "white" }}>
                 <DatePicker
                   label="วันที่สิ้นสุด"
                   value={endDate}
@@ -546,7 +546,7 @@ const AllEventContent: React.FC = () => {
                     },
                   }}
                 />
-              </FormControl>
+              </FormControl> */}
               <Box
                 sx={{
                   display: "flex",
