@@ -32,10 +32,7 @@ dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
-  return dayjs(dateTime)
-    .subtract(7, "hour")
-    .locale("th")
-    .format("D/M/YYYY HH:mm");
+  return dayjs(dateTime).locale("th").format("D/M/YYYY HH:mm");
 };
 
 function formatNumberWithCommas(number: number | string): string {
@@ -43,128 +40,20 @@ function formatNumberWithCommas(number: number | string): string {
   return bath;
 }
 
-function totalNetPriceWithZeroBalance(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-
-        return acc;
-      }, {})
-  );
-
-  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
+function totalNetPriceWithZeroBalance(data: any) {
+  const totalNetPriceWithZeroBalance = data.reduce<number>(
+    (sum, order) => sum + order.Total_Pay,
     0
   );
+
   let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
-
-  return res;
-}
-
-function OutstandingPayment(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-        return acc;
-      }, {})
-  );
-  const uniqueDataP = dataP.filter(
-    (order, index, self) =>
-      index === self.findIndex((o) => o.Order_no === order.Order_no)
-  );
-  // คำนวณผลรวมของ Total_Balance ที่ไม่เท่ากับ 0
-  const totalOutstandingPayment = uniqueDataP
-    .filter((order) => order.Total_Balance !== 0) // กรอง Total_Balance ที่ไม่เท่ากับ 0
-    .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
-
-  // console.log("totalBalance", totalOutstandingPayment, dataP);
-
-  let res = formatNumberWithCommas(totalOutstandingPayment);
-
-  return res;
-}
-
-function totalNetPrice(data: any, filteredOrders: any) {
-  const dataP = Object.values(
-    data
-      .filter(
-        (order) =>
-          order.Event_Id === filteredOrders[0]?.Event_Id &&
-          order.Order_Status !== 4
-      )
-      .reduce((acc, current) => {
-        const key = current.DT_order_id;
-
-        if (!acc[key]) {
-          acc[key] = current;
-        } else {
-          const existingPaymentDate = new Date(acc[key].Payment_Date7);
-          const currentPaymentDate = new Date(current.Payment_Date7);
-          if (currentPaymentDate > existingPaymentDate) {
-            acc[key] = current;
-          }
-        }
-        return acc;
-      }, {})
-  );
-
-  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Total_Price,
-    0
-  );
-
-  const uniqueDataP = dataP.filter(
-    (order, index, self) =>
-      index === self.findIndex((o) => o.Order_no === order.Order_no)
-  );
-  // คำนวณผลรวมของ Total_Balance ที่ไม่เท่ากับ 0
-  const totalOutstandingPayment = uniqueDataP
-    .filter((order) => order.Total_Balance !== 0) // กรอง Total_Balance ที่ไม่เท่ากับ 0
-    .reduce((sum, order) => sum + order.Total_Balance, 0); // รวมค่า Total_Balance
-
-  const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
-  // console.log("total", x, dataP);
-
-  let res = formatNumberWithCommas(x);
 
   return res;
 }
 
 const OverviewContent: React.FC = () => {
   const [combinedData, setCombinedData] = useState<any[]>([]);
-  console.log("combinedData", combinedData);
+  // console.log("combinedData", combinedData);
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
@@ -192,8 +81,6 @@ const OverviewContent: React.FC = () => {
     eventId: null,
   });
 
-  console.log("dashboardData", dashboardData);
-
   const processDashboardData = async (dashboardData: any) => {
     if (!dashboardData || dashboardData.length === 0) {
       console.error("Dashboard data is empty or undefined");
@@ -219,28 +106,29 @@ const OverviewContent: React.FC = () => {
       console.log("hisPayment:", hisPayment);
       return;
     }
-
+    console.log("hisPayment:", hisPayment);
     // ดำเนินการต่อหลังจากโหลดข้อมูลครบแล้ว
-    const filteredHisPayment = hisPayment.reduce((acc, current) => {
-      const existingOrder = acc.find(
-        (order) => order.Order_id === current.Order_id
-      );
+    const filteredHisPayment = hisPayment;
+    // .reduce((acc, current) => {
+    //   const existingOrder = acc.find(
+    //     (order) => order.Order_id === current.Order_id
+    //   );
 
-      if (existingOrder) {
-        const existingPaymentDate = new Date(existingOrder.Payment_Date7);
-        const currentPaymentDate = new Date(current.Payment_Date7);
+    //   if (existingOrder) {
+    //     const existingPaymentDate = new Date(existingOrder.Payment_Date7);
+    //     const currentPaymentDate = new Date(current.Payment_Date7);
 
-        if (currentPaymentDate > existingPaymentDate) {
-          return acc.map((order) =>
-            order.Order_id === current.Order_id ? current : order
-          );
-        }
-      } else {
-        acc.push(current);
-      }
+    //     if (currentPaymentDate > existingPaymentDate) {
+    //       return acc.map((order) =>
+    //         order.Order_id === current.Order_id ? current : order
+    //       );
+    //     }
+    //   } else {
+    //     acc.push(current);
+    //   }
 
-      return acc;
-    }, []);
+    //   return acc;
+    // }, []);
 
     const combinedData = events.map((event) => {
       //   const relatedOrders = orderAll.filter(
@@ -275,25 +163,13 @@ const OverviewContent: React.FC = () => {
     if (isSuccess && Array.isArray(dashboardData) && dashboardData.length > 0) {
       processDashboardData(dashboardData);
     } else {
-      console.log("kuy");
+      console.log("");
     }
   }, [dashboardData]);
 
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target;
-
-    const updatedFilters = {
-      ...filters,
-      [name]: value,
-    };
-
-    setFilters(updatedFilters);
-    localStorage.setItem("event", JSON.stringify(updatedFilters));
-  };
-
-  const handleUpdateFilters = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
 
     const updatedFilters = {
@@ -353,6 +229,25 @@ const OverviewContent: React.FC = () => {
     localStorage.setItem("event", JSON.stringify(filters));
   };
 
+  function OutstandingPayment(data: any) {
+    const Data2 = data.filter((order) => order.Is_Balance !== 0);
+
+    const totalNetPriceWithZeroBalance = data.reduce<number>(
+      (sum, order) => sum + order.Total_Pay,
+      0
+    );
+    const totalOutstandingPayment = Data2?.reduce<number>(
+      (sum, order) => sum + order.Total_Pay,
+      0
+    );
+
+    let x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
+
+    let res = formatNumberWithCommas(x);
+
+    return res;
+  }
+
   const filteredEvents = useMemo(() => {
     return combinedData.filter((event) => {
       if (
@@ -378,8 +273,6 @@ const OverviewContent: React.FC = () => {
     });
   }, [combinedData, filters]);
 
-  console.log("filteredEvents", filteredEvents);
-
   const tableCellHeadStyle = {
     color: "white",
     fontWeight: "bold",
@@ -387,10 +280,75 @@ const OverviewContent: React.FC = () => {
     textAlign: "center",
   };
 
+  //   const uniqueOrders = filteredEvents
+  //   .flatMap((event) => event.orders)
+  //   .reduce((acc, current) => {
+  //     const exists = acc.find((order) => order.Order_no === current.Order_no);
+  //     if (!exists) acc.push(current);
+  //     return acc;
+  //   }, []);
+
+  const totalOrders = filteredEvents.length;
+
+  const totalpay = filteredEvents.reduce((total, event) => {
+    console.log("event", event.paymentsByPayByName);
+    const totalPayByMethod = {};
+    Object.entries(event.paymentsByPayByName).forEach(
+      ([payByName, payments]) => {
+        const totalPay = payments.reduce((sum, payment) => {
+          return sum + (payment.Total_Pay || 0);
+        }, 0);
+        totalPayByMethod[payByName] = totalPay;
+      }
+    );
+
+    // return totalPayByMethod;
+    const grandTotalPay = Object.values(totalPayByMethod).reduce(
+      (sum, total) => {
+        return sum + total;
+      },
+      0
+    );
+
+    return grandTotalPay;
+  }, 0);
+
+  console.log("totalpay", totalpay);
+
+  const totalpayBalen = filteredEvents.reduce((total, event) => {
+    console.log("event", event.paymentsByPayByName);
+    const totalPayByMethod = {};
+    Object.entries(event.paymentsByPayByName).forEach(
+      ([payByName, payments]) => {
+        const filteredPayments = payments.filter(
+          (payment) => payment.Is_Balance !== 0
+        );
+        const totalPay = filteredPayments.reduce((sum, payment) => {
+          return sum + (payment.Total_Pay || 0);
+        }, 0);
+        totalPayByMethod[payByName] = totalPay;
+      }
+    );
+
+    // return totalPayByMethod;
+    const grandTotalPay = Object.values(totalPayByMethod).reduce(
+      (sum, total) => {
+        return sum + total;
+      },
+      0
+    );
+
+    return grandTotalPay;
+  }, 0);
+
+  const totalpayfun = totalpay - totalpayBalen;
+
   const [selectedOrderNo, setSelectedOrderNo] = useState(null);
   const handleOrderClick = (orderNo: any) => {
     setSelectedOrderNo(orderNo);
   };
+
+  // console.log("filteredEvents", filteredEvents);
   return (
     <div
       className="all-events-content"
@@ -433,7 +391,7 @@ const OverviewContent: React.FC = () => {
                   src="/รอจัดงาน.svg"
                   alt="รอจัดงาน icon"
                   className="filter-icon"
-                  sx={{ width: 70, height: 70 }} // Adjust the size as needed
+                  sx={{ width: 70, height: 70 }}
                 />
                 <Box
                   sx={{
@@ -452,10 +410,9 @@ const OverviewContent: React.FC = () => {
                       จำนวนอีเว้นทั้งหมด
                     </Typography>
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 1)
-                            .length
-                        : 0} */}
+                      {Array.isArray(filteredEvents)
+                        ? filteredEvents.length
+                        : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -504,10 +461,7 @@ const OverviewContent: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 2)
-                            .length
-                        : 0} */}
+                      {totalOrders ? totalOrders : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -558,10 +512,7 @@ const OverviewContent: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 3)
-                            .length
-                        : 0} */}
+                      {totalpay ? totalpay : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -610,10 +561,7 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 13)
-                            .length
-                        : 0} */}
+                      {totalpayBalen ? totalpayBalen : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -662,10 +610,7 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {Array.isArray(events)
-                        ? events.filter((event) => event?.Event_Status === 13)
-                            .length
-                        : 0} */}
+                      {totalpayfun ? totalpayfun : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -919,100 +864,56 @@ const OverviewContent: React.FC = () => {
           </TableHead>
           {combinedData && combinedData.length > 0 ? (
             <TableBody>
-              {filteredEvents.map((event: any, eventIndex: number) => {
-                const {
-                  Event_Id,
-                  Event_Name,
-                  Event_Time,
-                  paymentsByPayByName,
-                  orders,
-                } = event;
-
-                // วนลูปแต่ละกลุ่ม Pay_By_Name
-                return Object.keys(paymentsByPayByName).map(
-                  (payByName: string) => {
-                    const paymentGroup = paymentsByPayByName[payByName]; // รายการ payments ในกลุ่มนี้
-
-                    return paymentGroup.map(
-                      (payment: any, paymentIndex: number) => (
-                        <TableRow
-                          key={`${Event_Id}-${payByName}-${paymentIndex}`}
-                          style={{
-                            backgroundColor:
-                              selectedOrderNo === Event_Id
-                                ? "lightblue"
-                                : "inherit",
-                            cursor: "pointer",
+              {filteredEvents.map((event: any, eventIndex: number) => (
+                <>
+                  {Object.entries(event.paymentsByPayByName).map(
+                    ([payByName, payments]: [string, any[]], index: number) => (
+                      <TableRow
+                        key={index + eventIndex +1}
+                        style={{
+                          backgroundColor:
+                            selectedOrderNo === index + eventIndex +1
+                              ? "lightblue"
+                              : "inherit",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleOrderClick(index + eventIndex +1)}
+                      >
+                        <TableCell
+                          sx={{
+                            textAlign: "center",
+                            color: "black",
+                            fontWeight: "bold",
                           }}
-                          onClick={() => handleOrderClick(Event_Id)}
                         >
-                          <TableCell
-                            sx={{
-                              textAlign: "center",
-                              color: "black",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {`#`}
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {Event_Name}
-                          </TableCell>
-
-                          <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {Event_Time
-                              ? formatEventTime(Event_Time)
-                              : "ยังไม่ระบุ"}
-                          </TableCell>
-
-                          <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {payByName}
-                          </TableCell>
-
-                          {/* <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {formatNumberWithCommas(payment.Total_Pay)}
-                          </TableCell> */}
-
-                          <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {/* {orders
-                              ? totalNetPrice(orders, orders)
-                              : "ยังไม่ระบุ"} */}
-                            {formatNumberWithCommas(payment.Total_Pay)}
-                          </TableCell>
-
-                          <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {/* {orders
-                              ? OutstandingPayment(orders, orders)
-                              : "ยังไม่ระบุ"} */}
-                            {formatNumberWithCommas(payment.Total_Pay)}
-                          </TableCell>
-
-                          {/* <TableCell
-                            sx={{ textAlign: "center", color: "black" }}
-                          >
-                            {orders?.at(0)?.UnCheckin_By_Event
-                              ? orders?.at(0)?.UnCheckin_By_Event +
-                                orders.at(0)?.Checkin_By_Event
-                              : ""}
-                          </TableCell> */}
-                        </TableRow>
-                      )
-                    );
-                  }
-                );
-              })}
+                          {index + 1}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "black" }}>
+                          {event.Event_Name}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "black" }}>
+                          {event.Event_Time
+                            ? formatEventTime(event.Event_Time)
+                            : "ยังไม่ระบุ"}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "black" }}>
+                          {payByName}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "black" }}>
+                          {payments
+                            ? totalNetPriceWithZeroBalance(payments)
+                            : "ยังไม่ระบุ"}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "black" }}>
+                          {payments
+                            ? OutstandingPayment(payments)
+                            : "ยังไม่ระบุ"}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
+                </>
+              ))}
             </TableBody>
           ) : (
             <TableBody>
