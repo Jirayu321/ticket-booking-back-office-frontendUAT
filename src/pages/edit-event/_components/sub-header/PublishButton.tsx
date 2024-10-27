@@ -1,19 +1,18 @@
 import { FC } from "react";
 import toast from "react-hot-toast";
-import { formatISOToLocalTime, addHours } from "../../../../lib/util";
-import { updateEventById } from "../../../../services/event-list.service";
+// import { formatISOToLocalTime, addHours } from "../../../../lib/util";
+// import { updateEventById } from "../../../../services/event-list.service";
 import useEditEventStore from "../../_hook/useEditEventStore";
-
-const DEFAULT_ACTIONER = "admin";
-const HOURS_DIFF = 7;
+// const DEFAULT_ACTIONER = "admin";
+// const HOURS_DIFF = 7;
 
 type PublishButtonProps = {
-  event: any;
+  // event: any;
   isPublic: boolean;
   setIsPublic: (isPublic: boolean) => void;
 };
 
-const PublishButton: FC<PublishButtonProps> = ({ event, isPublic, setIsPublic }) => {
+const PublishButton: FC<PublishButtonProps> = ({ isPublic, setIsPublic }) => {
   const { title, title2, eventDateTime, refreshEventInfo } =
     useEditEventStore();
 

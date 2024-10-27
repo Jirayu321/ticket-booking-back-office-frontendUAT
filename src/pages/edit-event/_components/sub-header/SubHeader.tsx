@@ -33,6 +33,7 @@ const SubHeader: FC<SubHeaderProp> = ({
 }) => {
 
   const [isPublic, setIsPublic] = useState(false);
+  const [isPublicFromBase, setIsPublicFromBase] = useState(false);
 
   useEffect(() => {
     if (eventId) {
@@ -51,19 +52,20 @@ const SubHeader: FC<SubHeaderProp> = ({
       setEventDateTime(adjustedEventTime);
       setStatus(Number(eventModel.Event_Status));
       setIsPublic(eventModel.Event_Public === "Y");
+      setIsPublicFromBase(eventModel.Event_Public === "Y");
       setImages(0, eventModel.Event_Pic_1 || null);
       setImages(1, eventModel.Event_Pic_2 || null);
       setImages(2, eventModel.Event_Pic_3 || null);
       setImages(3, eventModel.Event_Pic_4 || null);
-      setIsPublic(eventModel.Event_Public === "Y" ? true : false);
 
       const eventStock = await getEventStock();
-      const eventStockModel = eventStock.filter((stc) => stc.Event_Id === eventId);
+      console.debug(eventId);
+      const eventStockModel = eventStock.filter((stc) => Number(stc.Event_Id) === Number(eventId));
       console.debug("eventStockModel => ", eventStockModel);
       setPlanGroupId(eventStockModel[0].PlanGroup_Id);
 
       const logEventPrice = await getLogEventPrice();
-      const logEventPriceModel = logEventPrice.filter((log) => log.Event_Id === eventId);
+      const logEventPriceModel = logEventPrice.filter((log) => Number(log.Event_Id) === Number(eventId));
       console.debug("logEventPriceModel => ", logEventPriceModel);
 
       // โค้ดการอัพเดต allRows
@@ -97,7 +99,7 @@ const SubHeader: FC<SubHeaderProp> = ({
   async function handleUpdateEvent() {
     try {
 
-      if (isPublic) {
+      if (isPublicFromBase && isPublic) {
         Swal.fire({
           icon: 'error',
           title: 'ไม่สามารถแก้ไขได้ เนื่องจากมีการเผยแพร่อยู่',
@@ -110,7 +112,7 @@ const SubHeader: FC<SubHeaderProp> = ({
         // Table : Event_List
         const eventTime = dayjs(eventDateTime).add(7, "hour").toISOString();
         const eventDate = dayjs(eventTime).add(7, "hour").toISOString().split("T")[0];
-        const resUpdateEventList = await updateEventById(Number(event.Event_Id), {
+        const resUpdateEventList = await updateEventById(Number(eventId), {
           Event_Name: title,
           Event_Addr: title2,
           Event_Desc: description,
@@ -144,18 +146,31 @@ const SubHeader: FC<SubHeaderProp> = ({
             console.debug("Update response for logId", row.id, ":", resUpdateLogEventPrice);
           }
         }
+
+        if (resUpdateEventList.status === 'SUCCESS') {
+          Swal.fire({
+            icon: 'success',
+            title: 'แก้ไขรายการสำเร็จ',
+            customClass: {
+              title: "swal2-title",
+              content: "swal2-content",
+            },
+          });
+
+          window.location.replace('/all-events');
+        } else {
+          console.error('Error updating event:', resUpdateEventList.message);
+        }
       }
-      const resUpdatePublic = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
-      if (resUpdatePublic.status === 'SUCCESS') {
-        window.location.replace('/all-events');
-        Swal.fire({
-          icon: 'success',
-          title: 'แก้ไขรายการสำเร็จ',
-          customClass: {
-            title: "swal2-title",
-            content: "swal2-content",
-          },
-        });
+
+      console.debug("isPublicFromBase : ", isPublicFromBase);
+      console.debug("isPublic : ", isPublic);
+      if ((isPublicFromBase && !isPublic) || (!isPublicFromBase && isPublic)) {
+        const resUpdatePublic = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
+        if (resUpdatePublic.status === 'SUCCESS') {
+          toast.success("ปรับสถานะเผยแพร่สำเร็จ");
+          window.location.replace('/all-events');
+        }
       }
     } catch (error: any) {
       toast.dismiss();
@@ -182,7 +197,7 @@ const SubHeader: FC<SubHeaderProp> = ({
     <div className={styles.subHeader} style={{ marginTop: "-10px" }}>
       <BackButton />
       <div className="toggle-container">
-        <PublishButton event={event} isPublic={isPublic} setIsPublic={setIsPublic} />
+        <PublishButton isPublic={isPublic} setIsPublic={setIsPublic} />
         <button
           className=""
           style={{
@@ -196,7 +211,7 @@ const SubHeader: FC<SubHeaderProp> = ({
             borderRadius: 4,
             cursor: "pointer",
           }}
-          onClick={() => handleCopyEventLink(event.Event_Id)}
+          onClick={() => handleCopyEventLink(eventId)}
           onMouseOver={(e) => (e.currentTarget.style.background = "#218838")}
           onMouseOut={(e) => (e.currentTarget.style.background = "#28a745")}
         >
