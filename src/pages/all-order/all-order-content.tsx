@@ -103,7 +103,7 @@ const AllOrderContent: React.FC = () => {
   const onLoadOrderDetail = async () => {
     await handleClearFilters();
     await handleOrderClick(localStorage.getItem("orderDetail"));
-  }
+  };
 
   const handleOrderprevData = (
     orderNo: any,
@@ -385,24 +385,33 @@ const AllOrderContent: React.FC = () => {
   const dataP = Object.values(
     orderDData.filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
   );
+  console.log("dataP", dataP);
+  const dataP2 = Object.values(
+    orderDData
+      .filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
+      .reduce((acc, current) => {
+        if (
+          !acc[current.Order_id] ||
+          current.His_Payment_id < acc[current.Order_id].His_Payment_id
+        ) {
+          acc[current.Order_id] = current;
+        }
+        return acc;
+      }, {})
+  );
+  console.log("dataP2", dataP2);
 
-  console.log("dataP",dataP)
+  const totalNetPriceWithZeroBalance = dataP2?.reduce<number>(
+    (sum, order) => sum + order.Net_Price,
+    0
+  );
 
-  const totalNetPriceWithZeroBalance = dataP?.reduce<number>(
+  const totalNetPrice = dataP?.reduce<number>(
     (sum, order) => sum + order.Total_Pay,
     0
   );
 
-
-  const OutstandingPayment3 = dataP?.reduce<number>(
-    (sum, order) => sum + order.Total_Balance,
-    0
-  );
-
-
-  console.log("totalNetPriceWithZeroBalance", dataP);
-
-  const totalNetPrice = totalNetPriceWithZeroBalance - OutstandingPayment3;
+  const OutstandingPayment3 = totalNetPriceWithZeroBalance - totalNetPrice;
 
   const handleClearFilters = async () => {
     setEvents(null);
@@ -1578,7 +1587,7 @@ const AllOrderContent: React.FC = () => {
                           width: "max-content",
                           cursor: "pointer",
                         }}
-                      // onClick={() => handleOrderClick(order.Order_no)}
+                        // onClick={() => handleOrderClick(order.Order_no)}
                       >
                         <TableCell style={{ textAlign: "center" }}>
                           <div

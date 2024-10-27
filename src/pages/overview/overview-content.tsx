@@ -32,10 +32,7 @@ dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
-  return dayjs(dateTime)
-    .subtract(7, "hour")
-    .locale("th")
-    .format("D/M/YYYY HH:mm");
+  return dayjs(dateTime).locale("th").format("D/M/YYYY HH:mm");
 };
 
 function formatNumberWithCommas(number: number | string): string {
@@ -43,38 +40,57 @@ function formatNumberWithCommas(number: number | string): string {
   return bath;
 }
 
-function totalNetPriceWithZeroBalance(data: any, filteredOrders: any) {
-  console.log("data", data);
+function totalNetPriceWithZeroBalance(data: any, id: any) {
+  const Data = data.filter(
+    (order) => order.Event_Id === id && order.Is_Balance === 0
+  );
 
-  const totalNetPriceWithZeroBalance = data?.reduce<number>(
-    (sum, order) => sum + order.Total_Pay,
+  const totalNetPriceWithZeroBalance = Data?.reduce<number>(
+    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
     0
   );
   let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
   return res;
 }
 
-function OutstandingPayment(data: any, filteredOrders: any) {
-  const totalOutstandingPayment = data
-    .filter((order) => order.Total_Balance !== 0)
-    .reduce((sum, order) => sum + order.Total_Balance, 0);
+function OutstandingPayment(data: any, id: any) {
+
+  const Data2 = data.filter(
+    (order) => order.Event_Id === id && order.Is_Balance !== 0
+  );
+  const totalOutstandingPayment = Data2?.reduce<number>(
+    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
+    0
+  );
 
   let res = formatNumberWithCommas(totalOutstandingPayment);
 
   return res;
 }
 
-function totalNetPrice(data: any, filteredOrders: any) {
-  const totalNetPriceWithZeroBalance = data?.reduce<number>(
-    (sum, order) => sum + order.Total_Pay,
+function totalNetPrice(data: any, id: any) {
+
+  const Data = data.filter(
+    (order) => order.Event_Id === id && order.Is_Balance === 0
+  );
+
+   const Data2 = data.filter(
+    (order) => order.Event_Id === id && order.Is_Balance !== 0
+  );
+
+  const totalNetPriceWithZeroBalance = Data?.reduce<number>(
+    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
     0
   );
-  const totalOutstandingPayment = data
-    .filter((order) => order.Total_Balance !== 0)
-    .reduce((sum, order) => sum + order.Total_Balance, 0);
+
+  const totalOutstandingPayment = Data2?.reduce<number>(
+    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
+    0
+  );
+
 
   const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
-  console.log("total", x);
+  // console.log("total", x);
 
   let res = formatNumberWithCommas(x);
   return res;
@@ -92,7 +108,7 @@ function formatCountOrder(data: any | null) {
     return acc;
   }, []);
 
-  console.log("Unique Orders:", uniqueOrders);
+  // console.log("Unique Orders:", uniqueOrders);
   return uniqueOrders.length;
 }
 
@@ -128,14 +144,14 @@ const OverviewContent: React.FC = () => {
     eventId: null,
   });
 
-  // console.log("dashboardData", dashboardData);
+  console.log("dashboardData", dashboardData);
 
   const processDashboardData = async (dashboardData: any) => {
     if (!dashboardData || dashboardData.length === 0) {
       console.error("Dashboard data is empty or undefined");
       return;
     }
-    console.log("dashboardData", dashboardData);
+    // console.log("dashboardData", dashboardData);
 
     const { dataAllEvent, dataAllOrder } = dashboardData[0] ?? {};
 
@@ -146,6 +162,7 @@ const OverviewContent: React.FC = () => {
       return;
     }
 
+    console.log("dataAllOrder:", dataAllOrder);
     const { events } = dataAllEvent;
     const { orderAll, hisPayment } = dataAllOrder;
     // console.log("hisPayment", hisPayment);
@@ -159,21 +176,20 @@ const OverviewContent: React.FC = () => {
     }
 
     // ดำเนินการต่อหลังจากโหลดข้อมูลครบแล้ว
-    const filteredHisPayment = hisPayment;
-    // .reduce((acc, current) => {
-    //   const exists = acc.find((order) => order.Event_Id === current.Event_Id);
-    //   if (exists) {
-    //     acc.push(current);
-    //   }
-    //   return acc;
-    // }, []);
+    const filteredHisPayment = hisPayment.reduce((acc, current) => {
+      const exists = acc.find((order) => order.Event_Id === current.Event_Id);
+      if (exists) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
 
     const combinedData = events.map((event) => {
       const relatedOrders = orderAll.filter(
         (order) => order.Event_Id === event.Event_Id
       );
 
-      console.log("filteredHisPayment", filteredHisPayment);
+      // console.log("filteredHisPayment", filteredHisPayment);
 
       return {
         ...event,
@@ -184,6 +200,7 @@ const OverviewContent: React.FC = () => {
 
     setCombinedData(combinedData);
   };
+  // console.log("combinedData", combinedData);
 
   useEffect(() => {
     if (isSuccess && Array.isArray(dashboardData) && dashboardData.length > 0) {
@@ -218,9 +235,9 @@ const OverviewContent: React.FC = () => {
     });
   }, [combinedData, filters]);
 
-  const handleClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
+  // const handleClick = (pageNumber: number) => {
+  //   setCurrentPage(pageNumber);
+  // };
 
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -236,17 +253,17 @@ const OverviewContent: React.FC = () => {
     localStorage.setItem("event", JSON.stringify(updatedFilters));
   };
 
-  const handleUpdateFilters = (event: SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
+  // const handleUpdateFilters = (event: SelectChangeEvent<string>) => {
+  //   const { name, value } = event.target;
 
-    const updatedFilters = {
-      ...filters,
-      [name]: value,
-    };
+  //   const updatedFilters = {
+  //     ...filters,
+  //     [name]: value,
+  //   };
 
-    setFilters(updatedFilters);
-    localStorage.setItem("event", JSON.stringify(updatedFilters));
-  };
+  //   setFilters(updatedFilters);
+  //   localStorage.setItem("event", JSON.stringify(updatedFilters));
+  // };
 
   const handleDateRangeChange = (
     startDate: dayjs.Dayjs | null,
@@ -314,12 +331,14 @@ const OverviewContent: React.FC = () => {
   const totalOrders = uniqueOrders.length;
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    console.log("event", event);
     // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
-    const eventTotalPay = event.payments.reduce(
-      (sum, payment) => sum + (payment.Total_Pay || 0),
-      0
-    );
+    // console.log("event", eventTotalPay);
+    const eventTotalPay = event.orders
+      .filter((order) => order.Event_Id === event.Event_Id)
+      .reduce(
+        (sum, payment) => sum + (payment.Web_Qty_Buy * payment.Plan_Price || 0),
+        0
+      );
     return total + eventTotalPay;
   }, 0);
 
@@ -343,14 +362,7 @@ const OverviewContent: React.FC = () => {
     return acc;
   }, {});
 
-  // คำนวณยอดรวมทั้งหมดจาก totalPayByEvent
-  const grandTotalPay = Object.values(totalPayByEvent).reduce(
-    (sum, total) => sum + total,
-    0
-  );
-
-  console.log("Total Pay by Event:", totalPayByEvent);
-  console.log("Grand Total Pay:", grandTotalPay);
+  
 
   const totalpayBalen = filteredEvents.reduce((total, event) => {
     // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
@@ -916,15 +928,15 @@ const OverviewContent: React.FC = () => {
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {orders
-                        ? totalNetPriceWithZeroBalance(payments, orders)
+                        ? totalNetPriceWithZeroBalance(orders, Event_Id)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {orders ? totalNetPrice(payments, orders) : "ยังไม่ระบุ"}
+                      {orders ? totalNetPrice(orders, Event_Id) : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
                       {orders
-                        ? OutstandingPayment(payments, orders)
+                        ? OutstandingPayment(orders, Event_Id)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>

@@ -294,7 +294,7 @@ const Sidebars: React.FC = () => {
               >
                 <MenuItem icon={<PaidIcon />}>ตัวเลือกการจ่ายเงิน</MenuItem>
               </Link>
-              <Link
+              {/* <Link
                 to="/employee"
                 className={`menu-bars ${
                   activePath === "/employee" ? "active" : ""
@@ -302,7 +302,7 @@ const Sidebars: React.FC = () => {
                 onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<ManageAccountsIcon />}>ตั้งค่าบริษัท</MenuItem>
-              </Link>
+              </Link> */}
             </Menu>
             <div
               style={{
@@ -336,7 +336,7 @@ const Sidebars: React.FC = () => {
                 Profile
               </MenuItem>
               {/* </Link> */}
-              <Link
+              {/* <Link
                 to="/role-settings"
                 className={`menu-bars ${
                   activePath === "/role-settings" ? "active" : ""
@@ -344,7 +344,7 @@ const Sidebars: React.FC = () => {
                 onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<AssignmentIndIcon />}>ตั้งค่าผู้ใช้</MenuItem>
-              </Link>
+              </Link> */}
               {/* <Link
                 to="/settings"
                 className={`menu-bars ${
