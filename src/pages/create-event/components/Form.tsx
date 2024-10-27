@@ -75,7 +75,8 @@ const CreateEventForm = () => {
   const [allRows, setAllRows] = useState({});
 
   useEffect(() => {
-    if (event && planGroupId !== "") {
+    if (eventId && planGroupId !== "") {
+      console.debug("handleZoneChange");
       handleZoneChange(String(planGroupId));
     }
   }, [eventId, combinedData, planGroupId]);
@@ -339,7 +340,7 @@ const CreateEventForm = () => {
       <Header title="งานทั้งหมด" />
       {eventId ? (
         <SubHeader
-          event={event}
+          eventId={eventId}
           title={title}
           title2={title2}
           description={description}

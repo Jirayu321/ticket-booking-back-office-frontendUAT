@@ -14,7 +14,7 @@ type SubHeaderProp = {
 };
 
 const SubHeader: FC<SubHeaderProp> = ({
-  event,
+  eventId,
   title,
   title2,
   description,
@@ -35,8 +35,8 @@ const SubHeader: FC<SubHeaderProp> = ({
   const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
-    if (event) {
-      getModelById(event.Event_Id);
+    if (eventId) {
+      getModelById(eventId);
     }
   }, []);
 
