@@ -3,6 +3,21 @@ import { addHours } from "../lib/util";
 
 const HOURS_DIFF = 7;
 
+// ============ GET ============
+
+export async function getLogEventPrice() {
+  try {
+    const response = await authAxiosClient.get(`/log-event-price`);
+
+    if (response.status !== 200) throw new Error();
+
+    return response.data.logEventPrices || [];
+  } catch (error: any) {
+    throw new Error("ล้มเหลวระหว่างการดึงข้อมูล ราคาของ อีเวนท์");
+  }
+}
+
+
 // ============ CREATE ============
 
 export async function createLogEventPrice({

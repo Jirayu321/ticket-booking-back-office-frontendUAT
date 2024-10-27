@@ -20,29 +20,15 @@ export async function getTicketTypeNameById(ticketTypeId: number) {
     // Access the array inside the 'ticketTypes' property
     const ticketTypes = ticketTypesResponse.ticketTypes;
 
-    // Log the fetched ticket types to see the full data
-    console.log("Fetched Ticket Types:", ticketTypes);
-
     // Check if ticketTypes is an array
     if (!Array.isArray(ticketTypes)) {
       throw new Error("Invalid data format: expected an array");
     }
 
-    // Check the type of Ticket_Type_Id in the array for debugging
-    ticketTypes.forEach((type: any) => {
-      console.log(`Ticket Type ID in Array: ${type.Ticket_Type_Id} (Type: ${typeof type.Ticket_Type_Id})`);
-    });
-
-    // Log the type of the ticketTypeId being searched
-    console.log(`Searching for Ticket Type ID: ${ticketTypeId} (Type: ${typeof ticketTypeId})`);
-
     // Find the ticket type by its ID (ensure the ID types match)
     const ticketType = ticketTypes.find(
       (type: { Ticket_Type_Id: number | string }) => type.Ticket_Type_Id == ticketTypeId // Use loose equality to handle string/number mismatch
     );
-
-    // Log the found ticket type to check if it exists
-    console.log(`Ticket Type for ID ${ticketTypeId}:`, ticketType);
 
     // If the ticket type is found, return its name, otherwise return a default fallback
     return ticketType ? ticketType.Ticket_Type_Name : "ประเภทบัตร"; // Fallback if not found

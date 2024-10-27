@@ -1,73 +1,156 @@
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { convertLocalTimeToISO } from "../../../../lib/util";
-import { updateEventById, updatePublicEventById } from "../../../../services/event-list.service";
-import useEditEventStore from "../../_hook/useEditEventStore";
+import { getEventById, updateEventById, updatePublicEventById } from "../../../../services/event-list.service";
 import styles from "../../edit-event-form.module.css";
 import BackButton from "./BackButton";
 import PublishButton from "./PublishButton";
 import Swal from "sweetalert2";
-
+import { getEventStock } from "../../../../services/event-stock.service";
+import { getLogEventPrice } from "../../../../services/log-event-price.service";
+import { updateLogEventPrice } from "../../../../services/log-event-price.service";
 type SubHeaderProp = {
   event: any;
 };
 
-const SubHeader: FC<SubHeaderProp> = ({ event }) => {
-  const navigate = useNavigate();
+const SubHeader: FC<SubHeaderProp> = ({
+  event,
+  title,
+  title2,
+  description,
+  eventDateTime,
+  status,
+  images,
+  setTitle,
+  setTitle2,
+  setDescription,
+  setEventDateTime,
+  setStatus,
+  setImages,
+  setPlanGroupId,
+  allRows,
+  setAllRows
+}) => {
 
   const [isPublic, setIsPublic] = useState(false);
 
-  const {
-    title,
-    title2,
-    eventDateTime,
-    description,
-    status,
-    refreshEventInfo,
-    images, // Getting images from Zustand store
-  } = useEditEventStore();
+  useEffect(() => {
+    if (event) {
+      getModelById(event.Event_Id);
+    }
+  }, []);
+
+  async function getModelById(eventId: number) {
+    try {
+      const eventModel = await getEventById(eventId);
+      console.debug(eventModel);
+      setTitle(eventModel.Event_Name);
+      setTitle2(eventModel.Event_Addr);
+      setDescription(eventModel.Event_Desc);
+      const adjustedEventTime = dayjs(eventModel.Event_Time).subtract(7, "hour").toISOString();
+      setEventDateTime(adjustedEventTime);
+      setStatus(Number(eventModel.Event_Status));
+      setIsPublic(eventModel.Event_Public === "Y");
+      setImages(0, eventModel.Event_Pic_1 || null);
+      setImages(1, eventModel.Event_Pic_2 || null);
+      setImages(2, eventModel.Event_Pic_3 || null);
+      setImages(3, eventModel.Event_Pic_4 || null);
+      setIsPublic(eventModel.Event_Public === "Y" ? true : false);
+
+      const eventStock = await getEventStock();
+      const eventStockModel = eventStock.filter((stc) => stc.Event_Id === eventId);
+      console.debug("eventStockModel => ", eventStockModel);
+      setPlanGroupId(eventStockModel[0].PlanGroup_Id);
+
+      const logEventPrice = await getLogEventPrice();
+      const logEventPriceModel = logEventPrice.filter((log) => log.Event_Id === eventId);
+      console.debug("logEventPriceModel => ", logEventPriceModel);
+
+      // โค้ดการอัพเดต allRows
+      const updatedRows = {};
+
+      for (const logEventPrice of logEventPriceModel) {
+        const { Plan_Id, Start_Datetime, End_Datetime, Plan_Price, Log_Id } = logEventPrice;
+
+        if (!updatedRows[Plan_Id]) {
+          updatedRows[Plan_Id] = [];
+        }
+
+        updatedRows[Plan_Id].push({
+          id: Log_Id,
+          startDate: Start_Datetime,
+          endDate: End_Datetime,
+          price: Plan_Price,
+        });
+      }
+
+      setAllRows((prevRows) => ({
+        ...prevRows,
+        ...updatedRows,
+      }));
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function handleUpdateEvent() {
     try {
-      // if (!refreshEventInfo) return;
-      // toast.loading("กำลังอัพเดทข้อมูลงาน");
 
-      // if (!event.Event_Id) throw new Error("ไม่พบ ID ของงาน");
+      if (isPublic) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ไม่สามารถแก้ไขได้ เนื่องจากมีการเผยแพร่อยู่',
+          customClass: {
+            title: "swal2-title",
+            content: "swal2-content",
+          },
+        });
+      } else {
+        // Table : Event_List
+        const eventTime = dayjs(eventDateTime).add(7, "hour").toISOString();
+        const eventDate = dayjs(eventTime).add(7, "hour").toISOString().split("T")[0];
+        const resUpdateEventList = await updateEventById(Number(event.Event_Id), {
+          Event_Name: title,
+          Event_Addr: title2,
+          Event_Desc: description,
+          Event_Date: eventDate,
+          Event_Time: eventTime,
+          Event_Status: status,
+          Event_Pic_1: images[0],
+          Event_Pic_2: images[1],
+          Event_Pic_3: images[2],
+          Event_Pic_4: images[3],
+        });
+        if (resUpdateEventList.status === 'SUCCESS') {
+          // do nothing
+        } else {
+          console.error('Error updating event:', resUpdateEventList.message);
+        }
 
-      // // Add 7 hours to the eventDateTime before converting to ISO
-      // const adjustedEventDateTime = dayjs(eventDateTime)
-      //   .add(7, "hour")
-      //   .toISOString();
+        // Table : Log_Event_Price
+        for (const planId in allRows) {
+          const rows = allRows[planId];
 
-      // // Make sure images are passed to the API call
-      // await updateEventById(Number(event.Event_Id), {
-      //   Event_Name: title,
-      //   Event_Addr: title2,
-      //   Event_Desc: description,
-      //   Event_Date: convertLocalTimeToISO(adjustedEventDateTime),
-      //   Event_Time: convertLocalTimeToISO(adjustedEventDateTime),
-      //   Event_Status: status,
-      //   Event_Pic_1: images[0], // First image
-      //   Event_Pic_2: images[1], // Second image
-      //   Event_Pic_3: images[2], // Third image
-      //   Event_Pic_4: images[3], // Fourth image
-      // });
+          for (const row of rows) {
+            const resUpdateLogEventPrice = await updateLogEventPrice({
+              logId: row.id,
+              startDateTime: row.startDate,
+              endDateTime: row.endDate,
+              updateBy: 'admin',
+              planPrice: row.price
+            });
 
-      // toast.dismiss();
-
-      // toast.success("อัพเดทข้อมูลงานสำเร็จ");
-
-      // refreshEventInfo();
-
-      const response = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
-
-      if (response.status === 'SUCCESS') {
+            console.debug("Update response for logId", row.id, ":", resUpdateLogEventPrice);
+          }
+        }
+      }
+      const resUpdatePublic = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
+      if (resUpdatePublic.status === 'SUCCESS') {
         window.location.replace('/all-events');
         Swal.fire({
           icon: 'success',
-          title: `${isPublic === true ? 'เผยแผร่สำเร็จ' : 'ไม่เผยแผร่เรียบร้อย'}`,
+          title: 'แก้ไขรายการสำเร็จ',
           customClass: {
             title: "swal2-title",
             content: "swal2-content",
@@ -85,7 +168,7 @@ const SubHeader: FC<SubHeaderProp> = ({ event }) => {
       "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมดโปรดบันทึกข้อมูลไว้ก่อน"
     );
     if (userConfirmed) {
-      navigate("/all-events");
+      window.location.replace("/all-events");
     }
   };
 

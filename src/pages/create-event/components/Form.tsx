@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { SwalSuccess, SwalConfirmDialog, SwalError } from "../../../lib/sweetalert";
@@ -28,15 +28,13 @@ import {
 import { useFetchPlanGroups } from "../../../hooks/fetch-data/useFetchPlanGroups";
 import toast from "react-hot-toast";
 import dayjs from 'dayjs';
-import Swal from "sweetalert2";
-import { setTime } from "react-datepicker/dist/date_utils";
 import { getTicketTypeNameById } from "../../../services/ticket-type.service";
 
 const CreateEventForm = () => {
   const { eventId } = useParams();
   const { data: planGroups } = useFetchPlanGroups();
   const { data: event } = useFetchEventList({
-    eventId: Number(eventId),
+    eventId: null,
   });
   const combinedData = useMemo(() => {
     if (!planGroups?.planGroups || !planGroups?.getAllPlans?.plans) return [];
@@ -73,14 +71,18 @@ const CreateEventForm = () => {
   const [activeTab, setActiveTab] = useState("รายละเอียด");
   const [selectedZoneGroup, setSelectedZoneGroup] = useState("");
   const [selectedGroupData, setSelectedGroupData] = useState(null);
-
+  const [planGroupId, setPlanGroupId] = useState("");
   const [allRows, setAllRows] = useState({});
+
+  useEffect(() => {
+    if (event && planGroupId !== "") {
+      handleZoneChange(String(planGroupId));
+    }
+  }, [eventId, combinedData, planGroupId]);
 
   const handleInputChange = (setter) => (e) => {
     const { value } = e.target;
-    if (value.trim()) {
-      setter(value);
-    }
+    setter(value.trim());
   };
 
   const handleImageUpload = (index) => (e) => {
@@ -113,11 +115,13 @@ const CreateEventForm = () => {
   };
 
   const handleZoneChange = (e) => {
-
     // เคลียค่า AllRow
-    setAllRows({});
+    if (!eventId) {
+      setAllRows({});
+    }
 
-    const selectedValue = e.target.value;
+    const selectedValue = typeof e === "string" ? e : e.target.value;
+
     setSelectedZoneGroup(selectedValue);
 
     const foundGroup = combinedData.find(
@@ -126,12 +130,12 @@ const CreateEventForm = () => {
 
     if (foundGroup && Array.isArray(foundGroup.plans)) {
       foundGroup.plans.forEach((plan) => {
-        handleAddRow(plan.Plan_id);
+        if (!eventId) {
+          handleAddRow(plan.Plan_id);
+        }
       });
 
       setSelectedGroupData(foundGroup);
-    } else {
-      SwalError("พบข้อผิดพลาด");
     }
   };
 
@@ -157,7 +161,7 @@ const CreateEventForm = () => {
     };
   };
 
-  const handleAddRow = (planId) => {
+  const handleAddRow = async (planId) => {
     const currentRows = allRows[planId] || [];
 
     if (currentRows.length >= 3) {
@@ -315,11 +319,8 @@ const CreateEventForm = () => {
     }
   };
 
-  const getThaiText = (id) => {
-    // พี่ไปร์ทค้างไว้ก่อน
-    // const getTicketTypeName = await getTicketTypeNameById(id);
-    // return getTicketTypeName[0]?.Ticket_Type_Name || "ไม่ระบุ";
-    switch (id) {
+  const getTicketTypeLabel = (ticketTypeId) => {
+    switch (ticketTypeId) {
       case 33:
         return "สเตชั่น";
       case 41:
@@ -337,7 +338,24 @@ const CreateEventForm = () => {
     <div className="create-new-event">
       <Header title="งานทั้งหมด" />
       {eventId ? (
-        <SubHeader event={event} />
+        <SubHeader
+          event={event}
+          title={title}
+          title2={title2}
+          description={description}
+          eventDateTime={eventDateTime}
+          status={status}
+          images={images}
+          setTitle={setTitle}
+          setTitle2={setTitle2}
+          setDescription={setDescription}
+          setEventDateTime={setEventDateTime}
+          setStatus={setStatus}
+          setImages={setImages}
+          setPlanGroupId={setPlanGroupId}
+          allRows={allRows}
+          setAllRows={setAllRows}
+        />
       ) : (
         <div
           className="sub-header"
@@ -615,16 +633,8 @@ const CreateEventForm = () => {
                                   alignItems: "self-start",
                                 }}
                               >
-                                <div
-                                  className="ticket-type"
-                                  style={{ textAlign: "center" }}
-                                >
-                                  <label
-                                    style={{
-                                      fontWeight: "bold",
-                                      margin: "0px",
-                                    }}
-                                  >
+                                <div className="ticket-type" style={{ textAlign: "center" }}>
+                                  <label style={{ fontWeight: "bold", margin: "0px" }}>
                                     ประเภทโต๊ะ
                                   </label>
                                   <input
@@ -638,9 +648,7 @@ const CreateEventForm = () => {
                                       backgroundColor: "white",
                                       color: "black",
                                     }}
-                                    value={getThaiText(
-                                      plan?.Plan_Ticket_Type_Id
-                                    )}
+                                    value={getTicketTypeLabel(plan.Plan_Ticket_Type_Id)}
                                     disabled
                                   />
                                 </div>
@@ -806,6 +814,7 @@ const CreateEventForm = () => {
 
                                           <TableCell style={{ height: "10px" }}>
                                             <TextField
+                                              value={row.price}
                                               type="number"
                                               style={{
                                                 width: "150px",
