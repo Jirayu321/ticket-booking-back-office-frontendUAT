@@ -83,7 +83,7 @@ const CreateEventForm = () => {
 
   const handleInputChange = (setter) => (e) => {
     const { value } = e.target;
-    setter(value.trim());
+    setter(value);
   };
 
   const handleImageUpload = (index) => (e) => {
@@ -252,9 +252,9 @@ const CreateEventForm = () => {
       // Table : Event_List
       const eventDate = new Date(eventDateTime).toISOString().split("T")[0];
       const resEventList = await createEvent({
-        Event_Name: title,
-        Event_Addr: title2,
-        Event_Desc: description,
+        Event_Name: title.trim(),
+        Event_Addr: title2.trim(),
+        Event_Desc: description.trim(),
         Event_Date: eventDate,
         Event_Time: eventDateTime,
         Event_Status: 1,
@@ -478,7 +478,7 @@ const CreateEventForm = () => {
                     {images[index] ? (
                       <>
                         <label className="image-upload-label">
-                          <span className="image-upload-link">เปลี่ยนภาพ</span>
+                          <span className="image-upload-link" hidden={!!eventId}>เปลี่ยนภาพ</span>
                           <input
                             type="file"
                             onChange={handleImageUpload(index)}
@@ -486,6 +486,7 @@ const CreateEventForm = () => {
                           />
                         </label>
                         <span
+                          hidden={!!eventId}
                           className="image-remove-button"
                           onClick={handleImageRemove(index)}
                         >

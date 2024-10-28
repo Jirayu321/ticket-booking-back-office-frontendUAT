@@ -113,9 +113,9 @@ const SubHeader: FC<SubHeaderProp> = ({
         const eventTime = dayjs(eventDateTime).add(7, "hour").toISOString();
         const eventDate = dayjs(eventTime).add(7, "hour").toISOString().split("T")[0];
         const resUpdateEventList = await updateEventById(Number(eventId), {
-          Event_Name: title,
-          Event_Addr: title2,
-          Event_Desc: description,
+          Event_Name: title.trim(),
+          Event_Addr: title2.trim(),
+          Event_Desc: description.trim(),
           Event_Date: eventDate,
           Event_Time: eventTime,
           Event_Status: status,
@@ -123,7 +123,7 @@ const SubHeader: FC<SubHeaderProp> = ({
           Event_Pic_2: images[1],
           Event_Pic_3: images[2],
           Event_Pic_4: images[3],
-        });
+        });        
         if (resUpdateEventList.status === 'SUCCESS') {
           // do nothing
         } else {
@@ -156,8 +156,6 @@ const SubHeader: FC<SubHeaderProp> = ({
               content: "swal2-content",
             },
           });
-
-          window.location.replace('/all-events');
         } else {
           console.error('Error updating event:', resUpdateEventList.message);
         }
@@ -169,9 +167,12 @@ const SubHeader: FC<SubHeaderProp> = ({
         const resUpdatePublic = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
         if (resUpdatePublic.status === 'SUCCESS') {
           toast.success("ปรับสถานะเผยแพร่สำเร็จ");
-          window.location.replace('/all-events');
         }
       }
+
+      setTimeout(() => {
+        window.location.replace("/all-events");
+      }, 1500);
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
