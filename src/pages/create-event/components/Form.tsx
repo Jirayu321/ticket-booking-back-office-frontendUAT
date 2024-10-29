@@ -710,27 +710,30 @@ const CreateEventForm = () => {
                                 </div>
                               </div>
 
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  gap: "15px",
-                                  marginBottom: "15px",
-                                }}
-                              >
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={() => handleAddRow(plan.Plan_id)}
-                                  style={{
-                                    marginBottom: "-20px",
-                                    height: 40,
+                              {!eventId && (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: "15px",
+                                    marginBottom: "15px",
                                   }}
                                 >
-                                  + เพิ่มราคาบัตร
-                                </Button>
-                              </Box>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleAddRow(plan.Plan_id)}
+                                    style={{
+                                      marginBottom: "-20px",
+                                      height: 40,
+                                    }}
+                                  >
+                                    + เพิ่มราคาบัตร
+                                  </Button>
+                                </Box>
+                              )}
+
                             </div>
                           </Box>
 
