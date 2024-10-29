@@ -53,7 +53,6 @@ function totalNetPriceWithZeroBalance(data: any) {
 
 const OverviewContent: React.FC = () => {
   const [combinedData, setCombinedData] = useState<any[]>([]);
-  // console.log("combinedData", combinedData);
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("event");
@@ -106,8 +105,8 @@ const OverviewContent: React.FC = () => {
       console.log("hisPayment:", hisPayment);
       return;
     }
-    console.log("hisPayment:", hisPayment);
-    // ดำเนินการต่อหลังจากโหลดข้อมูลครบแล้ว
+    // console.log("hisPayment:", hisPayment);
+
     const filteredHisPayment = hisPayment;
     // .reduce((acc, current) => {
     //   const existingOrder = acc.find(
@@ -155,7 +154,7 @@ const OverviewContent: React.FC = () => {
         paymentsByPayByName: paymentsByPayByName,
       };
     });
-
+    console.log("combinedData", combinedData);
     setCombinedData(combinedData);
   };
 
@@ -230,13 +229,11 @@ const OverviewContent: React.FC = () => {
   };
 
   function OutstandingPayment(data: any) {
-    const Data2 = data.filter((order) => order.Is_Balance !== 0);
-
     const totalNetPriceWithZeroBalance = data.reduce<number>(
-      (sum, order) => sum + order.Total_Pay,
+      (sum, order) => sum + order.Net_Price,
       0
     );
-    const totalOutstandingPayment = Data2?.reduce<number>(
+    const totalOutstandingPayment = data?.reduce<number>(
       (sum, order) => sum + order.Total_Pay,
       0
     );
@@ -280,29 +277,32 @@ const OverviewContent: React.FC = () => {
     textAlign: "center",
   };
 
-  //   const uniqueOrders = filteredEvents
-  //   .flatMap((event) => event.orders)
-  //   .reduce((acc, current) => {
-  //     const exists = acc.find((order) => order.Order_no === current.Order_no);
-  //     if (!exists) acc.push(current);
-  //     return acc;
-  //   }, []);
+  const uniqueOrders = filteredEvents
+    .flatMap((event) => event.paymentsByPayByName)
+    .reduce((total, order) => {
+      return (
+        total +
+        Object.values(order).reduce(
+          (sum, paymentArray) => sum + paymentArray.length,
+          0
+        )
+      );
+    }, 0);
 
-  const totalOrders = filteredEvents.length;
+  const totalOrders = uniqueOrders;
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    console.log("event", event.paymentsByPayByName);
+    // console.log("event", event.paymentsByPayByName);
     const totalPayByMethod = {};
     Object.entries(event.paymentsByPayByName).forEach(
       ([payByName, payments]) => {
         const totalPay = payments.reduce((sum, payment) => {
-          return sum + (payment.Total_Pay || 0);
+          return sum + (payment.Net_Price || 0);
         }, 0);
         totalPayByMethod[payByName] = totalPay;
       }
     );
 
-    // return totalPayByMethod;
     const grandTotalPay = Object.values(totalPayByMethod).reduce(
       (sum, total) => {
         return sum + total;
@@ -313,10 +313,7 @@ const OverviewContent: React.FC = () => {
     return grandTotalPay;
   }, 0);
 
-  console.log("totalpay", totalpay);
-
   const totalpayBalen = filteredEvents.reduce((total, event) => {
-    console.log("event", event.paymentsByPayByName);
     const totalPayByMethod = {};
     Object.entries(event.paymentsByPayByName).forEach(
       ([payByName, payments]) => {
@@ -330,7 +327,6 @@ const OverviewContent: React.FC = () => {
       }
     );
 
-    // return totalPayByMethod;
     const grandTotalPay = Object.values(totalPayByMethod).reduce(
       (sum, total) => {
         return sum + total;
@@ -348,7 +344,6 @@ const OverviewContent: React.FC = () => {
     setSelectedOrderNo(orderNo);
   };
 
-  // console.log("filteredEvents", filteredEvents);
   return (
     <div
       className="all-events-content"
@@ -512,7 +507,7 @@ const OverviewContent: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {totalpay ? totalpay : 0}
+                      {totalpay ? formatNumberWithCommas(totalpay) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -561,7 +556,9 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {totalpayBalen ? totalpayBalen : 0}
+                      {totalpayBalen
+                        ? formatNumberWithCommas(totalpayBalen)
+                        : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -608,9 +605,8 @@ const OverviewContent: React.FC = () => {
                     }}
                   >
                     <Typography sx={{ fontSize: "23px" }}>ค้างชำระ</Typography>
-
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {totalpayfun ? totalpayfun : 0}
+                      {totalpayfun ? formatNumberWithCommas(totalpayfun) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -706,7 +702,7 @@ const OverviewContent: React.FC = () => {
                     "&:hover": {
                       backgroundColor: "#CFB70B",
                     },
-                    flexShrink: 0, // Prevent the button from shrinking
+                    flexShrink: 0,
                   }}
                 >
                   ค้นหา
@@ -788,31 +784,6 @@ const OverviewContent: React.FC = () => {
               >
                 ช่องทางชำระ
               </TableCell>
-
-              {/* <TableCell
-                sx={{
-                  ...tableCellHeadStyle,
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                คำสั่งซื้อทั้งหมด
-              </TableCell> */}
-
-              {/* <TableCell
-                sx={{
-                  ...tableCellHeadStyle,
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                ยอดขายทั้งหมด
-              </TableCell> */}
-
               <TableCell
                 sx={{
                   ...tableCellHeadStyle,
@@ -836,30 +807,6 @@ const OverviewContent: React.FC = () => {
               >
                 ค้างชำระ
               </TableCell>
-
-              {/* <TableCell
-                sx={{
-                  ...tableCellHeadStyle,
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                จำนวนบัตรทั้งหมด
-              </TableCell>
-
-              <TableCell
-                sx={{
-                  ...tableCellHeadStyle,
-                  position: "sticky",
-                  top: 0,
-                  backgroundColor: "#11131A",
-                  zIndex: 2,
-                }}
-              >
-                เช็คอิน
-              </TableCell> */}
             </TableRow>
           </TableHead>
           {combinedData && combinedData.length > 0 ? (
@@ -869,15 +816,15 @@ const OverviewContent: React.FC = () => {
                   {Object.entries(event.paymentsByPayByName).map(
                     ([payByName, payments]: [string, any[]], index: number) => (
                       <TableRow
-                        key={index + eventIndex +1}
+                        key={index + eventIndex + 1}
                         style={{
                           backgroundColor:
-                            selectedOrderNo === index + eventIndex +1
+                            selectedOrderNo === index + eventIndex + 1
                               ? "lightblue"
                               : "inherit",
                           cursor: "pointer",
                         }}
-                        onClick={() => handleOrderClick(index + eventIndex +1)}
+                        onClick={() => handleOrderClick(index + eventIndex + 1)}
                       >
                         <TableCell
                           sx={{

@@ -277,8 +277,6 @@ const AllOrderContent: React.FC = () => {
           return acc;
         }, {})
     );
-
-    console.log("latestOrder:", latestOrders);
     setOrderDetail(latestOrders);
 
     const h = orderDData
@@ -288,8 +286,6 @@ const AllOrderContent: React.FC = () => {
           new Date(a.Payment_Date7).getTime() -
           new Date(b.Payment_Date7).getTime()
       );
-
-    // console.log("h:", h);
     setOrderHispayDetail(h);
   };
 
@@ -371,16 +367,6 @@ const AllOrderContent: React.FC = () => {
     }, []);
 
   const totalOrders = filteredOrders?.length;
-
-  // const OutstandingPayment = filteredOrders
-  //   ?.filter((order) => order.Order_Status === 4)
-  //   .reduce((sum, order) => sum + order.Total_Price * order.Web_Qty_Buy, 0);
-
-  // const OutstandingPayment2 = filteredOrders
-  //   .filter((order) => order.Total_Balance !== 0 && order.Order_Status === 1)
-  //   .reduce((sum, order) => sum + order.Total_Balance, 0);
-
-  // const OutstandingPayment3 = OutstandingPayment + OutstandingPayment2;
 
   const dataP = Object.values(
     orderDData.filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
