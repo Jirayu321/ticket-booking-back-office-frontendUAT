@@ -44,12 +44,10 @@ const SubHeader: FC<SubHeaderProp> = ({
   async function getModelById(eventId: number) {
     try {
       const eventModel = await getEventById(eventId);
-      console.debug(eventModel);
+      // console.debug(eventModel);
       setTitle(eventModel.Event_Name);
       setTitle2(eventModel.Event_Addr);
       setDescription(eventModel.Event_Desc);
-      const adjustedEventTime = dayjs(eventModel.Event_Time).subtract(7, "hour").toISOString();
-      setEventDateTime(adjustedEventTime);
       setStatus(Number(eventModel.Event_Status));
       setIsPublic(eventModel.Event_Public === "Y");
       setIsPublicFromBase(eventModel.Event_Public === "Y");
@@ -58,15 +56,17 @@ const SubHeader: FC<SubHeaderProp> = ({
       setImages(2, eventModel.Event_Pic_3 || null);
       setImages(3, eventModel.Event_Pic_4 || null);
 
+      const adjustedEventTime = dayjs(eventModel.Event_Time).subtract(7, "hour").toISOString();
+      setEventDateTime(adjustedEventTime);
+
       const eventStock = await getEventStock();
-      console.debug(eventId);
       const eventStockModel = eventStock.filter((stc) => Number(stc.Event_Id) === Number(eventId));
-      console.debug("eventStockModel => ", eventStockModel);
+      // console.debug("eventStockModel => ", eventStockModel);
       setPlanGroupId(eventStockModel[0].PlanGroup_Id);
 
       const logEventPrice = await getLogEventPrice();
       const logEventPriceModel = logEventPrice.filter((log) => Number(log.Event_Id) === Number(eventId));
-      console.debug("logEventPriceModel => ", logEventPriceModel);
+      // console.debug("logEventPriceModel => ", logEventPriceModel);
 
       // โค้ดการอัพเดต allRows
       const updatedRows = {};
@@ -78,10 +78,13 @@ const SubHeader: FC<SubHeaderProp> = ({
           updatedRows[Plan_Id] = [];
         }
 
+        const adjustedStart = dayjs(Start_Datetime).subtract(7, "hour").toISOString();
+        const adjustedEnd = dayjs(End_Datetime).subtract(7, "hour").toISOString();
+
         updatedRows[Plan_Id].push({
           id: Log_Id,
-          startDate: Start_Datetime,
-          endDate: End_Datetime,
+          startDate: adjustedStart,
+          endDate: adjustedEnd,
           price: Plan_Price,
         });
       }
@@ -123,7 +126,7 @@ const SubHeader: FC<SubHeaderProp> = ({
           Event_Pic_2: images[1],
           Event_Pic_3: images[2],
           Event_Pic_4: images[3],
-        });        
+        });
         if (resUpdateEventList.status === 'SUCCESS') {
           // do nothing
         } else {
@@ -161,8 +164,8 @@ const SubHeader: FC<SubHeaderProp> = ({
         }
       }
 
-      console.debug("isPublicFromBase : ", isPublicFromBase);
-      console.debug("isPublic : ", isPublic);
+      // console.debug("isPublicFromBase : ", isPublicFromBase);
+      // console.debug("isPublic : ", isPublic);
       if ((isPublicFromBase && !isPublic) || (!isPublicFromBase && isPublic)) {
         const resUpdatePublic = await updatePublicEventById(Number(window.location.pathname.split('/edit-event/')[1]), isPublic);
         if (resUpdatePublic.status === 'SUCCESS') {

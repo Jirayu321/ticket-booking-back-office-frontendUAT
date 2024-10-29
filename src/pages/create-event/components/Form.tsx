@@ -76,7 +76,7 @@ const CreateEventForm = () => {
 
   useEffect(() => {
     if (eventId && planGroupId !== "") {
-      console.debug("handleZoneChange");
+      // console.debug("handleZoneChange");
       handleZoneChange(String(planGroupId));
     }
   }, [eventId, combinedData, planGroupId]);
