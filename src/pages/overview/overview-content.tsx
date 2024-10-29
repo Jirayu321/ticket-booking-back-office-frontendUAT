@@ -32,7 +32,7 @@ dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
-  return dayjs(dateTime).locale("th").format("D/M/YYYY HH:mm");
+  return dayjs(dateTime).subtract(7, "hour").locale("th").format("D/M/YYYY HH:mm");
 };
 
 function formatNumberWithCommas(number: number | string): string {
