@@ -54,12 +54,11 @@ function totalNetPriceWithZeroBalance(data: any, id: any) {
 }
 
 function OutstandingPayment(data: any, id: any) {
-
   const Data2 = data.filter(
     (order) => order.Event_Id === id && order.Is_Balance !== 0
   );
   const totalOutstandingPayment = Data2?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
+    (sum, order) => sum + order.Is_Balance,
     0
   );
 
@@ -69,12 +68,12 @@ function OutstandingPayment(data: any, id: any) {
 }
 
 function totalNetPrice(data: any, id: any) {
-
+  console.log("totalNetPrice", data);
   const Data = data.filter(
     (order) => order.Event_Id === id && order.Is_Balance === 0
   );
 
-   const Data2 = data.filter(
+  const Data2 = data.filter(
     (order) => order.Event_Id === id && order.Is_Balance !== 0
   );
 
@@ -84,10 +83,9 @@ function totalNetPrice(data: any, id: any) {
   );
 
   const totalOutstandingPayment = Data2?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
+    (sum, order) => sum + order.Is_Balance,
     0
   );
-
 
   const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
   // console.log("total", x);
@@ -206,7 +204,7 @@ const OverviewContent: React.FC = () => {
     if (isSuccess && Array.isArray(dashboardData) && dashboardData.length > 0) {
       processDashboardData(dashboardData);
     } else {
-      console.log("kuy");
+      console.log("");
     }
   }, [dashboardData]);
 
@@ -331,8 +329,6 @@ const OverviewContent: React.FC = () => {
   const totalOrders = uniqueOrders.length;
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
-    // console.log("event", eventTotalPay);
     const eventTotalPay = event.orders
       .filter((order) => order.Event_Id === event.Event_Id)
       .reduce(
@@ -362,16 +358,20 @@ const OverviewContent: React.FC = () => {
     return acc;
   }, {});
 
-  
-
   const totalpayBalen = filteredEvents.reduce((total, event) => {
-    // คำนวณผลรวม Total_Pay สำหรับ payments ของแต่ละ event
-    const eventTotalPay = event.payments.reduce(
-      (sum, payment) => sum + (payment.Total_Balance || 0),
-      0
-    );
-    // รวมผลรวมของแต่ละ event เข้ากับ total ทั้งหมด
-    return total + eventTotalPay;
+    const eventTotalPay = event.orders
+      .filter((order) => order.Event_Id === event.Event_Id)
+      .reduce(
+        (sum, payment) => sum + (payment.Web_Qty_Buy * payment.Plan_Price || 0),
+        0
+      );
+    const eventTotalPay2 = event.orders
+      .filter(
+        (order) => order.Event_Id === event.Event_Id && order.Is_Balance !== 0
+      )
+      .reduce((sum, payment) => sum + (payment.Is_Balance || 0), 0);
+    let x = eventTotalPay - eventTotalPay2;
+    return total + x;
   }, 0);
 
   const totalpayfun = totalpay - totalpayBalen;
@@ -547,7 +547,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 3)
                             .length
                         : 0} */}
-                      {totalpay ? totalpay : 0}
+                      {totalpay ? formatNumberWithCommas(totalpay) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -596,7 +596,8 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {totalpayfun ? totalpayfun : 0}
+                    {totalpayBalen ? formatNumberWithCommas(totalpayBalen) : 0}
+                   
                     </Typography>
                   </Box>
                 </Box>
@@ -649,7 +650,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 13)
                             .length
                         : 0} */}
-                      {totalpayBalen ? totalpayBalen : 0}
+                           {totalpayfun ? formatNumberWithCommas(totalpayfun) : 0}
                     </Typography>
                   </Box>
                 </Box>
