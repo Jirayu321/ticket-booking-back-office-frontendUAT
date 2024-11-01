@@ -60,6 +60,7 @@ const AllSeatContent: React.FC = () => {
           scanStatus: "all",
           ticket_Reserve: "all",
           ticket_pay: "all",
+          ticketNo: "",
         };
   });
 
@@ -119,6 +120,8 @@ const AllSeatContent: React.FC = () => {
           : "all",
       ticket_pay:
         prevFilters.ticket_pay !== "all" ? prevFilters.ticket_pay : "all",
+
+      ticketNo: prevFilters.ticketNo !== "" ? prevFilters.ticketNo : "",
     }));
     setStartDate(dayjs().startOf("month"));
     setEndDate(dayjs().endOf("month"));
@@ -157,11 +160,20 @@ const AllSeatContent: React.FC = () => {
       return updatedFilters;
     });
   };
+  const handleSearchChange2 = (event) => {
+    setFilters((prev) => {
+      const updatedFilters = {
+        ...prev,
+        ticketNo : event.target.value,
+      };
+      localStorage.setItem("filtersSeat", JSON.stringify(updatedFilters));
+      return updatedFilters;
+    });
+  };
 
   const applyFilters = (tickets) => {
     return tickets.reduce((acc, current) => {
       const searchValue = filters.search.toLowerCase();
-
       const matchesSearch =
         current.ticket_running?.toLowerCase().includes(searchValue) ||
         current.Order_no?.toLowerCase().includes(searchValue) ||
@@ -170,6 +182,10 @@ const AllSeatContent: React.FC = () => {
         current.Cust_name?.toLowerCase().includes(searchValue) ||
         current.Cust_tel?.toLowerCase().includes(searchValue) ||
         current.Plan_Name?.toLowerCase().includes(searchValue);
+
+      const matchesTicketNo = String(current.ticket_no)
+        .toLowerCase()
+        .includes(filters.ticketNo?.toLowerCase() || "");
 
       const matchesEvent =
         filters.event === "all" || current.Event_Name.includes(filters.event);
@@ -208,7 +224,7 @@ const AllSeatContent: React.FC = () => {
           current.Event_Name.toLowerCase().includes(
             filters.eventName.toLowerCase()
           ));
-      // Combine all conditions
+
       if (
         matchesSearch &&
         matchesEvent &&
@@ -217,7 +233,8 @@ const AllSeatContent: React.FC = () => {
         matchesScanStatus &&
         matchesTicketReserve &&
         matchesEventName &&
-        matchesTicketPay
+        matchesTicketPay &&
+        matchesTicketNo
       ) {
         // Check if we already have a ticket with the same ID
         const existingTicket = acc.find(
@@ -243,7 +260,7 @@ const AllSeatContent: React.FC = () => {
       return acc;
     }, []);
   };
-
+  console.log("ticketData", ticketData);
   const filteredTickets = applyFilters(ticketData);
   const totalCount = filteredTickets?.length;
   const scannedCount = filteredTickets.filter(
@@ -286,12 +303,12 @@ const AllSeatContent: React.FC = () => {
   const formatTableDisplay = (tableNumber, seatIndex, totalSeats, ticket) => {
     // console.log("ticket", ticket);
     // console.log("TicketTypes", TicketTypes);
-  
+
     if (TicketTypes.length !== 0) {
       const matchingType = TicketTypes?.ticketTypes.find(
         (type) => type.Ticket_Type_Id === ticket.Ticket_Type_Id
       );
-  
+
       if (matchingType && matchingType.Ticket_Type_Cal === "N") {
         return `${tableNumber} (${1}/${1})`; // 1/1
       } else {
@@ -301,7 +318,6 @@ const AllSeatContent: React.FC = () => {
       }
     }
   };
-  
 
   const handleOpenModal = (ticket) => {
     setSelectedTicket(ticket);
@@ -461,6 +477,26 @@ const AllSeatContent: React.FC = () => {
               onChange={handleSearchChange}
               placeholder="ค้นหาโดย ชื่องาน,รหัสที่นั่ง,ชื่อลูกค้า,เบอร์โทร,โซน หรือ เลขคำสั่งซื้อ"
               style={{ marginRight: "10px", width: "450px" }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none",
+                    transform: "translateY(5px)",
+                    height: 30,
+                  },
+                },
+              }}
+            />
+            <TextField
+              variant="outlined"
+              label="ค้นหาเบอร์โต๊ะ"
+              value={filters.ticketNo}
+              onChange={handleSearchChange2}
+              placeholder="ค้นหาโดยเบอร์โต๊ะ"
+              style={{ marginRight: "10px", width: "150px" }}
               InputLabelProps={{
                 shrink: true,
               }}

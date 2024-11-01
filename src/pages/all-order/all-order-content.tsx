@@ -188,7 +188,6 @@ const AllOrderContent: React.FC = () => {
         [event.target.name]: event.target.value,
       };
 
-      // เก็บค่า filters ใหม่ใน localStorage
       localStorage.setItem("filters", JSON.stringify(updatedFilters));
 
       return updatedFilters;
@@ -223,6 +222,7 @@ const AllOrderContent: React.FC = () => {
         customerPhone: "",
         status: "all",
         paymentStatus: "all",
+        ticketNo: "",
         ticketType: "all",
       };
     } else if (savedOrderDetailFilter) {
@@ -235,6 +235,7 @@ const AllOrderContent: React.FC = () => {
         customerPhone: "",
         status: "all",
         paymentStatus: "all",
+        ticketNo: "",
         ticketType: "all",
       };
     }
@@ -256,7 +257,7 @@ const AllOrderContent: React.FC = () => {
   const handleOrderClick = async (orderNo: any) => {
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
-    console.log("orderHData", orderHData);
+    // console.log("orderHData", orderHData);
 
     const latestOrders = Object.values(
       orderHData
@@ -296,21 +297,25 @@ const AllOrderContent: React.FC = () => {
     return bath;
   }
 
+  console.log("orderHData", orderHData);
   const filteredOrders = orderHData
     ?.filter((order) => {
       const matchesSearch =
         String(order.Event_Name)
           .toLowerCase()
-          .includes(filters.eventName.toLowerCase()) &&
+          .includes(filters.eventName?.toLowerCase() || "") &&
         String(order.Order_no)
           .toLowerCase()
-          .includes(filters.orderNo.toLowerCase()) &&
+          .includes(filters.orderNo?.toLowerCase() || "") &&
         String(order.Cust_name)
           .toLowerCase()
-          .includes(filters.customerName.toLowerCase()) &&
+          .includes(filters.customerName?.toLowerCase() || "") &&
         String(order.Cust_tel)
           .toLowerCase()
-          .includes(filters.customerPhone.toLowerCase());
+          .includes(filters.customerPhone?.toLowerCase() || "") &&
+        String(order.TicketNo_List)
+          .toLowerCase()
+          .includes(filters.ticketNo?.toLowerCase() || "");
 
       const matchesStatusOrder =
         (filters.status === "สำเร็จ" && order.Order_Status === 1) ||
@@ -371,7 +376,8 @@ const AllOrderContent: React.FC = () => {
   const dataP = Object.values(
     orderDData.filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
   );
-  console.log("dataP", dataP);
+  // console.log("dataP", dataP);
+
   const dataP2 = Object.values(
     orderDData
       .filter((order) => order.Event_Id === filteredOrders[0]?.Event_Id)
@@ -385,7 +391,8 @@ const AllOrderContent: React.FC = () => {
         return acc;
       }, {})
   );
-  console.log("dataP2", dataP2);
+
+  // console.log("dataP2", dataP2);
 
   const totalNetPriceWithZeroBalance = dataP2?.reduce<number>(
     (sum, order) => sum + order.Net_Price,
@@ -924,6 +931,27 @@ const AllOrderContent: React.FC = () => {
 
                 <TextField
                   variant="outlined"
+                  label="เบอร์โต๊ะ"
+                  name="ticketNo"
+                  value={filters.ticketNo}
+                  onChange={handleSearchChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& input": {
+                        border: "none",
+                        transform: "translateY(5px)",
+                        width: "120px",
+                        height: 30,
+                      },
+                    },
+                  }}
+                />
+
+                <TextField
+                  variant="outlined"
                   label="ชื่อลูกค้า"
                   name="customerName"
                   value={filters.customerName}
@@ -942,6 +970,7 @@ const AllOrderContent: React.FC = () => {
                     },
                   }}
                 />
+
                 <TextField
                   variant="outlined"
                   label="เบอร์โทร"
@@ -962,6 +991,7 @@ const AllOrderContent: React.FC = () => {
                     },
                   }}
                 />
+
                 <FormControl
                   variant="outlined"
                   sx={{ backgroundColor: "white" }}
@@ -1006,6 +1036,7 @@ const AllOrderContent: React.FC = () => {
                 </FormControl>
               </Box>
             </Box>
+
             <Box
               sx={{
                 display: "flex",
@@ -1051,7 +1082,7 @@ const AllOrderContent: React.FC = () => {
           maxHeight: "70vh",
         }}
       >
-        <div style={{ width: "920px" }}>
+        <div style={{ width: "1030px" }}>
           <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
             คำสั่งซื้อทั้งหมด
           </p>
@@ -1157,6 +1188,22 @@ const AllOrderContent: React.FC = () => {
                       fontSize: "17px",
                       textAlign: "center",
                       color: "#fff",
+                      minWidth: "80px",
+                      maxWidth: "80px",
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#11131A",
+                      zIndex: 2,
+                    }}
+                  >
+                    เบอร์โต๊ะ
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "17px",
+                      textAlign: "center",
+                      color: "#fff",
                       minWidth: "65px",
                       position: "sticky",
                       top: 0,
@@ -1254,6 +1301,9 @@ const AllOrderContent: React.FC = () => {
                       <TableCell style={{ textAlign: "center", width: "50px" }}>
                         {order.Cust_tel}
                       </TableCell>
+                      <TableCell style={{ textAlign: "center", width: "50px" }}>
+                        {order.TicketNo_List}
+                      </TableCell>
                       <TableCell style={{ textAlign: "center" }}>
                         <div
                           style={{
@@ -1334,7 +1384,7 @@ const AllOrderContent: React.FC = () => {
                         marginBottom: 20,
                         justifyItems: "flex-start",
                         alignItems: "center",
-                        width: "25vw",
+                        width: "30vw",
                       }}
                     >
                       <p>
@@ -1403,13 +1453,13 @@ const AllOrderContent: React.FC = () => {
                           : handletime(orderDetail.at(0)?.Order_datetime)}
                       </p>
 
-                      <p>
+                      {/* <p>
                         <strong>line_id:</strong>
                         <br />
                         {orderDetail?.length === 0
                           ? ``
                           : `${orderDetail.at(0)?.Cust_line}`}
-                      </p>
+                      </p> */}
                     </div>
                     <div
                       style={{
@@ -1656,14 +1706,7 @@ const AllOrderContent: React.FC = () => {
 
       <div
         style={{ marginTop: "18px", display: "flex", justifyContent: "center" }}
-      >
-        {/* <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, page) => handleClick(page)}
-          color="primary"
-        /> */}
-      </div>
+      ></div>
 
       <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box
