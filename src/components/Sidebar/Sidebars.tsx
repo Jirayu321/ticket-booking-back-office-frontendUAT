@@ -116,7 +116,7 @@ const Sidebars: React.FC = () => {
                         marginLeft:"1px"
                       }}
                     >
-                      v.002
+                      v.003
                     </Typography>
                     <IconButton
                       sx={{

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { authAxiosClient } from "../../config/axios.config";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -31,6 +32,12 @@ import moment from "moment";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import "moment/locale/th";
+import Swal from "sweetalert2";
+import {
+  SwalSuccess,
+  SwalConfirmDialog,
+  SwalError,
+} from "../../lib/sweetalert";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
@@ -45,6 +52,7 @@ import {
 moment.locale("th");
 const AllOrderContent: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
+  console.log("orderDetail", orderDetail);
   const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -248,6 +256,148 @@ const AllOrderContent: React.FC = () => {
     setModalOpen(true);
   };
 
+  const PaymentGateway = async (chargeId: any) => {
+    console.log("orderDetail.at(0)", orderDetail.at(0));
+    console.log("chargeId", chargeId);
+    if (!chargeId) {
+      console.error("Invalid charge ID");
+      return;
+    }
+  
+    try {
+      const response = await authAxiosClient?.post("/api/getChargeDetails", { chargeId });
+  
+      if (response.status !== 200) {
+        throw new Error(`Failed to retrieve charge details, status: ${response.status}`);
+      }
+  
+      const result = response?.data;
+  
+      if (result.success) {
+        console.log("Charge detail:", result?.data);
+        if (result?.data.paid !== false) {
+          const amount: number = Number(result?.data.amount) / 100;
+          const totalSum = orderDetail.reduce((acc, order) => acc + order.Total_Price, 0);
+          const paymentOption: number = (amount / totalSum) * 100;
+          const time_paid = result?.data.paid_at;
+          const ref_number1 = (result?.data?.source as any)?.provider_references?.reference_number_1 || "";
+          const orderId = orderDetail.at(0).Order_id;
+          const paymentMethod = (result?.data?.source as any)?.type;
+          const validPaymentMethods = ["mobile_banking_bay", "mobile_banking_bbl", "mobile_banking_ktb", "mobile_banking_kbank", "mobile_banking_scb", "promptpay"];
+  
+          if (!paymentMethod) {
+            console.log("Payment method is null");
+          } else if (validPaymentMethods.includes(paymentMethod)) {
+            if (paymentMethod === "promptpay") {
+              console.log("promptpay", paymentMethod);
+              const PaymentMethod = "promptpay";
+              const res = await authAxiosClient?.post("/api/AddHisPayment", {
+                orderId,
+                orderDetail,
+                totalSum,
+                amount,
+                PaymentMethod,
+                paymentOption,
+                time_paid,
+                chargeId,
+                ref_number1,
+              });
+              console.log("AddHisPayment response:", res?.data);
+              SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+              setTimeout(() => {
+                window.location.replace("/all-orders");
+              }, 1500);
+            } else {
+              console.log("E-Banking", paymentMethod);
+              const PaymentMethod = "E-Banking";
+              const res = await authAxiosClient?.post("/api/AddHisPayment", {
+                orderId,
+                orderDetail,
+                totalSum,
+                amount,
+                PaymentMethod,
+                paymentOption,
+                time_paid,
+                chargeId,
+                ref_number1,
+              });
+              console.log("AddHisPayment response:", res?.data);
+              SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+              setTimeout(() => {
+                window.location.replace("/all-orders");
+              }, 1500);
+            }
+          } else if (result?.data?.card) {
+            console.log("card", result?.data?.card);
+            const PaymentMethod = "Credit Card";
+            const res = await authAxiosClient?.post("/api/AddHisPayment", {
+              orderId,
+              orderDetail,
+              totalSum,
+              amount,
+              PaymentMethod,
+              paymentOption,
+              time_paid,
+              chargeId,
+              ref_number1,
+            });
+            console.log("AddHisPayment response:", res?.data);
+            SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+            setTimeout(() => {
+              window.location.replace("/all-orders");
+            }, 1500);
+          } else {
+            console.log("Other payment method not recognized");
+          }
+        } else if (result?.data.failure_code) {
+          console.log("Charge details:", result?.data.failure_code);
+        } else {
+          console.log("Waiting for payment...");
+          Swal.fire({
+            icon: "warning",
+            text: "ตรวจสอบการจ่ายเป็น Pendding ใน Payment Gateway คุณต้องการยกเลิกคำสั่งซื้อเลยหรือไม่",
+            showCancelButton: true,
+            confirmButtonText: "ตกลง",
+            cancelButtonText: "ปิด",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const orderId = orderDetail.at(0).Order_id;
+              try {
+                const res = await authAxiosClient?.post("/api/claerStatusR", { orderId, chargeId });
+                console.log("claerStatusR response:", res?.data);
+                SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+                setTimeout(() => {
+                  window.location.replace("/all-orders");
+                }, 1500);
+              } catch (error) {
+                console.error("Error in claerStatusR:", error);
+                Swal.fire({
+                  icon: "error",
+                  text: "เกิดข้อผิดพลาดในการยกเลิกสถานะ",
+                });
+              }
+            } else {
+              console.log("User closed");
+            }
+          });
+        }
+      } else {
+        console.error("Error retrieving charge details:", result.error);
+        Swal.fire({
+          icon: "error",
+          text: "ไม่สามารถดึงข้อมูลการชำระเงินได้",
+        });
+      }
+    } catch (error: any) {
+      console.error("Failed to retrieve charge details:", error.message || error);
+      Swal.fire({
+        icon: "error",
+        text: "เกิดข้อผิดพลาดในการดึงข้อมูลการชำระเงิน",
+      });
+    }
+  };
+  
+
   const handletime = (x) => {
     const adjustedDate = dayjs(x).subtract(7, "hour");
     const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
@@ -320,7 +470,7 @@ const AllOrderContent: React.FC = () => {
       const matchesStatusOrder =
         (filters.status === "สำเร็จ" && order.Order_Status === 1) ||
         (filters.status === "มีแก้ไข" && order.Order_Status === 2) ||
-        (filters.status === "ขอคืนเงิน" && order.Order_Status === 13) ||
+        (filters.status === "ยกเลิก" && order.Order_Status === 13) ||
         (filters.status === "ไม่สำเร็จเพราะติด R" &&
           order.Order_Status === 4) ||
         (filters.status === "ไม่สำเร็จจาก Omise" && order.Order_Status === 5) ||
@@ -1007,7 +1157,7 @@ const AllOrderContent: React.FC = () => {
                     <MenuItem value="all">ทั้งหมด</MenuItem>
                     <MenuItem value="สำเร็จ">สำเร็จ</MenuItem>
                     <MenuItem value="มีแก้ไข">มีแก้ไข</MenuItem>
-                    <MenuItem value="ขอคืนเงิน">ขอคืนเงิน</MenuItem>
+                    <MenuItem value="ยกเลิก">ยกเลิก</MenuItem>
                     <MenuItem value="ไม่สำเร็จเพราะติด R">
                       ไม่สำเร็จเพราะติด R
                     </MenuItem>
@@ -1478,6 +1628,26 @@ const AllOrderContent: React.FC = () => {
                           style={{ width: 110, height: 50 }}
                         >
                           ดูรายละเอียด
+                        </Button>
+                      ) : null}
+                      {orderDetail[0]?.Order_Status === 4 ? (
+                        <Button
+                          variant="contained"
+                          // color="primary"
+                          onClick={() =>
+                            PaymentGateway(
+                              orderDetail.at(0)?.ORD_H_Last_Charge_ID
+                            )
+                          }
+                          style={{
+                            width: 110,
+                            height: 50,
+                            marginTop: 10,
+                            backgroundColor: "#CFB70B",
+                            color: "black",
+                          }}
+                        >
+                          ตรวจสอบจ่าย
                         </Button>
                       ) : null}
                     </div>
