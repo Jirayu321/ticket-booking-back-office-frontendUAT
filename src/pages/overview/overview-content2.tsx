@@ -32,7 +32,10 @@ dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
-  return dayjs(dateTime).subtract(7, "hour").locale("th").format("D/M/YYYY HH:mm");
+  return dayjs(dateTime)
+    .subtract(7, "hour")
+    .locale("th")
+    .format("D/M/YYYY HH:mm");
 };
 
 function formatNumberWithCommas(number: number | string): string {
@@ -130,9 +133,9 @@ const OverviewContent: React.FC = () => {
     // }, []);
 
     const combinedData = events.map((event) => {
-      //   const relatedOrders = orderAll.filter(
-      //     (order) => order.Event_Id === event.Event_Id
-      //   );
+      const relatedOrders = orderAll.filter(
+        (order) => order.Event_Id === event.Event_Id
+      );
 
       const relatedPayments = filteredHisPayment.filter(
         (payment) => payment.Event_Id === event.Event_Id
@@ -149,8 +152,10 @@ const OverviewContent: React.FC = () => {
         },
         {}
       );
+
       return {
         ...event,
+        Orders: relatedOrders,
         paymentsByPayByName: paymentsByPayByName,
       };
     });
@@ -254,7 +259,7 @@ const OverviewContent: React.FC = () => {
         return false;
       }
 
-      const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
+      // const publishDate = dayjs(event.Event_Public_Date).subtract(7, "hour");
       const eventDate = dayjs(event.Event_Time).subtract(7, "hour");
 
       if (filters.startDate && filters.endDate) {
@@ -276,23 +281,22 @@ const OverviewContent: React.FC = () => {
     fontSize: "17px",
     textAlign: "center",
   };
+  console.log("filteredEvents", filteredEvents);
 
-  const uniqueOrders = filteredEvents
-    .flatMap((event) => event.paymentsByPayByName)
-    .reduce((total, order) => {
-      return (
-        total +
-        Object.values(order).reduce(
-          (sum, paymentArray) => sum + paymentArray.length,
-          0
-        )
-      );
-    }, 0);
+  const uniqueOrders = () => {
+    if (filteredEvents.length > 1) {
+      return filteredEvents.reduce((total, event) => {
+        return total + (event.Orders?.length || 0);
+      }, 0);
+    } else {
+      return filteredEvents[0]?.Orders?.length || 0;
+    }
+  };
 
-  const totalOrders = uniqueOrders;
+  const totalOrders = uniqueOrders();
+  console.log(totalOrders);
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    // console.log("event", event.paymentsByPayByName);
     const totalPayByMethod = {};
     Object.entries(event.paymentsByPayByName).forEach(
       ([payByName, payments]) => {
@@ -310,7 +314,7 @@ const OverviewContent: React.FC = () => {
       0
     );
 
-    return grandTotalPay;
+    return total + grandTotalPay;
   }, 0);
 
   const totalpayBalen = filteredEvents.reduce((total, event) => {
@@ -812,60 +816,75 @@ const OverviewContent: React.FC = () => {
           {combinedData && combinedData.length > 0 ? (
             <TableBody>
               {filteredEvents.map((event: any, eventIndex: number) => (
-                <>
-                  {Object.entries(event.paymentsByPayByName).map(
-                    ([payByName, payments]: [string, any[]], index: number) => (
-                      <TableRow
-                        key={index + eventIndex + 1}
-                        style={{
-                          backgroundColor:
-                            selectedOrderNo === index + eventIndex + 1
-                              ? "lightblue"
-                              : "inherit",
-                          cursor: "pointer",
+                <React.Fragment key={`event-${eventIndex}`}>
+                  {(
+                    Object.entries(event.paymentsByPayByName) as [
+                      string,
+                      any[]
+                    ][]
+                  ).map(([payByName, payments], index) => (
+                    <TableRow
+                      key={`row-${eventIndex}-${index}`} // ใช้ key ที่ไม่ซ้ำกันโดยผสม eventIndex และ index
+                      style={{
+                        backgroundColor:
+                          selectedOrderNo ===
+                          eventIndex *
+                            Object.entries(event.paymentsByPayByName).length +
+                            index +
+                            1
+                            ? "lightblue"
+                            : "inherit",
+                        cursor: "pointer",
+                      }}
+                      onClick={() =>
+                        handleOrderClick(
+                          eventIndex *
+                            Object.entries(event.paymentsByPayByName).length +
+                            index +
+                            1
+                        )
+                      }
+                    >
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "black",
+                          fontWeight: "bold",
                         }}
-                        onClick={() => handleOrderClick(index + eventIndex + 1)}
                       >
-                        <TableCell
-                          sx={{
-                            textAlign: "center",
-                            color: "black",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center", color: "black" }}>
-                          {event.Event_Name}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center", color: "black" }}>
-                          {event.Event_Time
-                            ? formatEventTime(event.Event_Time)
-                            : "ยังไม่ระบุ"}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center", color: "black" }}>
-                          {payByName}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center", color: "black" }}>
-                          {payments
-                            ? totalNetPriceWithZeroBalance(payments)
-                            : "ยังไม่ระบุ"}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center", color: "black" }}>
-                          {payments
-                            ? OutstandingPayment(payments)
-                            : "ยังไม่ระบุ"}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
-                </>
+                        {eventIndex *
+                          Object.entries(event.paymentsByPayByName).length +
+                          index +
+                          1}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                        {event.Event_Name}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                        {event.Event_Time
+                          ? formatEventTime(event.Event_Time)
+                          : "ยังไม่ระบุ"}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                        {payByName}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                        {payments
+                          ? totalNetPriceWithZeroBalance(payments)
+                          : "ยังไม่ระบุ"}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                        {payments ? OutstandingPayment(payments) : "ยังไม่ระบุ"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </React.Fragment>
               ))}
             </TableBody>
           ) : (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={11} sx={{ textAlign: "center" }}>
+                <TableCell colSpan={6} sx={{ textAlign: "center" }}>
                   ไม่มีข้อมูล
                 </TableCell>
               </TableRow>

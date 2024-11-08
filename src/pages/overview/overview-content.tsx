@@ -32,7 +32,10 @@ dayjs.extend(buddhistEra);
 
 const formatEventTime = (dateTime: string | null | undefined) => {
   if (!dateTime) return "ยังไม่ระบุ";
-  return dayjs(dateTime).subtract(7, "hour").locale("th").format("D/M/YYYY HH:mm");
+  return dayjs(dateTime)
+    .subtract(7, "hour")
+    .locale("th")
+    .format("D/M/YYYY HH:mm");
 };
 
 function formatNumberWithCommas(number: number | string): string {
@@ -41,56 +44,40 @@ function formatNumberWithCommas(number: number | string): string {
 }
 
 function totalNetPriceWithZeroBalance(data: any, id: any) {
-  const Data = data.filter(
-    (order) => order.Event_Id === id && order.Is_Balance === 0
-  );
-
-  const totalNetPriceWithZeroBalance = Data?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
-    0
-  );
-  let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
+  console.log("data", data);
+  const totalPay = data.reduce((sum, payment) => {
+    return sum + (payment.Net_Price || 0);
+  }, 0);
+  let res = formatNumberWithCommas(totalPay);
   return res;
 }
 
 function OutstandingPayment(data: any, id: any) {
-  const Data2 = data.filter(
-    (order) => order.Event_Id === id && order.Is_Balance !== 0
-  );
+  const Data2 = data.filter((payment) => payment.Is_Balance !== 0);
+
+  const totalPay = data.reduce((sum, payment) => {
+    return sum + (payment.Net_Price || 0);
+  }, 0);
+
   const totalOutstandingPayment = Data2?.reduce<number>(
-    (sum, order) => sum + order.Is_Balance,
+    (sum, payment) => sum + payment.Total_Pay,
     0
   );
 
-  let res = formatNumberWithCommas(totalOutstandingPayment);
+  const totalpayfun = totalPay - totalOutstandingPayment;
+
+  let res = formatNumberWithCommas(totalpayfun);
 
   return res;
 }
 
 function totalNetPrice(data: any, id: any) {
-  console.log("totalNetPrice", data);
-  const Data = data.filter(
-    (order) => order.Event_Id === id && order.Is_Balance === 0
-  );
-
-  const Data2 = data.filter(
-    (order) => order.Event_Id === id && order.Is_Balance !== 0
-  );
-
-  const totalNetPriceWithZeroBalance = Data?.reduce<number>(
-    (sum, order) => sum + order.Web_Qty_Buy * order.Plan_Price,
+  const Data2 = data.filter((payment) => payment.Is_Balance !== 0);
+  const totalNetPriceWithZeroBalance = Data2?.reduce<number>(
+    (sum, payment) => sum + payment.Total_Pay,
     0
   );
-
-  const totalOutstandingPayment = Data2?.reduce<number>(
-    (sum, order) => sum + order.Is_Balance,
-    0
-  );
-
-  const x = totalNetPriceWithZeroBalance - totalOutstandingPayment;
-  // console.log("total", x);
-
-  let res = formatNumberWithCommas(x);
+  let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
   return res;
 }
 
@@ -174,25 +161,21 @@ const OverviewContent: React.FC = () => {
     }
 
     // ดำเนินการต่อหลังจากโหลดข้อมูลครบแล้ว
-    const filteredHisPayment = hisPayment.reduce((acc, current) => {
-      const exists = acc.find((order) => order.Event_Id === current.Event_Id);
-      if (exists) {
-        acc.push(current);
-      }
-      return acc;
-    }, []);
 
     const combinedData = events.map((event) => {
       const relatedOrders = orderAll.filter(
         (order) => order.Event_Id === event.Event_Id
       );
 
+      const relatedPayments = hisPayment.filter(
+        (payment) => payment.Event_Id === event.Event_Id
+      );
       // console.log("filteredHisPayment", filteredHisPayment);
 
       return {
         ...event,
         orders: relatedOrders,
-        payments: filteredHisPayment,
+        payments: relatedPayments,
       };
     });
 
@@ -318,23 +301,24 @@ const OverviewContent: React.FC = () => {
     textAlign: "center",
   };
 
-  const uniqueOrders = filteredEvents
-    .flatMap((event) => event.orders)
-    .reduce((acc, current) => {
-      const exists = acc.find((order) => order.Order_no === current.Order_no);
-      if (!exists) acc.push(current);
-      return acc;
-    }, []);
+  const uniqueOrders = () => {
+    if (filteredEvents.length > 1) {
+      return filteredEvents.reduce((total, event) => {
+        return total + (event.orders?.length || 0);
+      }, 0);
+    } else {
+      return filteredEvents[0]?.orders?.length || 0;
+    }
+  };
+  const totalOrders = uniqueOrders();
 
-  const totalOrders = uniqueOrders.length;
+  console.log("filteredEvents", filteredEvents);
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    const eventTotalPay = event.orders
-      .filter((order) => order.Event_Id === event.Event_Id)
-      .reduce(
-        (sum, payment) => sum + (payment.Web_Qty_Buy * payment.Plan_Price || 0),
-        0
-      );
+    const eventTotalPay = event.payments.reduce(
+      (sum, payment) => sum + (payment.Net_Price || 0),
+      0
+    );
     return total + eventTotalPay;
   }, 0);
 
@@ -359,19 +343,11 @@ const OverviewContent: React.FC = () => {
   }, {});
 
   const totalpayBalen = filteredEvents.reduce((total, event) => {
-    const eventTotalPay = event.orders
-      .filter((order) => order.Event_Id === event.Event_Id)
-      .reduce(
-        (sum, payment) => sum + (payment.Web_Qty_Buy * payment.Plan_Price || 0),
-        0
-      );
-    const eventTotalPay2 = event.orders
-      .filter(
-        (order) => order.Event_Id === event.Event_Id && order.Is_Balance !== 0
-      )
-      .reduce((sum, payment) => sum + (payment.Is_Balance || 0), 0);
-    let x = eventTotalPay - eventTotalPay2;
-    return total + x;
+    const eventTotalPay = event.payments
+      .filter((payment) => payment.Is_Balance !== 0)
+      .reduce((sum, payment) => sum + (payment.Total_Pay || 0), 0);
+
+    return eventTotalPay;
   }, 0);
 
   const totalpayfun = totalpay - totalpayBalen;
@@ -596,8 +572,9 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                    {totalpayBalen ? formatNumberWithCommas(totalpayBalen) : 0}
-                   
+                      {totalpayBalen
+                        ? formatNumberWithCommas(totalpayBalen)
+                        : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -650,7 +627,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 13)
                             .length
                         : 0} */}
-                           {totalpayfun ? formatNumberWithCommas(totalpayfun) : 0}
+                      {totalpayfun ? formatNumberWithCommas(totalpayfun) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -928,16 +905,18 @@ const OverviewContent: React.FC = () => {
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {orders
-                        ? totalNetPriceWithZeroBalance(orders, Event_Id)
+                      {payments
+                        ? totalNetPriceWithZeroBalance(payments, Event_Id)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {orders ? totalNetPrice(orders, Event_Id) : "ยังไม่ระบุ"}
+                      {payments
+                        ? totalNetPrice(payments, Event_Id)
+                        : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {orders
-                        ? OutstandingPayment(orders, Event_Id)
+                      {payments
+                        ? OutstandingPayment(payments, Event_Id)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
