@@ -297,24 +297,32 @@ const OverviewContent: React.FC = () => {
   console.log(totalOrders);
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    const totalPayByMethod = {};
-    Object.entries(event.paymentsByPayByName).forEach(
-      ([payByName, payments]) => {
-        const totalPay = payments.reduce((sum, payment) => {
-          return sum + (payment.Net_Price || 0);
-        }, 0);
-        totalPayByMethod[payByName] = totalPay;
-      }
-    );
+    // const totalPayByMethod = {};
 
-    const grandTotalPay = Object.values(totalPayByMethod).reduce(
-      (sum, total) => {
-        return sum + total;
-      },
-      0
+    // return 0;
+    // Object.entries(event.Orders).forEach(
+    // ([payByName, payments]) => {
+    //   console.log("payments", payments);
+    const filteredPayments = event.Orders.filter(
+      (payment) => payment.Order_Status !== 13
     );
+    // console.log("filteredPayments", filteredPayments);
+    const totalPay = filteredPayments.reduce((sum, payment) => {
+      return sum + (payment.Total_Price || 0);
+    }, 0);
+    console.log("totalPay", totalPay);
+    // totalPayByMethod[payByName] = totalPay;
+    // }
+    // );
 
-    return total + grandTotalPay;
+    // const grandTotalPay = Object.values(totalPayByMethod).reduce(
+    //   (sum, total) => {
+    //     return sum + total;
+    //   },
+    //   0
+    // );
+
+    return totalPay;
   }, 0);
 
   const totalpayBalen = filteredEvents.reduce((total, event) => {
@@ -322,7 +330,7 @@ const OverviewContent: React.FC = () => {
     Object.entries(event.paymentsByPayByName).forEach(
       ([payByName, payments]) => {
         const filteredPayments = payments.filter(
-          (payment) => payment.Is_Balance !== 0
+          (payment) => payment.Is_Balance !== 0 || payment.Is_Balance > 1
         );
         const totalPay = filteredPayments.reduce((sum, payment) => {
           return sum + (payment.Total_Pay || 0);
@@ -797,10 +805,10 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                ชำระแล้ว
+                ยอดชำระ
               </TableCell>
 
-              <TableCell
+              {/* <TableCell
                 sx={{
                   ...tableCellHeadStyle,
                   position: "sticky",
@@ -810,7 +818,7 @@ const OverviewContent: React.FC = () => {
                 }}
               >
                 ค้างชำระ
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
           {combinedData && combinedData.length > 0 ? (
@@ -873,9 +881,9 @@ const OverviewContent: React.FC = () => {
                           ? totalNetPriceWithZeroBalance(payments)
                           : "ยังไม่ระบุ"}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", color: "black" }}>
+                      {/* <TableCell sx={{ textAlign: "center", color: "black" }}>
                         {payments ? OutstandingPayment(payments) : "ยังไม่ระบุ"}
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </React.Fragment>

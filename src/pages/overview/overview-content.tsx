@@ -43,20 +43,26 @@ function formatNumberWithCommas(number: number | string): string {
   return bath;
 }
 
-function totalNetPriceWithZeroBalance(data: any, id: any) {
-  console.log("data", data);
-  const totalPay = data.reduce((sum, payment) => {
-    return sum + (payment.Net_Price || 0);
+function totalNetPriceWithZeroBalance(data: any) {
+  const filteredPayments = data.filter(
+    (payment) => payment.Order_Status !== 13
+  );
+  // console.log("data", filteredPayments);
+  const totalPay = filteredPayments.reduce((sum, payment) => {
+    return sum + (payment.Total_Price || 0);
   }, 0);
+  console.log("data", totalPay);
   let res = formatNumberWithCommas(totalPay);
   return res;
 }
 
 function OutstandingPayment(data: any, id: any) {
-  const Data2 = data.filter((payment) => payment.Is_Balance !== 0);
+  const Data2 = data.filter(
+    (payment) => payment.Is_Balance !== 0 || payment.Is_Balance > 1
+  );
 
   const totalPay = data.reduce((sum, payment) => {
-    return sum + (payment.Net_Price || 0);
+    return sum + (payment.Total_Pay || 0);
   }, 0);
 
   const totalOutstandingPayment = Data2?.reduce<number>(
@@ -315,10 +321,17 @@ const OverviewContent: React.FC = () => {
   console.log("filteredEvents", filteredEvents);
 
   const totalpay = filteredEvents.reduce((total, event) => {
-    const eventTotalPay = event.payments.reduce(
-      (sum, payment) => sum + (payment.Net_Price || 0),
+    console.log("event.Orders", event);
+
+    const filteredPayments = event.orders.filter(
+      (payment) => payment.Order_Status !== 13
+    );
+
+    const eventTotalPay = filteredPayments.reduce(
+      (sum, payment) => sum + (payment.Total_Price || 0),
       0
     );
+
     return total + eventTotalPay;
   }, 0);
 
@@ -905,8 +918,8 @@ const OverviewContent: React.FC = () => {
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                      {payments
-                        ? totalNetPriceWithZeroBalance(payments, Event_Id)
+                      {orders
+                        ? totalNetPriceWithZeroBalance(orders)
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
