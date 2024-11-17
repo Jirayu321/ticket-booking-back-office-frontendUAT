@@ -113,10 +113,10 @@ const Sidebars: React.FC = () => {
                         fontSize: "16px",
                         fontWeight: "bold",
                         color: "#ffd700",
-                        marginLeft:"1px"
+                        marginLeft: "1px",
                       }}
                     >
-                      v.003
+                      v.004
                     </Typography>
                     <IconButton
                       sx={{
@@ -294,15 +294,17 @@ const Sidebars: React.FC = () => {
               >
                 <MenuItem icon={<PaidIcon />}>ตัวเลือกการจ่ายเงิน</MenuItem>
               </Link>
-              {/* <Link
+              <Link
                 to="/employee"
                 className={`menu-bars ${
                   activePath === "/employee" ? "active" : ""
                 }`}
                 onClick={handleMenuItemClick}
               >
-                <MenuItem icon={<ManageAccountsIcon />}>ตั้งค่าบริษัท</MenuItem>
-              </Link> */}
+                <MenuItem icon={<ManageAccountsIcon />}>
+                  ตั้งค่าพนักงาน
+                </MenuItem>
+              </Link>
             </Menu>
             <div
               style={{
@@ -323,36 +325,21 @@ const Sidebars: React.FC = () => {
               </Typography>
             </div>
             <Menu>
-              {/* <Link
-                to="/profile"
-                className={`menu-bars ${
-                  activePath === "/profile" ? "active" : ""
-                }`}
-              > */}
               <MenuItem
                 icon={<AccountCircleIcon />}
                 onClick={handleViewProfile}
               >
                 Profile
               </MenuItem>
-              {/* </Link> */}
-              {/* <Link
-                to="/role-settings"
+
+              <Link
+                to="/settings-company"
                 className={`menu-bars ${
-                  activePath === "/role-settings" ? "active" : ""
-                }`}
-                onClick={handleMenuItemClick}
-              >
-                <MenuItem icon={<AssignmentIndIcon />}>ตั้งค่าผู้ใช้</MenuItem>
-              </Link> */}
-              {/* <Link
-                to="/settings"
-                className={`menu-bars ${
-                  activePath === "/settings" ? "active" : ""
+                  activePath === "/settings-company" ? "active" : ""
                 }`}
               >
-                <MenuItem icon={<SettingsIcon />}>Setting</MenuItem>
-              </Link> */}
+                <MenuItem icon={<SettingsIcon />}>ตั้งค่าบริษัท</MenuItem>
+              </Link>
               <MenuItem
                 icon={<LogoutIcon />}
                 className="menu-bars"

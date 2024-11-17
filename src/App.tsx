@@ -5,6 +5,7 @@ import AllEvent from "./pages/all-event/all-event";
 import Overview from "./pages/overview/overview";
 import Overview2 from "./pages/overview/orerview2";
 import Employee from "./pages/emp/emp";
+import Company from "./pages/company/company";
 import CreateNewEvent from "./pages/create-event/create-event";
 import ZoneGroup from "./pages/zone-group/zone-group";
 import ZonePage from "./pages/zone/zone";
@@ -165,6 +166,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Employee />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings-company"
+            element={
+              <ProtectedRoute>
+                <Company />
               </ProtectedRoute>
             }
           />
