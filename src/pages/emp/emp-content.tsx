@@ -203,7 +203,7 @@ const AllContent: React.FC = () => {
   const handleChange = (
     event: React.ChangeEvent<
       HTMLInputElement | { name?: string; value: unknown }
-    >,
+    >
   ) => {
     const { name, value } = event.target;
 
@@ -265,7 +265,7 @@ const AllContent: React.FC = () => {
         Emp_Code: newEmployee.Emp_Code,
         Emp_Prefix: newEmployee.Emp_Prefix,
         Emp_Name: newEmployee.Emp_Name,
-        Emp_Dept:1,
+        Emp_Dept: 1,
         Emp_Position: newEmployee.Emp_Position || 2,
         Emp_Position_Detail: newEmployee.Emp_Position_Detail,
         Emp_StartDate: newEmployee.Emp_StartDate || null,
@@ -449,7 +449,7 @@ const AllContent: React.FC = () => {
         <TableContainer
           component={Paper}
           sx={{ borderRadius: "0" }}
-          style={{ maxHeight: "85vh", overflowY: "auto", width: "1300px" }}
+          style={{ maxHeight: "85vh", overflowY: "auto", width: "1030px" }}
         >
           <Table>
             <TableHead sx={{ backgroundColor: "#11131A", height: "60px" }}>
@@ -518,7 +518,7 @@ const AllContent: React.FC = () => {
                 >
                   ตำแหน่ง
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   style={{
                     color: "white",
                     fontSize: "17px",
@@ -547,7 +547,7 @@ const AllContent: React.FC = () => {
                   }}
                 >
                   รหัสผู้ใช้
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   style={{
                     color: "white",
@@ -571,16 +571,18 @@ const AllContent: React.FC = () => {
                   <TableRow key={plan.Emp_Id}>
                     <TableCell sx={{}}>{plan.Emp_Code}</TableCell>
                     <TableCell sx={{}}>{plan.Emp_Name}</TableCell>
-                    <TableCell sx={{}}>{plan.Emp_Tel}</TableCell>{" "}
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {plan.Emp_Tel}
+                    </TableCell>{" "}
                     <TableCell sx={{ textAlign: "center" }}>
                       {plan.Emp_Position_Detail}
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    {/* <TableCell sx={{ textAlign: "center" }}>
                       {plan.Emp_UUser}
                     </TableCell>{" "}
                     <TableCell sx={{ textAlign: "center" }}>
                       {plan.Emp_PPass}
-                    </TableCell>{" "}
+                    </TableCell>{" "} */}
                     <TableCell sx={{ textAlign: "center" }}>
                       <Button
                         variant="contained"

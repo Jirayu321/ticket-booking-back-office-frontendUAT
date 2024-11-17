@@ -774,96 +774,6 @@ const AllContent: React.FC = () => {
                     zIndex: 2,
                   }}
                 >
-                  เลขภาษี
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
-                  ที่อยู่ 1
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
-                  ที่อยู่ 2
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
-                  ที่อยู่ 3
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
-                  จังหวัด
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
-                  รหัสไปรษณีย์
-                </TableCell>
-                <TableCell
-                  style={{
-                    color: "white",
-                    fontSize: "17px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "5px",
-                    position: "sticky",
-                    top: 0,
-                    backgroundColor: "#11131A",
-                    zIndex: 2,
-                  }}
-                >
                   เบอร์โทร 1
                 </TableCell>
                 <TableCell
@@ -935,14 +845,6 @@ const AllContent: React.FC = () => {
                     <TableCell sx={{}}>{plan.Comp_Name_TH}</TableCell>
                     <TableCell sx={{}}>{plan.Comp_Name_EN}</TableCell>
                     <TableCell sx={{}}>{plan.Comp_ShortName}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {plan.Comp_TaxNo}
-                    </TableCell>{" "}
-                    <TableCell sx={{}}>{plan.Comp_Add1}</TableCell>{" "}
-                    <TableCell sx={{}}>{plan.Comp_Add2}</TableCell>{" "}
-                    <TableCell sx={{}}>{plan.Comp_Add3}</TableCell>{" "}
-                    <TableCell sx={{}}>{plan.Comp_Province}</TableCell>{" "}
-                    <TableCell sx={{}}>{plan.Comp_Post}</TableCell>{" "}
                     <TableCell sx={{}}>{plan.Comp_Tel1}</TableCell>
                     <TableCell sx={{}}>{plan.Comp_Tel2}</TableCell>
                     <TableCell sx={{}}>{plan.Comp_Contact1}</TableCell>
