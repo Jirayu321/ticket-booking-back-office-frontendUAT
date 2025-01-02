@@ -36,7 +36,7 @@ export async function createEvent({
   Event_Status: number;
   Event_Public: string;
   Event_Pic_1: string | null; // Expect base64 or file URL
-  Event_Pic_2?: string | null; // Optional images
+  Event_Pic_2?: string | null; 
   Event_Pic_3?: string | null;
   Event_Pic_4?: string | null;
 }) {

@@ -261,30 +261,76 @@ const AllOrderContent: React.FC = () => {
     console.log("chargeId", chargeId);
     if (!chargeId) {
       console.error("Invalid charge ID");
+      Swal.fire({
+        icon: "warning",
+        text: "ตรวจสอบพบมีการสร้าง Order แต่ยังไม่ได้กดปุ่มชำระเงินคุณต้องการยกเลิกคำสั่งซื้อหรือไม่",
+        showCancelButton: true,
+        confirmButtonText: "ตกลง",
+        cancelButtonText: "ปิด",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const orderId = orderDetail.at(0).Order_id;
+          try {
+            const res = await authAxiosClient?.post("/api/claerStatusR", {
+              orderId,
+              chargeId,
+            });
+            console.log("claerStatusR response:", res?.data);
+            SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+            setTimeout(() => {
+              window.location.replace("/all-orders");
+            }, 1500);
+          } catch (error) {
+            console.error("Error in claerStatusR:", error);
+            Swal.fire({
+              icon: "error",
+              text: "เกิดข้อผิดพลาดในการยกเลิกสถานะ",
+            });
+          }
+        } else {
+          console.log("User closed");
+        }
+      });
       return;
     }
-  
+
     try {
-      const response = await authAxiosClient?.post("/api/getChargeDetails", { chargeId });
-  
+      const response = await authAxiosClient?.post("/api/getChargeDetails", {
+        chargeId,
+      });
+
       if (response.status !== 200) {
-        throw new Error(`Failed to retrieve charge details, status: ${response.status}`);
+        throw new Error(
+          `Failed to retrieve charge details, status: ${response.status}`
+        );
       }
-  
+
       const result = response?.data;
-  
+
       if (result.success) {
         console.log("Charge detail:", result?.data);
         if (result?.data.paid !== false) {
           const amount: number = Number(result?.data.amount) / 100;
-          const totalSum = orderDetail.reduce((acc, order) => acc + order.Total_Price, 0);
+          const totalSum = orderDetail.reduce(
+            (acc, order) => acc + order.Total_Price,
+            0
+          );
           const paymentOption: number = (amount / totalSum) * 100;
           const time_paid = result?.data.paid_at;
-          const ref_number1 = (result?.data?.source as any)?.provider_references?.reference_number_1 || "";
+          const ref_number1 =
+            (result?.data?.source as any)?.provider_references
+              ?.reference_number_1 || "";
           const orderId = orderDetail.at(0).Order_id;
           const paymentMethod = (result?.data?.source as any)?.type;
-          const validPaymentMethods = ["mobile_banking_bay", "mobile_banking_bbl", "mobile_banking_ktb", "mobile_banking_kbank", "mobile_banking_scb", "promptpay"];
-  
+          const validPaymentMethods = [
+            "mobile_banking_bay",
+            "mobile_banking_bbl",
+            "mobile_banking_ktb",
+            "mobile_banking_kbank",
+            "mobile_banking_scb",
+            "promptpay",
+          ];
+
           if (!paymentMethod) {
             console.log("Payment method is null");
           } else if (validPaymentMethods.includes(paymentMethod)) {
@@ -351,6 +397,36 @@ const AllOrderContent: React.FC = () => {
           }
         } else if (result?.data.failure_code) {
           console.log("Charge details:", result?.data.failure_code);
+          Swal.fire({
+            icon: "warning",
+            text: "ตรวจสอบการจ่ายเป็น Pendding ใน Payment Gateway คุณต้องการยกเลิกคำสั่งซื้อเลยหรือไม่",
+            showCancelButton: true,
+            confirmButtonText: "ตกลง",
+            cancelButtonText: "ปิด",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const orderId = orderDetail.at(0).Order_id;
+              try {
+                const res = await authAxiosClient?.post("/api/claerStatusR", {
+                  orderId,
+                  chargeId,
+                });
+                console.log("claerStatusR response:", res?.data);
+                SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
+                setTimeout(() => {
+                  window.location.replace("/all-orders");
+                }, 1500);
+              } catch (error) {
+                console.error("Error in claerStatusR:", error);
+                Swal.fire({
+                  icon: "error",
+                  text: "เกิดข้อผิดพลาดในการยกเลิกสถานะ",
+                });
+              }
+            } else {
+              console.log("User closed");
+            }
+          });
         } else {
           console.log("Waiting for payment...");
           Swal.fire({
@@ -363,7 +439,10 @@ const AllOrderContent: React.FC = () => {
             if (result.isConfirmed) {
               const orderId = orderDetail.at(0).Order_id;
               try {
-                const res = await authAxiosClient?.post("/api/claerStatusR", { orderId, chargeId });
+                const res = await authAxiosClient?.post("/api/claerStatusR", {
+                  orderId,
+                  chargeId,
+                });
                 console.log("claerStatusR response:", res?.data);
                 SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
                 setTimeout(() => {
@@ -389,14 +468,16 @@ const AllOrderContent: React.FC = () => {
         });
       }
     } catch (error: any) {
-      console.error("Failed to retrieve charge details:", error.message || error);
+      console.error(
+        "Failed to retrieve charge details:",
+        error.message || error
+      );
       Swal.fire({
         icon: "error",
         text: "เกิดข้อผิดพลาดในการดึงข้อมูลการชำระเงิน",
       });
     }
   };
-  
 
   const handletime = (x) => {
     const adjustedDate = dayjs(x).subtract(7, "hour");

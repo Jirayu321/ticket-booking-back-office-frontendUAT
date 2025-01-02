@@ -12,7 +12,7 @@ interface EventState {
   setDescription: (description: string) => void;
   setEventDateTime: (eventDateTime: any) => void;
   setStatus: (status: number) => void;
-  setImages: (index: number, image: string | null) => void; // Action to set images
+  setImages: (index: number, image: string | null) => void; 
 }
 
 export const useEventStore = create<EventState>((set) => ({
