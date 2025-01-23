@@ -486,7 +486,7 @@ const CreateEventForm = () => {
                           />
                         </label>
                         <span
-                          hidden={!!eventId}
+                          // hidden={!!eventId}
                           className="image-remove-button"
                           onClick={handleImageRemove(index)}
                         >

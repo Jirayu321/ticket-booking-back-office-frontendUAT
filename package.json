@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174",
-    "dev:host": "vite --host --port 5174",
-    "start": "vite --port 5174",
+    "dev": "vite --port 5177",
+    "dev:host": "vite --host --port 5177",
+    "start": "vite --port 5177",
     "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -39,6 +39,7 @@
     "qrcode": "^1.5.4",
     "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
+    "react-color": "^2.19.3",
     "react-datepicker": "^7.4.0",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",

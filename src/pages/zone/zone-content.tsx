@@ -38,6 +38,7 @@ import {
   getEventStock,
 } from "../../services/event-stock.service";
 
+
 import Header from "../common/header";
 import Swal from "sweetalert2";
 import { useFetchTicketTypes } from "../../hooks/fetch-data/useFetchTicketTypes";
@@ -50,6 +51,9 @@ import {
   createTicketNoPerPlan,
   getAllTicketNoPerPlanByEventId,
 } from "../../services/ticket-no-per-plan.service";
+
+import { SketchPicker } from 'react-color';
+
 interface Plan {
   name: string;
   desc: string;
@@ -61,6 +65,8 @@ interface Plan {
   seats: string;
 }
 const ZoneContent: React.FC = () => {
+  const [color, setColor] = useState('#fff');
+  const [editcolor,setEditColor]= useState<boolean>(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
   const [open, setOpen] = useState<boolean>(false);
@@ -479,6 +485,7 @@ const ZoneContent: React.FC = () => {
         Plan_Ticket_Type_Id: newPlan.selectedTicketType,
         Plan_Ticket_Qty: newPlan.zone,
         Plan_Ticket_Qty_Per: newPlan.seats,
+        Plan_Colour_Code:color
       });
 
       console.log("Response from createPlan:", res);
@@ -796,6 +803,11 @@ const ZoneContent: React.FC = () => {
   useEffect(() => {
     Letter();
   }, [ticketNoPerPlan]);
+
+  const handleChangeComplete = (color) => {
+    console.log("color",color.hex)
+    setColor(color.hex);
+  };
 
   return (
     <div
@@ -1125,6 +1137,13 @@ const ZoneContent: React.FC = () => {
               },
             }}
           />
+           <div>
+               <p>สีโซน</p>
+
+              <button style={{ background: color, width: '100px', height: '40px' }} onClick={()=>setEditColor(!editcolor)} ></button>
+              {editcolor === true ? (<SketchPicker color={color} onChangeComplete={handleChangeComplete} />):null}
+              
+            </div>
           <TextField
             margin="dense"
             name="desc"

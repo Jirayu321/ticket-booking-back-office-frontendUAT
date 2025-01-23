@@ -38,6 +38,7 @@ export async function createPlan({
   Plan_Ticket_Type_Id,
   Plan_Ticket_Qty,
   Plan_Ticket_Qty_Per,
+  Plan_Colour_Code,
 }: {
   Plan_Desc: string;
   Plan_Name: string;
@@ -47,6 +48,7 @@ export async function createPlan({
   Plan_Ticket_Type_Id: number;
   Plan_Ticket_Qty: number;
   Plan_Ticket_Qty_Per: number;
+  Plan_Colour_Code: string;
 }) {
   try {
     const response = await authAxiosClient.post("/plan", {
@@ -58,6 +60,7 @@ export async function createPlan({
       Plan_Ticket_Type_Id,
       Plan_Ticket_Qty,
       Plan_Ticket_Qty_Per,
+      Plan_Colour_Code,
     });
     if (response.status !== 200) {
       throw "Failed to create plan";

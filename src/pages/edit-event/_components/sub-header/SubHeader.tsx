@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import { getEventStock } from "../../../../services/event-stock.service";
 import { getLogEventPrice } from "../../../../services/log-event-price.service";
 import { updateLogEventPrice } from "../../../../services/log-event-price.service";
+import {updateEventStatusbyeventId} from "../../../../services/updateEventStatus.service"
 type SubHeaderProp = {
   event: any;
 };
@@ -182,14 +183,22 @@ const SubHeader: FC<SubHeaderProp> = ({
     }
   }
 
-  const handleCancel = () => {
-    const userConfirmed = window.confirm(
-      "ถ้ากลับไปตอนนี้ข้อมูลในหน้านี้จะหายไปทั้งหมดโปรดบันทึกข้อมูลไว้ก่อน"
-    );
+  const handleCancel = async () => {
+    const userConfirmed = window.confirm("คุณแน่ใจที่จะปิดงานนี้หรือมั้ย");
+  
     if (userConfirmed) {
-      window.location.replace("/all-events");
+      const status = await updateEventStatusbyeventId(eventId);
+  
+      if (status?.success) {
+        console.log("Status update successful:", status.message);
+        window.location.replace("/all-events");
+      } else {
+        console.error("Failed to update event status:", status.error);
+        alert(status?.error || "Failed to update the event status. Please try again.");
+      }
     }
   };
+  
 
   function handleCopyEventLink(eventId: number) {
     const eventLink = `https://deedclub.appsystemyou.com/CheckIn/${eventId}`;
@@ -245,7 +254,7 @@ const SubHeader: FC<SubHeaderProp> = ({
         </button>
 
         <button className="btn-cancel" onClick={handleCancel}>
-          ยกเลิก
+        ปิดงาน
         </button>
         <button className="btn-save" onClick={handleUpdateEvent}>
           บันทึก

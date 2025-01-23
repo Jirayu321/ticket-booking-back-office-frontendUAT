@@ -124,7 +124,6 @@ const AllOrderContent: React.FC = () => {
 
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
-
     const latestOrder = data
       .filter((order) => order.Order_no === orderNo)
       .reduce((acc, current) => {
@@ -259,6 +258,11 @@ const AllOrderContent: React.FC = () => {
   const PaymentGateway = async (chargeId: any) => {
     console.log("orderDetail.at(0)", orderDetail.at(0));
     console.log("chargeId", chargeId);
+    const time: Date = new Date();
+    console.log(`Current time is: ${time.toLocaleTimeString()}`);
+    const savedLocale = JSON.parse(localStorage.getItem("emmp") || "{}");
+    const name = savedLocale?.Emp_Name || "Unknown";
+      console.log("name", name);
     if (!chargeId) {
       console.error("Invalid charge ID");
       Swal.fire({
@@ -270,10 +274,14 @@ const AllOrderContent: React.FC = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const orderId = orderDetail.at(0).Order_id;
+          const Remark = `ตรวจสอบพบมีการสร้าง Order แต่ยังไม่ได้กดปุ่มชำระเงิน`;
           try {
             const res = await authAxiosClient?.post("/api/claerStatusR", {
               orderId,
               chargeId,
+              Remark,
+              time,
+              name,
             });
             console.log("claerStatusR response:", res?.data);
             SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
@@ -298,6 +306,7 @@ const AllOrderContent: React.FC = () => {
       const response = await authAxiosClient?.post("/api/getChargeDetails", {
         chargeId,
       });
+      console.log("Charge details response:", response);
 
       if (response.status !== 200) {
         throw new Error(
@@ -397,6 +406,7 @@ const AllOrderContent: React.FC = () => {
           }
         } else if (result?.data.failure_code) {
           console.log("Charge details:", result?.data.failure_code);
+
           Swal.fire({
             icon: "warning",
             text: "ตรวจสอบการจ่ายเป็น Pendding ใน Payment Gateway คุณต้องการยกเลิกคำสั่งซื้อเลยหรือไม่",
@@ -406,10 +416,14 @@ const AllOrderContent: React.FC = () => {
           }).then(async (result) => {
             if (result.isConfirmed) {
               const orderId = orderDetail.at(0).Order_id;
+              const Remark = `ตรวจสอบการจ่ายเป็น Pendding ใน Payment Gateway`;
               try {
                 const res = await authAxiosClient?.post("/api/claerStatusR", {
                   orderId,
-                  chargeId,
+              chargeId,
+              Remark,
+              time,
+              name,
                 });
                 console.log("claerStatusR response:", res?.data);
                 SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
@@ -438,10 +452,14 @@ const AllOrderContent: React.FC = () => {
           }).then(async (result) => {
             if (result.isConfirmed) {
               const orderId = orderDetail.at(0).Order_id;
+              const Remark = `ตรวจสอบการจ่ายเป็น Pendding ใน Payment Gateway`;
               try {
                 const res = await authAxiosClient?.post("/api/claerStatusR", {
                   orderId,
                   chargeId,
+                  Remark,
+                  time,
+                  name,
                 });
                 console.log("claerStatusR response:", res?.data);
                 SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
@@ -461,7 +479,7 @@ const AllOrderContent: React.FC = () => {
           });
         }
       } else {
-        console.error("Error retrieving charge details:", result.error);
+        console.error("Error retrieving charge details:", response);
         Swal.fire({
           icon: "error",
           text: "ไม่สามารถดึงข้อมูลการชำระเงินได้",
@@ -481,6 +499,12 @@ const AllOrderContent: React.FC = () => {
 
   const handletime = (x) => {
     const adjustedDate = dayjs(x).subtract(7, "hour");
+    const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
+    return formattedDateTime;
+  };
+
+  const handletime2 = (x) => {
+    const adjustedDate = dayjs(x);
     const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
     return formattedDateTime;
   };
@@ -1662,7 +1686,7 @@ const AllOrderContent: React.FC = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {orderDetail.at(0)?.OrderStatus_Name}
+                          {orderDetail.at(0)?.OrderStatus_Name} {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? `/ โดย ${orderDetail.at(0)?.Cancel_By}` : ''}
                         </span>
                       </p>
                       <p>
@@ -1683,6 +1707,24 @@ const AllOrderContent: React.FC = () => {
                           ? ``
                           : handletime(orderDetail.at(0)?.Order_datetime)}
                       </p>
+                      <p></p>
+                      <p></p>
+                      {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
+                        <p>
+                        <strong>เวลาเลิก:</strong>
+                        <br />
+                        {orderDetail?.length === 0
+                          ? ``
+                          : handletime2(orderDetail.at(0)?.Cancel_Date)}
+                      </p>): null}
+                      {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
+                        <p>
+                        <strong>สาเหตุ:</strong>
+                        <br />
+                        {orderDetail?.length === 0
+                          ? ``
+                          : (orderDetail.at(0)?.Remark_1)}
+                      </p>): null}
 
                       {/* <p>
                         <strong>line_id:</strong>
