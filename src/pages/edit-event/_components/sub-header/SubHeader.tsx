@@ -32,7 +32,7 @@ const SubHeader: FC<SubHeaderProp> = ({
   allRows,
   setAllRows
 }) => {
-
+console.log("status",status)
   const [isPublic, setIsPublic] = useState(false);
   const [isPublicFromBase, setIsPublicFromBase] = useState(false);
 
@@ -210,7 +210,9 @@ const SubHeader: FC<SubHeaderProp> = ({
     <div className={styles.subHeader} style={{ marginTop: "-10px" }}>
       <BackButton />
       <div className="toggle-container">
+      {status !== 3 ?   
         <PublishButton isPublic={isPublic} setIsPublic={setIsPublic} />
+        :null}
         <button
           className=""
           style={{
@@ -256,9 +258,11 @@ const SubHeader: FC<SubHeaderProp> = ({
         <button className="btn-cancel" onClick={handleCancel}>
         ปิดงาน
         </button>
+        {status !== 3 ?    
         <button className="btn-save" onClick={handleUpdateEvent}>
           บันทึก
-        </button>
+        </button>:null}
+     
       </div>
     </div>
   );

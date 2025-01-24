@@ -503,11 +503,7 @@ const AllOrderContent: React.FC = () => {
     return formattedDateTime;
   };
 
-  const handletime2 = (x) => {
-    const adjustedDate = dayjs(x);
-    const formattedDateTime = adjustedDate.format("DD/MM/BBBB - HH:mm น.");
-    return formattedDateTime;
-  };
+
 
   const handleOrderClick = async (orderNo: any) => {
     localStorage.setItem("orderDetail", orderNo);
@@ -1711,14 +1707,14 @@ const AllOrderContent: React.FC = () => {
                       <p></p>
                       {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
                         <p>
-                        <strong>เวลาเลิก:</strong>
+                        <strong>เวลายกเลิก:</strong>
                         <br />
                         {orderDetail?.length === 0
                           ? ``
-                          : handletime2(orderDetail.at(0)?.Cancel_Date)}
+                          : handletime(orderDetail.at(0)?.Cancel_Date)}
                       </p>): null}
                       {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
-                        <p>
+                        <p style={{width:"380px"}}>
                         <strong>สาเหตุ:</strong>
                         <br />
                         {orderDetail?.length === 0
@@ -1739,6 +1735,8 @@ const AllOrderContent: React.FC = () => {
                         display: "grid",
                         justifyContent: "flex-end",
                         alignContent: "flex-end",
+                       position:"relative",
+                       top:"10px"
                       }}
                     >
                       {orderDetail.length !== 0 ? (
