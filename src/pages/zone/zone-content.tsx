@@ -34,7 +34,7 @@ import {
 } from "../../services/plan.service";
 import { getAllPlanGroups } from "../../services/plan-group.service";
 import {
-  createEventStock,
+  // createEventStock,
   getEventStock,
 } from "../../services/event-stock.service";
 
@@ -43,10 +43,10 @@ import Header from "../common/header";
 import Swal from "sweetalert2";
 import { useFetchTicketTypes } from "../../hooks/fetch-data/useFetchTicketTypes";
 import { useZoneStore } from "../create-event/form-store";
-import { ZoneData } from "../edit-event/type";
+// import { ZoneData } from "../edit-event/type";
 import Plan from "../edit-event/_components/Plan";
 import GenerateBoxes from "../create-event/components/generate-boxes";
-import { set } from "react-hook-form";
+// import { set } from "react-hook-form";
 import {
   createTicketNoPerPlan,
   getAllTicketNoPerPlanByEventId,
@@ -63,12 +63,14 @@ interface Plan {
   selectedTicketType: string;
   zone: string;
   seats: string;
+  PlanColourCode:string;
 }
 const ZoneContent: React.FC = () => {
   const [color, setColor] = useState('#fff');
   const [editcolor,setEditColor]= useState<boolean>(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
+
   const [open, setOpen] = useState<boolean>(false);
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -79,24 +81,25 @@ const ZoneContent: React.FC = () => {
     pic: "",
     active: "Y",
     planGroupId: "",
-    selectedTicketType: "", // selectedTicketType
-    zone: "", //  zone
-    seats: "", // seats
+    selectedTicketType: "", 
+    zone: "", 
+    seats: "", 
   });
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
+  console.log("editPlan",editPlan)
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [letter, setTetter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
 
-  const [selectTableModal, setSelectTableModal] = useState<sting>("");
-  const itemsPerPage = 50;
+  const [selectTableModal, setSelectTableModal] = useState<string>("");
+  // const itemsPerPage = 50;
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("");
   const [selectedTicketTypeName, setSelectedTicketTypeName] =
     useState<string>("");
   const [zone, setZone] = useState<string>("");
   const [seats, setSeats] = useState<string>("");
-  const [selectedTable, setSelectedTable] = useState<string>(1);
+  const [selectedTable, setSelectedTable] = useState<string>("1");
   const [ticketNoPerPlan, setTicketNoPerPlan] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,6 +248,14 @@ const ZoneContent: React.FC = () => {
       zone: "",
       seats: "",
     });
+
+    setColor("#fff")
+    setSelectedTicketType("");
+    setSelectedTicketTypeName("");
+    setSeats("")
+    setSelectedTable("")
+    setZone("")
+
     setOpen(true);
   };
 
@@ -265,7 +276,6 @@ const ZoneContent: React.FC = () => {
   };
 
   const handleEditOpen = async (plan: any) => {
-    console.log("handleEditOpen plan =>", plan);
     setSelectTableModal(plan.Ticket_No_Option);
     const dataTicketNoPerPage = await fetchTicketNoPerPlan(
       plan.Plan_id,
@@ -277,7 +287,6 @@ const ZoneContent: React.FC = () => {
       ticketNoPlanList: dataTicketNoPerPage,
     };
 
-    console.log("planDataMerge =>", planDataMerge);
 
     setEditPlan(planDataMerge);
     setEditOpen(true);
@@ -303,27 +312,7 @@ const ZoneContent: React.FC = () => {
   };
 
   // แก้ไขแผน
-  // const handleEditChange = (
-  //   event: React.ChangeEvent<
-  //     HTMLInputElement | { name?: string; value: unknown }
-  //   >
-  // ) => {
-  //   const { name, value } = event.target;
-  //   // console.log("handleEditChange value", value);
-  //   setEditPlan((prev: any) => ({
-  //     ...prev,
-  //     [name!]: value,
-  //   }));
-  //   if (name === "selectTableModal") {
-  //     setSelectTableModal(value);
-  //     setStartNumber(1);
-  //   } else if (name === "Plan_Ticket_Type_Id") {
-  //     const typeName = ticketTypes.find(
-  //       (type) => type.Ticket_Type_Id === value
-  //     );
-  //     setSelectedTicketTypeName(typeName?.Ticket_Type_Name || "");
-  //   }
-  // };
+
   const handleEditChange = (
     event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
@@ -410,42 +399,6 @@ const ZoneContent: React.FC = () => {
     }
   };
 
-  // const DEFAULT_ACTIONER = "admin";
-
-  //
-  // const handleSaveEventStock = async (
-  //   plan_Id: number,
-  //   planGroup_Id: number,
-  //   ticket_Type_Id: number,
-  //   ticket_Qty: number,
-  //   ticket_Qty_Per: number
-  // ) => {
-  //   try {
-  //     const stcTotal = ticket_Qty * ticket_Qty_Per;
-
-  //     const zoneDataArray = [{
-  //       PlanGroup_Id: planGroup_Id,
-  //       Plan_Id: plan_Id,
-  //       Ticket_Type_Id: ticket_Type_Id,
-  //       Ticket_Qty: ticket_Qty,
-  //       Ticket_Qty_Per: ticket_Qty_Per,
-  //       STC_Total: stcTotal,
-  //       Ticket_Qty_Buy: 0,
-  //       Ticket_Qty_Balance: ticket_Qty,
-  //       STC_Total_Balance: stcTotal,
-  //       Created_By: DEFAULT_ACTIONER,
-  //     }];
-
-  //     await Promise.all(zoneDataArray.map(async (data) => {
-  //       await createEventStock(data);
-  //     }));
-
-  //   } catch (error: any) {
-  //     console.error("Error saving event stock:", error);
-  //     throw new Error(error?.message || "An error occurred while saving event stock");
-  //   }
-  // };
-
   // ส่งข้อมูลไปหา API
 
   const handleCreate = async () => {
@@ -479,7 +432,7 @@ const ZoneContent: React.FC = () => {
       const res = await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
-        Plan_Pic: newPlan.pic || null, // Use null if no image is provided
+        Plan_Pic: newPlan.pic || null, 
         Plan_Active: newPlan.active,
         PlanGroup_id: groupId,
         Plan_Ticket_Type_Id: newPlan.selectedTicketType,
@@ -715,7 +668,6 @@ const ZoneContent: React.FC = () => {
   });
 
   const currentItems = filteredPlans;
-  // console.log("currentItems =>", currentItems);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -742,23 +694,6 @@ const ZoneContent: React.FC = () => {
       fileInputRef.current.value = "";
     }
   };
-
-  // const handleEditImageChange = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   if (event.target.files && event.target.files[0]) {
-  //     const file = event.target.files[0];
-
-  //     const reader = new FileReader();
-  //     reader.onload = (e) => {
-  //       setEditPlan((prev) => ({
-  //         ...prev,
-  //         Plan_Pic: e.target?.result as string, // Store the base64 string in state
-  //       }));
-  //     };
-  //     reader.readAsDataURL(file); // Read the file as a data URL (base64 string)
-  //   }
-  // };
 
   const handleEditImageChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -807,6 +742,15 @@ const ZoneContent: React.FC = () => {
   const handleChangeComplete = (color) => {
     console.log("color",color.hex)
     setColor(color.hex);
+  };
+
+  const handleChangeComplete2 = (color) => {
+    console.log("Selected color:", color.hex);
+  
+    setEditPlan((prev) => ({
+      ...prev,
+      Plan_Colour_Code: color.hex,
+    }));
   };
 
   return (
@@ -985,6 +929,22 @@ const ZoneContent: React.FC = () => {
                     fontSize: "17px",
                     fontWeight: "bold",
                     textAlign: "center",
+                    width: "100px",
+                    padding: "5px",
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#11131A",
+                    zIndex: 2,
+                  }}
+                >
+                  สีโซน
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: "white",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    textAlign: "center",
                     padding: "5px",
                     position: "sticky",
                     top: 0,
@@ -1048,6 +1008,21 @@ const ZoneContent: React.FC = () => {
                         />
                       </div>
                     </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                        <div>
+                          <button
+                            title={`Color Code: ${plan?.Plan_Colour_Code || "Default (#fff)"}`}
+                            style={{
+                              backgroundColor: plan?.Plan_Colour_Code || "#f0f0f0",
+                              width: "100px",
+                              height: "40px",
+                              border: "1px solid #ccc",
+                              borderRadius: "5px",
+                            }}
+                            aria-label={`Zone color: ${plan?.Plan_Colour_Code || "default color"}`}
+                          ></button>
+                        </div>
+                      </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Switch
                         checked={plan.Plan_Active === "Y"}
@@ -1139,11 +1114,10 @@ const ZoneContent: React.FC = () => {
           />
            <div>
                <p>สีโซน</p>
-
               <button style={{ background: color, width: '100px', height: '40px' }} onClick={()=>setEditColor(!editcolor)} ></button>
               {editcolor === true ? (<SketchPicker color={color} onChangeComplete={handleChangeComplete} />):null}
-              
             </div>
+
           <TextField
             margin="dense"
             name="desc"
@@ -1161,24 +1135,7 @@ const ZoneContent: React.FC = () => {
               },
             }}
           />
-          {/* <input
-            accept="image/*"
-            style={{ display: "block", margin: "dense" }}
-            type="file"
-            onChange={handleImageChange}
-          />
-          {newPlan.pic && (
-            <img
-              src={newPlan.pic}
-              alt="Selected"
-              style={{
-                width: "100px",
-                height: "auto",
-                cursor: "pointer",
-                marginTop: "10px",
-              }}
-            />
-          )} */}
+         
           <TextField
             inputRef={fileInputRef}
             accept="image/*"
@@ -1255,6 +1212,7 @@ const ZoneContent: React.FC = () => {
               <MenuItem value="N">No</MenuItem>
             </Select>
           </FormControl>
+
           {/* TICKET TYPE* */}
           <FormControl fullWidth margin="dense">
             <InputLabel id="demo-simple-select-label">
@@ -1351,6 +1309,8 @@ const ZoneContent: React.FC = () => {
             zoneId={1}
             selectedTicketType={selectedTicketTypeName}
             letter={letter || null}
+            mode="Create" // โหมดแก้ไข
+            dataEdit={editPlan} 
           />
         </DialogContent>
         <DialogActions>
@@ -1401,6 +1361,11 @@ const ZoneContent: React.FC = () => {
                 },
               }}
             />
+               <div>
+               <p>สีโซน</p>
+              <button style={{ background: editPlan?.Plan_Colour_Code, width: '100px', height: '40px' }} onClick={()=>setEditColor(!editcolor)} ></button>
+              {editcolor === true ? (<SketchPicker color={editPlan?.Plan_Colour_Code} onChangeComplete={handleChangeComplete2} />):null}
+            </div>
             <TextField
               margin="dense"
               name="Plan_Desc"
@@ -1493,7 +1458,7 @@ const ZoneContent: React.FC = () => {
                 id="outlined-controlled"
                 label="จำนวนบัตร/โซน*"
                 name="Plan_Ticket_Qty"
-                value={editPlan.Plan_Ticket_Qty}
+                value={editPlan?.Plan_Ticket_Qty}
                 type="number"
                 onChange={handleEditChange}
               />
@@ -1556,11 +1521,11 @@ const ZoneContent: React.FC = () => {
             <GenerateBoxes
               method={selectTableModal ? selectTableModal.toString() : ""} // ตรวจสอบว่า selectTableModal มีค่าอยู่หรือไม่
               totalSeats={editPlan.Plan_Ticket_Qty} // เลขโต๊ะที่โชว์
-              zoneId={1} // ID
+              zoneId={1}
               selectedTicketType={selectedTicketTypeName} // ประเภทตั๋ว
               letter={letter || null}
-            // mode="edit" // โหมดแก้ไข
-            // dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
+            mode="edit" // โหมดแก้ไข
+            dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
             />
           </DialogContent>
           <DialogActions>
