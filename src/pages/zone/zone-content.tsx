@@ -493,7 +493,6 @@ const ZoneContent: React.FC = () => {
 
     const groupId = editPlan.PlanGroup_id;
 
-    // Exclude the plan being edited from the duplicate check
     const filteredPlans = plans.filter(
       (plan) => plan.Plan_id !== editPlan.Plan_id
     );
@@ -531,6 +530,7 @@ const ZoneContent: React.FC = () => {
         Plan_Ticket_Qty_Per: editPlan.Plan_Ticket_Qty_Per,
         Plan_Active: editPlan.Plan_Active,
         PlanGroup_id: groupId,
+        Plan_Colour_Code:editPlan?.Plan_Colour_Code,
         dataTicketValue: dataTicket,
       };
 

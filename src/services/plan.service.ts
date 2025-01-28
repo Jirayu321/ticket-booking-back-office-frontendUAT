@@ -81,6 +81,7 @@ export async function patchPlan({
   Plan_Ticket_Qty_Per,
   Plan_Active,
   PlanGroup_id,
+  Plan_Colour_Code,
   dataTicketValue
 }: {
   Plan_id: number;
@@ -90,6 +91,7 @@ export async function patchPlan({
   Plan_Ticket_Type_Id?: number;
   Plan_Active?: string;
   PlanGroup_id?: number | null;
+  Plan_Colour_Code?: string;
   dataTicketValue?: any[] | [];
   Plan_Ticket_Qty: number;
   Plan_Ticket_Qty_Per: number;
@@ -104,6 +106,7 @@ export async function patchPlan({
       Plan_Ticket_Qty_Per,
       Plan_Active,
       PlanGroup_id,
+      Plan_Colour_Code,
       dataTicketValue
     });
 
