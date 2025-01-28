@@ -179,9 +179,9 @@ console.log("status",status)
         }
       }
 
-      // setTimeout(() => {
-      //   window.location.replace("/all-events");
-      // }, 1500);
+      setTimeout(() => {
+        window.location.replace("/all-events");
+      }, 1500);
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
