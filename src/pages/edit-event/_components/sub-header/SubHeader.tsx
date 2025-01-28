@@ -45,7 +45,8 @@ console.log("status",status)
   async function getModelById(eventId: number) {
     try {
       const eventModel = await getEventById(eventId);
-      // console.debug(eventModel);
+
+      console.log("eventModel",eventModel);
       setTitle(eventModel.Event_Name);
       setTitle2(eventModel.Event_Addr);
       setDescription(eventModel.Event_Desc);
@@ -116,6 +117,10 @@ console.log("status",status)
         // Table : Event_List
         const eventTime = dayjs(eventDateTime).add(7, "hour").toISOString();
         const eventDate = dayjs(eventTime).add(7, "hour").toISOString().split("T")[0];
+        console.log( "Event_Pic", images[0],
+          "Event_Pic", images[1],
+          "Event_Pic", images[2],
+          "Event_Pic", images[3],)
         const resUpdateEventList = await updateEventById(Number(eventId), {
           Event_Name: title.trim(),
           Event_Addr: title2.trim(),
@@ -174,9 +179,9 @@ console.log("status",status)
         }
       }
 
-      setTimeout(() => {
-        window.location.replace("/all-events");
-      }, 1500);
+      // setTimeout(() => {
+      //   window.location.replace("/all-events");
+      // }, 1500);
     } catch (error: any) {
       toast.dismiss();
       toast.error(error.message);
