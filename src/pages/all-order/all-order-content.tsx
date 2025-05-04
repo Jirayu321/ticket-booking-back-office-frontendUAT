@@ -33,14 +33,16 @@ import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import "moment/locale/th";
 import Swal from "sweetalert2";
-import {
-  SwalSuccess,
-  SwalConfirmDialog,
-  SwalError,
-} from "../../lib/sweetalert";
+import { SwalSuccess } from "../../lib/sweetalert";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
+
+import { getViewTicketListbyOrderid } from "../../services/view-tikcet-list.service";
+
+import { updateOrder } from "../../services/order-all.service";
+import QRCode from "qrcode";
+import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
 import {
   selectedColor,
@@ -54,6 +56,7 @@ const AllOrderContent: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<any[]>([]);
   console.log("orderDetail", orderDetail);
   const [orderHispayDetail, setOrderHispayDetail] = useState<any[]>([]);
+  console.log("orderHispayDetail", orderHispayDetail);
   const [modalOpen, setModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -255,6 +258,162 @@ const AllOrderContent: React.FC = () => {
     setModalOpen(true);
   };
 
+  const handleNavigateToOrderSite = async (order_id: string | number) => {
+    const response = await getViewTicketListbyOrderid(order_id);
+    const test = await updateOrder(order_id);
+    console.log("test", test);
+    const latestTicketsMap = new Map();
+
+    response.ticketList.forEach((ticket) => {
+      if (
+        !latestTicketsMap.has(ticket.ticket_id) ||
+        new Date(ticket.Payment_Date7) >
+          new Date(latestTicketsMap.get(ticket.ticket_id).Payment_Date7)
+      ) {
+        latestTicketsMap.set(ticket.ticket_id, ticket);
+      }
+    });
+
+    const latestTickets = Array.from(latestTicketsMap.values());
+
+    console.log("tickets response:", response, order_id);
+    console.log("latestTickets", latestTickets);
+
+    if (Array.isArray(latestTickets)) {
+      let contentHtml = `
+          <html>
+            <head>
+              <title>Print QR Codes</title>
+              <style>
+                body { margin: 0; padding: 0; }
+                .ticket-container {
+                  text-align: center;
+                }
+                img { width: 90%; height: 80%; margin:0px; }
+                p {
+                  font-size: 40px;
+                  font-weight: bold; 
+                  color: #333;
+                  margin:0px;
+                }
+                .details {
+                  font-size: 40px;
+                  color: #666;
+                   margin:0px;
+                }
+                   .divbody{
+                  position: relative;
+                  top: -45px;
+                   }
+              </style>
+            </head>
+            <body>
+        `;
+      for (let ticket of latestTickets) {
+        const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
+        if (ticket.Ticket_Type_Cal === "N") {
+          contentHtml += `
+            <div class="ticket-container">
+              <img src="${dataUrl}"/>
+            <div class="divbody">
+            <p class="details">${ticket.Event_Name}</p>
+            <p class="details">
+             ${ticket.Plan_Name}
+            - ${ticket.ticket_no}(${ticket.ticket_line}/${
+            ticket.Total_stc / ticket.Web_Qty_Buy
+          })
+            </p>
+              <p class="details">เวลา: ${new Date(
+                ticket.Event_Date
+              ).toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })} - ${new Date(
+            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+          ).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            // second: "2-digit",
+            hour12: false,
+          })}น.</p>
+            </div>
+             
+            
+            </div>
+          `;
+        } else {
+          contentHtml += `
+            <div class="ticket-container">
+              <img src="${dataUrl}"/>
+              <p class="details">${ticket.Event_Name}</p>
+              <p class="details">${ticket.Plan_Name} -  ${ticket.ticket_no} (${
+            ticket.ticket_line
+          }/${ticket.Total_stc}) </p>
+              <p class="details">เวลา:
+              ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })} - ${new Date(
+            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+          ).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            // second: "2-digit",
+            hour12: false,
+          })} น.
+             </p>
+            </div>
+          `;
+        }
+      }
+
+      contentHtml += `
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                };
+              };
+            </script>
+            </body>
+          </html>
+        `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow?.document.write(contentHtml);
+      printWindow?.document.close();
+    }
+  };
+
+  const handleNavigateToOrderSite2 = async (order_id: string | number) => {
+    const orderIdStr = String(order_id); // Ensure order_id is a string
+
+    // PRDODUCTION
+    // window.open(
+    //   `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+    //     "token"
+    //   )}`,
+    //   "_blank"
+    // );
+    //  UAT
+    // window.open(
+    //   `https://deedclub-uat.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+    //     "token"
+    //   )}`,
+    //   "_blank"
+    // );
+    // test
+    window.open(
+      `http://localhost:3010/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+        "token"
+      )}`,
+      "_blank"
+    );
+  };
+
   const PaymentGateway = async (chargeId: any) => {
     console.log("orderDetail.at(0)", orderDetail.at(0));
     console.log("chargeId", chargeId);
@@ -262,7 +421,7 @@ const AllOrderContent: React.FC = () => {
     console.log(`Current time is: ${time.toLocaleTimeString()}`);
     const savedLocale = JSON.parse(localStorage.getItem("emmp") || "{}");
     const name = savedLocale?.Emp_Name || "Unknown";
-      console.log("name", name);
+    console.log("name", name);
     if (!chargeId) {
       console.error("Invalid charge ID");
       Swal.fire({
@@ -420,10 +579,10 @@ const AllOrderContent: React.FC = () => {
               try {
                 const res = await authAxiosClient?.post("/api/claerStatusR", {
                   orderId,
-              chargeId,
-              Remark,
-              time,
-              name,
+                  chargeId,
+                  Remark,
+                  time,
+                  name,
                 });
                 console.log("claerStatusR response:", res?.data);
                 SwalSuccess("อัพเดทประวัติการชำระเรียบร้อย");
@@ -503,8 +662,6 @@ const AllOrderContent: React.FC = () => {
     return formattedDateTime;
   };
 
-
-
   const handleOrderClick = async (orderNo: any) => {
     localStorage.setItem("orderDetail", orderNo);
     setSelectedOrderNo(orderNo);
@@ -542,13 +699,14 @@ const AllOrderContent: React.FC = () => {
   };
 
   function formatNumberWithCommas(number: number | string): string {
-    const bath = `${number
-      ?.toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ฿`;
-    return bath;
+    const num = typeof number === "string" ? parseFloat(number) : number;
+    if (isNaN(num)) return "0.00 ฿";
+
+    const parts = num.toFixed(2).split(".");
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${integerPart}.${parts[1]} ฿`;
   }
 
-  console.log("orderHData", orderHData);
   const filteredOrders = orderHData
     ?.filter((order) => {
       const matchesSearch =
@@ -1682,7 +1840,10 @@ const AllOrderContent: React.FC = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {orderDetail.at(0)?.OrderStatus_Name} {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? `/ โดย ${orderDetail.at(0)?.Cancel_By}` : ''}
+                          {orderDetail.at(0)?.OrderStatus_Name}{" "}
+                          {orderDetail.at(0)?.OrderStatus_Name === "ยกเลิก"
+                            ? `/ โดย ${orderDetail.at(0)?.Cancel_By}`
+                            : ""}
                         </span>
                       </p>
                       <p>
@@ -1705,22 +1866,24 @@ const AllOrderContent: React.FC = () => {
                       </p>
                       <p></p>
                       <p></p>
-                      {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
+                      {orderDetail.at(0)?.OrderStatus_Name === "ยกเลิก" ? (
                         <p>
-                        <strong>เวลายกเลิก:</strong>
-                        <br />
-                        {orderDetail?.length === 0
-                          ? ``
-                          : handletime(orderDetail.at(0)?.Cancel_Date)}
-                      </p>): null}
-                      {orderDetail.at(0)?.OrderStatus_Name === 'ยกเลิก' ? (  
-                        <p style={{width:"380px"}}>
-                        <strong>สาเหตุ:</strong>
-                        <br />
-                        {orderDetail?.length === 0
-                          ? ``
-                          : (orderDetail.at(0)?.Remark_1)}
-                      </p>): null}
+                          <strong>เวลายกเลิก:</strong>
+                          <br />
+                          {orderDetail?.length === 0
+                            ? ``
+                            : handletime(orderDetail.at(0)?.Cancel_Date)}
+                        </p>
+                      ) : null}
+                      {orderDetail.at(0)?.OrderStatus_Name === "ยกเลิก" ? (
+                        <p style={{ width: "380px" }}>
+                          <strong>สาเหตุ:</strong>
+                          <br />
+                          {orderDetail?.length === 0
+                            ? ``
+                            : orderDetail.at(0)?.Remark_1}
+                        </p>
+                      ) : null}
 
                       {/* <p>
                         <strong>line_id:</strong>
@@ -1731,45 +1894,123 @@ const AllOrderContent: React.FC = () => {
                       </p> */}
                     </div>
                     <div
-                      style={{
-                        display: "grid",
-                        justifyContent: "flex-end",
-                        alignContent: "flex-end",
-                       position:"relative",
-                       top:"10px"
-                      }}
+                      style={
+                        (orderHispayDetail &&
+                          orderHispayDetail.at(0)?.Total_Balance === 0) ||
+                        orderDetail[0]?.Order_Status === 4
+                          ? {
+                              display: "grid",
+                              justifyContent: "flex-end",
+                              alignContent: "flex-end",
+                              position: "relative",
+                              top: "-30px",
+                              right: "60px",
+                            }
+                          : {
+                              display: "grid",
+                              justifyContent: "flex-end",
+                              alignContent: "flex-end",
+                              position: "relative",
+                              top: "-30px",
+                              right: "60px",
+                            }
+                      }
                     >
                       {orderDetail.length !== 0 ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() =>
-                            handleViewHistoryClick(orderDetail.at(0)?.Order_id)
-                          }
-                          style={{ width: 110, height: 50 }}
-                        >
-                          ดูรายละเอียด
-                        </Button>
-                      ) : null}
-                      {orderDetail[0]?.Order_Status === 4 ? (
-                        <Button
-                          variant="contained"
-                          // color="primary"
-                          onClick={() =>
-                            PaymentGateway(
-                              orderDetail.at(0)?.ORD_H_Last_Charge_ID
-                            )
-                          }
-                          style={{
-                            width: 110,
-                            height: 50,
-                            marginTop: 10,
-                            backgroundColor: "#CFB70B",
-                            color: "black",
+                        <div
+                          className="flex"
+                          style={orderHispayDetail &&
+                            orderHispayDetail.at(0)?.Total_Balance !== 0 &&
+                            orderDetail[0]?.Order_Status !== 4 ?{
+                            width: "247px",
+                            display: "grid",
+                            justifyContent: "space-between",
+                            gridTemplateColumns: "auto auto",
+                          }:{
+                            width: "237px",
+                            display: "grid",
+                            justifyContent: "space-between",
+                            gridTemplateColumns: "auto auto",
                           }}
                         >
-                          ตรวจสอบจ่าย
-                        </Button>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                              handleViewHistoryClick(
+                                orderDetail.at(0)?.Order_id
+                              )
+                            }
+                            style={{ width: 110, height: 50 }}
+                          >
+                            ดูรายละเอียด
+                          </Button>
+                          {orderHispayDetail &&
+                          orderHispayDetail.at(0)?.Total_Balance === 0 ? (
+                            <Button
+                              onClick={() => {
+                                handleNavigateToOrderSite(
+                                  orderDetail.at(0)?.Order_id
+                                );
+                              }}
+                              variant="contained"
+                              style={{
+                                backgroundColor: "#CFB70B",
+                                color: "#000",
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                height: "50px",
+                              }}
+                              startIcon={<FaPrint style={{ color: "black" }} />}
+                            >
+                              Print QR
+                            </Button>
+                          ) : null}
+
+                          {orderDetail[0]?.Order_Status === 4 ? (
+                            <Button
+                              variant="contained"
+                              // color="primary"
+                              onClick={() =>
+                                PaymentGateway(
+                                  orderDetail.at(0)?.ORD_H_Last_Charge_ID
+                                )
+                              }
+                              style={{
+                                width: 110,
+                                height: 50,
+                                backgroundColor: "#CFB70B",
+                                color: "black",
+                              }}
+                            >
+                              ตรวจสอบจ่าย
+                            </Button>
+                          ) : null}
+                          {orderHispayDetail &&
+                          orderHispayDetail.at(0)?.Total_Balance !== 0 &&
+                          orderDetail[0]?.Order_Status !== 4 ? (
+                            <Button
+                              onClick={() => {
+                                handleNavigateToOrderSite2(
+                                  orderDetail.at(0)?.Order_id
+                                );
+                              }}
+                              variant="contained"
+                              style={{
+                                backgroundColor: "#CFB70B",
+                                color: "#000",
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                height: "50px",
+                              }}
+                              startIcon={
+                                <FaMoneyBill style={{ color: "black" }} />
+                              }
+                            >
+                              ชำระส่วนที่เหลือ
+                            </Button>
+                          ) : null}
+                        </div>
                       ) : null}
                     </div>
                   </div>

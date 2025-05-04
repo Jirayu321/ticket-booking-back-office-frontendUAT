@@ -20,6 +20,9 @@ import AllStockPage from "./pages/all-stock/all-stock";
 import AllSeatPage from "./pages/all-seat/all-seat";
 import LoginPage from "./pages/login/LoginPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+
+import MoveTheTablePage from "./pages/move-the-table/move-the-table";
+import OrderReqTablePage from "./pages/all-order-request/order-request-table";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "./App.css";
@@ -174,6 +177,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Company />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/move-the-table"
+            element={
+              <ProtectedRoute>
+                <MoveTheTablePage />
+              </ProtectedRoute>
+            }
+          />
+
+<Route
+            path="/order-request-table"
+            element={
+              <ProtectedRoute>
+                <OrderReqTablePage />
               </ProtectedRoute>
             }
           />

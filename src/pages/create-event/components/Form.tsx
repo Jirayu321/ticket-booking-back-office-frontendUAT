@@ -459,16 +459,14 @@ const CreateEventForm = () => {
             <label>ภาพประกอบ</label>
             <div className="image-grid">
               {[
-                "ภาพปก* ขนาดภาพแบบ1:1",
-                "ภาพประกอบ 1 (ไม่บังคับ) ขนาดภาพแบบ1:1",
-                "ภาพประกอบ 2 (ไม่บังคับ) ขนาดภาพแบบ1:1",
-                "ภาพประกอบ 3 (ไม่บังคับ) ขนาดภาพแบบ1:1",
+                "ภาพปก* ขนาดภาพแบบ2:3",
+                "ภาพออกจอ2 ขนาดภาพแบบ2:3",
               ].map((title, index) => (
                 <div key={index} className="image-upload-container">
                   <span className="image-upload-title">{title}</span>
                   <div
                     className="image-upload-box"
-                    style={{ width: 250, height: 210 }}
+                    style={{ width: 200, height: 290 }}
                   >
                     {images[index] && (
                       <img src={images[index]} alt={`Upload ${index}`} />

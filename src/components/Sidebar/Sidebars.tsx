@@ -208,6 +208,17 @@ const Sidebars: React.FC = () => {
                 </MenuItem>
               </Link>
               <Link
+                to="/order-request-table"
+                className={`menu-bars ${
+                  activePath === "/order-request-table" ? "active" : ""
+                }`}
+                onClick={handleMenuItemClick}
+              >
+                <MenuItem icon={<ShoppingCartIcon />}>
+                  คำสั่งซื้อที่มีปัญหาทั้งหมด
+                </MenuItem>
+              </Link>
+              <Link
                 to="/all-stocks"
                 className={`menu-bars ${
                   activePath === "/all-stocks" ? "active" : ""
@@ -293,6 +304,15 @@ const Sidebars: React.FC = () => {
                 onClick={handleMenuItemClick}
               >
                 <MenuItem icon={<PaidIcon />}>ตัวเลือกการจ่ายเงิน</MenuItem>
+              </Link>
+              <Link
+                to="/move-the-table"
+                className={`menu-bars ${
+                  activePath === "/move-the-table" ? "active" : ""
+                }`}
+                onClick={handleMenuItemClick}
+              >
+                <MenuItem icon={<EventSeatIcon />}>ย้ายโต๊ะ</MenuItem>
               </Link>
               <Link
                 to="/employee"
