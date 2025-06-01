@@ -19,6 +19,7 @@ import OrderDetailPage from "./pages/order-detail/order-detail";
 import AllStockPage from "./pages/all-stock/all-stock";
 import AllSeatPage from "./pages/all-seat/all-seat";
 import LoginPage from "./pages/login/LoginPage";
+import Dashboard from "./pages/dashboard/dashboardPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 import MoveTheTablePage from "./pages/move-the-table/move-the-table";
@@ -190,11 +191,20 @@ function App() {
             }
           />
 
-<Route
+          <Route
             path="/order-request-table"
             element={
               <ProtectedRoute>
                 <OrderReqTablePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dashboard-mabile"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
               </ProtectedRoute>
             }
           />

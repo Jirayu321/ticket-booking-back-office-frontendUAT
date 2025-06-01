@@ -29,6 +29,28 @@ export async function login({
   }
 }
 
+export async function loginPin(pin: string) {
+  try {
+    const response = await authAxiosClient.post("/auth", {
+      pin: pin,
+    });
+
+    if (response.status !== 200) {
+      throw new Error("ล้มเหลวในการเข้าสู่ระบบด้วย PIN");
+    }
+
+    return response.data;
+  } catch (error: any) {
+    let errorMessage = error.message;
+
+    if (isAxiosError(error)) {
+      errorMessage = error.response?.data?.message || "เกิดข้อผิดพลาด";
+    }
+
+    throw new Error(errorMessage);
+  }
+}
+
 export async function getUserInfo() {
   const token = localStorage.getItem("token");
   try {

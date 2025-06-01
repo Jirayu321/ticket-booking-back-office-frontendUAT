@@ -28,5 +28,50 @@
 }
 
 .cardFooter {
-    width: 100%;
+  width: 100%;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 70px);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.key {
+  height: 70px;
+  width: 70px;
+  font-size: 22px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f5f5f5;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+
+.key:active {
+  background-color: #e0e0e0;
+  transform: scale(0.95);
+}
+
+.pin-dots {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #ccc;
+  transition: all 0.2s ease-in-out;
+}
+
+.pin-dot.filled {
+  background-color: #000;
+  transform: scale(1.2);
 }
