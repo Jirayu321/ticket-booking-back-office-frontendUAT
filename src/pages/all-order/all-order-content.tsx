@@ -399,19 +399,19 @@ const AllOrderContent: React.FC = () => {
     //   "_blank"
     // );
     //  UAT
-    // window.open(
-    //   `https://deedclub-uat.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
-    //     "token"
-    //   )}`,
-    //   "_blank"
-    // );
-    // test
     window.open(
-      `http://localhost:3010/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+      `https://deedclub-uat.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
         "token"
       )}`,
       "_blank"
     );
+    // test
+    // window.open(
+    //   `http://localhost:3010/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+    //     "token"
+    //   )}`,
+    //   "_blank"
+    // );
   };
 
   const PaymentGateway = async (chargeId: any) => {

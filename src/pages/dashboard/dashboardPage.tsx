@@ -127,6 +127,26 @@ export default function Dashboard() {
     }
   };
 
+  const formatCurrency = (amount) => {
+  // ตรวจสอบว่า amount เป็นประเภท number
+  if (typeof amount !== "number" || isNaN(amount)) {
+    return "0.00";
+  }
+
+  // แปลงจำนวนเงินให้เป็นทศนิยม 2 ตำแหน่ง
+  const formattedAmount = amount.toFixed(2);
+
+  // ตรวจสอบว่ามีรูปแบบที่จัดรูปแบบแล้วอยู่หรือไม่
+  const regex = /^\d{1,3}(?:,\d{3})*(?:\.\d{2})?$/;
+  // ตรวจสอบว่าค่าเป็นประเภท string และมีรูปแบบที่จัดรูปแบบแล้วหรือไม่
+  if (regex.test(formattedAmount)) {
+    return formattedAmount; // คืนค่าเดิมถ้ามีการ format เรียบร้อยแล้ว
+  }
+
+  // เพิ่ม , เพื่อจัดรูปแบบจำนวนเงิน
+  return formattedAmount.replace(/\d(?=(\d{3})+\.)/g, "$&,");
+};
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -359,14 +379,14 @@ export default function Dashboard() {
           <div key={event.id} className={styles.eventRow}>
             <div
               className={`${styles.eventHeader} ${
-                styles[`eventHeaderGradient${index % 3}`]
+                styles[`eventHeaderGradient${index % 4}`]
               }`}
             >
               <div className={styles.eventIndex}>{index + 1}.</div>
               <div className={styles.eventName}>{event.name}</div>
               <div className={styles.eventStatus}>ออนไลน์</div>
               <div className={styles.eventTotal}>
-                ยอดขายทั้งหมด : ฿ {event.total}
+                ยอดขายทั้งหมด : ฿ {formatCurrency(event.total)}
               </div>
             </div>
 
@@ -376,11 +396,11 @@ export default function Dashboard() {
                 <p>
                   วันจัดงาน : {event.date} {event.time}
                 </p>
-                <p>ชำระแล้ว : ฿ {event.paid}</p>
+                <p>ชำระแล้ว : ฿ {formatCurrency(event.paid)}</p>
               </div>
               <div className={styles.eventInfo}>
                 <p>คำสั่งซื้อทั้งหมด : {event.orders}</p>
-                <p>ค้างชำระ : ฿ {event.unpaid}</p>
+                <p>ค้างชำระ : ฿ {formatCurrency(event.unpaid)}</p>
               </div>
             </div>
           </div>
