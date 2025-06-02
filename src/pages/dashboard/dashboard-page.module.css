@@ -3,6 +3,7 @@
   padding: 5px;
   max-width: 1200px;
   height: 100vh;
+  overflow-y: auto;
   /* margin: 0 auto; */
 }
 
@@ -34,6 +35,7 @@
   text-align: center;
   line-height: 1.2;
   min-width: 120px;
+  font-size: larger;
 }
 
 .nav a:hover {
@@ -144,6 +146,305 @@ p {
   width: fit-content;
 }
 
-h2{
-    width: fit-content;
+h2 {
+  width: fit-content;
+}
+
+.Carousel {
+  display: grid;
+  grid-template-columns: 990px auto;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  overflow-y: hidden !important; /* บางกรณี Chrome มองเป็น vertical */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none;
+}
+
+.dateFilterWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  transform: scale(0.55);
+  transform-origin: left top;
+}
+
+.dateFilterBox {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.dateLabel {
+  background-color: #fff;
+  color: #444;
+  padding: 10px 16px;
+  font-weight: 500;
+  border-right: 1.5px solid #ccc;
+  white-space: nowrap;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.dateInput {
+  border: none;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  background: none;
+  width: 90px;
+}
+
+.dateSeparator {
+  color: #aaa;
+  font-size: 18px;
+}
+
+.calendarIcon {
+  font-size: 18px;
+  color: #5c4434;
+}
+
+.searchButton {
+  background-color: #facc15;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.allButton {
+  background-color: white;
+  border: 2px solid #facc15;
+  color: #facc15;
+  font-size: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.searchButton {
+  background-color: #facc15;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  outline: none;
+}
+
+.searchButton:hover,
+.searchButton:focus,
+.searchButton:active {
+  background-color: #fbbf24; /* สีเหลืองเข้มขึ้น */
+  color: white;
+}
+
+.allButton {
+  background-color: white;
+  border: 2px solid #facc15;
+  color: #facc15;
+  font-size: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.allButton:hover,
+.allButton:focus,
+.allButton:active {
+  background-color: #fefce8;
+  color: #facc15;
+  border-color: #facc15;
+}
+
+.totalSalesBox {
+  background-color: #f3f4f6;
+  border-radius: 12px;
+}
+
+.totalSalesHeader {
+  background: linear-gradient(to right, #96711b, #fcbe2d);
+  color: white;
+  padding: 8px 16px;
+  margin: -16px -16px 16px -16px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.divsalesCard {
+  display: grid;
+  width: 400px;
+  justify-content: center;
+  padding-bottom: 25px;
+}
+
+.salesCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 300px;
+  justify-items: center;
+}
+
+.salesIcon {
+  width: 50px;
+  margin-bottom: 12px;
+}
+
+.salesLabel {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.totalAmount {
+  font-size: 32px;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+/*  */
+.sectionBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #f4f4f4;
+}
+
+.eventRow {
+  background: white;
+  /* border-radius: 8px; */
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-left: 6px solid transparent;
+  width: max-content;
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #333, #555);
+  color: white;
+  padding: 8px 16px;
+  gap: 10px;
+}
+
+.eventIndex {
+  font-weight: bold;
+}
+
+.eventName {
+  flex: 1;
+  font-weight: bold;
+  color: gold;
+}
+
+.eventStatus {
+  background-color: #10b981;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: white;
+}
+
+.eventTotal {
+  font-weight: bold;
+  font-size: small;
+}
+
+.eventDetail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.eventImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.eventInfo {
+  flex: 1;
+  color: black;
+}
+.sectionBox2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  position: relative;
+  right: 25px;
+  width: max-content;
+}
+.eventInfo p {
+  font-size: small;
+}
+
+.eventHeaderGradient0 {
+  background: linear-gradient(90deg, #232323 0%, #dccada 100%);
+}
+
+.eventHeaderGradient1 {
+  background: linear-gradient(90deg, #232323 0%, #e5ffa5 100%);
+}
+
+.eventHeaderGradient2 {
+  background: #232323
+}
+
+.eventHeaderGradient3 {
+  background: linear-gradient(90deg, #232323 0%, #ff9294 100%);
+}
+
+
+.pageButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #f3f3f3;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.pageButton:hover:not(:disabled) {
+  background-color: #fcbe2d;
+  color: white;
+}
+
+.pageButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

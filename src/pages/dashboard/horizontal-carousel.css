@@ -1,0 +1,54 @@
+.carousel-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 50%;
+  scroll-padding-right: 50%;
+  scroll-behavior: smooth;
+  gap: 24px;
+  padding: 24px;
+  scroll-behavior: smooth;
+}
+
+.carousel-card {
+  flex-shrink: 0;
+  width: 340px;
+  border-radius: 16px;
+  overflow: hidden;
+  scroll-snap-align: center;
+  background-color: white;
+  transform: scale(0.95);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-card.focused {
+  scroll-snap-align: center;
+  transform: scale(1.05) translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+  /* text-align: center; */
+  /* width: 380px; */
+}
+
+.card-info {
+  width: 95%;
+  margin-left: 3%;
+}
+
+.info-box {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: normal;
+  margin-top: 1rem;
+  background-color: rgba(35, 35, 35, 0.5);
+  border-radius: 12px;
+  padding: 0.75rem;
+  color: white;
+  text-align: left;
+}
