@@ -103,6 +103,7 @@ const AllOrderContent: React.FC = () => {
     events?.dataOrder?.orderAll?.filter(
       (order: any) => order?.DT_order_id !== null
     ) || [];
+  console.log("orderHData", orderHData);
 
   const orderDData =
     events?.dataOrder?.hisPayment?.filter(
@@ -262,6 +263,7 @@ const AllOrderContent: React.FC = () => {
     const response = await getViewTicketListbyOrderid(order_id);
     const test = await updateOrder(order_id);
     console.log("test", test);
+
     const latestTicketsMap = new Map();
 
     response.ticketList.forEach((ticket) => {
@@ -276,111 +278,88 @@ const AllOrderContent: React.FC = () => {
 
     const latestTickets = Array.from(latestTicketsMap.values());
 
-    console.log("tickets response:", response, order_id);
-    console.log("latestTickets", latestTickets);
+    // ✅ Group tickets by plan_id + ticket_no
+    const ticketGroups = new Map<string, any[]>();
+    latestTickets.forEach((ticket) => {
+      const key = `${ticket.plan_id}-${ticket.ticket_no}`;
+      if (!ticketGroups.has(key)) ticketGroups.set(key, []);
+      ticketGroups.get(key)?.push(ticket);
+    });
 
     if (Array.isArray(latestTickets)) {
       let contentHtml = `
-          <html>
-            <head>
-              <title>Print QR Codes</title>
-              <style>
-                body { margin: 0; padding: 0; }
-                .ticket-container {
-                  text-align: center;
-                }
-                img { width: 90%; height: 80%; margin:0px; }
-                p {
-                  font-size: 40px;
-                  font-weight: bold; 
-                  color: #333;
-                  margin:0px;
-                }
-                .details {
-                  font-size: 40px;
-                  color: #666;
-                   margin:0px;
-                }
-                   .divbody{
-                  position: relative;
-                  top: -45px;
-                   }
-              </style>
-            </head>
-            <body>
-        `;
+      <html>
+        <head>
+          <title>Print QR Codes</title>
+          <style>
+            body { margin: 0; padding: 0; }
+            .ticket-container { text-align: center; }
+            img { width: 90%; height: 80%; margin: 0px; }
+            p {
+              font-size: 40px;
+              font-weight: bold;
+              color: #333;
+              margin: 0px;
+            }
+            .details {
+              font-size: 40px;
+              color: #666;
+              margin: 0px;
+            }
+            .divbody {
+              position: relative;
+              top: -45px;
+            }
+          </style>
+        </head>
+        <body>
+    `;
+
       for (let ticket of latestTickets) {
         const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
-        if (ticket.Ticket_Type_Cal === "N") {
-          contentHtml += `
-            <div class="ticket-container">
-              <img src="${dataUrl}"/>
-            <div class="divbody">
+
+        const key = `${ticket.plan_id}-${ticket.ticket_no}`;
+        const group = ticketGroups.get(key) || [];
+        const totalInGroup = group.length;
+
+        contentHtml += `
+        <div class="ticket-container">
+          <img src="${dataUrl}"/>
+          <div class="divbody">
             <p class="details">${ticket.Event_Name}</p>
-            <p class="details">
-             ${ticket.Plan_Name}
-            - ${ticket.ticket_no}(${ticket.ticket_line}/${
-            ticket.Total_stc / ticket.Web_Qty_Buy
-          })
-            </p>
-              <p class="details">เวลา: ${new Date(
-                ticket.Event_Date
-              ).toLocaleDateString("th-TH", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })} - ${new Date(
-            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
-          ).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            // second: "2-digit",
-            hour12: false,
-          })}น.</p>
-            </div>
-             
-            
-            </div>
-          `;
-        } else {
-          contentHtml += `
-            <div class="ticket-container">
-              <img src="${dataUrl}"/>
-              <p class="details">${ticket.Event_Name}</p>
-              <p class="details">${ticket.Plan_Name} -  ${ticket.ticket_no} (${
-            ticket.ticket_line
-          }/${ticket.Total_stc}) </p>
-              <p class="details">เวลา:
-              ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })} - ${new Date(
-            new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
-          ).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            // second: "2-digit",
-            hour12: false,
-          })} น.
-             </p>
-            </div>
-          `;
-        }
+            <p class="details">${ticket.Plan_Name} - ${ticket.ticket_no} (${
+          ticket.ticket_line
+        }/${totalInGroup})</p>
+            <p class="details">เวลา: ${new Date(
+              ticket.Event_Date
+            ).toLocaleDateString("th-TH", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })} - ${new Date(
+          new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+        ).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })} น.</p>
+          </div>
+        </div>
+      `;
       }
 
       contentHtml += `
-            <script>
-              window.onload = function() {
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
-              };
-            </script>
-            </body>
-          </html>
-        `;
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        </script>
+        </body>
+      </html>
+    `;
 
       const printWindow = window.open("", "_blank");
       printWindow?.document.write(contentHtml);
@@ -760,25 +739,32 @@ const AllOrderContent: React.FC = () => {
       );
     })
     .reduce((acc, current) => {
-      const existingOrder = acc.find(
+      const existingIndex = acc.findIndex(
         (order) => order.Order_id === current.Order_id
       );
 
-      if (existingOrder) {
-        const existingPaymentDate = new Date(existingOrder.Payment_Date7);
-        const currentPaymentDate = new Date(current.Payment_Date7);
+      if (existingIndex !== -1) {
+        const existingOrder = acc[existingIndex];
 
-        if (currentPaymentDate > existingPaymentDate) {
-          return acc.map((order) =>
-            order.Order_id === current.Order_id ? current : order
-          );
-        }
+        const combinedList = [
+          ...existingOrder.TicketNo_List.split(",").map((s) => s.trim()),
+          ...current.TicketNo_List.split(",").map((s) => s.trim()),
+        ];
+
+        const uniqueList = [...new Set(combinedList)].join(", ");
+
+        acc[existingIndex] = {
+          ...existingOrder,
+          TicketNo_List: uniqueList,
+        };
       } else {
-        acc.push(current);
+        acc.push({ ...current });
       }
 
       return acc;
     }, []);
+
+  console.log("filteredOrders", filteredOrders);
 
   const totalOrders = filteredOrders?.length;
 
@@ -1919,19 +1905,23 @@ const AllOrderContent: React.FC = () => {
                       {orderDetail.length !== 0 ? (
                         <div
                           className="flex"
-                          style={orderHispayDetail &&
+                          style={
+                            orderHispayDetail &&
                             orderHispayDetail.at(0)?.Total_Balance !== 0 &&
-                            orderDetail[0]?.Order_Status !== 4 ?{
-                            width: "247px",
-                            display: "grid",
-                            justifyContent: "space-between",
-                            gridTemplateColumns: "auto auto",
-                          }:{
-                            width: "237px",
-                            display: "grid",
-                            justifyContent: "space-between",
-                            gridTemplateColumns: "auto auto",
-                          }}
+                            orderDetail[0]?.Order_Status !== 4
+                              ? {
+                                  width: "247px",
+                                  display: "grid",
+                                  justifyContent: "space-between",
+                                  gridTemplateColumns: "auto auto",
+                                }
+                              : {
+                                  width: "237px",
+                                  display: "grid",
+                                  justifyContent: "space-between",
+                                  gridTemplateColumns: "auto auto",
+                                }
+                          }
                         >
                           <Button
                             variant="contained"
@@ -1946,7 +1936,7 @@ const AllOrderContent: React.FC = () => {
                             ดูรายละเอียด
                           </Button>
                           {orderHispayDetail &&
-                          orderHispayDetail.at(0)?.Total_Balance === 0 ? (
+                          orderHispayDetail.at(-1)?.Total_Balance === 0 ? (
                             <Button
                               onClick={() => {
                                 handleNavigateToOrderSite(
@@ -1987,7 +1977,7 @@ const AllOrderContent: React.FC = () => {
                             </Button>
                           ) : null}
                           {orderHispayDetail &&
-                          orderHispayDetail.at(0)?.Total_Balance !== 0 &&
+                          orderHispayDetail.at(-1)?.Total_Balance !== 0 &&
                           orderDetail[0]?.Order_Status !== 4 ? (
                             <Button
                               onClick={() => {
