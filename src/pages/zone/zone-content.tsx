@@ -38,7 +38,6 @@ import {
   getEventStock,
 } from "../../services/event-stock.service";
 
-
 import Header from "../common/header";
 import Swal from "sweetalert2";
 import { useFetchTicketTypes } from "../../hooks/fetch-data/useFetchTicketTypes";
@@ -52,7 +51,7 @@ import {
   getAllTicketNoPerPlanByEventId,
 } from "../../services/ticket-no-per-plan.service";
 
-import { SketchPicker } from 'react-color';
+import { SketchPicker } from "react-color";
 
 interface Plan {
   name: string;
@@ -63,11 +62,11 @@ interface Plan {
   selectedTicketType: string;
   zone: string;
   seats: string;
-  PlanColourCode:string;
+  PlanColourCode: string;
 }
 const ZoneContent: React.FC = () => {
-  const [color, setColor] = useState('#fff');
-  const [editcolor,setEditColor]= useState<boolean>(false);
+  const [color, setColor] = useState("#fff");
+  const [editcolor, setEditColor] = useState<boolean>(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planGroups, setPlanGroups] = useState<any[]>([]);
 
@@ -81,12 +80,12 @@ const ZoneContent: React.FC = () => {
     pic: "",
     active: "Y",
     planGroupId: "",
-    selectedTicketType: "", 
-    zone: "", 
-    seats: "", 
+    selectedTicketType: "",
+    zone: "",
+    seats: "",
   });
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
-  console.log("editPlan",editPlan)
+  console.log("editPlan", editPlan);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [letter, setTetter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
@@ -249,12 +248,12 @@ const ZoneContent: React.FC = () => {
       seats: "",
     });
 
-    setColor("#fff")
+    setColor("#fff");
     setSelectedTicketType("");
     setSelectedTicketTypeName("");
-    setSeats("")
-    setSelectedTable("")
-    setZone("")
+    setSeats("");
+    setSelectedTable("");
+    setZone("");
 
     setOpen(true);
   };
@@ -286,7 +285,6 @@ const ZoneContent: React.FC = () => {
       ...plan,
       ticketNoPlanList: dataTicketNoPerPage,
     };
-
 
     setEditPlan(planDataMerge);
     setEditOpen(true);
@@ -432,13 +430,13 @@ const ZoneContent: React.FC = () => {
       const res = await createPlan({
         Plan_Desc: newPlan.desc,
         Plan_Name: newPlan.name,
-        Plan_Pic: newPlan.pic || null, 
+        Plan_Pic: newPlan.pic || null,
         Plan_Active: newPlan.active,
         PlanGroup_id: groupId,
         Plan_Ticket_Type_Id: newPlan.selectedTicketType,
         Plan_Ticket_Qty: newPlan.zone,
         Plan_Ticket_Qty_Per: newPlan.seats,
-        Plan_Colour_Code:color
+        Plan_Colour_Code: color,
       });
 
       console.log("Response from createPlan:", res);
@@ -530,7 +528,7 @@ const ZoneContent: React.FC = () => {
         Plan_Ticket_Qty_Per: editPlan.Plan_Ticket_Qty_Per,
         Plan_Active: editPlan.Plan_Active,
         PlanGroup_id: groupId,
-        Plan_Colour_Code:editPlan?.Plan_Colour_Code,
+        Plan_Colour_Code: editPlan?.Plan_Colour_Code,
         dataTicketValue: dataTicket,
       };
 
@@ -740,13 +738,13 @@ const ZoneContent: React.FC = () => {
   }, [ticketNoPerPlan]);
 
   const handleChangeComplete = (color) => {
-    console.log("color",color.hex)
+    console.log("color", color.hex);
     setColor(color.hex);
   };
 
   const handleChangeComplete2 = (color) => {
     console.log("Selected color:", color.hex);
-  
+
     setEditPlan((prev) => ({
       ...prev,
       Plan_Colour_Code: color.hex,
@@ -1009,20 +1007,25 @@ const ZoneContent: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                        <div>
-                          <button
-                            title={`Color Code: ${plan?.Plan_Colour_Code || "Default (#fff)"}`}
-                            style={{
-                              backgroundColor: plan?.Plan_Colour_Code || "#f0f0f0",
-                              width: "100px",
-                              height: "40px",
-                              border: "1px solid #ccc",
-                              borderRadius: "5px",
-                            }}
-                            aria-label={`Zone color: ${plan?.Plan_Colour_Code || "default color"}`}
-                          ></button>
-                        </div>
-                      </TableCell>
+                      <div>
+                        <button
+                          title={`Color Code: ${
+                            plan?.Plan_Colour_Code || "Default (#fff)"
+                          }`}
+                          style={{
+                            backgroundColor:
+                              plan?.Plan_Colour_Code || "#f0f0f0",
+                            width: "100px",
+                            height: "40px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                          }}
+                          aria-label={`Zone color: ${
+                            plan?.Plan_Colour_Code || "default color"
+                          }`}
+                        ></button>
+                      </div>
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Switch
                         checked={plan.Plan_Active === "Y"}
@@ -1112,11 +1115,19 @@ const ZoneContent: React.FC = () => {
               },
             }}
           />
-           <div>
-               <p>สีโซน</p>
-              <button style={{ background: color, width: '100px', height: '40px' }} onClick={()=>setEditColor(!editcolor)} ></button>
-              {editcolor === true ? (<SketchPicker color={color} onChangeComplete={handleChangeComplete} />):null}
-            </div>
+          <div>
+            <p>สีโซน</p>
+            <button
+              style={{ background: color, width: "100px", height: "40px" }}
+              onClick={() => setEditColor(!editcolor)}
+            ></button>
+            {editcolor === true ? (
+              <SketchPicker
+                color={color}
+                onChangeComplete={handleChangeComplete}
+              />
+            ) : null}
+          </div>
 
           <TextField
             margin="dense"
@@ -1135,7 +1146,7 @@ const ZoneContent: React.FC = () => {
               },
             }}
           />
-         
+
           <TextField
             inputRef={fileInputRef}
             accept="image/*"
@@ -1294,12 +1305,15 @@ const ZoneContent: React.FC = () => {
               onChange={handleTableChange}
             >
               <MenuItem value="1">1.คีย์เลขโต๊ะได้เอง</MenuItem>
-              <MenuItem value="2">{`2. รันจาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
-                }`}</MenuItem>
-              <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
-                } - (ประเภทบัตร 1-${zone ? parseInt(zone, 10) : 0})`}</MenuItem>
-              <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${zone ? parseInt(zone, 10) : 0
-                }`}</MenuItem>
+              <MenuItem value="2">{`2. รันจาก 1 ถึง ${
+                zone ? parseInt(zone, 10) : 0
+              }`}</MenuItem>
+              <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
+                zone ? parseInt(zone, 10) : 0
+              } - (ประเภทบัตร 1-${zone ? parseInt(zone, 10) : 0})`}</MenuItem>
+              <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
+                zone ? parseInt(zone, 10) : 0
+              }`}</MenuItem>
               <MenuItem value="5">5.ไม่ระบุเลขโต๊ะ</MenuItem>
             </Select>
           </FormControl>
@@ -1310,7 +1324,7 @@ const ZoneContent: React.FC = () => {
             selectedTicketType={selectedTicketTypeName}
             letter={letter || null}
             mode="Create" // โหมดแก้ไข
-            dataEdit={editPlan} 
+            dataEdit={editPlan}
           />
         </DialogContent>
         <DialogActions>
@@ -1361,10 +1375,22 @@ const ZoneContent: React.FC = () => {
                 },
               }}
             />
-               <div>
-               <p>สีโซน</p>
-              <button style={{ background: editPlan?.Plan_Colour_Code, width: '100px', height: '40px' }} onClick={()=>setEditColor(!editcolor)} ></button>
-              {editcolor === true ? (<SketchPicker color={editPlan?.Plan_Colour_Code} onChangeComplete={handleChangeComplete2} />):null}
+            <div>
+              <p>สีโซน</p>
+              <button
+                style={{
+                  background: editPlan?.Plan_Colour_Code,
+                  width: "100px",
+                  height: "40px",
+                }}
+                onClick={() => setEditColor(!editcolor)}
+              ></button>
+              {editcolor === true ? (
+                <SketchPicker
+                  color={editPlan?.Plan_Colour_Code}
+                  onChangeComplete={handleChangeComplete2}
+                />
+              ) : null}
             </div>
             <TextField
               margin="dense"
@@ -1500,21 +1526,25 @@ const ZoneContent: React.FC = () => {
                 onChange={handleEditChange}
               >
                 <MenuItem value="1">1.คีย์เลขโต๊ะได้เอง</MenuItem>
-                <MenuItem value="2">{`2. รันจาก 1 ถึง ${editPlan.Plan_Ticket_Qty
-                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                  : 0
-                  }`}</MenuItem>
-                <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${editPlan.Plan_Ticket_Qty
-                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                  : 0
-                  } - (ประเภทบัตร 1-${editPlan.Plan_Ticket_Qty
+                <MenuItem value="2">{`2. รันจาก 1 ถึง ${
+                  editPlan.Plan_Ticket_Qty
                     ? parseInt(editPlan.Plan_Ticket_Qty, 10)
                     : 0
-                  })`}</MenuItem>
-                <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${editPlan.Plan_Ticket_Qty
-                  ? parseInt(editPlan.Plan_Ticket_Qty, 10)
-                  : 0
-                  }`}</MenuItem>
+                }`}</MenuItem>
+                <MenuItem value="3">{`3.นำหน้าด้วย ประเภทบัตร ต่อด้วย รันจาก 1 ถึง ${
+                  editPlan.Plan_Ticket_Qty
+                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                    : 0
+                } - (ประเภทบัตร 1-${
+                  editPlan.Plan_Ticket_Qty
+                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                    : 0
+                })`}</MenuItem>
+                <MenuItem value="4">{`4.ใส่อักษรนำหน้า ต่อด้วย ประเภทบัตร จาก 1 ถึง ${
+                  editPlan.Plan_Ticket_Qty
+                    ? parseInt(editPlan.Plan_Ticket_Qty, 10)
+                    : 0
+                }`}</MenuItem>
                 <MenuItem value="5">5.ไม่ระบุเลขโต๊ะ</MenuItem>
               </Select>
             </FormControl>
@@ -1524,8 +1554,8 @@ const ZoneContent: React.FC = () => {
               zoneId={1}
               selectedTicketType={selectedTicketTypeName} // ประเภทตั๋ว
               letter={letter || null}
-            mode="edit" // โหมดแก้ไข
-            dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
+              mode="edit" // โหมดแก้ไข
+              dataEdit={editPlan} // ข้อมูลที่จะแก้ไข
             />
           </DialogContent>
           <DialogActions>

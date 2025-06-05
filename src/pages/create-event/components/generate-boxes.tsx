@@ -9,9 +9,8 @@ interface GenerateTableProps {
   totalSeats: number;
   zoneId: number;
   selectedTicketType: string;
-  letter: string;
-  mode: string;
-  dataEdit: any;
+  // mode: string;
+  // dataEdit: any;
 }
 
 const GenerateBoxes: React.FC<GenerateTableProps> = ({
@@ -20,9 +19,11 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
   zoneId,
   selectedTicketType,
   letter,
-  mode,
-  dataEdit,
+  // mode,
+  // dataEdit,
 }) => {
+  // console.log("hi", method, totalSeats, zoneId, selectedTicketType);
+  console.log("letter", letter);
   const {
     setStartNumberAndPrefix,
     setTableValues,
@@ -39,15 +40,25 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
     setStartNumberAndPrefix,
     zones,
     selectedTicketType,
-    mode,
-    dataEdit,
   });
 
   useEffect(() => {
-    if (letter) {
-      setPrefix(letter); // Update prefix when letter changes
-    }
-  }, [letter, setPrefix]);
+    console.log("Props:", { method, totalSeats, zoneId, selectedTicketType });
+    console.log("Store values:", { startNumber, zones });
+    console.log("Generated values:", { prefix });
+  }, [
+    method,
+    totalSeats,
+    zoneId,
+    selectedTicketType,
+    startNumber,
+    zones,
+    prefix,
+  ]);
+
+  useEffect(() => {
+    setPrefix(letter);
+  }, [letter]);
 
   return method === "5" ? null : (
     <Box>
@@ -58,7 +69,7 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
         }}
       >
         <Box>
-          {totalSeats > 0 && (
+          {totalSeats && (
             <Typography
               variant="h5"
               sx={{
@@ -92,7 +103,9 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
               id="startNumber"
               type="number"
               value={startNumber}
-              onChange={(e) => setStartNumber(Number(e.target.value))}
+              onChange={(e) => {
+                setStartNumber(Number(e.target.value));
+              }}
               label="เริ่มจาก*"
             />
           </Box>
@@ -131,15 +144,6 @@ const GenerateBoxes: React.FC<GenerateTableProps> = ({
       </Box>
     </Box>
   );
-};
-
-GenerateBoxes.defaultProps = {
-  method: "1",
-  totalSeats: 0,
-  selectedTicketType: "",
-  letter: "",
-  mode: "create",
-  dataEdit: null,
 };
 
 export default GenerateBoxes;

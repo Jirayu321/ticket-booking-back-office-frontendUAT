@@ -14,9 +14,7 @@ export function useGenerateBoxes(options: {
     prefix: string
   ) => void;
   zones: Record<number, any>;
-  selectedTicketType: string;
-  mode: string;
-  dataEdit: any;
+  selectedTicketType: string; // Add selectedTicketType to the options
 }) {
   const {
     method,
@@ -26,9 +24,8 @@ export function useGenerateBoxes(options: {
     setStartNumberAndPrefix,
     zones,
     selectedTicketType,
-    mode,
-    dataEdit,
   } = options;
+  console.log("options", options);
   const { inputValues, setInputValueStore, startNumber, setStartNumber } =
     useZoneStore();
 
@@ -37,7 +34,7 @@ export function useGenerateBoxes(options: {
   useEffect(() => {
     const savedStartNumber = zones[zoneId]?.startNumber;
     const savedPrefix = zones[zoneId]?.prefix;
-
+    console.log("zones", zones);
     if (savedStartNumber !== undefined) setStartNumber(savedStartNumber);
     if (savedPrefix !== undefined) setPrefix(savedPrefix);
 
@@ -49,22 +46,20 @@ export function useGenerateBoxes(options: {
   }, [startNumber, prefix, zoneId]);
 
   useEffect(() => {
-    if (mode === "edit" && Array.isArray(dataEdit?.ticketNoPlanList)) {
-      const initialValues = dataEdit.ticketNoPlanList.map((item) => item.Ticket_No);
-      setInputValueStore(initialValues);
-      setTableValues(zoneId, initialValues);
-    } else if (mode === "create") {
-      const initialValues = Array(totalSeats).fill(""); // Reset for "create"
-      setInputValueStore(initialValues);
-      setTableValues(zoneId, initialValues);
+    updateTableValues();
+  }, [prefix, totalSeats, method, zoneId]);
+
+  useEffect(() => {
+    if (startNumber !== null) {
+      updateTableValues();
     }
-  }, [mode, dataEdit, zoneId, totalSeats]);
+  }, [totalSeats, method, zoneId, startNumber]);
 
   const handleInputChange = (index: number, value: string) => {
-    const updatedValues = [...inputValues];
-    updatedValues[index] = value;
-    setInputValueStore(updatedValues); // Update local store
-    setTableValues(zoneId, updatedValues); // Sync with parent component
+    const newValues = [...inputValues];
+    newValues[index] = value;
+    setTableValues(zoneId, newValues);
+    setInputValueStore(newValues);
   };
 
   const updateTableValues = () => {
@@ -75,91 +70,80 @@ export function useGenerateBoxes(options: {
 
   const generateBoxesData = () => {
     let boxesData: string[] = [];
+    console.log(" generateBoxesData method", method);
+    console.log(" generateBoxesData prefix", prefix);
+    console.log("generateBoxesData startNumber", startNumber);
 
-    if (mode === "edit") {
-      // Use dataEdit for "edit" mode
-      boxesData = Array.isArray(dataEdit?.ticketNoPlanList)
-        ? dataEdit.ticketNoPlanList.map((item) => item.Ticket_No)
-        : [];
-    } else if (mode === "create") {
-      // Generate boxes for "create" mode
-      if (method === "1") {
-        boxesData = Array.from(
-          { length: totalSeats },
-          (_, i) => inputValues[i]?.trimEnd() || ""
-        );
-      } else if (["2", "3", "4"].includes(method) && startNumber !== null) {
-        boxesData = Array.from({ length: totalSeats }, (_, i) => {
-          const currentNumber = startNumber + i;
-          if (method === "3") return `${selectedTicketType} ${currentNumber}`;
-          if (method === "4") return `${prefix}${currentNumber}`;
-          return `${currentNumber}`;
-        });
-      } else if (method === "5") {
-        boxesData = Array.from({ length: totalSeats }, () => "");
+    if (method === "1") {
+
+      boxesData = Array.from(
+        { length: totalSeats },
+        (_, i) => inputValues[i]?.trimEnd() || ""
+      );
+    } else if (["2", "3", "4"].includes(method) && startNumber !== null) {
+
+      for (let i = 0; i < totalSeats; i++) {
+        const boxValue =
+          method === "3"
+            ? `${selectedTicketType} ${startNumber + i}`
+            : method === "4"
+            ? `${prefix}${startNumber + i}`
+            : `${startNumber + i}`;
+        boxesData.push(boxValue);
       }
+    } else if (method === "5") {
+      boxesData = Array.from({ length: totalSeats }, () => "");
     }
-
-    // Apply user changes from inputValues if present
-    if (inputValues?.length > 0) {
-      inputValues.forEach((val, idx) => {
-        if (val) boxesData[idx] = val;
-      });
-    }
-
-    console.log("generateBoxesData result:", boxesData);
+    console.log("boxesData", boxesData);
     return boxesData;
   };
 
   const renderBoxes = () => {
-    const boxesData = generateBoxesData();
-    console.log("boxesData in renderBoxes:", boxesData);
-
-    if (!Array.isArray(boxesData)) {
-      console.error("boxesData is not an array:", boxesData);
-      return null;
-    }
-
-    return boxesData.map((value, index) => (
-      <Box
-        key={index}
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "flex-start",
-        }}
-      >
-        <TextField
+    return generateBoxesData().map((value, index) => {
+      // console.log('generateBoxesData value =>', value);
+      return (
+        <Box
+          key={index}
           sx={{
-            width: "70px",
-            "& .MuiOutlinedInput-root": {
-              "& input": {
-                border: "none",
-                transform: "translateY(5px)",
-                textAlign: "center",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+          }}
+        >
+          <TextField
+            sx={{
+              width: "70px",
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none",
+                  transform: "translateY(5px)",
+                  textAlign: "center",
+                },
               },
-            },
-          }}
-          onFocus={(e) => e.target.select()}
-          type="text"
-          value={value}
-          placeholder={method === "1" ? "โปรดระบุ" : ""}
-          InputProps={{
-            readOnly: method !== "1" && method !== "5",
-          }}
-          onBlur={() => {
-            const hasDuplicate = inputValues.filter((v) => v === value && v).length > 1;
-            if (hasDuplicate) {
-              SwalError("มีเลขซ้ำกันในโต๊ะ");
-              handleInputChange(index, ""); // Clear duplicate values
-            }
-          }}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            handleInputChange(index, e.target.value)
-          }
-        />
-      </Box>
-    ));
+            }}
+            onFocus={(e) => e.target.select()}
+            type="text"
+            value={value}
+            onBlur={() => {
+              const doesValueDuplicate =
+                inputValues.filter((v) => v === value && Boolean(v)).length > 1;
+
+              if (doesValueDuplicate) {
+                SwalError("มีเลขซ้ำกันในโต๊ะ");
+                handleInputChange(index, "");
+              }
+            }}
+            placeholder={method === "1" ? "โปรดระบุ" : ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              handleInputChange(index, e.target.value);
+            }}
+            InputProps={{
+              readOnly: method !== "1" && method !== "5",
+            }}
+          />
+        </Box>
+      );
+    });
   };
 
   return {
