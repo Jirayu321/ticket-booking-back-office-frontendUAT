@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { authAxiosClient } from "../../config/axios.config";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -44,6 +44,8 @@ import { updateOrder } from "../../services/order-all.service";
 import QRCode from "qrcode";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
+import io from "socket.io-client";
+
 import {
   selectedColor,
   paymentStatusBgColor0,
@@ -66,24 +68,13 @@ const AllOrderContent: React.FC = () => {
   const [isFetching, setIsFetching] = useState(false);
   const { refetch } = useFetchOrdertList({ count });
 
-  useEffect(() => {
-    if (events) {
-      console.log("ข้อมูล data เปลี่ยนไป:", events);
-    }
-  }, [events]);
+  const socketRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (isFetching) {
-      console.log("กำลังดึงข้อมูล...");
-    } else if (events) {
-      console.log("ข้อมูลโหลดเสร็จแล้ว");
-      setCount(true);
-    }
-  }, [isFetching, events]);
-
-  useEffect(() => {
-    initialize();
-  }, []);
+  if (!socketRef.current) {
+    socketRef.current = io("https://deedclub-staff-backend-uat2.appsystemyou.com", {
+      path: "/socket_io",
+    });
+  }
 
   const initialize = async () => {
     setIsFetching(true);
@@ -103,7 +94,6 @@ const AllOrderContent: React.FC = () => {
     events?.dataOrder?.orderAll?.filter(
       (order: any) => order?.DT_order_id !== null
     ) || [];
-  console.log("orderHData", orderHData);
 
   const orderDData =
     events?.dataOrder?.hisPayment?.filter(
@@ -367,31 +357,130 @@ const AllOrderContent: React.FC = () => {
     }
   };
 
-  const handleNavigateToOrderSite2 = async (order_id: string | number) => {
-    const orderIdStr = String(order_id); // Ensure order_id is a string
-
-    // PRDODUCTION
-    // window.open(
-    //   `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
-    //     "token"
-    //   )}`,
-    //   "_blank"
-    // );
-    //  UAT
-    window.open(
-      `https://deedclub-uat.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
-        "token"
-      )}`,
-      "_blank"
-    );
-    // test
-    // window.open(
-    //   `http://localhost:3010/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
-    //     "token"
-    //   )}`,
-    //   "_blank"
-    // );
+  const handlePayCash = async (Order_id: number) => {
+    console.log("Order_id", Order_id, typeof Order_id);
+    Swal.fire({
+      icon: "warning",
+      text: "คุณต้องการชำระเป็น เงินสด หรือไม่",
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ปิด",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await authAxiosClient?.post("/api/paysecond", {
+            Order_id,
+          });
+          console.log("paysecond response:", res?.data);
+          SwalSuccess("อัพเดทการชำระเรียบร้อย");
+          setTimeout(() => {
+            window.location.replace("/all-orders");
+          }, 1500);
+        } catch (error) {
+          console.error("Error in claerStatusR:", error);
+          Swal.fire({
+            icon: "error",
+            text: "เกิดข้อผิดพลาดในการชำระ",
+          });
+        }
+      } else {
+        console.log("User closed");
+      }
+    });
   };
+
+  const handlePayQRCODE = async (Order_id: number) => {
+    const confirmed = await Swal.fire({
+      icon: "warning",
+      text: "คุณต้องการชำระเป็น QR_CODE หรือไม่",
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ปิด",
+    });
+
+    if (!confirmed.isConfirmed) return;
+
+    try {
+      // ✅ เข้าร่วมห้องเฉพาะ order นี้ก่อน
+      socketRef.current.emit("joinOrderRoom", Order_id);
+
+      // ✅ เรียก API เพื่อสร้าง QR
+      const res = await authAxiosClient.post("/api/create-qr", {
+        orderId: Order_id,
+      });
+
+      const { qrCodeUrl } = res.data;
+      if (!qrCodeUrl) throw new Error("ไม่สามารถสร้าง QR Code ได้");
+
+      // ✅ ส่ง QR ไปยังหน้าจอที่สอง
+      socketRef.current.emit("orderCreated", {
+        orderId: Order_id,
+        qrCode: qrCodeUrl,
+      });
+
+      // ✅ แสดง QR พร้อมโหลด
+      Swal.fire({
+        title: "กำลังรอการชำระเงิน...",
+        html: `<img src="${qrCodeUrl}" width="250" height="250" />
+             <div style="margin-top: 10px;">กรุณาชำระเงินผ่านแอปธนาคารของคุณ</div>`,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // ✅ ป้องกันการติด loop listener ซ้ำ
+      socketRef.current.off("orderStatusUpdated");
+
+      // ✅ รอรับสถานะอัปเดต
+      socketRef.current.on("orderStatusUpdated", (payload: any) => {
+        if (payload?.orderId === Order_id && payload?.status === 1) {
+          Swal.fire({
+            icon: "success",
+            text: "อัพเดทการชำระเรียบร้อย",
+          });
+          setTimeout(() => {
+            window.location.replace("/all-orders");
+          }, 1500);
+        }
+      });
+    } catch (error: any) {
+      console.error("❌", error.message);
+      Swal.fire({
+        icon: "error",
+        text: error.message || "เกิดข้อผิดพลาด",
+      });
+    }
+  };
+
+  // const handlePayQRCODE = async () => {};
+
+  // const handleNavigateToOrderSite2 = async (order_id: string | number) => {
+  // const orderIdStr = String(order_id); // Ensure order_id is a string
+
+  // PRDODUCTION
+  // window.open(
+  //   `https://deedclub.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+  //     "token"
+  //   )}`,
+  //   "_blank"
+  // );
+  //  UAT
+  // window.open(
+  //   `https://deedclub-uat.appsystemyou.com/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+  //     "token"
+  //   )}`,
+  //   "_blank"
+  // );
+  // test
+  // window.open(
+  //   `http://localhost:3010/ConcertInfo/${orderIdStr}?token=${localStorage.getItem(
+  //     "token"
+  //   )}`,
+  //   "_blank"
+  // );
+  // };
 
   const PaymentGateway = async (chargeId: any) => {
     console.log("orderDetail.at(0)", orderDetail.at(0));
@@ -764,8 +853,6 @@ const AllOrderContent: React.FC = () => {
       return acc;
     }, []);
 
-  console.log("filteredOrders", filteredOrders);
-
   const totalOrders = filteredOrders?.length;
 
   const dataP = Object.values(
@@ -896,6 +983,25 @@ const AllOrderContent: React.FC = () => {
       />
     );
   });
+
+  useEffect(() => {
+    if (events) {
+      console.log("ข้อมูล data เปลี่ยนไป:", events);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    if (isFetching) {
+      console.log("กำลังดึงข้อมูล...");
+    } else if (events) {
+      console.log("ข้อมูลโหลดเสร็จแล้ว");
+      setCount(true);
+    }
+  }, [isFetching, events]);
+
+  useEffect(() => {
+    initialize();
+  }, []);
 
   return (
     <div
@@ -1769,7 +1875,7 @@ const AllOrderContent: React.FC = () => {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "80% auto",
+                      gridTemplateColumns: "auto auto",
                     }}
                   >
                     <div
@@ -1879,32 +1985,33 @@ const AllOrderContent: React.FC = () => {
                           : `${orderDetail.at(0)?.Cust_line}`}
                       </p> */}
                     </div>
-                    <div
-                      style={
-                        (orderHispayDetail &&
-                          orderHispayDetail.at(0)?.Total_Balance === 0) ||
-                        orderDetail[0]?.Order_Status === 4
-                          ? {
-                              display: "grid",
-                              justifyContent: "flex-end",
-                              alignContent: "flex-end",
-                              position: "relative",
-                              top: "-30px",
-                              right: "60px",
-                            }
-                          : {
-                              display: "grid",
-                              justifyContent: "flex-end",
-                              alignContent: "flex-end",
-                              position: "relative",
-                              top: "-30px",
-                              right: "60px",
-                            }
-                      }
-                    >
-                      {orderDetail.length !== 0 ? (
+                  </div>
+
+                  <div
+                    style={
+                      (orderHispayDetail &&
+                        orderHispayDetail.at(0)?.Total_Balance === 0) ||
+                      orderDetail[0]?.Order_Status === 4
+                        ? {
+                            display: "grid",
+                            position: "relative",
+                          }
+                        : {
+                            display: "grid",
+                            position: "relative",
+                          }
+                    }
+                  >
+                    {orderDetail.length !== 0 ? (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "auto auto",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <div
-                          className="flex"
+                          className=""
                           style={
                             orderHispayDetail &&
                             orderHispayDetail.at(0)?.Total_Balance !== 0 &&
@@ -1935,6 +2042,36 @@ const AllOrderContent: React.FC = () => {
                           >
                             ดูรายละเอียด
                           </Button>
+
+                          {orderDetail[0]?.Order_Status === 4 ? (
+                            <Button
+                              variant="contained"
+                              // color="primary"
+                              onClick={() =>
+                                PaymentGateway(
+                                  orderDetail.at(0)?.ORD_H_Last_Charge_ID
+                                )
+                              }
+                              style={{
+                                width: 110,
+                                height: 50,
+                                backgroundColor: "#CFB70B",
+                                color: "black",
+                              }}
+                            >
+                              ตรวจสอบจ่าย
+                            </Button>
+                          ) : null}
+                        </div>
+
+                        <div
+                          style={{
+                            // width: "247px",
+                            display: "grid",
+                            justifyContent: "space-between",
+                            gridTemplateColumns: "auto auto",
+                          }}
+                        >
                           {orderHispayDetail &&
                           orderHispayDetail.at(-1)?.Total_Balance === 0 ? (
                             <Button
@@ -1957,52 +2094,59 @@ const AllOrderContent: React.FC = () => {
                             </Button>
                           ) : null}
 
-                          {orderDetail[0]?.Order_Status === 4 ? (
-                            <Button
-                              variant="contained"
-                              // color="primary"
-                              onClick={() =>
-                                PaymentGateway(
-                                  orderDetail.at(0)?.ORD_H_Last_Charge_ID
-                                )
-                              }
-                              style={{
-                                width: 110,
-                                height: 50,
-                                backgroundColor: "#CFB70B",
-                                color: "black",
-                              }}
-                            >
-                              ตรวจสอบจ่าย
-                            </Button>
-                          ) : null}
                           {orderHispayDetail &&
                           orderHispayDetail.at(-1)?.Total_Balance !== 0 &&
                           orderDetail[0]?.Order_Status !== 4 ? (
-                            <Button
-                              onClick={() => {
-                                handleNavigateToOrderSite2(
-                                  orderDetail.at(0)?.Order_id
-                                );
-                              }}
-                              variant="contained"
+                            <div
                               style={{
-                                backgroundColor: "#CFB70B",
-                                color: "#000",
-                                fontWeight: "bold",
-                                fontSize: "12px",
-                                height: "50px",
+                                display: "grid",
+                                gridTemplateColumns: "auto auto",
+                                width: "375px",
+                                justifyContent: "space-between",
                               }}
-                              startIcon={
-                                <FaMoneyBill style={{ color: "black" }} />
-                              }
                             >
-                              ชำระส่วนที่เหลือ
-                            </Button>
+                              <Button
+                                onClick={() =>
+                                  handlePayCash(orderDetail.at(0)?.Order_id)
+                                }
+                                variant="contained"
+                                style={{
+                                  backgroundColor: "#CFB70B",
+                                  color: "#000",
+                                  fontWeight: "bold",
+                                  fontSize: "12px",
+                                  height: "50px",
+                                }}
+                                startIcon={
+                                  <FaMoneyBill style={{ color: "black" }} />
+                                }
+                              >
+                                ชำระส่วนที่เหลือเงินสด
+                              </Button>
+
+                              <Button
+                                onClick={() =>
+                                  handlePayQRCODE(orderDetail.at(0)?.Order_id)
+                                }
+                                variant="contained"
+                                style={{
+                                  backgroundColor: "#CFB70B",
+                                  color: "#000",
+                                  fontWeight: "bold",
+                                  fontSize: "12px",
+                                  height: "50px",
+                                }}
+                                startIcon={
+                                  <FaMoneyBill style={{ color: "black" }} />
+                                }
+                              >
+                                ชำระส่วนที่เหลือ QRCODE
+                              </Button>
+                            </div>
                           ) : null}
                         </div>
-                      ) : null}
-                    </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>

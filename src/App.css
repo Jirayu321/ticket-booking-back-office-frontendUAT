@@ -103,6 +103,10 @@ div:where(.swal2-container) {
   justify-items: center;
 }
 
+.swal2-popup {
+  justify-items: center;
+}
+
 .custom-datepicker {
   width: 100%;
   padding: 10px;
