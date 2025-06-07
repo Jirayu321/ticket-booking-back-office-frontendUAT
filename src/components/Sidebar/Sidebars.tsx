@@ -185,6 +185,35 @@ const Sidebars: React.FC = () => {
                 >
                   <MenuItem icon={<DashboardIcon />}>แยกตามการซื้อ</MenuItem>
                 </Link>
+                <Link
+                  to="/overview3"
+                  className={`menu-bars ${
+                    activePath === "/overview3" ? "active" : ""
+                  }`}
+                  onClick={handleMenuItemClick}
+                >
+                  <MenuItem icon={<DashboardIcon />}>Top 10 ยอดขาย</MenuItem>
+                </Link>
+                <Link
+                  to="/overview4"
+                  className={`menu-bars ${
+                    activePath === "/overview4" ? "active" : ""
+                  }`}
+                  onClick={handleMenuItemClick}
+                >
+                  <MenuItem icon={<DashboardIcon />}>
+                    ลูกค้าที่ซื้อบัตรซ้ำ
+                  </MenuItem>
+                </Link>
+                <Link
+                  to="/overview5"
+                  className={`menu-bars ${
+                    activePath === "/overview5" ? "active" : ""
+                  }`}
+                  onClick={handleMenuItemClick}
+                >
+                  <MenuItem icon={<DashboardIcon />}>รายการที่ยกเลิก</MenuItem>
+                </Link>
               </SubMenu>
 
               <Link

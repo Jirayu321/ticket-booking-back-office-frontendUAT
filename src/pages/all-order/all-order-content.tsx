@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { authAxiosClient } from "../../config/axios.config";
+import WalkinModal from "./WalkinModal";
+
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -68,12 +70,17 @@ const AllOrderContent: React.FC = () => {
   const [isFetching, setIsFetching] = useState(false);
   const { refetch } = useFetchOrdertList({ count });
 
+  const [walkinModalOpen, setWalkinModalOpen] = useState(false);
+
   const socketRef = useRef<any>(null);
 
   if (!socketRef.current) {
-    socketRef.current = io("https://deedclub-staff-backend-uat2.appsystemyou.com", {
-      path: "/socket_io",
-    });
+    socketRef.current = io(
+      "https://deedclub-staff-backend-uat2.appsystemyou.com",
+      {
+        path: "/socket_io",
+      }
+    );
   }
 
   const initialize = async () => {
@@ -357,11 +364,18 @@ const AllOrderContent: React.FC = () => {
     }
   };
 
-  const handlePayCash = async (Order_id: number) => {
-    console.log("Order_id", Order_id, typeof Order_id);
+  const handlePayCash = async (Order_id: number, amount: number) => {
+    console.log("amount", amount, typeof amount);
+    const Success = "/paid.png";
     Swal.fire({
       icon: "warning",
-      text: "คุณต้องการชำระเป็น เงินสด หรือไม่",
+      html: `คุณต้องการชำระเป็น เงินสด<br>&nbsp;&nbsp;&nbsp;&nbsp;ยอดเงิน ${amount.toLocaleString(
+        undefined,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }
+      )} บาท<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หรือไม่`,
       showCancelButton: true,
       confirmButtonText: "ตกลง",
       cancelButtonText: "ปิด",
@@ -370,12 +384,71 @@ const AllOrderContent: React.FC = () => {
         try {
           const res = await authAxiosClient?.post("/api/paysecond", {
             Order_id,
+            amount,
           });
           console.log("paysecond response:", res?.data);
-          SwalSuccess("อัพเดทการชำระเรียบร้อย");
-          setTimeout(() => {
-            window.location.replace("/all-orders");
-          }, 1500);
+          // SwalSuccess("อัพเดทการชำระเรียบร้อย");
+
+          Swal.fire({
+            html: `
+      <div style="text-align: center; ">
+        <img src="${Success}" width="250" height="250" />
+        <br/>
+        <div style="display: grid;width: 490px;grid-template-columns: auto auto;align-items: center;justify-content: space-between;">
+        <button id="printQRBtn" style="
+          margin-top: 20px;
+          background-color: #CFB70B;
+          color: black;
+          font-weight: bold;
+          font-size: 12px;
+          height: 50px;
+          border: none;
+          padding: 0 20px;
+          cursor: pointer;
+          border-radius: 5px;
+          ">
+          <i class="fa fa-print" style="margin-right: 5px;"></i> Print QR
+        </button>
+        <button id="closeBtn" style="
+         margin-top: 20px;
+          background-color: #e0e0e0;
+          color: black;
+          font-weight: bold;
+          font-size: 12px;
+          height: 50px;
+          border: none;
+          padding: 0 20px;
+          cursor: pointer;
+          border-radius: 5px;
+          width: 100px;
+        ">
+          ปิด
+        </button>
+        </div>
+        
+      </div>
+    `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+              Swal.hideLoading();
+
+              const printBtn = document.getElementById("printQRBtn");
+              const closeBtn = document.getElementById("closeBtn");
+
+              if (printBtn) {
+                printBtn.addEventListener("click", () => {
+                  handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
+                });
+              }
+
+              if (closeBtn) {
+                closeBtn.addEventListener("click", () => {
+                  window.location.replace("/all-orders");
+                });
+              }
+            },
+          });
         } catch (error) {
           console.error("Error in claerStatusR:", error);
           Swal.fire({
@@ -389,10 +462,17 @@ const AllOrderContent: React.FC = () => {
     });
   };
 
-  const handlePayQRCODE = async (Order_id: number) => {
+  const handlePayQRCODE = async (Order_id: number, amount: number) => {
+    const Success = "/paid.png";
     const confirmed = await Swal.fire({
       icon: "warning",
-      text: "คุณต้องการชำระเป็น QR_CODE หรือไม่",
+      html: `คุณต้องการชำระเป็น QR_CODE<br>&nbsp;&nbsp;&nbsp;&nbsp;ยอดเงิน ${amount.toLocaleString(
+        undefined,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }
+      )} บาท<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หรือไม่`,
       showCancelButton: true,
       confirmButtonText: "ตกลง",
       cancelButtonText: "ปิด",
@@ -407,6 +487,7 @@ const AllOrderContent: React.FC = () => {
       // ✅ เรียก API เพื่อสร้าง QR
       const res = await authAxiosClient.post("/api/create-qr", {
         orderId: Order_id,
+        amount,
       });
 
       const { qrCodeUrl } = res.data;
@@ -422,9 +503,11 @@ const AllOrderContent: React.FC = () => {
       Swal.fire({
         title: "กำลังรอการชำระเงิน...",
         html: `<img src="${qrCodeUrl}" width="250" height="250" />
-             <div style="margin-top: 10px;">กรุณาชำระเงินผ่านแอปธนาคารของคุณ</div>`,
+         <div style="margin-top: 10px;">กรุณาชำระเงินผ่านแอปธนาคารของคุณ</div>`,
         allowOutsideClick: false,
         showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: "ปิด",
         didOpen: () => {
           Swal.showLoading();
         },
@@ -436,13 +519,77 @@ const AllOrderContent: React.FC = () => {
       // ✅ รอรับสถานะอัปเดต
       socketRef.current.on("orderStatusUpdated", (payload: any) => {
         if (payload?.orderId === Order_id && payload?.status === 1) {
+          // Swal.fire({
+          //   icon: "success",
+          //   text: "อัพเดทการชำระเรียบร้อย",
+          // });
+          // setTimeout(() => {
+          //   window.location.replace("/all-orders");
+          // }, 1500);
           Swal.fire({
-            icon: "success",
-            text: "อัพเดทการชำระเรียบร้อย",
+            html: `
+      <div style="text-align: center; ">
+        <img src="${Success}" width="250" height="250" />
+        <br/>
+        <div style="display: grid;width: 490px;grid-template-columns: auto auto;align-items: center;justify-content: space-between;">
+        <button id="printQRBtn" style="
+          margin-top: 20px;
+          background-color: #CFB70B;
+          color: black;
+          font-weight: bold;
+          font-size: 12px;
+          height: 50px;
+          border: none;
+          padding: 0 20px;
+          cursor: pointer;
+          border-radius: 5px;
+          ">
+          <i class="fa fa-print" style="margin-right: 5px;"></i> Print QR
+        </button>
+        <button id="closeBtn" style="
+         margin-top: 20px;
+          background-color: #e0e0e0;
+          color: black;
+          font-weight: bold;
+          font-size: 12px;
+          height: 50px;
+          border: none;
+          padding: 0 20px;
+          cursor: pointer;
+          border-radius: 5px;
+          width: 100px;
+        ">
+          ปิด
+        </button>
+        </div>
+        
+      </div>
+    `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+              Swal.hideLoading();
+
+              const printBtn = document.getElementById("printQRBtn");
+              const closeBtn = document.getElementById("closeBtn");
+
+              if (printBtn) {
+                printBtn.addEventListener("click", () => {
+                  handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
+                });
+              }
+
+              if (closeBtn) {
+                closeBtn.addEventListener("click", () => {
+                  window.location.replace("/all-orders");
+                });
+              }
+            },
           });
-          setTimeout(() => {
-            window.location.replace("/all-orders");
-          }, 1500);
+
+          // setTimeout(() => {
+          //   window.location.replace("/all-orders");
+          // }, 1500);
         }
       });
     } catch (error: any) {
@@ -851,7 +998,23 @@ const AllOrderContent: React.FC = () => {
       }
 
       return acc;
-    }, []);
+    }, [])
+    .map((order) => {
+      const updatedTicketNoList = [
+        ...new Set(
+          order.TicketNo_List.split(",").map((no) =>
+            no.trim().startsWith("A") ? "Walk-in" : no.trim()
+          )
+        ),
+      ].join(", ");
+
+      return {
+        ...order,
+        TicketNo_List: updatedTicketNoList,
+      };
+    });
+
+  console.log("filteredOrders", filteredOrders);
 
   const totalOrders = filteredOrders?.length;
 
@@ -1003,12 +1166,29 @@ const AllOrderContent: React.FC = () => {
     initialize();
   }, []);
 
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const orderNo = localStorage.getItem("Order_no");
+      if (orderNo && orderHData.length && orderDData.length) {
+        await handleOrderClick(orderNo);
+      }
+    };
+
+    if (!hasInitialized.current && orderHData.length && orderDData.length) {
+      fetchOrder();
+      hasInitialized.current = true;
+    }
+  }, [orderHData, orderDData]);
+
   return (
     <div
       className="all-orders-content"
       style={{ display: "grid", height: "100%", alignContent: "baseline" }}
     >
       <Header title="คำสั่งซื้อทั้งหมด" />
+
       <Container maxWidth={false} sx={{ padding: 1, marginTop: "5px" }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -1584,9 +1764,33 @@ const AllOrderContent: React.FC = () => {
         }}
       >
         <div style={{ width: "1030px" }}>
-          <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
-            คำสั่งซื้อทั้งหมด
-          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              justifyContent: " space-between",
+              alignItems: "center",
+            }}
+          >
+            <p style={{ color: "#000", fontSize: 18, fontWeight: "bold" }}>
+              คำสั่งซื้อทั้งหมด
+            </p>
+            <div>
+              <Button
+                onClick={() => setWalkinModalOpen(true)}
+                variant="contained"
+                style={{
+                  backgroundColor: "#CFB70B",
+                  color: "#000",
+                  fontWeight: "bold",
+                  fontSize: "12px",
+                  height: "50px",
+                }}
+              >
+                ซื้อบัตรหน้างาน
+              </Button>
+            </div>
+          </div>
 
           <TableContainer
             component={Paper}
@@ -1760,7 +1964,10 @@ const AllOrderContent: React.FC = () => {
                             : "inherit",
                         cursor: "pointer",
                       }}
-                      onClick={() => handleOrderClick(order.Order_no)}
+                      onClick={() => {
+                        localStorage.setItem("Order_no", order.Order_no);
+                        handleOrderClick(order.Order_no);
+                      }}
                     >
                       <TableCell
                         style={{
@@ -2017,16 +2224,16 @@ const AllOrderContent: React.FC = () => {
                             orderHispayDetail.at(0)?.Total_Balance !== 0 &&
                             orderDetail[0]?.Order_Status !== 4
                               ? {
-                                  width: "247px",
-                                  display: "grid",
-                                  justifyContent: "space-between",
-                                  gridTemplateColumns: "auto auto",
-                                }
-                              : {
                                   width: "237px",
                                   display: "grid",
                                   justifyContent: "space-between",
-                                  gridTemplateColumns: "auto auto",
+                                  gridTemplateColumns: "auto auto ",
+                                }
+                              : {
+                                  width: "350px",
+                                  display: "grid",
+                                  justifyContent: "space-between",
+                                  gridTemplateColumns: "auto auto auto",
                                 }
                           }
                         >
@@ -2042,6 +2249,19 @@ const AllOrderContent: React.FC = () => {
                           >
                             ดูรายละเอียด
                           </Button>
+
+                          {/* <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                              handleViewHistoryClick(
+                                orderDetail.at(0)?.Order_id
+                              )
+                            }
+                            style={{ width: 110, height: 50 }}
+                          >
+                            ย้ายโต๊ะ
+                          </Button> */}
 
                           {orderDetail[0]?.Order_Status === 4 ? (
                             <Button
@@ -2107,7 +2327,10 @@ const AllOrderContent: React.FC = () => {
                             >
                               <Button
                                 onClick={() =>
-                                  handlePayCash(orderDetail.at(0)?.Order_id)
+                                  handlePayCash(
+                                    orderDetail.at(0)?.Order_id,
+                                    orderDetail.at(0)?.Is_Balance
+                                  )
                                 }
                                 variant="contained"
                                 style={{
@@ -2126,7 +2349,10 @@ const AllOrderContent: React.FC = () => {
 
                               <Button
                                 onClick={() =>
-                                  handlePayQRCODE(orderDetail.at(0)?.Order_id)
+                                  handlePayQRCODE(
+                                    orderDetail.at(0)?.Order_id,
+                                    orderDetail.at(0)?.Is_Balance
+                                  )
                                 }
                                 variant="contained"
                                 style={{
@@ -2406,6 +2632,14 @@ const AllOrderContent: React.FC = () => {
           </div>
         </Box>
       </Modal>
+
+      <WalkinModal
+        open={walkinModalOpen}
+        onClose={() => setWalkinModalOpen(false)}
+        handlePayCash={handlePayCash}
+        handlePayQRCODE={handlePayQRCODE}
+        eventName={filters?.eventName}
+      />
     </div>
   );
 };

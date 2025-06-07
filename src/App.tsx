@@ -2,8 +2,13 @@ import Swal from "sweetalert2";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AllEvent from "./pages/all-event/all-event";
-import Overview from "./pages/overview/overview";
-import Overview2 from "./pages/overview/orerview2";
+import Overview from "./pages/overview/overview"; //สรุปยอดตาม สรุปยอดตาม Event
+import Overview2 from "./pages/overview/orerview2"; // สรุปยอดตาม แยกตามการซื้อ ของ Event
+
+import Overview3 from "./pages/overview/orerview3"; //สรุปยอดตาม Top 10 ยอดขาย ของ Event
+import Overview4 from "./pages/overview/orerview4";  //สรุปยอดตาม ลูกค้าที่ซื้อบัตรซ้ำ
+import Overview5 from "./pages/overview/orerview5";  //สรุปยอดตาม รายการยกเลิก
+
 import Employee from "./pages/emp/emp";
 import Company from "./pages/company/company";
 import CreateNewEvent from "./pages/create-event/create-event";
@@ -71,6 +76,31 @@ function App() {
             element={
               <ProtectedRoute>
                 <Overview2 />
+              </ProtectedRoute>
+            }
+          />
+
+            <Route
+            path="/overview3"
+            element={
+              <ProtectedRoute>
+                <Overview3 />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/overview4"
+            element={
+              <ProtectedRoute>
+                <Overview4 />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/overview5"
+            element={
+              <ProtectedRoute>
+                <Overview5 />
               </ProtectedRoute>
             }
           />

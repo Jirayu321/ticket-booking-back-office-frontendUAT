@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import styles from "./dashboard-page.module.css";
 import HorizontalCarousel from "./HorizontalCarousel";
+import { authAxiosClient } from "../../config/axios.config";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -128,30 +129,82 @@ export default function Dashboard() {
   };
 
   const formatCurrency = (amount) => {
-  // ตรวจสอบว่า amount เป็นประเภท number
-  if (typeof amount !== "number" || isNaN(amount)) {
-    return "0.00";
-  }
+    // ตรวจสอบว่า amount เป็นประเภท number
+    if (typeof amount !== "number" || isNaN(amount)) {
+      return "0.00";
+    }
 
-  // แปลงจำนวนเงินให้เป็นทศนิยม 2 ตำแหน่ง
-  const formattedAmount = amount.toFixed(2);
+    // แปลงจำนวนเงินให้เป็นทศนิยม 2 ตำแหน่ง
+    const formattedAmount = amount.toFixed(2);
 
-  // ตรวจสอบว่ามีรูปแบบที่จัดรูปแบบแล้วอยู่หรือไม่
-  const regex = /^\d{1,3}(?:,\d{3})*(?:\.\d{2})?$/;
-  // ตรวจสอบว่าค่าเป็นประเภท string และมีรูปแบบที่จัดรูปแบบแล้วหรือไม่
-  if (regex.test(formattedAmount)) {
-    return formattedAmount; // คืนค่าเดิมถ้ามีการ format เรียบร้อยแล้ว
-  }
+    // ตรวจสอบว่ามีรูปแบบที่จัดรูปแบบแล้วอยู่หรือไม่
+    const regex = /^\d{1,3}(?:,\d{3})*(?:\.\d{2})?$/;
+    // ตรวจสอบว่าค่าเป็นประเภท string และมีรูปแบบที่จัดรูปแบบแล้วหรือไม่
+    if (regex.test(formattedAmount)) {
+      return formattedAmount; // คืนค่าเดิมถ้ามีการ format เรียบร้อยแล้ว
+    }
 
-  // เพิ่ม , เพื่อจัดรูปแบบจำนวนเงิน
-  return formattedAmount.replace(/\d(?=(\d{3})+\.)/g, "$&,");
-};
+    // เพิ่ม , เพื่อจัดรูปแบบจำนวนเงิน
+    return formattedAmount.replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const totalPages = Math.ceil(eventList.length / itemsPerPage);
   const paginatedList = eventList.slice((currentPage - 1) * itemsPerPage);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          resDailySales,
+          resOrderCount,
+          resTotalPaid,
+          resTotalUnpaid,
+          resTotalSales,
+          resEventSales,
+          resTop10,
+          repeatedCustomers
+        ] = await Promise.all([
+          authAxiosClient.get("/api/dailySales"),
+          authAxiosClient.get("/api/dailyOrderCount"),
+          authAxiosClient.get("/api/totalPaid"),
+          authAxiosClient.get("/api/totalUnpaid"),
+          authAxiosClient.get("/api/totalSales"),
+          authAxiosClient.post("/api/eventSales", { Event_Id: 325 }),
+          authAxiosClient.get("/api/top10Event"),
+          authAxiosClient.get("/api/repeatedCustomers")
+        ]);
+
+        console.log(
+          "data:",
+          resDailySales?.data,
+          resOrderCount?.data,
+          resTotalPaid?.data,
+          resTotalUnpaid?.data,
+          resTotalSales?.data,
+          resEventSales?.data,
+          resTop10?.data,
+          repeatedCustomers.data
+        );
+
+        //   setSalesData({
+        //     dailySales: resDailySales.data.data?.DailySales || 0,
+        //     dailyOrderCount: resOrderCount.data.data?.DailyOrderCount || 0,
+        //     totalPaid: resTotalPaid.data.data?.TotalPaid || 0,
+        //     totalUnpaid: resTotalUnpaid.data.data?.TotalUnpaid || 0,
+        //     totalSales: resTotalSales.data.data?.TotalSales || 0,
+        //     eventSales: resEventSales.data.data?.EventTotalSales || 0,
+        //     top10Customers: resTop10.data.data || [],
+        //   });
+      } catch (error) {
+        console.error("❌ Error loading sales data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.dashboardContainer}>
