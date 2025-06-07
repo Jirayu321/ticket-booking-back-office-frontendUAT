@@ -439,6 +439,7 @@ const AllOrderContent: React.FC = () => {
               if (printBtn) {
                 printBtn.addEventListener("click", () => {
                   handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
+                  window.location.replace("/all-orders");
                 });
               }
 
@@ -576,6 +577,7 @@ const AllOrderContent: React.FC = () => {
               if (printBtn) {
                 printBtn.addEventListener("click", () => {
                   handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
+                  window.location.replace("/all-orders");
                 });
               }
 
@@ -2250,7 +2252,7 @@ const AllOrderContent: React.FC = () => {
                             ดูรายละเอียด
                           </Button>
 
-                          {/* <Button
+                          <Button
                             variant="contained"
                             color="primary"
                             onClick={() =>
@@ -2261,7 +2263,7 @@ const AllOrderContent: React.FC = () => {
                             style={{ width: 110, height: 50 }}
                           >
                             ย้ายโต๊ะ
-                          </Button> */}
+                          </Button>
 
                           {orderDetail[0]?.Order_Status === 4 ? (
                             <Button
