@@ -357,7 +357,7 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                ยอดชำระ
+                ยอดขายทั้งหมด	
               </TableCell>
 
               <TableCell
@@ -369,7 +369,7 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                ยอดบัตร
+                จำนวนบัตรทั้งหมด	
               </TableCell>
             </TableRow>
           </TableHead>

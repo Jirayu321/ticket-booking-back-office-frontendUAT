@@ -240,7 +240,7 @@ const OverviewContent: React.FC = () => {
                 }}
               />
 
-              <FormControl sx={{ backgroundColor: "white" }}>
+              {/* <FormControl sx={{ backgroundColor: "white" }}>
                 <DatePicker
                   label="วันที่เริ่มต้น"
                   value={startDate}
@@ -275,7 +275,7 @@ const OverviewContent: React.FC = () => {
                     },
                   }}
                 />
-              </FormControl>
+              </FormControl> */}
               <Box
                 sx={{
                   display: "flex",
@@ -321,7 +321,7 @@ const OverviewContent: React.FC = () => {
           borderRadius: "0",
           maxHeight: "88vh",
           overflowY: "auto",
-          maxWidth: "50vw",
+          maxWidth: "55vw",
         }}
       >
         <Table stickyHeader sx={{ minWidth: 800 }}>
@@ -342,6 +342,17 @@ const OverviewContent: React.FC = () => {
                 }}
               >
                 ลำดับ
+              </TableCell>
+              <TableCell
+                sx={{
+                  ...tableCellHeadStyle,
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                }}
+              >
+                ชื่องาน
               </TableCell>
               <TableCell
                 sx={{
@@ -444,6 +455,9 @@ const OverviewContent: React.FC = () => {
                     }}
                   >
                     {eventIndex + 1}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center", color: "black" }}>
+                    {event.Event_Name}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {event.Cust_name}

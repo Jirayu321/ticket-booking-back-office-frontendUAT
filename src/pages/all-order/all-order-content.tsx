@@ -358,7 +358,8 @@ const AllOrderContent: React.FC = () => {
       </html>
     `;
 
-      const printWindow = window.open("", "_blank");
+      const printWindow = await window.open("", "_blank");
+       window.location.replace("/all-orders");
       printWindow?.document.write(contentHtml);
       printWindow?.document.close();
     }
@@ -437,9 +438,8 @@ const AllOrderContent: React.FC = () => {
               const closeBtn = document.getElementById("closeBtn");
 
               if (printBtn) {
-                printBtn.addEventListener("click", () => {
-                  handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
-                  window.location.replace("/all-orders");
+                printBtn.addEventListener("click", async () => {
+                  await handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
                 });
               }
 
@@ -575,9 +575,8 @@ const AllOrderContent: React.FC = () => {
               const closeBtn = document.getElementById("closeBtn");
 
               if (printBtn) {
-                printBtn.addEventListener("click", () => {
-                  handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
-                  window.location.replace("/all-orders");
+                printBtn.addEventListener("click", async () => {
+                  await handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
                 });
               }
 
@@ -2232,10 +2231,10 @@ const AllOrderContent: React.FC = () => {
                                   gridTemplateColumns: "auto auto ",
                                 }
                               : {
-                                  width: "350px",
+                                  width: "240px",
                                   display: "grid",
                                   justifyContent: "space-between",
-                                  gridTemplateColumns: "auto auto auto",
+                                  gridTemplateColumns: "auto auto ",
                                 }
                           }
                         >
@@ -2251,21 +2250,20 @@ const AllOrderContent: React.FC = () => {
                           >
                             ดูรายละเอียด
                           </Button>
-
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() =>
-                              handleViewHistoryClick(
-                                orderDetail.at(0)?.Order_id
-                              )
-                            }
-                            style={{ width: 110, height: 50 }}
-                          >
-                            ย้ายโต๊ะ
-                          </Button>
-
-                          {orderDetail[0]?.Order_Status === 4 ? (
+                          {orderHispayDetail.length > 0 ? (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() =>
+                                handleViewHistoryClick(
+                                  orderDetail.at(0)?.Order_id
+                                )
+                              }
+                              style={{ width: 110, height: 50 }}
+                            >
+                              ย้ายโต๊ะ
+                            </Button>
+                          ) : orderDetail[0]?.Order_Status === 4 ? (
                             <Button
                               variant="contained"
                               // color="primary"
@@ -2284,6 +2282,26 @@ const AllOrderContent: React.FC = () => {
                               ตรวจสอบจ่าย
                             </Button>
                           ) : null}
+
+                          {/* {orderDetail[0]?.Order_Status === 4 ? (
+                            <Button
+                              variant="contained"
+                              // color="primary"
+                              onClick={() =>
+                                PaymentGateway(
+                                  orderDetail.at(0)?.ORD_H_Last_Charge_ID
+                                )
+                              }
+                              style={{
+                                width: 110,
+                                height: 50,
+                                backgroundColor: "#CFB70B",
+                                color: "black",
+                              }}
+                            >
+                              ตรวจสอบจ่าย
+                            </Button>
+                          ) : null} */}
                         </div>
 
                         <div
@@ -2294,7 +2312,7 @@ const AllOrderContent: React.FC = () => {
                             gridTemplateColumns: "auto auto",
                           }}
                         >
-                          {orderHispayDetail &&
+                          {orderHispayDetail.length > 0 &&
                           orderHispayDetail.at(-1)?.Total_Balance === 0 ? (
                             <Button
                               onClick={() => {
@@ -2316,7 +2334,7 @@ const AllOrderContent: React.FC = () => {
                             </Button>
                           ) : null}
 
-                          {orderHispayDetail &&
+                          {orderHispayDetail.length > 0 &&
                           orderHispayDetail.at(-1)?.Total_Balance !== 0 &&
                           orderDetail[0]?.Order_Status !== 4 ? (
                             <div

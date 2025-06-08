@@ -44,14 +44,15 @@ function formatNumberWithCommas(number: number | string): string {
 }
 
 function totalNetPriceWithZeroBalance(data: any) {
-  const filteredPayments = data.filter(
-    (payment) => payment.Order_Status !== 13
-  );
+  console.log("data:", data);
+  const filteredPayments = data.filter((payment) => payment.Order_Status === 1);
+  console.log("filteredPayments:", filteredPayments);
   // console.log("data", filteredPayments);
   const totalPay = filteredPayments.reduce((sum, payment) => {
     return sum + (payment.Total_Price || 0);
   }, 0);
-  console.log("data", totalPay);
+  console.log("totalPay", totalPay);
+
   let res = formatNumberWithCommas(totalPay);
   return res;
 }
@@ -83,6 +84,7 @@ function totalNetPrice(data: any, id: any) {
     (sum, payment) => sum + payment.Total_Pay,
     0
   );
+  console.log("totalNetPriceWithZeroBalance", totalNetPriceWithZeroBalance);
   let res = formatNumberWithCommas(totalNetPriceWithZeroBalance);
   return res;
 }

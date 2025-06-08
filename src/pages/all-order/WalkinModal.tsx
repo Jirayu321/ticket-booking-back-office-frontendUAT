@@ -11,6 +11,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
+  height: 250,
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -76,10 +77,34 @@ const WalkinModal: React.FC<WalkinModalProps> = ({
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        <Typography variant="h6" gutterBottom>
+        {/* 🔺 ปุ่มกากบาทมุมขวาบน */}
+        <Button
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            minWidth: "unset",
+            padding: "4px 8px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            color: "black",
+            backgroundColor: "#f0f0f0",
+            "&:hover": {
+              backgroundColor: "#e0e0e0",
+            },
+          }}
+        >
+          ✕
+        </Button>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ justifySelf: "center", marginBottom: "2rem" }}
+        >
           ซื้อบัตรหน้างาน
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid item xs={6}>
             <TextField
               label="ราคาต่อใบ"
@@ -88,19 +113,45 @@ const WalkinModal: React.FC<WalkinModalProps> = ({
               value={walkinPrice}
               onChange={(e) => setWalkinPrice(Number(e.target.value))}
               onFocus={(e) => e.target.select()}
+              sx={{ width: "150px" }}
             />
           </Grid>
           <Grid item xs={6}>
             <Box display="flex" alignItems="center">
-              <Button onClick={() => setWalkinQty(Math.max(1, walkinQty - 1))}>
+              <Button
+                onClick={() => setWalkinQty(Math.max(1, walkinQty - 1))}
+                sx={{
+                  backgroundColor: "#CFB70B",
+                  color: "black",
+                  minWidth: "40px",
+                  "&:hover": {
+                    backgroundColor: "#b89e09",
+                  },
+                }}
+              >
                 -
               </Button>
               <Typography mx={2}>{walkinQty}</Typography>
-              <Button onClick={() => setWalkinQty(walkinQty + 1)}>+</Button>
+              <Button
+                onClick={() => setWalkinQty(walkinQty + 1)}
+                sx={{
+                  backgroundColor: "#CFB70B",
+                  color: "black",
+                  minWidth: "40px",
+                  "&:hover": {
+                    backgroundColor: "#b89e09",
+                  },
+                }}
+              >
+                +
+              </Button>
             </Box>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="body1">
+            <Typography
+              variant="h6"
+              sx={{ justifySelf: "center", marginBottom: "2rem " }}
+            >
               ยอดรวม: {total.toLocaleString()} บาท
             </Typography>
           </Grid>
@@ -108,14 +159,22 @@ const WalkinModal: React.FC<WalkinModalProps> = ({
             <Button
               variant="contained"
               onClick={() => handleConfirm("cash")}
-              sx={{ backgroundColor: "#CFB70B", color: "black" }}
+              sx={{
+                backgroundColor: "#CFB70B",
+                color: "black",
+                width: "150px",
+              }}
             >
               ชำระเงินสด
             </Button>
             <Button
               variant="contained"
               onClick={() => handleConfirm("qr")}
-              sx={{ backgroundColor: "#CFB70B", color: "black" }}
+              sx={{
+                backgroundColor: "#CFB70B",
+                color: "black",
+                width: "150px",
+              }}
             >
               ชำระ QR CODE
             </Button>
