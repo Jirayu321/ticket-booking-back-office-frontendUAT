@@ -257,10 +257,14 @@ const AllOrderContent: React.FC = () => {
   };
 
   const handleNavigateToOrderSite = async (order_id: string | number) => {
-    const response = await getViewTicketListbyOrderid(order_id);
-    const test = await updateOrder(order_id);
-    console.log("test", test);
+    const printWindow = window.open("", "_blank");
 
+    if (!printWindow) {
+      alert("ไม่สามารถเปิดหน้าพิมพ์ได้ กรุณาอนุญาต popup");
+      return;
+    }
+
+    const response = await getViewTicketListbyOrderid(order_id);
     const latestTicketsMap = new Map();
 
     response.ticketList.forEach((ticket) => {
@@ -275,7 +279,6 @@ const AllOrderContent: React.FC = () => {
 
     const latestTickets = Array.from(latestTicketsMap.values());
 
-    // ✅ Group tickets by plan_id + ticket_no
     const ticketGroups = new Map<string, any[]>();
     latestTickets.forEach((ticket) => {
       const key = `${ticket.plan_id}-${ticket.ticket_no}`;
@@ -283,86 +286,58 @@ const AllOrderContent: React.FC = () => {
       ticketGroups.get(key)?.push(ticket);
     });
 
-    if (Array.isArray(latestTickets)) {
-      let contentHtml = `
-      <html>
-        <head>
-          <title>Print QR Codes</title>
-          <style>
-            body { margin: 0; padding: 0; }
-            .ticket-container { text-align: center; }
-            img { width: 90%; height: 80%; margin: 0px; }
-            p {
-              font-size: 40px;
-              font-weight: bold;
-              color: #333;
-              margin: 0px;
-            }
-            .details {
-              font-size: 40px;
-              color: #666;
-              margin: 0px;
-            }
-            .divbody {
-              position: relative;
-              top: -45px;
-            }
-          </style>
-        </head>
-        <body>
+    let htmlContent = ``;
+    for (let ticket of latestTickets) {
+      const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
+      const key = `${ticket.plan_id}-${ticket.ticket_no}`;
+      const group = ticketGroups.get(key) || [];
+      const totalInGroup = group.length;
+
+      htmlContent += `
+      <div style="text-align: center; page-break-after: always;">
+        <img src="${dataUrl}" style="width:90%" />
+        <p style="font-size: 40px; font-weight: bold;">${ticket.Event_Name}</p>
+        <p style="font-size: 40px;">${ticket.Plan_Name} - ${
+        ticket.ticket_no
+      } (${ticket.ticket_line}/${totalInGroup})</p>
+        <p style="font-size: 40px;">
+          เวลา: ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })} - ${new Date(
+        new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
+      ).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })} น.
+        </p>
+      </div>
     `;
-
-      for (let ticket of latestTickets) {
-        const dataUrl = await QRCode.toDataURL(ticket.ticket_id.toString());
-
-        const key = `${ticket.plan_id}-${ticket.ticket_no}`;
-        const group = ticketGroups.get(key) || [];
-        const totalInGroup = group.length;
-
-        contentHtml += `
-        <div class="ticket-container">
-          <img src="${dataUrl}"/>
-          <div class="divbody">
-            <p class="details">${ticket.Event_Name}</p>
-            <p class="details">${ticket.Plan_Name} - ${ticket.ticket_no} (${
-          ticket.ticket_line
-        }/${totalInGroup})</p>
-            <p class="details">เวลา: ${new Date(
-              ticket.Event_Date
-            ).toLocaleDateString("th-TH", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })} - ${new Date(
-          new Date(ticket.Event_Time).getTime() - 7 * 60 * 60 * 1000
-        ).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })} น.</p>
-          </div>
-        </div>
-      `;
-      }
-
-      contentHtml += `
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = function() {
-              window.close();
-            };
-          };
-        </script>
-        </body>
-      </html>
-    `;
-
-      const printWindow = await window.open("", "_blank");
-       window.location.replace("/all-orders");
-      printWindow?.document.write(contentHtml);
-      printWindow?.document.close();
     }
+
+    // ✅ inject HTML
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Print QR Codes</title>
+        <style>
+          body { margin: 0; padding: 0; }
+        </style>
+      </head>
+      <body onload="window.print(); window.onafterprint = () => window.close();">
+        ${htmlContent}
+      </body>
+    </html>
+  `);
+    printWindow.document.close();
+
+    // ✅ redirect หลักหลังจาก inject เสร็จ
+    setTimeout(() => {
+      window.location.replace("/all-orders");
+    }, 500); // เผื่อ delay ให้ printWindow ทำงานก่อน
   };
 
   const handlePayCash = async (Order_id: number, amount: number) => {
@@ -392,10 +367,24 @@ const AllOrderContent: React.FC = () => {
 
           Swal.fire({
             html: `
-      <div style="text-align: center; ">
-        <img src="${Success}" width="250" height="250" />
-        <br/>
-        <div style="display: grid;width: 490px;grid-template-columns: auto auto;align-items: center;justify-content: space-between;">
+    <div style="text-align: center; position: relative;">
+      <!-- ปุ่มกากบาท -->
+      <button id="xCloseBtn" style="
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px;
+        color: #999;
+      ">&times;</button>
+
+      <img src="${Success}" width="250" height="250" />
+      <br/>
+      <div style="display: grid;width: 490px;grid-template-columns: auto;align-items: center;justify-content:center ;">
         <button id="printQRBtn" style="
           margin-top: 20px;
           background-color: #CFB70B;
@@ -407,28 +396,13 @@ const AllOrderContent: React.FC = () => {
           padding: 0 20px;
           cursor: pointer;
           border-radius: 5px;
-          ">
+          width: 170px;
+        ">
           <i class="fa fa-print" style="margin-right: 5px;"></i> Print QR
         </button>
-        <button id="closeBtn" style="
-         margin-top: 20px;
-          background-color: #e0e0e0;
-          color: black;
-          font-weight: bold;
-          font-size: 12px;
-          height: 50px;
-          border: none;
-          padding: 0 20px;
-          cursor: pointer;
-          border-radius: 5px;
-          width: 100px;
-        ">
-          ปิด
-        </button>
-        </div>
-        
       </div>
-    `,
+    </div>
+  `,
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => {
@@ -436,6 +410,7 @@ const AllOrderContent: React.FC = () => {
 
               const printBtn = document.getElementById("printQRBtn");
               const closeBtn = document.getElementById("closeBtn");
+              const xCloseBtn = document.getElementById("xCloseBtn");
 
               if (printBtn) {
                 printBtn.addEventListener("click", async () => {
@@ -443,10 +418,12 @@ const AllOrderContent: React.FC = () => {
                 });
               }
 
-              if (closeBtn) {
-                closeBtn.addEventListener("click", () => {
+              if (closeBtn || xCloseBtn) {
+                const closeHandler = () => {
                   window.location.replace("/all-orders");
-                });
+                };
+                closeBtn?.addEventListener("click", closeHandler);
+                xCloseBtn?.addEventListener("click", closeHandler);
               }
             },
           });
@@ -520,19 +497,26 @@ const AllOrderContent: React.FC = () => {
       // ✅ รอรับสถานะอัปเดต
       socketRef.current.on("orderStatusUpdated", (payload: any) => {
         if (payload?.orderId === Order_id && payload?.status === 1) {
-          // Swal.fire({
-          //   icon: "success",
-          //   text: "อัพเดทการชำระเรียบร้อย",
-          // });
-          // setTimeout(() => {
-          //   window.location.replace("/all-orders");
-          // }, 1500);
           Swal.fire({
             html: `
-      <div style="text-align: center; ">
-        <img src="${Success}" width="250" height="250" />
-        <br/>
-        <div style="display: grid;width: 490px;grid-template-columns: auto auto;align-items: center;justify-content: space-between;">
+    <div style="text-align: center; position: relative;">
+      <!-- ปุ่มกากบาท -->
+      <button id="xCloseBtn" style="
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px;
+        color: #999;
+      ">&times;</button>
+
+      <img src="${Success}" width="250" height="250" />
+      <br/>
+      <div style="display: grid;width: 490px;grid-template-columns: auto;align-items: center;justify-content:center ;">
         <button id="printQRBtn" style="
           margin-top: 20px;
           background-color: #CFB70B;
@@ -544,28 +528,13 @@ const AllOrderContent: React.FC = () => {
           padding: 0 20px;
           cursor: pointer;
           border-radius: 5px;
-          ">
+          width: 170px;
+        ">
           <i class="fa fa-print" style="margin-right: 5px;"></i> Print QR
         </button>
-        <button id="closeBtn" style="
-         margin-top: 20px;
-          background-color: #e0e0e0;
-          color: black;
-          font-weight: bold;
-          font-size: 12px;
-          height: 50px;
-          border: none;
-          padding: 0 20px;
-          cursor: pointer;
-          border-radius: 5px;
-          width: 100px;
-        ">
-          ปิด
-        </button>
-        </div>
-        
       </div>
-    `,
+    </div>
+  `,
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => {
@@ -573,6 +542,7 @@ const AllOrderContent: React.FC = () => {
 
               const printBtn = document.getElementById("printQRBtn");
               const closeBtn = document.getElementById("closeBtn");
+              const xCloseBtn = document.getElementById("xCloseBtn");
 
               if (printBtn) {
                 printBtn.addEventListener("click", async () => {
@@ -580,17 +550,15 @@ const AllOrderContent: React.FC = () => {
                 });
               }
 
-              if (closeBtn) {
-                closeBtn.addEventListener("click", () => {
+              if (closeBtn || xCloseBtn) {
+                const closeHandler = () => {
                   window.location.replace("/all-orders");
-                });
+                };
+                closeBtn?.addEventListener("click", closeHandler);
+                xCloseBtn?.addEventListener("click", closeHandler);
               }
             },
           });
-
-          // setTimeout(() => {
-          //   window.location.replace("/all-orders");
-          // }, 1500);
         }
       });
     } catch (error: any) {
@@ -1171,7 +1139,23 @@ const AllOrderContent: React.FC = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const orderNo = localStorage.getItem("Order_no");
+      let orderNo = localStorage.getItem("Order_no");
+
+      // 🔁 ถ้าไม่มีค่าใน localStorage ให้ fallback ไป order ล่าสุด
+      if (!orderNo && orderHData.length > 0) {
+        const latestOrder = [...orderHData].sort(
+          (a, b) =>
+            new Date(b.Order_datetime).getTime() -
+            new Date(a.Order_datetime).getTime()
+        )[0];
+
+        if (latestOrder) {
+          orderNo = latestOrder.Order_no;
+          localStorage.setItem("Order_no", orderNo); // เก็บไว้ใช้ต่อไป
+        }
+      }
+
+      // ✅ ถ้ามี orderNo แล้ว และข้อมูลพร้อม ให้โหลด
       if (orderNo && orderHData.length && orderDData.length) {
         await handleOrderClick(orderNo);
       }
@@ -1778,7 +1762,10 @@ const AllOrderContent: React.FC = () => {
             </p>
             <div>
               <Button
-                onClick={() => setWalkinModalOpen(true)}
+                onClick={() => {
+                  localStorage.removeItem("Order_no");
+                  setWalkinModalOpen(true);
+                }}
                 variant="contained"
                 style={{
                   backgroundColor: "#CFB70B",
@@ -2260,6 +2247,7 @@ const AllOrderContent: React.FC = () => {
                                 )
                               }
                               style={{ width: 110, height: 50 }}
+                              disabled={true}
                             >
                               ย้ายโต๊ะ
                             </Button>

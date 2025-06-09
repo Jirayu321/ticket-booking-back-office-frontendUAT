@@ -357,7 +357,7 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                ยอดขายทั้งหมด	
+                ยอดขายทั้งหมด
               </TableCell>
 
               <TableCell
@@ -369,7 +369,31 @@ const OverviewContent: React.FC = () => {
                   zIndex: 2,
                 }}
               >
-                จำนวนบัตรทั้งหมด	
+                ชำระแล้ว
+              </TableCell>
+
+              <TableCell
+                sx={{
+                  ...tableCellHeadStyle,
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                }}
+              >
+                ค้างชำระ
+              </TableCell>
+
+              <TableCell
+                sx={{
+                  ...tableCellHeadStyle,
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#11131A",
+                  zIndex: 2,
+                }}
+              >
+                จำนวนบัตรทั้งหมด
               </TableCell>
             </TableRow>
           </TableHead>
@@ -414,8 +438,21 @@ const OverviewContent: React.FC = () => {
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {event.TotalSales
                       ? `${formatNumberWithCommas(event.TotalSales)}฿`
-                      : "ยังไม่ระบุ"}
+                      : "0"}
                   </TableCell>
+
+                  <TableCell sx={{ textAlign: "center", color: "black" }}>
+                    {event.TotalPaid
+                      ? `${formatNumberWithCommas(event.TotalPaid)}฿`
+                      : "0"}
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "center", color: "black" }}>
+                    {event.TotalUnpaid
+                      ? `${formatNumberWithCommas(event.TotalUnpaid)}฿`
+                      : "0"}
+                  </TableCell>
+
                   <TableCell sx={{ textAlign: "center", color: "black" }}>
                     {" "}
                     {event.TotalSales
