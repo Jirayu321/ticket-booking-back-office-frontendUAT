@@ -16,7 +16,6 @@
 
 .nav {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 24px;
   font-size: 16px;
@@ -56,12 +55,13 @@
 
 .hiddenScroll {
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE และ Edge */
 }
 
 .hiddenScroll::-webkit-scrollbar {
-  display: none; /* WebKit (Chrome, Safari) */
+  display: none; /* Chrome, Safari */
 }
 
 .summarySection {
@@ -182,7 +182,7 @@ h2 {
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
-  transform: scale(0.55);
+  transform: scale(0.65);
   transform-origin: left top;
 }
 
@@ -321,6 +321,7 @@ h2 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   width: 300px;
   justify-items: center;
+  display: grid;
 }
 
 .salesIcon {
@@ -461,6 +462,7 @@ h2 {
 input[type="text"] {
   width: 88%;
   border: none;
+  padding: 10px 0px 0px;
 }
 .coutomDetail {
   display: grid;

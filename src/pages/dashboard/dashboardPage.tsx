@@ -131,6 +131,7 @@ export default function Dashboard() {
     eventSales: 0,
     top10: [],
     repeatedCustomers: [],
+    eventSummary: [],
   });
 
   const [filters, setFilters] = useState(() => {
@@ -207,6 +208,7 @@ export default function Dashboard() {
           resEventSales,
           resTop10,
           repeatedCustomers,
+          eventSummary,
         ] = await Promise.all([
           authAxiosClient.get("/api/dailySales"),
           authAxiosClient.get("/api/dailyOrderCount"),
@@ -216,6 +218,7 @@ export default function Dashboard() {
           authAxiosClient.post("/api/eventSales", { Event_Id: 325 }),
           authAxiosClient.get("/api/top10Event"),
           authAxiosClient.get("/api/repeatedCustomers"),
+          authAxiosClient.get("/api/eventSummary"),
         ]);
 
         console.log(
@@ -227,7 +230,8 @@ export default function Dashboard() {
           resTotalSales?.data,
           resEventSales?.data,
           resTop10?.data,
-          repeatedCustomers.data
+          repeatedCustomers.data,
+          eventSummary.data.data
         );
 
         setSalesData({
@@ -239,6 +243,7 @@ export default function Dashboard() {
           eventSales: resEventSales.data.data?.EventTotalSales || 0,
           top10: resTop10.data.data || [],
           repeatedCustomers: repeatedCustomers.data.data || [],
+          eventSummary: eventSummary.data.data || [],
         });
       } catch (error) {
         console.error("❌ Error loading sales data:", error);
