@@ -77,6 +77,17 @@ const TableMoveHistoryContent: React.FC = () => {
   const currentItems = tableMoveList.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleOpenDialog = () => setOpenDialog(true);
+    const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setNewMove((prev) => ({
+      Order_ID: "",
+      Cust_Name: "",
+      From_Table: "",
+      To_Table: "",
+      Moved_By: prev.Moved_By, // คงชื่อผู้ย้ายไว้
+      Move_Remark: "",
+    }));
+  };
 
   function formatDateTime(datetime: string | Date) {
     const now = new Date(datetime);
@@ -91,18 +102,6 @@ const TableMoveHistoryContent: React.FC = () => {
   
     return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
   }
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setNewMove((prev) => ({
-      Order_ID: "",
-      Cust_Name: "",
-      From_Table: "",
-      To_Table: "",
-      Moved_By: prev.Moved_By, // คงชื่อผู้ย้ายไว้
-      Move_Remark: "",
-    }));
-  };
 
   const handleChangeNewMove = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMove({ ...newMove, [e.target.name]: e.target.value });
@@ -119,7 +118,7 @@ const TableMoveHistoryContent: React.FC = () => {
 
     try {
       const response = await authAxiosClient.post(
-        "http://localhost:8177/api/table-move/full",
+        "/api/table-move/full",
         {
           Order_ID,
           Cust_Name,

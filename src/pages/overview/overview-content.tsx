@@ -58,10 +58,6 @@ function formatNumberWithCommas(number: number | string): string {
 //     (payment) => payment.Is_Balance !== 0 || payment.Is_Balance > 1
 //   );
 
-//   const totalPay = data.reduce((sum, payment) => {
-//     return sum + (payment.Total_Pay || 0);
-//   }, 0);
-
 //   const totalOutstandingPayment = Data2?.reduce<number>(
 //     (sum, payment) => sum + payment.Total_Pay,
 //     0
@@ -220,18 +216,36 @@ const OverviewContent: React.FC = () => {
     textAlign: "center",
   };
 
-  const uniqueOrders = () => {
-    if (filteredEvents.length > 1) {
-      return filteredEvents.reduce((total, event) => {
-        return total + (event.orders?.length || 0);
-      }, 0);
-    } else {
-      return filteredEvents[0]?.orders?.length || 0;
-    }
-  };
+  // const uniqueOrders = () => {
+  //   if (filteredEvents.length > 1) {
+  //     return filteredEvents.reduce((total, event) => {
+  //       return total + (event.orders?.length || 0);
+  //     }, 0);
+  //   } else {
+  //     return filteredEvents[0]?.orders?.length || 0;
+  //   }
+  // };
 
-  const totalOrders = uniqueOrders();
+  // const totalOrders = uniqueOrders();
+  const totalOrders = filteredEvents?.reduce(
+    (sum, order) => sum + order.TotalOrders,
+    0
+  );
 
+  const TotalPay = filteredEvents?.reduce(
+    (sum, order) => sum + order.TotalPaid,
+    0
+  );
+
+  const TotalNetPrice = filteredEvents?.reduce(
+    (sum, order) => sum + order.TotalNetPrice,
+    0
+  );
+
+  const TotalUnpaid = filteredEvents?.reduce(
+    (sum, order) => sum + order.TotalUnpaid,
+    0
+  );
   console.log("filteredEvents", filteredEvents);
 
   // const totalpayBalen = filteredEvents.reduce((total, event) => {
@@ -443,7 +457,9 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 3)
                             .length
                         : 0} */}
-                      {/* {totalpay ? formatNumberWithCommas(totalpay) : 0} */}
+                      {TotalNetPrice
+                        ? formatNumberWithCommas(TotalNetPrice)
+                        : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -492,9 +508,7 @@ const OverviewContent: React.FC = () => {
                     <Typography sx={{ fontSize: "23px" }}>ชำระแล้ว</Typography>
 
                     <Typography sx={{ fontSize: "25px", fontWeight: "bold" }}>
-                      {/* {totalpayBalen
-                        ? formatNumberWithCommas(totalpayBalen)
-                        : 0} */}
+                      {TotalPay ? formatNumberWithCommas(TotalPay) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -547,7 +561,7 @@ const OverviewContent: React.FC = () => {
                         ? events.filter((event) => event?.Event_Status === 13)
                             .length
                         : 0} */}
-                      {/* {totalpayfun ? formatNumberWithCommas(totalpayfun) : 0} */}
+                      {TotalUnpaid ? formatNumberWithCommas(TotalUnpaid) : 0}
                     </Typography>
                   </Box>
                 </Box>
@@ -800,7 +814,7 @@ const OverviewContent: React.FC = () => {
                   TotalPaid,
                   TotalTickets,
                   TotalUnpaid,
-                  TotalCheckin
+                  TotalCheckin,
                 } = event;
                 return (
                   <TableRow
@@ -856,10 +870,10 @@ const OverviewContent: React.FC = () => {
                         : "ยังไม่ระบุ"}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", color: "black" }}>
-                     {TotalCheckin
+                      {TotalCheckin
                         ? `${formatNumberWithCommas(TotalCheckin)} `
                         : "0"}
-                    </TableCell> 
+                    </TableCell>
                   </TableRow>
                 );
               })}

@@ -287,10 +287,10 @@ input[type="text"] {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
+/* 
 button:hover {
   background-color: #7b4c2f;
-}
+} */
 
 /* Navigation Menu */
 .nav-menu {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { authAxiosClient } from "../../config/axios.config";
 import WalkinModal from "./WalkinModal";
+import MoveTableDialog from "./MoveTableDialogComponent";
 
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -24,6 +25,10 @@ import {
   Typography,
   Modal,
   IconButton,
+  DialogContent,
+  DialogActions,
+  Dialog,
+  DialogTitle,
 } from "@mui/material";
 import Header from "../common/header";
 import OrderDetailContent from "../order-detail/order-detail-content";
@@ -39,10 +44,11 @@ import { SwalSuccess } from "../../lib/sweetalert";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useFetchOrdertList } from "../../hooks/fetch-data/useFetchEventList";
+import { getViewEventStock, getAvailableTablesByPlan } from "../../lib/api";
 
 import { getViewTicketListbyOrderid } from "../../services/view-tikcet-list.service";
 
-import { updateOrder } from "../../services/order-all.service";
+// import { updateOrder } from "../../services/order-all.service";
 import QRCode from "qrcode";
 import { FaMoneyBill, FaPrint } from "react-icons/fa";
 
@@ -71,6 +77,107 @@ const AllOrderContent: React.FC = () => {
   const { refetch } = useFetchOrdertList({ count });
 
   const [walkinModalOpen, setWalkinModalOpen] = useState(false);
+
+  const [newMove, setNewMove] = useState({
+    Order_ID: "",
+    Cust_Name: "",
+    From_Table: "",
+    To_Table: "",
+    From_Zone: "",
+    To_Zone: "",
+    Move_Remark: "",
+  });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isSingleOrder, setIsSingleOrder] = useState(false);
+  const [isSingleTable, setIsSingleTable] = useState(false);
+
+  const handleOpenDialog = (order: any[]) => {
+    setOpenDialog(true);
+    console.log("order:", order);
+
+    const datemp = JSON.parse(localStorage.getItem("emmp") || "{}");
+    const empName = datemp?.Emp_Name || "ไม่ทราบชื่อ";
+
+    const isSingleOrder = order.length === 1;
+    const rawTicketNo = order.at(0)?.TicketNo_List || "";
+    const isSingleTable = rawTicketNo && !rawTicketNo.includes(",");
+    const formattedTicket = rawTicketNo.trim().startsWith("A")
+      ? "Walk-in"
+      : rawTicketNo.trim();
+    setIsSingleOrder(order.length === 1);
+    setIsSingleTable(rawTicketNo && !rawTicketNo.includes(","));
+    setNewMove((prev) => ({
+      Order_ID: order.at(0)?.Order_no || "",
+      Cust_Name: order.at(0)?.Cust_name || "",
+      From_Table: isSingleOrder && isSingleTable ? formattedTicket : "",
+      To_Table: "",
+      Moved_By: empName,
+      Move_Remark: "",
+      From_Zone: isSingleOrder ? order.at(0)?.Plan_Name || "" : "",
+      To_Zone: "",
+    }));
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setNewMove((prev) => ({
+      Order_ID: "",
+      Cust_Name: "",
+      From_Table: "",
+      To_Table: "",
+      Moved_By: prev.Moved_By,
+      Move_Remark: "",
+      From_Zone: "",
+      To_Zone: "",
+    }));
+  };
+
+  const handleChangeNewMove = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMove({ ...newMove, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmitMove = async () => {
+    const { Order_ID, Cust_Name, From_Table, To_Table, Moved_By, Move_Remark } =
+      newMove;
+
+    if (!Order_ID || !Cust_Name || !From_Table || !To_Table) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    try {
+      const response = await authAxiosClient.post("/api/table-move/full", {
+        Order_ID,
+        Cust_Name,
+        From_Table,
+        To_Table,
+        Moved_By,
+        Move_Remark,
+      });
+
+      const { status, message, needPayment, diffAmount, qrUrl } = response.data;
+
+      if (status === "success") {
+        if (needPayment && diffAmount > 0 && qrUrl) {
+          const confirmPay = window.confirm(
+            `คุณต้องชำระเพิ่ม ${diffAmount.toLocaleString()} บาท\nกด OK เพื่อดู QR Code ชำระเงิน`
+          );
+          if (confirmPay) {
+            window.open(qrUrl, "_blank");
+          }
+        }
+
+        alert("ย้ายโต๊ะสำเร็จ");
+        handleCloseDialog();
+        // fetchTableMoveHistory();
+      } else {
+        alert(message || "ไม่สามารถย้ายโต๊ะได้");
+      }
+    } catch (err) {
+      console.error("❌ Failed to move table", err);
+      alert("เกิดข้อผิดพลาดในการย้ายโต๊ะ");
+    }
+  };
 
   const socketRef = useRef<any>(null);
 
@@ -1167,6 +1274,23 @@ const AllOrderContent: React.FC = () => {
     }
   }, [orderHData, orderDData]);
 
+  useEffect(() => {
+    if (!newMove.From_Zone) return;
+
+    const tables = orderDetail
+      .filter((item) => item.Plan_Name === newMove.From_Zone)
+      .flatMap((item) => item.TicketNo_List.split(",").map((no) => no.trim()));
+
+    const uniqueTables = [...new Set(tables)];
+
+    if (uniqueTables.length === 1) {
+      setNewMove((prev) => ({
+        ...prev,
+        From_Table: uniqueTables[0],
+      }));
+    }
+  }, [newMove.From_Zone, orderDetail]);
+
   return (
     <div
       className="all-orders-content"
@@ -2241,13 +2365,12 @@ const AllOrderContent: React.FC = () => {
                             <Button
                               variant="contained"
                               color="primary"
-                              onClick={() =>
-                                handleViewHistoryClick(
-                                  orderDetail.at(0)?.Order_id
-                                )
+                              onClick={
+                                () => handleOpenDialog(orderDetail)
+                                // orderDetail.at(0)?.Order_id
                               }
                               style={{ width: 110, height: 50 }}
-                              disabled={true}
+                              // disabled={true}
                             >
                               ย้ายโต๊ะ
                             </Button>
@@ -2648,6 +2771,296 @@ const AllOrderContent: React.FC = () => {
         handlePayQRCODE={handlePayQRCODE}
         eventName={filters?.eventName}
       />
+      <MoveTableDialog
+        openDialog={openDialog}
+        handleCloseDialog={handleCloseDialog}
+        orderDetail={orderDetail}
+        newMove={newMove}
+        setNewMove={setNewMove}
+        isSingleOrder={isSingleOrder}
+        isSingleTable={isSingleTable}
+      />
+      {/* <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth>
+        <DialogTitle>
+          เพิ่มการย้ายโต๊ะ
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            X
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              width: "100%",
+            }}
+          >
+            <TextField
+              autoFocus
+              margin="dense"
+              name="Order_ID"
+              label="รหัสออเดอร์"
+              type="text"
+              fullWidth
+              value={newMove.Order_ID}
+              onChange={handleChangeNewMove}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                    color: "black", // <-- สีดำที่ต้องการ
+                    WebkitTextFillColor: "black",
+                  },
+                },
+              }}
+              disabled
+            />
+            <TextField
+              margin="dense"
+              name="Cust_Name"
+              label="ชื่อลูกค้า"
+              type="text"
+              fullWidth
+              value={newMove.Cust_Name}
+              onChange={handleChangeNewMove}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                    color: "black", // <-- สีดำที่ต้องการ
+                    WebkitTextFillColor: "black",
+                  },
+                },
+                marginLeft: "5px",
+              }}
+              disabled
+            />
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              width: "100%",
+            }}
+          >
+            {orderDetail.length > 1 ? (
+              <FormControl fullWidth margin="dense" sx={{ width: "275px" }}>
+                <InputLabel>จากโซน</InputLabel>
+                <Select
+                  name="From_Zone"
+                  value={newMove.From_Zone}
+                  onChange={handleChangeNewMove}
+                  label="จากโซน"
+                >
+                  {[...new Set(orderDetail.map((item) => item.Plan_Name))].map(
+                    (zone, index) => (
+                      <MenuItem key={index} value={zone}>
+                        {zone}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+            ) : (
+              <TextField
+                margin="dense"
+                name="From_Zone"
+                label="จากโซน"
+                type="text"
+                fullWidth
+                value={newMove.From_Zone}
+                onChange={handleChangeNewMove}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& input": {
+                      border: "none",
+                      transform: "translateY(5px)",
+                      color: "black", // <-- สีดำที่ต้องการ
+                      WebkitTextFillColor: "black",
+                    },
+                  },
+                }}
+                disabled
+              />
+            )}
+
+            {orderDetail.length > 1 ? (
+              <FormControl
+                fullWidth
+                margin="dense"
+                disabled={!newMove.From_Zone}
+                sx={{ width: "275px" }}
+              >
+                <InputLabel>จากโต๊ะ</InputLabel>
+                <Select
+                  name="From_Table"
+                  value={newMove.From_Table}
+                  onChange={handleChangeNewMove}
+                  label="จากโต๊ะ"
+                >
+                  {[
+                    ...new Set(
+                      orderDetail
+                        .filter((item) => item.Plan_Name === newMove.From_Zone)
+                        .flatMap((item) =>
+                          item.TicketNo_List.split(",").map((no) => no.trim())
+                        )
+                    ),
+                  ].map((ticket, index) => (
+                    <MenuItem key={index} value={ticket}>
+                      {ticket.startsWith("A") ? "Walk-in" : ticket}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            ) : (
+              <>
+                {isSingleOrder && !isSingleTable ? (
+                  <Select
+                    name="From_Table"
+                    value={newMove.From_Table}
+                    onChange={handleChangeNewMove}
+                    fullWidth
+                    displayEmpty
+                    sx={{
+                      marginTop: "8px",
+                      "& .MuiSelect-select": {
+                        transform: "translateY(5px)",
+                      },
+                      marginLeft: "5px",
+                      height: "51px",
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      เลือกโต๊ะ
+                    </MenuItem>
+                    {[
+                      ...new Set(
+                        orderDetail
+                          .filter(
+                            (item) => item.Plan_Name === newMove.From_Zone
+                          )
+                          .flatMap((item) =>
+                            item.TicketNo_List.split(",").map((no) => no.trim())
+                          )
+                      ),
+                    ].map((ticket, index) => (
+                      <MenuItem key={index} value={ticket}>
+                        {ticket.startsWith("A") ? "Walk-in" : ticket}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                ) : (
+                  <TextField
+                    margin="dense"
+                    name="From_Table"
+                    label="จากโต๊ะ"
+                    type="text"
+                    fullWidth
+                    value={newMove.From_Table}
+                    onChange={handleChangeNewMove}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& input": {
+                          border: "none",
+                          transform: "translateY(5px)",
+                        },
+                      },
+                      marginLeft: "5px",
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              width: "100%",
+            }}
+          >
+            <TextField
+              margin="dense"
+              name="To_Zone"
+              label="ไปโซน"
+              type="text"
+              fullWidth
+              value={newMove.To_Zone}
+              onChange={handleChangeNewMove}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none",
+                    transform: "translateY(5px)",
+                  },
+                },
+              }}
+            />
+            <TextField
+              margin="dense"
+              name="To_Table"
+              label="ไปโต๊ะ"
+              type="text"
+              fullWidth
+              value={newMove.To_Table}
+              onChange={handleChangeNewMove}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& input": {
+                    border: "none", // Remove the inner border
+                    transform: "translateY(5px)",
+                  },
+                },
+                marginLeft: "5px",
+              }}
+            />
+          </div>
+
+          <TextField
+            margin="dense"
+            name="Move_Remark"
+            label="หมายเหตุ"
+            type="text"
+            fullWidth
+            multiline
+            minRows={3}
+            value={newMove.Move_Remark}
+            onChange={handleChangeNewMove}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& input": {
+                  border: "none", // Remove the inner border
+                  transform: "translateY(5px)",
+                },
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            ยกเลิก
+          </Button>
+          <Button
+            onClick={handleSubmitMove}
+            color="primary"
+            variant="contained"
+          >
+            บันทึก
+          </Button>
+        </DialogActions>
+      </Dialog> */}
     </div>
   );
 };

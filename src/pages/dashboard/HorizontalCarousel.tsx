@@ -24,59 +24,29 @@ type Props = {
 export default function HorizontalCarousel({ detailsList }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
-  // 🔍 IntersectionObserver เพื่อหา card ตรงกลาง
-  useEffect(() => {
+  const handleCardClick = (index: number) => {
+    // ถ้าคลิกการ์ดที่ถูกเลือกอยู่ ให้ยกเลิกการเลือก
+    setFocusedIndex(focusedIndex === index ? null : index);
+
+    // เลื่อนการ์ดให้อยู่กลางจอ (optional)
     const container = containerRef.current;
-    if (!container) return;
+    const card = cardRefs.current[index];
+    if (container && card) {
+      const containerWidth = container.offsetWidth;
+      const cardWidth = card.offsetWidth;
+      const scrollPosition =
+        card.offsetLeft - containerWidth / 2 + cardWidth / 2;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .map((entry) => ({
-            index: Number(entry.target.getAttribute("data-index")),
-            ratio: entry.intersectionRatio,
-          }))
-          .sort((a, b) => b.ratio - a.ratio); // เรียงจากเห็นเยอะสุด
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: "smooth",
+      });
+    }
+  };
 
-        if (visible.length > 0) {
-          setFocusedIndex(visible[0].index);
-        }
-      },
-      {
-        root: container,
-        threshold: [0.5, 0.75, 1], // สังเกตเฉพาะกลางๆ
-        rootMargin: "0px",
-      }
-    );
-
-    cardRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, [detailsList]);
-
-  // ✅ Auto scroll loop
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const scrollInterval = setInterval(() => {
-      const isAtEnd =
-        container.scrollLeft + container.offsetWidth >= container.scrollWidth - 10;
-
-      if (isAtEnd) {
-        container.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        container.scrollBy({ left: 400, behavior: "smooth" });
-      }
-    }, 4000);
-
-    return () => clearInterval(scrollInterval);
-  }, []);
+  // ... ส่วนอื่นๆ ของโค้ดที่เหลือ ...
 
   return (
     <div ref={containerRef} className="carousel-container">
@@ -86,6 +56,7 @@ export default function HorizontalCarousel({ detailsList }: Props) {
           ref={(el) => (cardRefs.current[index] = el)}
           data-index={index}
           className={`carousel-card ${focusedIndex === index ? "focused" : ""}`}
+          onClick={() => handleCardClick(index)}
         >
           <div
             className="card-bg-blur"

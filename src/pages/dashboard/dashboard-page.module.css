@@ -54,6 +54,16 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.hiddenScroll {
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE และ Edge */
+}
+
+.hiddenScroll::-webkit-scrollbar {
+  display: none; /* WebKit (Chrome, Safari) */
+}
+
 .summarySection {
   display: grid;
   grid-template-columns: 230px 230px;
@@ -314,7 +324,7 @@ h2 {
 }
 
 .salesIcon {
-  width: 50px;
+  width: 80px;
   margin-bottom: 12px;
 }
 
@@ -384,12 +394,12 @@ h2 {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  width: 96vw;
 }
 
 .eventImage {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 100px;
   border-radius: 8px;
   object-fit: cover;
 }
@@ -421,13 +431,12 @@ h2 {
 }
 
 .eventHeaderGradient2 {
-  background: #232323
+  background: #232323;
 }
 
 .eventHeaderGradient3 {
   background: linear-gradient(90deg, #232323 0%, #ff9294 100%);
 }
-
 
 .pageButton {
   padding: 8px 16px;
@@ -447,4 +456,49 @@ h2 {
 .pageButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+input[type="text"] {
+  width: 88%;
+  border: none;
+}
+.coutomDetail {
+  display: grid;
+  grid-template-columns: 100px 90px auto;
+  justify-content: space-between;
+  color: #232323;
+  width: 96vw;
+  font-size: smaller;
+}
+.eventInfotop {
+  display: grid;
+  grid-template-columns: auto auto;
+  color: #232323;
+}
+.eventRowTop {
+  background: white;
+  /* border-radius: 8px; */
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-left: 6px solid transparent;
+  width: max-content;
+  margin: 10px 0px;
+  border-radius: 10px;
+}
+
+.numbertop {
+  margin: 0px;
+  margin-right: 20px;
+  color: #fcbe2d;
+  font-weight: 500;
+  font-size: 40px;
+}
+.Detailtop {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 65vw;
+  justify-content: space-between;
+}
+.Detailtop p {
+  font-size: x-small;
 }

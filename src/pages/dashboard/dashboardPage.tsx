@@ -13,6 +13,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { TextField } from "@mui/material";
 
 const yourData = [
   {
@@ -117,9 +118,36 @@ export default function Dashboard() {
   const dashboardRef = useRef(null);
   const salesRef = useRef(null);
   const topRef = useRef(null);
+
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const [salesData, setSalesData] = useState({
+    dailySales: 0,
+    dailyOrderCount: 0,
+    totalPaid: 0,
+    totalUnpaid: 0,
+    totalSales: 0,
+    eventSales: 0,
+    top10: [],
+    repeatedCustomers: [],
+  });
+
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("event");
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          sortBy: "publish-date",
+          publishStatus: "all",
+          status: "all",
+          search: "",
+          startDate: null as string | null,
+          endDate: null as string | null,
+          dateFilterType: "publish-date",
+        };
+  });
+
   const repeatRef = useRef(null);
 
   const handleScroll = (ref: any) => {
@@ -154,6 +182,19 @@ export default function Dashboard() {
   const totalPages = Math.ceil(eventList.length / itemsPerPage);
   const paginatedList = eventList.slice((currentPage - 1) * itemsPerPage);
 
+  const handleTextFieldChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+
+    const updatedFilters = {
+      ...filters,
+      [name]: value,
+    };
+
+    setFilters(updatedFilters);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -165,7 +206,7 @@ export default function Dashboard() {
           resTotalSales,
           resEventSales,
           resTop10,
-          repeatedCustomers
+          repeatedCustomers,
         ] = await Promise.all([
           authAxiosClient.get("/api/dailySales"),
           authAxiosClient.get("/api/dailyOrderCount"),
@@ -174,7 +215,7 @@ export default function Dashboard() {
           authAxiosClient.get("/api/totalSales"),
           authAxiosClient.post("/api/eventSales", { Event_Id: 325 }),
           authAxiosClient.get("/api/top10Event"),
-          authAxiosClient.get("/api/repeatedCustomers")
+          authAxiosClient.get("/api/repeatedCustomers"),
         ]);
 
         console.log(
@@ -189,15 +230,16 @@ export default function Dashboard() {
           repeatedCustomers.data
         );
 
-        //   setSalesData({
-        //     dailySales: resDailySales.data.data?.DailySales || 0,
-        //     dailyOrderCount: resOrderCount.data.data?.DailyOrderCount || 0,
-        //     totalPaid: resTotalPaid.data.data?.TotalPaid || 0,
-        //     totalUnpaid: resTotalUnpaid.data.data?.TotalUnpaid || 0,
-        //     totalSales: resTotalSales.data.data?.TotalSales || 0,
-        //     eventSales: resEventSales.data.data?.EventTotalSales || 0,
-        //     top10Customers: resTop10.data.data || [],
-        //   });
+        setSalesData({
+          dailySales: resDailySales.data.data?.DailySales || 0,
+          dailyOrderCount: resOrderCount.data.data?.DailyOrderCount || 0,
+          totalPaid: resTotalPaid.data.data?.TotalPaid || 0,
+          totalUnpaid: resTotalUnpaid.data.data?.TotalUnpaid || 0,
+          totalSales: resTotalSales.data.data?.TotalSales || 0,
+          eventSales: resEventSales.data.data?.EventTotalSales || 0,
+          top10: resTop10.data.data || [],
+          repeatedCustomers: repeatedCustomers.data.data || [],
+        });
       } catch (error) {
         console.error("❌ Error loading sales data:", error);
       }
@@ -245,8 +287,8 @@ export default function Dashboard() {
       >
         {/* Carousel */}
         <div
-          className="overflow-x-auto whitespace-nowrap hide-scrollbar"
-          style={{ width: "875px" }}
+          className={styles.hiddenScroll}
+          style={{ width: "875px", height: "570px" }}
         >
           <HorizontalCarousel detailsList={yourData} />
         </div>
@@ -356,6 +398,7 @@ export default function Dashboard() {
               className={styles.dateInput}
               onCalendarOpen={() => setIsDateOpen(true)}
               onCalendarClose={() => setIsDateOpen(false)}
+              style={{ border: "none" }}
             />
             <span className={styles.dateSeparator}>→</span>
             <DatePicker
@@ -366,6 +409,7 @@ export default function Dashboard() {
               className={styles.dateInput}
               onCalendarOpen={() => setIsDateOpen(true)}
               onCalendarClose={() => setIsDateOpen(false)}
+              style={{ border: "none" }}
 
               // withPortal
             />
@@ -394,11 +438,11 @@ export default function Dashboard() {
         }}
       >
         <div className={`${styles.card1} `}>
-          <p>ยอดขายวันนี้</p>
+          <p>ยอดขาย</p>
           <h2>฿375,900</h2>
         </div>
         <div className={`${styles.card2} `}>
-          <p>คำสั่งซื้อวันนี้</p>
+          <p>คำสั่งซื้อ</p>
           <h2>156</h2>
         </div>
         <div className={`${styles.card3} `}>
@@ -413,6 +457,44 @@ export default function Dashboard() {
 
       <section ref={salesRef} className={styles.totalSalesBox}>
         <h3 className={styles.totalSalesHeader}>ยอดขายทั้งหมด</h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto auto",
+            justifyContent: "start",
+          }}
+        >
+          <label
+            style={{
+              color: "black",
+              fontWeight: 200,
+              border: "1px solid black",
+              padding: "10px",
+              borderRadius: "5px",
+              borderRight: "none",
+              marginBottom: "10px",
+            }}
+          >
+            งาน
+          </label>
+          <input
+            name="search"
+            value={filters.search}
+            onChange={handleTextFieldChange}
+            placeholder="ค้นหางาน"
+            style={{
+              border: "1px solid black",
+              height: "38px",
+              marginLeft: "-3px",
+              borderEndEndRadius: "5px",
+              borderStartEndRadius: "5px",
+              marginBottom: "10px",
+              padding: "5px",
+              width: "84vw",
+            }}
+          />
+        </div>
+
         <div className={styles.divsalesCard}>
           <div className={styles.salesCard}>
             <img src="/bag.svg" alt="bag" className={styles.salesIcon} />
@@ -420,83 +502,128 @@ export default function Dashboard() {
             <p className={styles.totalAmount}>฿375,900</p>
           </div>
         </div>
-      </section>
 
-      <section className={styles.sectionBox2}>
-        <p style={{ margin: 0, color: "black", marginLeft: "15px" }}>
-          {(currentPage - 1) * itemsPerPage + 1}-
-          {Math.min(currentPage * itemsPerPage, eventList.length)} จาก{" "}
-          {eventList.length} รายการ
-        </p>
-        {eventList.map((event, index) => (
-          <div key={event.id} className={styles.eventRow}>
-            <div
-              className={`${styles.eventHeader} ${
-                styles[`eventHeaderGradient${index % 4}`]
-              }`}
+        <section className={styles.sectionBox2}>
+          <p style={{ margin: 0, color: "black", marginLeft: "15px" }}>
+            {(currentPage - 1) * itemsPerPage + 1}-
+            {Math.min(currentPage * itemsPerPage, eventList.length)} จาก{" "}
+            {eventList.length} รายการ
+          </p>
+          {eventList.map((event, index) => (
+            <div key={event.id} className={styles.eventRow}>
+              <div
+                className={`${styles.eventHeader} ${
+                  styles[`eventHeaderGradient${index % 4}`]
+                }`}
+              >
+                <div className={styles.eventIndex}>{index + 1}.</div>
+                <div className={styles.eventName}>{event.name}</div>
+                <div className={styles.eventStatus}>ออนไลน์</div>
+                <div className={styles.eventTotal}>
+                  ยอดขายทั้งหมด : ฿ {formatCurrency(event.total)}
+                </div>
+              </div>
+
+              <div className={styles.eventDetail}>
+                <img src={event.img} className={styles.eventImage} />
+                <div className={styles.eventInfo}>
+                  <p>
+                    วันจัดงาน : {event.date} {event.time}
+                  </p>
+                  <p>ชำระแล้ว : ฿ {formatCurrency(event.paid)}</p>
+                </div>
+                <div className={styles.eventInfo}>
+                  <p>คำสั่งซื้อทั้งหมด : {event.orders}</p>
+                  <p>ค้างชำระ : ฿ {formatCurrency(event.unpaid)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "1rem",
+              gap: "12px",
+            }}
+          >
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={styles.pageButton}
             >
-              <div className={styles.eventIndex}>{index + 1}.</div>
-              <div className={styles.eventName}>{event.name}</div>
-              <div className={styles.eventStatus}>ออนไลน์</div>
-              <div className={styles.eventTotal}>
-                ยอดขายทั้งหมด : ฿ {formatCurrency(event.total)}
-              </div>
-            </div>
-
-            <div className={styles.eventDetail}>
-              <img src={event.img} className={styles.eventImage} />
-              <div className={styles.eventInfo}>
-                <p>
-                  วันจัดงาน : {event.date} {event.time}
-                </p>
-                <p>ชำระแล้ว : ฿ {formatCurrency(event.paid)}</p>
-              </div>
-              <div className={styles.eventInfo}>
-                <p>คำสั่งซื้อทั้งหมด : {event.orders}</p>
-                <p>ค้างชำระ : ฿ {formatCurrency(event.unpaid)}</p>
-              </div>
-            </div>
+              {"<"}
+            </button>
+            <button className={styles.pageButton}>{currentPage}</button>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className={styles.pageButton}
+            >
+              {">"}
+            </button>
           </div>
-        ))}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "1rem",
-            gap: "12px",
-          }}
-        >
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={styles.pageButton}
-          >
-            {"<"}
-          </button>
-          <button className={styles.pageButton}>{currentPage}</button>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className={styles.pageButton}
-          >
-            {">"}
-          </button>
-        </div>
+        </section>
       </section>
 
-      {/* <section  className={styles.sectionBox}>
-        <h2>ยอดขายทั้งหมด</h2>
-        <p>(mock)</p>
+      <section
+        ref={topRef}
+        className={styles.totalSalesBox}
+        style={{ marginTop: "25px" }}
+      >
+        <h3 className={styles.totalSalesHeader}>Top 10 ยอดขาย</h3>
+        <section>
+          {salesData.top10.map((event, index) => (
+            <div key={event?.Event_Id} className={styles.eventRowTop}>
+              <div className={styles.eventDetail}>
+                <img src={event?.Event_Pic_1} className={styles.eventImage} />
+                <div className={styles.eventInfotop}>
+                  <p className={styles.numbertop}>{index + 1}</p>
+                  <div>
+                    <p style={{ color: "#FCBE2D", margin: 0 }}>
+                      {event?.Event_Name}
+                    </p>
+                    <div className={styles.Detailtop}>
+                      <p>
+                        ยอดขายทั้งหมด : ฿ {formatCurrency(event?.TotalPaid)}
+                      </p>
+                      <p>บัตรทั้งหมด : {formatCurrency(event?.Ticket_Count)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.eventInfo}></div>
+              </div>
+            </div>
+          ))}
+        </section>
       </section>
 
-      <section ref={topRef} className={styles.sectionBox}>
-        <h2>Top 10 ยอดขาย</h2>
-        <p>(mock)</p>
+      <section
+        ref={repeatRef}
+        className={styles.totalSalesBox}
+        style={{ marginTop: "25px" }}
+      >
+        <h3 className={styles.totalSalesHeader}>ลูกค้าซื้อซ้ำ</h3>
+        <section>
+          {salesData.repeatedCustomers.map((event, index) => (
+            <div
+              key={index}
+              className={styles.eventRow}
+              style={{ margin: "10px 0px", borderRadius: "10px" }}
+            >
+              <div className={styles.coutomDetail}>
+                <p style={{ color: "#FCBE2D" }}>{event?.Cust_name}</p>
+                <p>{event?.Cust_tel}</p>
+                <p>จำนวนซื้อซ้ำ : {formatCurrency(event?.OrderCount)}</p>
+              </div>
+            </div>
+          ))}
+        </section>
       </section>
 
-      <section ref={repeatRef} className={styles.sectionBox}>
+      {/* <section ref={repeatRef} className={styles.sectionBox}>
         <h2>ลูกค้าซื้อซ้ำ</h2>
         <p>(mock)</p>
       </section> */}

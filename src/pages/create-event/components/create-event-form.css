@@ -295,9 +295,9 @@ input[type="text"] {
   transition: background-color 0.3s;
 }
 
-button:hover {
+/* button:hover {
   background-color: #7b4c2f;
-}
+} */
 
 /* Navigation Menu */
 .nav-menu {

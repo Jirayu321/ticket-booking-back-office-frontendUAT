@@ -24,7 +24,7 @@
   bottom: 0;
   width: 100%;
   height: 40%; /* ปรับตามต้องการ */
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  /* background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent); */
   pointer-events: none;
   border-radius: 0 0 16px 16px; /* ให้โค้งมุมล่าง */
   z-index: 1;
