@@ -167,8 +167,10 @@ const AllOrderContent: React.FC = () => {
           }
         }
 
-        alert("ย้ายโต๊ะสำเร็จ");
+        // alert("ย้ายโต๊ะสำเร็จ");
         handleCloseDialog();
+        window.location.replace("/all-orders");
+
         // fetchTableMoveHistory();
       } else {
         alert(message || "ไม่สามารถย้ายโต๊ะได้");

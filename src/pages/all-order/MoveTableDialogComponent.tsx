@@ -66,7 +66,8 @@ export default function MoveTableDialogComponent({
           }
         }
 
-        alert("ย้ายโต๊ะสำเร็จ");
+        // alert("ย้ายโต๊ะสำเร็จ");
+        window.location.replace("/all-orders");
         handleCloseDialog();
         // fetchTableMoveHistory();
       } else {

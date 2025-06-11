@@ -7,7 +7,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const COLORS = ["#ff4081", "#4caf50", "#03a9f4"];
+const COLORS = [
+  "#ff4081", // Promptpay (ชมพู)
+  "#4caf50", // Credit Card (เขียว)
+  "#03a9f4", // E-Banking (ฟ้า)
+  "#ffc107", // เงินสด (เหลือง)
+  "#9c27b0", // สำรอง 1
+  "#ff5722", // สำรอง 2
+];
 
 export default function Dashboard() {
   const dashboardRef = useRef(null);
@@ -143,6 +150,18 @@ export default function Dashboard() {
     // เพิ่ม , เพื่อจัดรูปแบบจำนวนเงิน
     return formattedAmount.replace(/\d(?=(\d{3})+\.)/g, "$&,");
   };
+
+  const formatCurrency2 = (amount) => {
+  if (typeof amount !== "number" || isNaN(amount)) {
+    return "0";
+  }
+
+  // ปัดเศษทศนิยมออก (floor)
+  const roundedAmount = Math.floor(amount);
+
+  return roundedAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 
   const renderCustomizedLabel = ({
     cx,
@@ -347,7 +366,6 @@ export default function Dashboard() {
                   />
                 ))}
               </Pie>
-              {/* ✅ ตรงกลาง */}
               <text
                 x="50%"
                 y="50%"
@@ -364,39 +382,43 @@ export default function Dashboard() {
           <div style={{ width: "250px", marginTop: "-50px" }}>
             <p
               className="text-center font-bold mt-4 text-xl"
-              style={{ color: "black", justifySelf: "self-end" }}
+              style={{ color: "black", justifySelf: "self-start" }}
             >
-              จำนวน คำสั่งซื้อ ทั้งหมด :{" "}
-              {formatCurrency(salesDatadaily?.TotalOrders)}
+              จำนวนงานทั้งหมด :{" "}
+              {formatCurrency2(salesDatadaily?.TotalOrders)}
             </p>
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "auto ",
-                justifyContent: "space-around",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                marginTop: "10px",
+                marginLeft: "10px",
               }}
             >
               {pieData.map((item, index) => (
                 <div
                   key={index}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "auto auto",
-                    justifyContent: "space-around",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   }}
                 >
-                  <p
-                    className="text-center font-bold mt-4 text-xl"
-                    style={{ color: "black", margin: "0px", width: "100px" }}
-                  >
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      backgroundColor: COLORS[index % COLORS.length],
+                    }}
+                  />
+                  <span style={{ flex: 1, color: "black", fontWeight: "bold" }}>
                     {item.name}
-                  </p>
-                  <p
-                    className="text-center font-bold mt-4 text-xl"
-                    style={{ color: "black", margin: "0px" }}
-                  >
+                  </span>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
                     ฿ {formatCurrency(item.amount)}
-                  </p>
+                  </span>
                 </div>
               ))}
             </div>
