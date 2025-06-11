@@ -5,114 +5,9 @@ import { authAxiosClient } from "../../config/axios.config";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { TextField } from "@mui/material";
-
-const yourData = [
-  {
-    Id: 1,
-    Name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    Event_Date: "2025-06-02",
-    Event_Time: "19:00:00",
-    At: "Deed Club Trang",
-    Desc: "ราคาเริ่มต้น 500 บาท",
-  },
-  {
-    Id: 2,
-    Name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    Event_Date: "2025-06-02",
-    Event_Time: "19:00:00",
-    At: "Deed Club Trang",
-    Desc: "ราคาเริ่มต้น 500 บาท",
-  },
-  {
-    Id: 3,
-    Name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    Event_Date: "2025-06-02",
-    Event_Time: "19:00:00",
-    At: "Deed Club Trang",
-    Desc: "ราคาเริ่มต้น 500 บาท",
-  },
-
-  // เพิ่มได้เรื่อย ๆ
-];
-
-const pieData = [
-  { name: "Promptpay", value: 50, amount: 375900 },
-  { name: "Credit card", value: 30, amount: 375900 },
-  { name: "E-Banking", value: 20, amount: 375900 },
-];
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#ff4081", "#4caf50", "#03a9f4"];
-
-const eventList = [
-  {
-    id: 1,
-    name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    total: 375900,
-    date: "8/5/2025",
-    time: "22.00",
-    paid: 375900,
-    orders: 96,
-    unpaid: 0,
-  },
-  {
-    id: 2,
-    name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    total: 375900,
-    date: "8/5/2025",
-    time: "22.00",
-    paid: 375900,
-    orders: 96,
-    unpaid: 0,
-  },
-  {
-    id: 3,
-    name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    total: 375900,
-    date: "8/5/2025",
-    time: "22.00",
-    paid: 375900,
-    orders: 96,
-    unpaid: 0,
-  },
-  {
-    id: 4,
-    name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    total: 375900,
-    date: "8/5/2025",
-    time: "22.00",
-    paid: 375900,
-    orders: 96,
-    unpaid: 0,
-  },
-  {
-    id: 5,
-    name: "ลำไย ไหทองคำ",
-    img: "https://26tickettrang.s3.ap-southeast-2.amazonaws.com/images/plans/3dddc1f3-e4de-4e5d-86c8-0e524810f0d8.png",
-    total: 375900,
-    date: "8/5/2025",
-    time: "22.00",
-    paid: 375900,
-    orders: 96,
-    unpaid: 0,
-  },
-  // เพิ่มรายการอื่น ๆ ตามต้องการ
-];
 
 export default function Dashboard() {
   const dashboardRef = useRef(null);
@@ -121,6 +16,7 @@ export default function Dashboard() {
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [filteredEventSummary, setFilteredEventSummary] = useState([]);
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [salesData, setSalesData] = useState({
     dailySales: 0,
@@ -133,21 +29,92 @@ export default function Dashboard() {
     repeatedCustomers: [],
     eventSummary: [],
   });
+  const [salesDatadaily, setSalesDatadaily] = useState({});
+  const [showOnlyPublished, setShowOnlyPublished] = useState(false);
 
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem("event");
-    return savedFilters
-      ? JSON.parse(savedFilters)
-      : {
-          sortBy: "publish-date",
-          publishStatus: "all",
-          status: "all",
-          search: "",
-          startDate: null as string | null,
-          endDate: null as string | null,
-          dateFilterType: "publish-date",
+  const [filters, setFilters] = useState({ search: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const handleTextFieldChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    setCurrentPage(1); // reset page when searching
+  };
+
+  const isEventInFilter = (eventName: string) => {
+    const data = filteredEventsdaily.find(
+      (event) => event.Event_Name === eventName
+    );
+
+    setSalesDatadaily(data);
+  };
+  console.log("salesDatadaily", salesDatadaily);
+
+  const handleSearch = () => {
+    const filtered = salesData.eventSummary.filter((event) => {
+      const eventDate = new Date(event.Event_Time);
+      return eventDate >= startDate && eventDate <= endDate;
+    });
+
+    setFilteredEventSummary(filtered);
+
+    // ตั้งค่า default chart ให้ event แรกที่พบ
+    if (filtered.length > 0) {
+      isEventInFilter(filtered[0].Event_Name);
+    }
+  };
+  const filteredEventsdaily = filteredEventSummary.filter((event) =>
+    event?.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
+  );
+
+  const pieDataRaw = salesDatadaily?.PaidBreakdownByType
+    ? salesDatadaily.PaidBreakdownByType.split(",").map((item) => {
+        const [name, amount] = item.trim().split(":");
+        return {
+          name: name.trim(),
+          amount: parseFloat(amount.trim()),
         };
-  });
+      })
+    : [];
+
+  const total = pieDataRaw.reduce((sum, item) => sum + item.amount, 0);
+
+  const pieData = pieDataRaw.map((item) => ({
+    name: item.name,
+    value: total > 0 ? +((item.amount / total) * 100).toFixed(2) : 0,
+    amount: item.amount,
+  }));
+
+  const filteredEvents = salesData.eventSummary.filter((event) =>
+    event?.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const paginatedEvents = filteredEvents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalSales = filteredEvents.reduce(
+    (sum, event) => sum + parseFloat(event?.TotalNetPrice || 0),
+    0
+  );
+
+  const formatMinus7Hours = (utcString) => {
+    const utcDate = new Date(utcString);
+
+    // ลบ 7 ชั่วโมงจากเวลา UTC
+    const minus7Date = new Date(utcDate.getTime() - 7 * 60 * 60 * 1000);
+
+    // แสดงผลในรูปแบบ yyyy-mm-dd hh:mm:ss
+    const year = minus7Date.getFullYear();
+    const month = String(minus7Date.getMonth() + 1).padStart(2, "0");
+    const day = String(minus7Date.getDate()).padStart(2, "0");
+    const hour = String(minus7Date.getHours()).padStart(2, "0");
+    const minute = String(minus7Date.getMinutes()).padStart(2, "0");
+    // const second = String(minus7Date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year}  ${hour}:${minute} น.`;
+  };
 
   const repeatRef = useRef(null);
 
@@ -177,23 +144,54 @@ export default function Dashboard() {
     return formattedAmount.replace(/\d(?=(\d{3})+\.)/g, "$&,");
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-  const totalPages = Math.ceil(eventList.length / itemsPerPage);
-  const paginatedList = eventList.slice((currentPage - 1) * itemsPerPage);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        stroke="black"
+        strokeWidth={0.8}
+        paintOrder="stroke"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={14}
+        fontWeight="bold"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
 
-  const handleTextFieldChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
+  const handleResetFilter = () => {
+    const defaultStart = new Date(`${new Date().getFullYear()}-01-01`);
+    const latestEventTime = salesData.eventSummary.reduce((latest, event) => {
+      const eventDate = new Date(event.Event_Time);
+      return eventDate > latest ? eventDate : latest;
+    }, new Date(0));
 
-    const updatedFilters = {
-      ...filters,
-      [name]: value,
-    };
+    setStartDate(defaultStart);
+    setEndDate(latestEventTime);
+    setFilters({ search: "" });
+    setShowOnlyPublished(false);
+    setFilteredEventSummary(salesData.eventSummary); // ✅ เซตตรงนี้ด้วย
+    setCurrentPage(1);
 
-    setFilters(updatedFilters);
+    if (salesData.eventSummary.length > 0) {
+      isEventInFilter(salesData.eventSummary[0].Event_Name);
+    }
   };
 
   useEffect(() => {
@@ -221,19 +219,15 @@ export default function Dashboard() {
           authAxiosClient.get("/api/eventSummary"),
         ]);
 
-        console.log(
-          "data:",
-          resDailySales?.data,
-          resOrderCount?.data,
-          resTotalPaid?.data,
-          resTotalUnpaid?.data,
-          resTotalSales?.data,
-          resEventSales?.data,
-          resTop10?.data,
-          repeatedCustomers.data,
-          eventSummary.data.data
-        );
+        const events = eventSummary.data.data || [];
 
+        // ✅ หาวันที่ Event ล่าสุด
+        const latestEventTime = events.reduce((latest, event) => {
+          const eventDate = new Date(event.Event_Time);
+          return eventDate > latest ? eventDate : latest;
+        }, new Date(0));
+
+        // ✅ ตั้ง state หลัก
         setSalesData({
           dailySales: resDailySales.data.data?.DailySales || 0,
           dailyOrderCount: resOrderCount.data.data?.DailyOrderCount || 0,
@@ -243,8 +237,13 @@ export default function Dashboard() {
           eventSales: resEventSales.data.data?.EventTotalSales || 0,
           top10: resTop10.data.data || [],
           repeatedCustomers: repeatedCustomers.data.data || [],
-          eventSummary: eventSummary.data.data || [],
+          eventSummary: events,
         });
+
+        // ✅ ตั้งค่าเริ่มต้นหลังจาก SalesData set แล้ว
+        setTimeout(() => {
+          handleResetFilter(); // 🔥 เรียกหลังจากโหลดครบ
+        }, 0);
       } catch (error) {
         console.error("❌ Error loading sales data:", error);
       }
@@ -252,6 +251,18 @@ export default function Dashboard() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log("salesDatadaily", salesDatadaily);
+  }, [salesDatadaily]);
+  useEffect(() => {
+    if (
+      salesData.eventSummary.length > 0 &&
+      filteredEventSummary.length === 0
+    ) {
+      handleResetFilter(); // ✅ เรียกหลังจากโหลดข้อมูลแล้วจริง ๆ
+    }
+  }, [salesData.eventSummary]);
 
   return (
     <div className={styles.dashboardContainer}>
@@ -295,7 +306,16 @@ export default function Dashboard() {
           className={styles.hiddenScroll}
           style={{ width: "875px", height: "570px" }}
         >
-          <HorizontalCarousel detailsList={yourData} />
+          <HorizontalCarousel
+            detailsList={
+              showOnlyPublished
+                ? filteredEventSummary.filter(
+                    (event) => event.Event_Status === 1
+                  )
+                : filteredEventSummary
+            }
+            filteredEventsdaily={isEventInFilter}
+          />
         </div>
         {/* Pie Chart */}
         <div
@@ -317,7 +337,8 @@ export default function Dashboard() {
                 cy="50%"
                 outerRadius={100}
                 innerRadius={60}
-                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                label={renderCustomizedLabel}
+                labelLine={false}
               >
                 {pieData.map((entry, index) => (
                   <Cell
@@ -326,65 +347,58 @@ export default function Dashboard() {
                   />
                 ))}
               </Pie>
-              {/* <Tooltip
-                formatter={(value, name, props) => [
-                  `฿${pieData[props?.payload?.payload?.index || 0]?.amount}`,
-                  name,
-                ]}
-              /> */}
-              {/* <Legend /> */}
+              {/* ✅ ตรงกลาง */}
+              <text
+                x="50%"
+                y="50%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="20"
+                fontWeight="bold"
+                fill="black"
+              >
+                ฿ {formatCurrency(salesDatadaily?.TotalNetPrice || 0)}
+              </text>
             </PieChart>
           </ResponsiveContainer>
           <div style={{ width: "250px", marginTop: "-50px" }}>
             <p
               className="text-center font-bold mt-4 text-xl"
-              style={{ color: "black" }}
+              style={{ color: "black", justifySelf: "self-end" }}
             >
-              จำนวนงานทั้งหมด : 20
+              จำนวน คำสั่งซื้อ ทั้งหมด :{" "}
+              {formatCurrency(salesDatadaily?.TotalOrders)}
             </p>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "auto auto",
+                gridTemplateColumns: "auto ",
                 justifyContent: "space-around",
               }}
             >
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                Promptpay :20
-              </p>
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                ฿ 375,900
-              </p>
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                Credit card : 20
-              </p>
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                ฿ 375,900
-              </p>
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                E-Banking : 20
-              </p>
-              <p
-                className="text-center font-bold mt-4 text-xl"
-                style={{ color: "black", margin: "0px" }}
-              >
-                ฿ 375,900
-              </p>
+              {pieData.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "auto auto",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <p
+                    className="text-center font-bold mt-4 text-xl"
+                    style={{ color: "black", margin: "0px", width: "100px" }}
+                  >
+                    {item.name}
+                  </p>
+                  <p
+                    className="text-center font-bold mt-4 text-xl"
+                    style={{ color: "black", margin: "0px" }}
+                  >
+                    ฿ {formatCurrency(item.amount)}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -426,11 +440,41 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <button className={styles.searchButton}>
+        <button className={styles.searchButton} onClick={handleSearch}>
           <img src="/Search.svg" alt="search" width={20} />
         </button>
 
-        <button className={styles.allButton}>All</button>
+        <button className={styles.allButton} onClick={handleResetFilter}>
+          All
+        </button>
+      </div>
+      <div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginTop: "-35px",
+            marginBottom: "40px",
+            color: "black",
+            fontSize: "small",
+          }}
+        >
+          <input
+            type="checkbox"
+            id="publishedCheckbox"
+            checked={showOnlyPublished}
+            onChange={(e) => setShowOnlyPublished(e.target.checked)}
+            style={{
+              width: "18px",
+              height: "18px",
+              accentColor: "#FDC446",
+              marginRight: "8px",
+            }}
+          />
+          <label htmlFor="publishedCheckbox" style={{ fontWeight: 200 }}>
+            แสดงเฉพาะงานที่เผยแพร่อยู่
+          </label>
+        </div>
       </div>
 
       <section
@@ -444,19 +488,19 @@ export default function Dashboard() {
       >
         <div className={`${styles.card1} `}>
           <p>ยอดขาย</p>
-          <h2>฿375,900</h2>
+          <h2>{`฿${formatCurrency(salesDatadaily?.TotalNetPrice)}`}</h2>
         </div>
         <div className={`${styles.card2} `}>
           <p>คำสั่งซื้อ</p>
-          <h2>156</h2>
+          <h2>{`${formatCurrency(salesDatadaily?.TotalOrders)}`}</h2>
         </div>
         <div className={`${styles.card3} `}>
           <p>ยอดชำระแล้ว</p>
-          <h2>฿375,000</h2>
+          <h2>{`฿${formatCurrency(salesDatadaily?.TotalPaid)}`}</h2>
         </div>
         <div className={`${styles.card4} `}>
           <p>ยอดค้างชำระ</p>
-          <h2>฿900</h2>
+          <h2>{`฿${formatCurrency(salesDatadaily?.TotalUnpaid)}`}</h2>
         </div>
       </section>
 
@@ -504,42 +548,50 @@ export default function Dashboard() {
           <div className={styles.salesCard}>
             <img src="/bag.svg" alt="bag" className={styles.salesIcon} />
             <p className={styles.salesLabel}>ยอดขายทั้งหมด</p>
-            <p className={styles.totalAmount}>฿375,900</p>
+            <p className={styles.totalAmount}>฿{formatCurrency(totalSales)}</p>
           </div>
         </div>
 
         <section className={styles.sectionBox2}>
           <p style={{ margin: 0, color: "black", marginLeft: "15px" }}>
             {(currentPage - 1) * itemsPerPage + 1}-
-            {Math.min(currentPage * itemsPerPage, eventList.length)} จาก{" "}
-            {eventList.length} รายการ
+            {Math.min(currentPage * itemsPerPage, filteredEvents.length)} จาก{" "}
+            {filteredEvents.length} รายการ
           </p>
-          {eventList.map((event, index) => (
-            <div key={event.id} className={styles.eventRow}>
+          {paginatedEvents.map((event, index) => (
+            <div key={index} className={styles.eventRow}>
               <div
                 className={`${styles.eventHeader} ${
                   styles[`eventHeaderGradient${index % 4}`]
                 }`}
               >
-                <div className={styles.eventIndex}>{index + 1}.</div>
-                <div className={styles.eventName}>{event.name}</div>
-                <div className={styles.eventStatus}>ออนไลน์</div>
+                <div className={styles.eventIndex}>
+                  {(currentPage - 1) * itemsPerPage + index + 1}.
+                </div>
+                <div className={styles.eventName}>{event?.Event_Name}</div>
+                <div
+                  className={
+                    event?.Event_Status === 1
+                      ? styles.eventStatus
+                      : styles.eventStatus2
+                  }
+                >
+                  {event?.Event_Status === 1 ? "ออนไลน์" : "ออฟไลน์"}
+                </div>
                 <div className={styles.eventTotal}>
-                  ยอดขายทั้งหมด : ฿ {formatCurrency(event.total)}
+                  ยอดขายทั้งหมด : ฿ {formatCurrency(event?.TotalNetPrice)}
                 </div>
               </div>
 
               <div className={styles.eventDetail}>
-                <img src={event.img} className={styles.eventImage} />
+                <img src={event?.Event_Pic_1} className={styles.eventImage} />
                 <div className={styles.eventInfo}>
-                  <p>
-                    วันจัดงาน : {event.date} {event.time}
-                  </p>
-                  <p>ชำระแล้ว : ฿ {formatCurrency(event.paid)}</p>
+                  <p>วันจัดงาน : {formatMinus7Hours(event?.Event_Time)}</p>
+                  <p>ชำระแล้ว : ฿ {formatCurrency(event?.TotalPaid)}</p>
                 </div>
                 <div className={styles.eventInfo}>
-                  <p>คำสั่งซื้อทั้งหมด : {event.orders}</p>
-                  <p>ค้างชำระ : ฿ {formatCurrency(event.unpaid)}</p>
+                  <p>คำสั่งซื้อทั้งหมด : {event?.TotalOrders}</p>
+                  <p>ค้างชำระ : ฿ {formatCurrency(event?.TotalUnpaid)}</p>
                 </div>
               </div>
             </div>
@@ -582,7 +634,7 @@ export default function Dashboard() {
         <section>
           {salesData.top10.map((event, index) => (
             <div key={event?.Event_Id} className={styles.eventRowTop}>
-              <div className={styles.eventDetail}>
+              <div className={styles.eventDetailtop}>
                 <img src={event?.Event_Pic_1} className={styles.eventImage} />
                 <div className={styles.eventInfotop}>
                   <p className={styles.numbertop}>{index + 1}</p>
@@ -627,11 +679,6 @@ export default function Dashboard() {
           ))}
         </section>
       </section>
-
-      {/* <section ref={repeatRef} className={styles.sectionBox}>
-        <h2>ลูกค้าซื้อซ้ำ</h2>
-        <p>(mock)</p>
-      </section> */}
     </div>
   );
 }

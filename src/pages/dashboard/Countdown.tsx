@@ -19,13 +19,14 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, id, details }) => {
     if (!initialTime) return;
 
     const countdown = () => {
-      const eventDate = new Date(initialTime).getTime();
+      const eventDate = new Date(initialTime).getTime(); // ✅ ใช้ตรง ๆ
+      const now = Date.now();
+      const distance = eventDate - now;
+
       if (isNaN(eventDate)) {
         console.error("Invalid initialTime:", initialTime);
         return;
       }
-      const now = Date.now();
-      const distance = eventDate - now;
 
       if (distance <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -42,9 +43,13 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, id, details }) => {
       });
     };
 
-    countdown();
-    const interval = setInterval(countdown, 1000);
+    countdown(); // run once
+    const interval = setInterval(countdown, 1000); // run every second
     return () => clearInterval(interval);
+  }, [initialTime]);
+
+  useEffect(() => {
+    console.log(`🧭 ${details?.Event_Name} initialTime:`, initialTime);
   }, [initialTime]);
 
   return (
@@ -52,13 +57,13 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, id, details }) => {
       <div
         className="countdown-container"
         style={{
-          backgroundImage: `url(${details?.img})`,
+          backgroundImage: `url(${details?.Event_Pic_1})`,
         }}
       >
         <div className="countdown-overlay">
           <div className="event-info">
-            <h1 className="event-name">{details?.Name}</h1>
-            <p className="event-location">{details?.At}</p>
+            <h1 className="event-name">{details?.Event_Name}</h1>
+            <p className="event-location">{details?.Event_Addr}</p>
           </div>
 
           <div className="timer-box">
@@ -78,7 +83,9 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, id, details }) => {
             </div>
             <div className="time-separator">:</div>
             <div className="time-block">
-              <p className="time-value">{timeLeft.seconds}</p>
+              <p className="time-value">
+                {String(timeLeft.seconds).padStart(2, "0")}
+              </p>
               <p className="time-label">Seconds</p>
             </div>
           </div>
