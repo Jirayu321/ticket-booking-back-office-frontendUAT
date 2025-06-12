@@ -6,6 +6,17 @@
   overflow-y: auto;
   /* margin: 0 auto; */
 }
+.eventNamebig {
+  color: #fcbe2d;
+  font-size: 65px;
+  position: absolute;
+  font-weight: bolder;
+  margin-left: -150px;
+  margin-top: -10px;
+  width: -webkit-fill-available;
+  display: grid;
+  justify-content: center;
+}
 
 .header {
   position: sticky;
@@ -85,7 +96,7 @@
 } */
 
 .card1 {
-  width: 100%;
+  width: 83%;
   padding: 15px;
   border-radius: 12px;
   flex-direction: column;
@@ -95,7 +106,7 @@
   background-size: contain;
 }
 .card2 {
-  width: 100%;
+  width: 83%;
   padding: 15px;
   border-radius: 12px;
   flex-direction: column;
@@ -105,7 +116,7 @@
   background-size: contain;
 }
 .card3 {
-  width: 100%;
+  width: 83%;
   padding: 15px;
   border-radius: 12px;
   flex-direction: column;
@@ -115,7 +126,7 @@
   background-size: contain;
 }
 .card4 {
-  width: 100%;
+  width: 83%;
   padding: 15px;
   border-radius: 12px;
   flex-direction: column;
@@ -182,8 +193,9 @@ h2 {
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
-  transform: scale(0.6);
+  transform: scale(0.9);
   transform-origin: left top;
+  width: 108vw;
 }
 
 .dateFilterBox {
@@ -500,19 +512,22 @@ input[type="text"] {
 
 .numbertop {
   margin: 0px;
-  margin-right: 20px;
+  margin-right: 8px;
   color: #fcbe2d;
   font-weight: 500;
-  font-size: 40px;
+  font-size: 30px;
+  align-content: space-evenly;
 }
 .Detailtop {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 150px 160px;
   width: 60vw;
   justify-content: space-between;
+  height: 15px;
 }
 .Detailtop p {
-  font-size: x-small;
+  font-size: 15px;
+  margin: 0px;
 }
 .eventDetailtop {
   display: flex;

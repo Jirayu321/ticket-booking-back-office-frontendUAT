@@ -152,16 +152,15 @@ export default function Dashboard() {
   };
 
   const formatCurrency2 = (amount) => {
-  if (typeof amount !== "number" || isNaN(amount)) {
-    return "0";
-  }
+    if (typeof amount !== "number" || isNaN(amount)) {
+      return "0";
+    }
 
-  // ปัดเศษทศนิยมออก (floor)
-  const roundedAmount = Math.floor(amount);
+    // ปัดเศษทศนิยมออก (floor)
+    const roundedAmount = Math.floor(amount);
 
-  return roundedAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
+    return roundedAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
   const renderCustomizedLabel = ({
     cx,
@@ -335,6 +334,7 @@ export default function Dashboard() {
             }
             filteredEventsdaily={isEventInFilter}
           />
+          <p className={styles.eventNamebig}>{salesDatadaily?.Event_Name}</p>
         </div>
         {/* Pie Chart */}
         <div
@@ -384,8 +384,7 @@ export default function Dashboard() {
               className="text-center font-bold mt-4 text-xl"
               style={{ color: "black", justifySelf: "self-start" }}
             >
-              จำนวนงานทั้งหมด :{" "}
-              {formatCurrency2(salesDatadaily?.TotalOrders)}
+              จำนวนงานทั้งหมด : {formatCurrency2(salesDatadaily?.TotalOrders)}
             </p>
             <div
               style={{
@@ -475,7 +474,7 @@ export default function Dashboard() {
           style={{
             display: "flex",
             alignItems: "center",
-            marginTop: "-35px",
+            marginTop: "-20px",
             marginBottom: "40px",
             color: "black",
             fontSize: "small",
@@ -505,23 +504,23 @@ export default function Dashboard() {
         style={{
           transform: "scale(0.87)",
           transformOrigin: "top left",
-          marginTop: isDateOpen ? "110px" : "-30px",
+          marginTop: isDateOpen ? "218px" : "-30px",
         }}
       >
         <div className={`${styles.card1} `}>
-          <p>ยอดขาย</p>
+          <h2>ยอดขาย</h2>
           <h2>{`฿${formatCurrency(salesDatadaily?.TotalNetPrice)}`}</h2>
         </div>
         <div className={`${styles.card2} `}>
-          <p>คำสั่งซื้อ</p>
+          <h2>คำสั่งซื้อ</h2>
           <h2>{`${formatCurrency(salesDatadaily?.TotalOrders)}`}</h2>
         </div>
         <div className={`${styles.card3} `}>
-          <p>ยอดชำระแล้ว</p>
+          <h2>ยอดชำระแล้ว</h2>
           <h2>{`฿${formatCurrency(salesDatadaily?.TotalPaid)}`}</h2>
         </div>
         <div className={`${styles.card4} `}>
-          <p>ยอดค้างชำระ</p>
+          <h2>ยอดค้างชำระ</h2>
           <h2>{`฿${formatCurrency(salesDatadaily?.TotalUnpaid)}`}</h2>
         </div>
       </section>
@@ -661,14 +660,18 @@ export default function Dashboard() {
                 <div className={styles.eventInfotop}>
                   <p className={styles.numbertop}>{index + 1}</p>
                   <div>
-                    <p style={{ color: "#FCBE2D", margin: 0 }}>
-                      {event?.Event_Name}
-                    </p>
                     <div className={styles.Detailtop}>
-                      <p>
-                        ยอดขายทั้งหมด : ฿ {formatCurrency(event?.TotalPaid)}
-                      </p>
-                      <p>บัตรทั้งหมด : {formatCurrency(event?.Ticket_Count)}</p>
+                      <div>
+                        <p style={{ color: "#FCBE2D", fontSize: "17px" }}>
+                          {event?.Event_Name}
+                        </p>
+                        <p style={{ fontSize: "15px" }}>
+                          บัตรทั้งหมด : {formatCurrency2(event?.Ticket_Count)}{" "}
+                          ใบ
+                        </p>
+                      </div>
+
+                      <p>ยอดขาย : ฿ {formatCurrency2(event?.TotalPaid)}</p>
                     </div>
                   </div>
                 </div>
@@ -695,7 +698,7 @@ export default function Dashboard() {
               <div className={styles.coutomDetail}>
                 <p style={{ color: "#FCBE2D" }}>{event?.Cust_name}</p>
                 <p>{event?.Cust_tel}</p>
-                <p>จำนวนซื้อซ้ำ : {formatCurrency(event?.OrderCount)}</p>
+                <p>จำนวนซื้อซ้ำ : {formatCurrency2(event?.OrderCount)} ครั้ง</p>
               </div>
             </div>
           ))}

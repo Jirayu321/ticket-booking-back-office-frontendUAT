@@ -146,3 +146,9 @@ div:where(.swal2-container) {
   position: absolute;
   z-index: 3;
 }
+.react-datepicker__current-month {
+  justify-self: center;
+  /* text-align: center;
+  font-weight: bold;
+  display: block; */
+}
