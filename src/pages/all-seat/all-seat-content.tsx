@@ -262,6 +262,7 @@ const AllSeatContent: React.FC = () => {
   };
   console.log("ticketData", ticketData);
   const filteredTickets = applyFilters(ticketData);
+  console.log("filteredTickets", filteredTickets);
   const totalCount = filteredTickets?.length;
   const scannedCount = filteredTickets.filter(
     (ticket) => ticket.check_in_status === 1

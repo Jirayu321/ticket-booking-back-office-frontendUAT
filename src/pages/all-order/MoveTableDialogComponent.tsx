@@ -201,7 +201,7 @@ export default function MoveTableDialogComponent({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "auto auto",
+            gridTemplateColumns: "275px auto",
             width: "100%",
           }}
         >
@@ -239,6 +239,7 @@ export default function MoveTableDialogComponent({
                     transform: "translateY(5px)",
                     color: "black",
                     WebkitTextFillColor: "black",
+                    width: "275px",
                   },
                 },
               }}
@@ -358,11 +359,17 @@ export default function MoveTableDialogComponent({
               onChange={handleChangeNewMove}
               label="ไปโต๊ะ"
             >
-              {availableTables.map((table, index) => (
-                <MenuItem key={index} value={table}>
-                  {table?.Ticket_No}
-                </MenuItem>
-              ))}
+              {[...availableTables]
+                .sort((a, b) => {
+                  const numA = parseInt(a.Ticket_No?.replace(/\D/g, "") || "0");
+                  const numB = parseInt(b.Ticket_No?.replace(/\D/g, "") || "0");
+                  return numA - numB;
+                })
+                .map((table, index) => (
+                  <MenuItem key={index} value={table}>
+                    {table?.Ticket_No}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </div>

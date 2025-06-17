@@ -116,9 +116,13 @@ const TableMoveHistoryContent: React.FC = () => {
         };
   });
 
-  const filteredList = tableMoveList.filter((item) =>
-    item.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
-  );
+  const filteredList = tableMoveList.filter((item) => {
+    const searchText = filters.search.toLowerCase();
+    return (
+      item.Event_Name?.toLowerCase().includes(searchText) ||
+      item.Cust_Name?.toLowerCase().includes(searchText)
+    );
+  });
 
   const handleTextFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -149,10 +153,11 @@ const TableMoveHistoryContent: React.FC = () => {
           value={filters.search}
           onChange={handleTextFieldChange}
           variant="outlined"
-          label="ค้นจากชื่องาน"
+          label="ค้นหาชื่องาน หรือ ชื่อลูกค้า "
           InputLabelProps={{
             shrink: true,
           }}
+          placeholder="ค้นหาชื่องาน หรือ ชื่อลูกค้า"
           sx={{
             "& .MuiOutlinedInput-root": {
               "& input": {

@@ -481,7 +481,7 @@ h2 {
   cursor: not-allowed;
 }
 
-input[type="text"] {
+.dateRange input[type="text"] {
   width: 88%;
   border: none;
   padding: 10px 0px 0px;

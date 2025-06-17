@@ -147,7 +147,7 @@ const PaymentHistory: React.FC<{ dtOrderId: any }> = ({ dtOrderId }) => {
             <TableCell
               style={{ fontWeight: "bold", color: "#000", fontSize: "18px" }}
             >
-              จำนวนเงิน
+              ยอดชำระ
             </TableCell>
             <TableCell
               style={{ fontWeight: "bold", color: "#000", fontSize: "18px" }}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { authAxiosClient } from "../../config/axios.config";
 import WalkinModal from "./WalkinModal";
 import MoveTableDialog from "./MoveTableDialogComponent";
+import { getTableMoveHistory } from "../../services/table-move.service.ts";
 
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -178,6 +179,22 @@ const AllOrderContent: React.FC = () => {
     } catch (err) {
       console.error("❌ Failed to move table", err);
       alert("เกิดข้อผิดพลาดในการย้ายโต๊ะ");
+    }
+  };
+  const datamovetable = async (order: any[]) => {
+    const result = await getTableMoveHistory();
+  };
+
+  const [displayOrderStatus, setDisplayOrderStatus] = useState("");
+  const handleOrderStatus = async (OrderStatus, orderDetail) => {
+    try {
+      const result = await getTableMoveHistory();
+      const orderId = orderDetail?.Order_id;
+      const moved = result?.some((move) => move.Order_ID === orderId);
+      return moved ? `${OrderStatus} | ย้ายโต๊ะ` : OrderStatus;
+    } catch (error) {
+      console.error("Error checking move status:", error);
+      return OrderStatus;
     }
   };
 
@@ -1293,6 +1310,19 @@ const AllOrderContent: React.FC = () => {
     }
   }, [newMove.From_Zone, orderDetail]);
 
+  useEffect(() => {
+    const checkMoveStatus = async () => {
+      if (orderDetail?.length) {
+        const status = await handleOrderStatus(
+          orderDetail[0]?.OrderStatus_Name,
+          orderDetail[0]
+        );
+        setDisplayOrderStatus(status);
+      }
+    };
+    checkMoveStatus();
+  }, [orderDetail]);
+
   return (
     <div
       className="all-orders-content"
@@ -2253,7 +2283,7 @@ const AllOrderContent: React.FC = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {orderDetail.at(0)?.OrderStatus_Name}{" "}
+                          {displayOrderStatus}{" "}
                           {orderDetail.at(0)?.OrderStatus_Name === "ยกเลิก"
                             ? `/ โดย ${orderDetail.at(0)?.Cancel_By}`
                             : ""}
