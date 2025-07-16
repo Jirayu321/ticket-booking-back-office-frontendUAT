@@ -2505,7 +2505,7 @@ const AllOrderContent: React.FC = () => {
                               >
                                 ย้ายโต๊ะ
                               </Button>
-                              {orderDetail[0]?.Order_Status === 4 ? (
+                              {orderDetail[0]?.Order_Status === 1 ? (
                                 <Button
                                   variant="contained"
                                   color="primary"
