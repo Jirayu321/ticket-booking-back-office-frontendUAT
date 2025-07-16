@@ -2179,12 +2179,17 @@ const AllOrderContent: React.FC = () => {
                   let paymentStatusBgColor;
 
                   if (order.Order_Status === 1 || order.Order_Status === 13) {
-                    if (order.Is_Balance === 0) {
-                      paymentStatusLabel = "ชำระครบ";
-                      paymentStatusBgColor = `${paymentStatusBgColor0}`;
-                    } else if (order.Is_Balance > 0) {
-                      paymentStatusLabel = "ค้างจ่าย";
-                      paymentStatusBgColor = `${paymentStatusBgColor1}`;
+                    if (order.Order_Status === 13) {
+                      paymentStatusLabel = "ไม่ระบุ";
+                      paymentStatusBgColor = `${paymentStatusBgUnknown}`;
+                    } else {
+                      if (order.Is_Balance === 0) {
+                        paymentStatusLabel = "ชำระครบ";
+                        paymentStatusBgColor = `${paymentStatusBgColor0}`;
+                      } else if (order.Is_Balance > 0) {
+                        paymentStatusLabel = "ค้างจ่าย";
+                        paymentStatusBgColor = `${paymentStatusBgColor1}`;
+                      }
                     }
                   } else {
                     paymentStatusLabel = "ไม่ระบุ";
