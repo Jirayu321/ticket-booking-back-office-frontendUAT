@@ -2472,10 +2472,10 @@ const AllOrderContent: React.FC = () => {
                                   gridTemplateColumns: "auto auto auto",
                                 }
                               : {
-                                  width: "240px",
+                                  width: "355px",
                                   display: "grid",
                                   justifyContent: "space-between",
-                                  gridTemplateColumns: "auto auto ",
+                                  gridTemplateColumns: "auto auto auto",
                                 }
                           }
                         >
