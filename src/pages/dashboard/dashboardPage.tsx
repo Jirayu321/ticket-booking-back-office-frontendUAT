@@ -6,6 +6,7 @@ import { authAxiosClient } from "../../config/axios.config";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 
 const COLORS = [
   "#ff4081", // Promptpay (ชมพู)
@@ -38,6 +39,7 @@ export default function Dashboard() {
   });
   const [salesDatadaily, setSalesDatadaily] = useState({});
   const [showOnlyPublished, setShowOnlyPublished] = useState(false);
+  const [Width, setWidth] = useState<number | undefined>(undefined);
 
   const [filters, setFilters] = useState({ search: "" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,14 +95,17 @@ export default function Dashboard() {
     amount: item.amount,
   }));
 
-  const filteredEvents = salesData.eventSummary.filter((event) =>
-    event?.Event_Name?.toLowerCase().includes(filters.search.toLowerCase())
-  );
+  const filteredEvents = salesData.eventSummary.filter((event) => {
+    const name = event?.Event_Name?.toLowerCase() || "";
+    const excluded = "ดีดคลับ (deedclub) จังหวัดตรัง".toLowerCase();
+    return name.includes(filters.search.toLowerCase()) && name !== excluded;
+  });
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = filteredEvents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const totalSales = filteredEvents.reduce(
     (sum, event) => sum + parseFloat(event?.TotalNetPrice || 0),
     0
@@ -120,7 +125,7 @@ export default function Dashboard() {
     const minute = String(minus7Date.getMinutes()).padStart(2, "0");
     // const second = String(minus7Date.getSeconds()).padStart(2, "0");
 
-    return `${day}/${month}/${year}  ${hour}:${minute} น.`;
+    return `${day}/${month}/${year}  ${hour}:${minute} `;
   };
 
   const repeatRef = useRef(null);
@@ -212,6 +217,80 @@ export default function Dashboard() {
     }
   };
 
+  const getResponsiveStyle = (width?: number) => {
+    if (width === undefined) {
+      return {}; // ให้ไม่มี style อะไรเป็นพิเศษระหว่าง SSR
+    }
+    if (width <= 360) {
+      return {
+        transform: "scale(0.26)",
+        transformOrigin: "top left",
+        height: "200px",
+      };
+    } else if (width <= 390) {
+      return {
+        transform: "scale(0.27)",
+        transformOrigin: "top left",
+        height: "200px",
+      };
+    } else if (width <= 414) {
+      return {
+        transform: "scale(0.3)",
+        transformOrigin: "top left",
+        height: "200px",
+      };
+    } else if (width <= 430) {
+      return {
+        transform: "scale(0.3)",
+        transformOrigin: "top left",
+        height: "200px",
+      };
+    } else {
+      return { width: "100%" };
+    }
+  };
+
+  const getResponsiveStyle2 = (width?: number) => {
+    if (width === undefined) {
+      return {}; // ให้ไม่มี style อะไรเป็นพิเศษระหว่าง SSR
+    }
+    if (width <= 360) {
+      return {
+        transform: "scale(0.76)",
+        transformOrigin: "top left",
+        marginTop: isDateOpen ? "218px" : "-30px",
+      };
+    } else if (width <= 390) {
+      return {
+        transform: "scale(0.79)",
+        transformOrigin: "top left",
+        marginTop: isDateOpen ? "218px" : "-30px",
+      };
+    } else if (width <= 414) {
+      return {
+        transform: "scale(0.87)",
+        transformOrigin: "top left",
+        marginTop: isDateOpen ? "218px" : "-30px",
+      };
+    } else if (width <= 430) {
+      return {
+        transform: "scale(0.87)",
+        transformOrigin: "top left",
+        marginTop: isDateOpen ? "218px" : "-30px",
+      };
+    } else {
+      return { width: "100%" };
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // call one time to set immediately
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -238,7 +317,7 @@ export default function Dashboard() {
         ]);
 
         const events = eventSummary.data.data || [];
-
+        console.log("events", events);
         // ✅ หาวันที่ Event ล่าสุด
         const latestEventTime = events.reduce((latest, event) => {
           const eventDate = new Date(event.Event_Time);
@@ -311,14 +390,7 @@ export default function Dashboard() {
         </nav>
       </header>
 
-      <div
-        className={styles.Carousel}
-        style={{
-          transform: "scale(0.3)",
-          transformOrigin: "top left",
-          height: "200px",
-        }}
-      >
+      <div className={styles.Carousel} style={getResponsiveStyle(Width)}>
         {/* Carousel */}
         <div
           className={styles.hiddenScroll}
@@ -501,11 +573,7 @@ export default function Dashboard() {
       <section
         ref={dashboardRef}
         className={styles.summarySection}
-        style={{
-          transform: "scale(0.87)",
-          transformOrigin: "top left",
-          marginTop: isDateOpen ? "218px" : "-30px",
-        }}
+        style={getResponsiveStyle2(Width)}
       >
         <div className={`${styles.card1} `}>
           <h2>ยอดขาย</h2>
@@ -513,7 +581,11 @@ export default function Dashboard() {
         </div>
         <div className={`${styles.card2} `}>
           <h2>คำสั่งซื้อ</h2>
-          <h2>{`${formatCurrency(salesDatadaily?.TotalOrders)}`}</h2>
+          <h2>{`${formatCurrency(
+            (salesDatadaily?.TotalOrders ?? 0) +
+              (salesDatadaily?.CompletedOrderCount ?? 0) +
+              (salesDatadaily?.CancelledOrderCount ?? 0)
+          )}`}</h2>
         </div>
         <div className={`${styles.card3} `}>
           <h2>ยอดชำระแล้ว</h2>
@@ -611,7 +683,12 @@ export default function Dashboard() {
                   <p>ชำระแล้ว : ฿ {formatCurrency(event?.TotalPaid)}</p>
                 </div>
                 <div className={styles.eventInfo}>
-                  <p>คำสั่งซื้อทั้งหมด : {event?.TotalOrders}</p>
+                  <p>
+                    คำสั่งซื้อทั้งหมด :{" "}
+                    {(event?.TotalOrders ?? 0) +
+                      (event?.CompletedOrderCount ?? 0) +
+                      (event?.CancelledOrderCount ?? 0)}
+                  </p>
                   <p>ค้างชำระ : ฿ {formatCurrency(event?.TotalUnpaid)}</p>
                 </div>
               </div>
@@ -665,13 +742,32 @@ export default function Dashboard() {
                         <p style={{ color: "#FCBE2D", fontSize: "17px" }}>
                           {event?.Event_Name}
                         </p>
+
+                        <p>ยอดขาย : ฿ {formatCurrency2(event?.TotalPaid)}</p>
+                      </div>
+                      <div
+                        style={
+                          index === 9
+                            ? {
+                                display: "flex",
+                                alignItems: "center",
+                                height: "27px",
+                                marginLeft: "-15px",
+                              }
+                            : {
+                                display: "flex",
+                                alignItems: "center",
+                                height: "27px",
+                              }
+                        }
+                      >
+                        <ConfirmationNumberIcon
+                          style={{ marginRight: "5px" }}
+                        />
                         <p style={{ fontSize: "15px" }}>
-                          บัตรทั้งหมด : {formatCurrency2(event?.Ticket_Count)}{" "}
-                          ใบ
+                          : {formatCurrency2(event?.Ticket_Count)} ใบ
                         </p>
                       </div>
-
-                      <p>ยอดขาย : ฿ {formatCurrency2(event?.TotalPaid)}</p>
                     </div>
                   </div>
                 </div>
@@ -685,7 +781,7 @@ export default function Dashboard() {
       <section
         ref={repeatRef}
         className={styles.totalSalesBox}
-        style={{ marginTop: "25px" }}
+        style={{ marginTop: "25px", padding: "5px 0px" }}
       >
         <h3 className={styles.totalSalesHeader}>ลูกค้าซื้อซ้ำ</h3>
         <section>

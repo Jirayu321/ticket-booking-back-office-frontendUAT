@@ -201,12 +201,9 @@ const AllOrderContent: React.FC = () => {
   const socketRef = useRef<any>(null);
 
   if (!socketRef.current) {
-    socketRef.current = io(
-      "https://deedclub-staff-backend-uat2.appsystemyou.com",
-      {
-        path: "/socket_io",
-      }
-    );
+    socketRef.current = io("https://deedclub-staff-backend.appsystemyou.com", {
+      path: "/socket_io",
+    });
   }
 
   const initialize = async () => {
@@ -220,7 +217,7 @@ const AllOrderContent: React.FC = () => {
   };
 
   const evntDetail = events?.dataEvent?.events.filter(
-    (event: any) => event?.Event_Public === "Y"
+    (event: any) => event?.Event_Public === "Y" && event?.Event_Biz_Type !== 2
   );
 
   const orderHData =
@@ -421,12 +418,12 @@ const AllOrderContent: React.FC = () => {
 
       htmlContent += `
       <div style="text-align: center; page-break-after: always;">
-        <img src="${dataUrl}" style="width:90%" />
-        <p style="font-size: 40px; font-weight: bold;">${ticket.Event_Name}</p>
-        <p style="font-size: 40px;">${ticket.Plan_Name} - ${
+        <img src="${dataUrl}" style="width:70%" />
+        <p style="font-size: 36px; font-weight: bold;">${ticket.Event_Name}</p>
+        <p style="font-size: 36px;">${ticket.Plan_Name} - ${
         ticket.ticket_no
       } (${ticket.ticket_line}/${totalInGroup})</p>
-        <p style="font-size: 40px;">
+        <p style="font-size: 36px;">
           เวลา: ${new Date(ticket.Event_Date).toLocaleDateString("th-TH", {
             year: "numeric",
             month: "long",
@@ -464,6 +461,101 @@ const AllOrderContent: React.FC = () => {
     setTimeout(() => {
       window.location.replace("/all-orders");
     }, 500); // เผื่อ delay ให้ printWindow ทำงานก่อน
+  };
+
+  const handleReleaseTheTable = async (Order_id: number) => {
+    // const Success = "/paid.png";
+    Swal.fire({
+      icon: "warning",
+      html: `คุณต้องการปล่อยโต๊ะของOrderนี้หรือไม่`,
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ปิด",
+    }).then(async (result) => {
+      const emmp = JSON.parse(localStorage.getItem("emmp") || "{}");
+      const empName = emmp?.Emp_Name || "ไม่ทราบชื่อ";
+      if (result.isConfirmed) {
+        try {
+          const res = await authAxiosClient?.post("/api/releasethetable", {
+            Order_id,
+            empName,
+          });
+          console.log("paysecond response:", res?.data);
+          // SwalSuccess("อัพเดทการชำระเรียบร้อย");
+
+          //         Swal.fire({
+          //           html: `
+          //   <div style="text-align: center; position: relative;">
+          //     <!-- ปุ่มกากบาท -->
+          //     <button id="xCloseBtn" style="
+          //       position: absolute;
+          //       top: 0;
+          //       right: 0;
+          //       background: transparent;
+          //       border: none;
+          //       font-size: 24px;
+          //       font-weight: bold;
+          //       cursor: pointer;
+          //       padding: 10px;
+          //       color: #999;
+          //     ">&times;</button>
+
+          //     <img src="${Success}" width="250" height="250" />
+          //     <br/>
+          //     <div style="display: grid;width: 490px;grid-template-columns: auto;align-items: center;justify-content:center ;">
+          //       <button id="printQRBtn" style="
+          //         margin-top: 20px;
+          //         background-color: #CFB70B;
+          //         color: black;
+          //         font-weight: bold;
+          //         font-size: 12px;
+          //         height: 50px;
+          //         border: none;
+          //         padding: 0 20px;
+          //         cursor: pointer;
+          //         border-radius: 5px;
+          //         width: 170px;
+          //       ">
+          //         <i class="fa fa-print" style="margin-right: 5px;"></i> Print QR
+          //       </button>
+          //     </div>
+          //   </div>
+          // `,
+          //           allowOutsideClick: false,
+          //           showConfirmButton: false,
+          //           didOpen: () => {
+          //             Swal.hideLoading();
+
+          //             const printBtn = document.getElementById("printQRBtn");
+          //             const closeBtn = document.getElementById("closeBtn");
+          //             const xCloseBtn = document.getElementById("xCloseBtn");
+
+          //             if (printBtn) {
+          //               printBtn.addEventListener("click", async () => {
+          //                 await handleNavigateToOrderSite(orderDetail.at(0)?.Order_id);
+          //               });
+          //             }
+
+          //             if (closeBtn || xCloseBtn) {
+          //               const closeHandler = () => {
+          //                 window.location.replace("/all-orders");
+          //               };
+          //               closeBtn?.addEventListener("click", closeHandler);
+          //               xCloseBtn?.addEventListener("click", closeHandler);
+          //             }
+          //           },
+          //         });
+        } catch (error) {
+          console.error("Error in claerStatusR:", error);
+          Swal.fire({
+            icon: "error",
+            text: "เกิดข้อผิดพลาดในการปล่อยโต๊ะ",
+          });
+        }
+      } else {
+        console.log("User closed");
+      }
+    });
   };
 
   const handlePayCash = async (Order_id: number, amount: number) => {
@@ -1019,6 +1111,7 @@ const AllOrderContent: React.FC = () => {
 
   const filteredOrders = orderHData
     ?.filter((order) => {
+      if (order.Event_Name === "ดีดคลับ (DEEDCLUB) จังหวัดตรัง") return false;
       const matchesSearch =
         String(order.Event_Name)
           .toLowerCase()
@@ -2085,7 +2178,7 @@ const AllOrderContent: React.FC = () => {
                   let paymentStatusLabel;
                   let paymentStatusBgColor;
 
-                  if (order.Order_Status === 1) {
+                  if (order.Order_Status === 1 || order.Order_Status === 13) {
                     if (order.Is_Balance === 0) {
                       paymentStatusLabel = "ชำระครบ";
                       paymentStatusBgColor = `${paymentStatusBgColor0}`;
@@ -2368,10 +2461,10 @@ const AllOrderContent: React.FC = () => {
                             orderHispayDetail.at(0)?.Total_Balance !== 0 &&
                             orderDetail[0]?.Order_Status !== 4
                               ? {
-                                  width: "237px",
+                                  width: "355px",
                                   display: "grid",
                                   justifyContent: "space-between",
-                                  gridTemplateColumns: "auto auto ",
+                                  gridTemplateColumns: "auto auto auto",
                                 }
                               : {
                                   width: "240px",
@@ -2394,18 +2487,37 @@ const AllOrderContent: React.FC = () => {
                             ดูรายละเอียด
                           </Button>
                           {orderHispayDetail.length > 0 ? (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={
-                                () => handleOpenDialog(orderDetail)
-                                // orderDetail.at(0)?.Order_id
-                              }
-                              style={{ width: 110, height: 50 }}
-                              // disabled={true}
-                            >
-                              ย้ายโต๊ะ
-                            </Button>
+                            <>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={
+                                  () => handleOpenDialog(orderDetail)
+                                  // orderDetail.at(0)?.Order_id
+                                }
+                                style={{ width: 110, height: 50 }}
+                                // disabled={true}
+                              >
+                                ย้ายโต๊ะ
+                              </Button>
+                              {orderDetail[0]?.Order_Status === 4 ? (
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={
+                                    () =>
+                                      handleReleaseTheTable(
+                                        orderDetail.at(0)?.Order_id
+                                      )
+                                    //
+                                  }
+                                  style={{ width: 110, height: 50 }}
+                                  // disabled={true}
+                                >
+                                  ปล่อยโต๊ะ
+                                </Button>
+                              ) : null}
+                            </>
                           ) : orderDetail[0]?.Order_Status === 4 ? (
                             <Button
                               variant="contained"
@@ -2657,7 +2769,7 @@ const AllOrderContent: React.FC = () => {
                     let paymentStatusLabel;
                     let paymentStatusBgColor;
 
-                    if (order.Order_Status === 1) {
+                    if (order.Order_Status === 1 || order.Order_Status === 13) {
                       if (order.Total_Balance === 0) {
                         paymentStatusLabel = "ชำระครบ";
                         paymentStatusBgColor = "#28a745";
